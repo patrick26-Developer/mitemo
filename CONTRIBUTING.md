@@ -32,6 +32,24 @@ pnpm install        # installe les dépendances et active les hooks Git
 6. **Revue.** Au moins une approbation d'un autre membre. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
 7. **Fusion** en _rebase and merge_ une fois la CI verte, pour conserver l'historique atomique. La branche est supprimée après fusion.
 
+## Issues
+
+Chaque issue porte trois familles de labels, un jalon et une personne assignée.
+
+| Famille     | Labels                                                                  |
+| ----------- | ----------------------------------------------------------------------- |
+| `type:`     | `fonctionnalité`, `bug`, `tâche technique`, `documentation`, `sécurité` |
+| `app:`      | `api`, `web`, `mobile`, `contracts`, `infra`                            |
+| `domaine:`  | `identité`, `tontine`, `grand-livre`, `paiement`, `canaux`              |
+| `priorité:` | `haute` (bloque le parcours de la phase en cours), `moyenne`, `basse`   |
+| `statut:`   | `à trier` (posé par les formulaires), `bloqué`                          |
+
+**Assignation** : le backend (`app:api`, `app:contracts`, `app:infra`) est assigné à Patrick (`patrick26-Developer`), les vues (`app:web`, `app:mobile`) à Espoir (`Espoir-Loem`). Le workflow `issue-triage.yml` pose le label d'application choisi dans le formulaire et assigne automatiquement.
+
+**Jalons** : `Phase 0 : démonstration` puis `Phase 1 : pilote réel`, qui reprennent `docs/audit/07-roadmap-et-perimetre.md`.
+
+Une issue de fonctionnalité contient des critères d'acceptation au format « Étant donné ... quand ... alors ... » : ce sont les premiers tests à écrire. Les dépendances entre issues sont indiquées par « Dépend de #numéro ».
+
 ## Messages de commit
 
 Format [Conventional Commits](https://www.conventionalcommits.org/fr/) :
