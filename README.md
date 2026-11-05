@@ -11,6 +11,11 @@ Projet présenté au concours U-Shine Congo 2026, thématique « L'inclusion fin
 | [Vision et stratégie](docs/document_vision_strat_gie_mitemo.md)                 | Problème, proposition de valeur, marché, périmètre           |
 | [Cahier des charges fonctionnel](docs/cahier_des_charges_fonctionnel_mitemo.md) | Besoins fonctionnels                                         |
 | [Audit externe](docs/audit/README.md)                                           | Modèle économique, conformité, architecture, budget, risques |
+| [Architecture système](docs/architecture-systeme.md)                            | Surfaces, API, données, authentification, environnements     |
+| [Architecture de l'information](docs/architecture-information.md)               | Arborescences, vocabulaire, statuts, navigation              |
+| [Parcours utilisateur](docs/user-flows.md)                                      | Écrans et décisions de chaque tâche                          |
+| [Parcours de vie](docs/user-journey.md)                                         | Personas, étapes, moments de vérité                          |
+| [User stories](docs/user-stories.md)                                            | Besoins et critères d'acceptation, liés aux issues           |
 | [Décisions d'architecture](docs/adr/)                                           | Un fichier par décision                                      |
 | [`AGENTS.md`](AGENTS.md)                                                        | Règles du dépôt : stack, architecture, TDD, conventions      |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)                                            | Cycle de travail, commits, revue, branches                   |

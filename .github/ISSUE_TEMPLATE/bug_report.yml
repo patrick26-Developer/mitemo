@@ -1,7 +1,7 @@
 name: Bug
 description: Un comportement ne correspond pas à ce qui est attendu.
 title: "fix: "
-labels: ["bug", "à trier"]
+labels: ["type:bug", "statut:à trier"]
 body:
   - type: dropdown
     id: scope
