@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.next/
+.expo/
+coverage/
+.turbo/
+pnpm-lock.yaml
+docs/
+README.md
+**/prisma/migrations/
