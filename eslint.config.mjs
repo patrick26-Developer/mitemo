@@ -1,9 +1,8 @@
 /**
- * Configuration ESLint racine.
- *
- * Chaque application (NestJS, Next.js, Expo) importe ce fichier dans son propre
- * eslint.config.mjs et y ajoute ses règles spécifiques. Aucune règle définie ici
- * ne doit être affaiblie dans une application.
+ * Configuration ESLint unique du monorepo : elle s'applique à toutes les applications
+ * et à tous les paquets. Les règles propres à une application (Next.js, Expo) sont
+ * ajoutées ici dans un bloc ciblé par `files`, jamais dans une configuration séparée.
+ * Aucune règle commune ne doit être affaiblie pour une application.
  */
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
@@ -26,7 +25,7 @@ export default tseslint.config(
       "**/.expo/**",
       "**/coverage/**",
       "**/.turbo/**",
-      "apps/**",
+      "**/src/generated/**",
     ],
   },
   js.configs.recommended,
@@ -70,6 +69,7 @@ export default tseslint.config(
         },
       ],
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-extraneous-class": ["error", { allowWithDecorator: true }],
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
