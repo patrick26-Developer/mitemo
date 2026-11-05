@@ -5,6 +5,7 @@
  * Aucune règle commune ne doit être affaiblie pour une application.
  */
 import js from "@eslint/js";
+import nextVitals from "eslint-config-next/core-web-vitals";
 import prettier from "eslint-config-prettier";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
@@ -12,6 +13,20 @@ import tseslint from "typescript-eslint";
 
 const NESTED_MAP_IN_JSX =
   "CallExpression[callee.property.name='map'] :matches(JSXElement, JSXFragment) CallExpression[callee.property.name='map']";
+
+const WEB_FILES = ["apps/web/**/*.{js,jsx,mjs,ts,tsx,mts,cts}"];
+
+/**
+ * Restreint les blocs de eslint-config-next à l'application web. Le bloc qui ne
+ * contient que des `ignores` est retiré : les exclusions sont déclarées plus bas.
+ * @param {import("eslint").Linter.Config[]} blocks Blocs fournis par Next.js.
+ * @returns {import("eslint").Linter.Config[]} Les mêmes blocs, limités à apps/web.
+ */
+function scopeToWeb(blocks) {
+  return blocks
+    .filter((block) => Object.keys(block).some((key) => key !== "ignores"))
+    .map((block) => ({ ...block, files: WEB_FILES }));
+}
 
 const TEST_FILES = ["**/*.spec.*", "**/*.test.*", "**/*.int-spec.*", "**/*.e2e-spec.*"];
 
@@ -26,10 +41,16 @@ export default tseslint.config(
       "**/coverage/**",
       "**/.turbo/**",
       "**/src/generated/**",
+      "**/next-env.d.ts",
     ],
   },
   js.configs.recommended,
   ...tseslint.configs.strict,
+  ...scopeToWeb(nextVitals),
+  {
+    files: WEB_FILES,
+    settings: { next: { rootDir: "apps/web/" } },
+  },
   {
     languageOptions: {
       globals: globals.node,
