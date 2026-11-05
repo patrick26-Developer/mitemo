@@ -62,6 +62,9 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/src/generated/**",
       "**/next-env.d.ts",
+      // Ancien backend autonome, en cours de retrait (voir audit docs/audit) :
+      // non suivi par Git, jamais mis aux règles du monorepo, à retirer avec le dossier.
+      "mitemo-backend/**",
     ],
   },
   js.configs.recommended,
