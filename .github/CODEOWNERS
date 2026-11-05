@@ -1,0 +1,14 @@
+# Propriétaires du code. Une PR qui touche un chemin demande la revue du propriétaire.
+# Ajouter les membres de l'équipe au fur et à mesure (utilisateurs ou équipes GitHub).
+
+*                       @patrick26-Developer
+
+/apps/api/              @patrick26-Developer
+/apps/api/prisma/       @patrick26-Developer
+/apps/web/              @patrick26-Developer
+/apps/mobile/           @patrick26-Developer
+/packages/              @patrick26-Developer
+
+/.github/               @patrick26-Developer
+/AGENTS.md              @patrick26-Developer
+/CONTRIBUTING.md        @patrick26-Developer

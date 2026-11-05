@@ -1,0 +1,11 @@
+// Schéma de la base Mitemo. Les modèles arrivent avec les features (grand livre en premier).
+// Montants : toujours BigInt, jamais Float ni Decimal (voir AGENTS.md, section 1.1).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

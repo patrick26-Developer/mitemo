@@ -1,0 +1,25 @@
+name: Assignation
+
+# Statut obligatoire : une pull request sans personne assignée ne peut pas être fusionnée.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, assigned, unassigned, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  assignee:
+    name: Assignation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Vérifier qu'au moins une personne est assignée
+        env:
+          ASSIGNEES: ${{ join(github.event.pull_request.assignees.*.login, ', ') }}
+        run: |
+          if [ -z "$ASSIGNEES" ]; then
+            echo "::error::Aucune personne assignée à cette pull request."
+            exit 1
+          fi
+          echo "Assignée à : $ASSIGNEES"

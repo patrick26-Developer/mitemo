@@ -1,0 +1,4 @@
+pnpm audit:deps
+pnpm lint
+pnpm typecheck
+pnpm test
