@@ -8,8 +8,25 @@ onlyBuiltDependencies:
   - "@swc/core"
   - prisma
 
+# Scripts refusés explicitement : le binaire précompilé est fourni par une dépendance optionnelle,
+# le script ne sert qu'à recompiler depuis les sources (node-gyp) en dernier recours.
+ignoredBuiltDependencies:
+  - "@parcel/watcher"
+
+# Écarts de pairs acceptés après vérification. Chaque entrée dit pourquoi.
+peerDependencyRules:
+  allowedVersions:
+    # Plugins embarqués par eslint-config-next 16, déclarés jusqu'à ESLint 9 seulement.
+    # Next.js 16 documente le support d'ESLint 10 (nextjs.org/docs/app/api-reference/config/eslint),
+    # et ESLint 9 n'est plus maintenu. À retirer quand les plugins déclarent ESLint 10.
+    eslint-plugin-import>eslint: "10"
+    eslint-plugin-jsx-a11y>eslint: "10"
+    eslint-plugin-react>eslint: "10"
+
 # Correctifs de sécurité sur des dépendances transitives.
 # Chaque entrée référence l'avis d'origine. À retirer dès que le parent publie le correctif.
 overrides:
   # GHSA-g3hv-75wg-m249 (via eslint)
   minimatch@>=7.0.0 <11.0.1: ">=11.0.1"
+  # GHSA-3g3m-2fjr-6pw4 (via jest > test-exclude et expo > @expo/cli)
+  glob@>=9.0.0 <=14.0.1: ^14.0.2
