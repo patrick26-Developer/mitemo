@@ -5,7 +5,7 @@ Merci de prendre le temps de contribuer. Ce guide décrit comment on travaille e
 ## Prérequis
 
 - Node.js (version dans `.nvmrc`) : `nvm use`
-- pnpm 10 : `npm install -g pnpm@10`
+- pnpm 12 : `npm install -g pnpm@12` (la version exacte est épinglée dans `package.json`)
 - Un accès à une base PostgreSQL (branche Neon personnelle ou PostgreSQL local)
 
 ```bash
@@ -17,9 +17,9 @@ pnpm install        # installe les dépendances et active les hooks Git
 ## Cycle de travail
 
 1. **Une issue d'abord.** Tout travail part d'une issue décrivant le besoin et les critères d'acceptation. Pour un petit correctif évident, l'issue peut être créée en même temps que la PR.
-2. **Une branche par issue**, créée depuis `main` à jour :
+2. **Une branche par issue**, créée depuis `develop` à jour :
    ```bash
-   git switch main && git pull --rebase
+   git switch develop && git pull --rebase
    git switch -c feat/42-enregistrer-cotisation
    ```
    Préfixes : `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`.
@@ -28,7 +28,7 @@ pnpm install        # installe les dépendances et active les hooks Git
    - écrire le code minimal qui le fait passer ;
    - refactorer.
 4. **Commits atomiques.** Un commit = un changement cohérent qui compile et dont les tests passent. Évitez les commits fourre-tout du type « wip » ou « fix ».
-5. **Pull request** vers `main`, en remplissant le modèle. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
+5. **Pull request** vers `develop`, en remplissant le modèle. **Elle est assignée** à son auteur : le workflow `assign.yml` le fait à l'ouverture si personne ne l'est encore, et le statut `Assignation` bloque la fusion tant qu'elle n'a pas de responsable. Pour passer la main : `gh pr edit <numéro> --add-assignee <login>`. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
 6. **Revue.** Au moins une approbation d'un autre membre. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
 7. **Fusion** en _rebase and merge_ une fois la CI verte, pour conserver l'historique atomique. La branche est supprimée après fusion.
 
@@ -103,14 +103,18 @@ Commentaires préfixés pour lever toute ambiguïté :
 
 Toute décision structurante (nouvelle dépendance majeure, changement de couche, nouveau service externe) fait l'objet d'un ADR dans `docs/adr/NNNN-titre.md`, discuté dans la PR qui l'introduit.
 
-## Protection de la branche `main`
+## Branches et protection
 
-À configurer dans _Settings > Branches_ sur GitHub :
+- `develop` : intégration, cible de toutes les pull requests de travail.
+- `staging` : préproduction.
+- `main` : production, alimentée uniquement depuis `staging`.
+
+Protection à configurer sur `main`, `staging` et `develop`, dans _Settings > Branches_ sur GitHub :
 
 - pull request obligatoire avant fusion, une approbation minimum ;
 - approbation de CODEOWNERS requise ;
-- statuts obligatoires : `Qualité` et `Messages de commit` ;
-- branche à jour avec `main` avant fusion ;
+- statuts obligatoires : `Qualité`, `Messages de commit` et `Assignation` ;
+- branche à jour avec la branche cible avant fusion ;
 - historique linéaire ;
 - pas de push forcé, pas de suppression.
 
