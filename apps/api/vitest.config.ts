@@ -12,7 +12,20 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      exclude: ["src/main.ts", "src/**/*.module.ts", "src/generated/**"],
+      exclude: [
+        "src/main.ts",
+        "src/**/*.module.ts",
+        "src/generated/**",
+        // Jamais exécutés par cette config (test.include ne cible que *.spec.ts) :
+        // un fichier *.int-spec.ts compté comme cible de couverture affiche
+        // toujours 0 %, quel que soit son contenu.
+        "src/**/*.int-spec.ts",
+        // Câblage d'infrastructure fin (constructeur + hooks de cycle de vie Nest),
+        // même catégorie que main.ts/*.module.ts ci-dessus : sa correction est
+        // vérifiée par prisma.service.int-spec.ts contre une vraie base, pas par
+        // un test unitaire qui mockerait l'adaptateur Prisma sans rien prouver.
+        "src/shared/database/prisma.service.ts",
+      ],
       thresholds: {
         lines: 80,
         branches: 80,

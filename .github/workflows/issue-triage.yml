@@ -1,0 +1,48 @@
+name: Tri des issues
+
+# Pose le label app:* d'après l'application choisie dans le formulaire, puis assigne
+# selon la règle de l'équipe : backend (api, contracts, infra) à Patrick, vues (web,
+# mobile) à Espoir. Le corps de l'issue est une donnée non fiable : il n'est lu que
+# par variable d'environnement, jamais interpolé dans le script.
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  issues: write
+
+env:
+  BACKEND: patrick26-Developer
+  VUES: Espoir-Loem
+
+jobs:
+  triage:
+    name: Labels et assignation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Poser les labels d'application depuis le formulaire
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          apps=$(printf '%s\n' "$BODY" \
+            | awk '/^### Applications? concernées?/{f=1; next} /^### /{f=0} f' \
+            | tr ',' '\n' | sed 's/^ *//; s/ *$//' | grep -xE 'api|web|mobile' | sort -u || true)
+          for app in $apps; do
+            gh issue edit "$ISSUE" --add-label "app:$app"
+          done
+
+      - name: Assigner selon l'application
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
+        run: |
+          labels=$(gh issue view "$ISSUE" --json labels --jq '.labels[].name')
+          if printf '%s\n' "$labels" | grep -qxE 'app:(api|contracts|infra)'; then
+            gh issue edit "$ISSUE" --add-assignee "$BACKEND"
+          fi
+          if printf '%s\n' "$labels" | grep -qxE 'app:(web|mobile)'; then
+            gh issue edit "$ISSUE" --add-assignee "$VUES"
+          fi

@@ -1,7 +1,7 @@
 name: Fonctionnalité
 description: Proposer un nouveau comportement ou une évolution.
 title: "feat: "
-labels: ["fonctionnalité", "à trier"]
+labels: ["type:fonctionnalité", "statut:à trier"]
 body:
   - type: textarea
     id: need

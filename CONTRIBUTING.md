@@ -29,8 +29,26 @@ pnpm install        # installe les dépendances et active les hooks Git
    - refactorer.
 4. **Commits atomiques.** Un commit = un changement cohérent qui compile et dont les tests passent. Évitez les commits fourre-tout du type « wip » ou « fix ».
 5. **Pull request** vers `develop`, en remplissant le modèle. **Elle est assignée** à son auteur : le workflow `assign.yml` le fait à l'ouverture si personne ne l'est encore, et le statut `Assignation` bloque la fusion tant qu'elle n'a pas de responsable. Pour passer la main : `gh pr edit <numéro> --add-assignee <login>`. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
-6. **Revue.** Au moins une approbation d'un autre membre. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
+6. **Revue.** Au moins une approbation d'un autre membre : GitHub interdit d'approuver sa propre PR, et le ruleset interdit de fusionner sans approbation. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
 7. **Fusion** en _rebase and merge_ une fois la CI verte, pour conserver l'historique atomique. La branche est supprimée après fusion.
+
+## Issues
+
+Chaque issue porte trois familles de labels, un jalon et une personne assignée.
+
+| Famille     | Labels                                                                  |
+| ----------- | ----------------------------------------------------------------------- |
+| `type:`     | `fonctionnalité`, `bug`, `tâche technique`, `documentation`, `sécurité` |
+| `app:`      | `api`, `web`, `mobile`, `contracts`, `infra`                            |
+| `domaine:`  | `identité`, `tontine`, `grand-livre`, `paiement`, `canaux`              |
+| `priorité:` | `haute` (bloque le parcours de la phase en cours), `moyenne`, `basse`   |
+| `statut:`   | `à trier` (posé par les formulaires), `bloqué`                          |
+
+**Assignation** : le backend (`app:api`, `app:contracts`, `app:infra`) est assigné à Patrick (`patrick26-Developer`), les vues (`app:web`, `app:mobile`) à Espoir (`Espoir-Loem`). Le workflow `issue-triage.yml` pose le label d'application choisi dans le formulaire et assigne automatiquement.
+
+**Jalons** : `Phase 0 : démonstration` puis `Phase 1 : pilote réel`, qui reprennent `docs/audit/07-roadmap-et-perimetre.md`.
+
+Une issue de fonctionnalité contient des critères d'acceptation au format « Étant donné ... quand ... alors ... » : ce sont les premiers tests à écrire. Les dépendances entre issues sont indiquées par « Dépend de #numéro ».
 
 ## Messages de commit
 
@@ -107,16 +125,40 @@ Toute décision structurante (nouvelle dépendance majeure, changement de couche
 
 - `develop` : intégration, cible de toutes les pull requests de travail.
 - `staging` : préproduction.
-- `main` : production, alimentée uniquement depuis `staging`.
+- `main` : production, alimentée uniquement depuis `staging`, à la seule exception des PR de version (section suivante).
 
-Protection à configurer sur `main`, `staging` et `develop`, dans _Settings > Branches_ sur GitHub :
+`main`, `staging` et `develop` sont protégées par le ruleset [`.github/rulesets/branches-protegees.json`](.github/rulesets/branches-protegees.json) :
 
-- pull request obligatoire avant fusion, une approbation minimum ;
-- approbation de CODEOWNERS requise ;
-- statuts obligatoires : `Qualité`, `Messages de commit` et `Assignation` ;
-- branche à jour avec la branche cible avant fusion ;
-- historique linéaire ;
-- pas de push forcé, pas de suppression.
+- **personne ne fusionne sa propre PR sans l'approbation de l'autre membre**, administrateurs compris (aucune exception dans `bypass_actors`) ;
+- une approbation minimum, d'un propriétaire du code (`CODEOWNERS`) qui n'est pas l'auteur ;
+- l'approbation doit porter sur le dernier push : un nouveau commit l'annule, et la personne qui a poussé en dernier ne peut pas approuver ;
+- toutes les conversations résolues ;
+- statuts obligatoires `Qualité`, `Messages de commit` et `Assignation`, sur une branche à jour avec la cible ;
+- ni push forcé, ni suppression de branche.
+
+**Seul l'auteur met sa branche à jour** (bouton « Update branch » ou rebase). Si le relecteur le fait, il devient le dernier à avoir poussé et ne peut plus approuver.
+
+Application ou mise à jour, par un administrateur :
+
+```bash
+# Création
+gh api -X POST repos/patrick26-Developer/mitemo/rulesets --input .github/rulesets/branches-protegees.json
+# Mise à jour d'un ruleset existant
+gh api -X PUT repos/patrick26-Developer/mitemo/rulesets/<id> --input .github/rulesets/branches-protegees.json
+```
+
+Le fichier fait foi : toute modification des règles passe par une PR sur ce fichier, puis est appliquée par un administrateur.
+
+## Versions et déploiement
+
+Chaque application a sa propre version SemVer et son `CHANGELOG.md`. Les tags sont au format `api-v0.1.0`, `web-v0.1.0`, `mobile-v0.1.0`. Décision : [ADR 0004](docs/adr/0004-versions-et-tags-par-application.md).
+
+1. Le travail arrive sur `main` par la PR `staging` → `main`.
+2. Le workflow `release.yml` ouvre ou met à jour une **PR de version** par application concernée, intitulée par exemple `chore(main): release api 0.1.1`. Elle contient le `CHANGELOG.md` et la nouvelle version, calculés depuis les messages de commit.
+3. La fusion de cette PR crée le tag et la release GitHub. C'est le tag qui déclenche la mise en production.
+4. Ouvrir ensuite une PR `main` → `develop` pour ramener les versions et les `CHANGELOG.md`.
+
+On ne crée ni ne modifie jamais un tag à la main, et on ne modifie jamais un `CHANGELOG.md` à la main : on corrige le message de commit concerné dans une nouvelle PR. `staging` se déploie à chaque fusion, sans tag.
 
 ## Signaler un problème de sécurité
 
