@@ -10,6 +10,7 @@ Types et interfaces partagés entre `apps/api`, `apps/web` et `apps/mobile`. Sou
 | `identifiers.ts` | `GroupId`, `MemberId`, `ContributionId`                           |
 | `money.ts`       | `AmountMinor` (bigint), `MoneyDto` (chaîne), lecture et écriture  |
 | `api-error.ts`   | Format unique des erreurs de l'API                                |
+| `health.ts`      | Réponse de `GET /health`                                          |
 
 ## Utilisation
 
