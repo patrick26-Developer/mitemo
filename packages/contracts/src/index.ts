@@ -4,6 +4,7 @@
  */
 export type { Brand } from "./brand.ts";
 export type { ContributionId, GroupId, MemberId } from "./identifiers.ts";
+export type { HealthResponse } from "./health.ts";
 export { API_ERROR_CODES } from "./api-error.ts";
 export type { ApiErrorCode, ApiErrorResponse, ApiFieldError } from "./api-error.ts";
 export {
