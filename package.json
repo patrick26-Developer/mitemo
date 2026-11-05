@@ -1,10 +1,10 @@
 {
   "name": "mitemo",
   "private": true,
-  "packageManager": "pnpm@10.34.9",
+  "packageManager": "pnpm@12.16.1",
   "engines": {
-    "node": ">=24",
-    "pnpm": ">=10"
+    "node": ">=26",
+    "pnpm": ">=12"
   },
   "scripts": {
     "prepare": "husky",
@@ -17,7 +17,7 @@
     "test": "pnpm test:scripts && turbo run test",
     "test:ci": "pnpm test:scripts && turbo run test:ci",
     "test:e2e": "turbo run test:e2e",
-    "test:scripts": "node --test scripts/",
+    "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "test:affected": "pnpm test:scripts && turbo run typecheck test --filter=...[HEAD]",
     "audit:deps": "pnpm audit --audit-level=moderate",
     "commit:check": "node scripts/check-commit-message.mjs"
