@@ -9,3 +9,6 @@ pnpm-lock.yaml
 docs/
 **/prisma/migrations/
 **/src/generated/
+
+# Généré par release-please
+**/CHANGELOG.md
