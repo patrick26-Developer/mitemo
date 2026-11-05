@@ -10,6 +10,9 @@ out/
 web-build/
 *.tsbuildinfo
 
+# Code généré (Prisma Client, régénéré par `prisma generate`)
+**/src/generated/
+
 # Turborepo
 .turbo/
 
