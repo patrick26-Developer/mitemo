@@ -21,7 +21,16 @@ export const TRANSACTION_STATES = [
 /** État de l'automate de transaction. Voir {@link TRANSACTION_STATES}. */
 export type TransactionState = (typeof TRANSACTION_STATES)[number];
 
-/** Demande d'approvisionnement du portefeuille d'un membre. */
+/**
+ * Demande d'approvisionnement du portefeuille d'un membre.
+ *
+ * ⚠️ Aucune implémentation de ce contrat ne doit être branchée sur un
+ * prestataire de paiement réel avant la validation du modèle juridique
+ * (`docs/audit/02-conformite-reglementaire.md`) et la signature d'un
+ * partenaire agréé. Jusqu'à cette validation, seule l'implémentation contre
+ * le simulateur d'opérateur (issue #14) est autorisée. Voir
+ * `docs/adr/0005-pas-de-fonds-reels-sans-validation-juridique.md`.
+ */
 export interface FundWalletRequest {
   readonly memberId: MemberId;
   readonly amount: MoneyDto;
@@ -31,6 +40,10 @@ export interface FundWalletRequest {
  * Transaction d'approvisionnement créée. `state` vaut toujours `INITIATED` à
  * la création : le client ne doit jamais afficher le dépôt comme réussi avant
  * un passage ultérieur à `CONFIRMED`.
+ *
+ * ⚠️ Même garde-fou que {@link FundWalletRequest} : simulateur uniquement
+ * tant que le modèle juridique n'est pas validé
+ * (`docs/adr/0005-pas-de-fonds-reels-sans-validation-juridique.md`).
  */
 export interface FundWalletResponse {
   readonly transactionId: TransactionId;
