@@ -28,6 +28,26 @@ function scopeToWeb(blocks) {
     .map((block) => ({ ...block, files: WEB_FILES }));
 }
 
+const MOBILE_FILES = ["apps/mobile/**/*.{js,jsx,ts,tsx}"];
+const REACT_PLUGINS = ["react", "react-hooks"];
+
+/**
+ * Applique au mobile les règles React et Hooks de eslint-config-next, en réutilisant
+ * les mêmes instances de plugins (ESLint refuse deux plugins sous le même nom).
+ * @param {import("eslint").Linter.Config[]} blocks Blocs fournis par Next.js.
+ * @returns {import("eslint").Linter.Config} Bloc limité à apps/mobile.
+ */
+function reactRulesForMobile(blocks) {
+  const [base] = blocks;
+  const isReactRule = ([rule]) => REACT_PLUGINS.some((name) => rule.startsWith(`${name}/`));
+  return {
+    files: MOBILE_FILES,
+    plugins: Object.fromEntries(REACT_PLUGINS.map((name) => [name, base.plugins[name]])),
+    settings: { react: { version: "19.3" } },
+    rules: Object.fromEntries(Object.entries(base.rules).filter(isReactRule)),
+  };
+}
+
 const TEST_FILES = ["**/*.spec.*", "**/*.test.*", "**/*.int-spec.*", "**/*.e2e-spec.*"];
 
 export default tseslint.config(
@@ -51,6 +71,7 @@ export default tseslint.config(
     files: WEB_FILES,
     settings: { next: { rootDir: "apps/web/" } },
   },
+  reactRulesForMobile(nextVitals),
   {
     languageOptions: {
       globals: globals.node,
