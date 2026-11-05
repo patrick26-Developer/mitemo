@@ -2,16 +2,20 @@ packages:
   - "apps/*"
   - "packages/*"
 
-# Seuls ces paquets peuvent exécuter un script à l'installation. Tout ajout se justifie en PR.
-onlyBuiltDependencies:
-  - "@prisma/engines"
-  - "@swc/core"
-  - prisma
+# Comportement de l'installation (pnpm ne lit plus ces réglages dans .npmrc depuis la v11).
+engineStrict: true
+autoInstallPeers: true
+strictPeerDependencies: false
 
-# Scripts refusés explicitement : le binaire précompilé est fourni par une dépendance optionnelle,
-# le script ne sert qu'à recompiler depuis les sources (node-gyp) en dernier recours.
-ignoredBuiltDependencies:
-  - "@parcel/watcher"
+# Scripts d'installation : true = autorisé, false = refusé en connaissance de cause.
+# Tout paquet absent de cette liste et doté d'un script fait échouer l'installation.
+allowBuilds:
+  "@prisma/engines": true
+  "@swc/core": true
+  prisma: true
+  # Le binaire précompilé est fourni par une dépendance optionnelle ; le script ne sert
+  # qu'à recompiler depuis les sources (node-gyp) en dernier recours.
+  "@parcel/watcher": false
 
 # Écarts de pairs acceptés après vérification. Chaque entrée dit pourquoi.
 peerDependencyRules:
