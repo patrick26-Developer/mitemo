@@ -17,4 +17,18 @@ Cette règle résout « comment on affiche », mais pas « dans quelle langue on
 1. Faut-il unifier les quatre automates sur une seule langue pour les valeurs techniques (et laquelle), ou accepter le mélange actuel tel qu'il reflète la documentation source ?
 2. Si une unification est décidée, qui la fait, et à quel moment — avant ou après que des issues s'appuient sur les littéraux déjà écrits (plusieurs issues ouvertes citent déjà `ANNULEE`, `CLOTUREE_ANTICIPEE`, `GARANTIE_BLOQUEE` verbatim) ?
 
-**Décision :** en attente de l'architecte.
+**Recommandation de l'architecte (2026-11-06) :** valeurs techniques stables en anglais (comme `TRANSACTION_STATES` déjà livré), libellés affichés traduits côté interface. Le mélange actuel doit être unifié **avant** la première migration de base de données, car changer un état déjà en base coûte cher. Cette recommandation est consignée ici ; elle n'a pas encore été appliquée au code existant (`tontine.ts`, `membership.ts`, `round.ts` restent en français à ce jour).
+
+**Décision :** recommandation formulée, application au code en attente.
+
+## Commission de distribution (1,5 %, convention B)
+
+**Soulevée par :** l'architecte, en relisant la revue de la PR #60.
+
+**Constat.** `round.ts` (`DistributeRoundResponse`) expose un champ `commission`, documenté comme venant de `docs/audit/03-architecture-technique.md` §3.1 (taux de 1,5 %, « convention B » : le bénéficiaire ne cotise pas à son propre tour). Ce taux et cette convention sont des **hypothèses de l'audit initial**, pas des décisions validées par le fondateur. Elles n'ont jamais été confrontées aux principes déjà énoncés par ailleurs : pas de prélèvement automatique sans règle approuvée par les membres, aucun frais caché, modèle économique fondé sur les abonnements plutôt que sur une commission par mouvement. Un champ `commission` dans un contrat partagé encode déjà, de fait, un modèle économique — avant qu'il ne soit confirmé.
+
+**Statut explicite : hypothèse non validée par le fondateur.**
+
+**Décision à prendre :** confirmer le taux et la convention tels quels, les modifier, ou retirer la commission du modèle de distribution au profit d'un autre mécanisme de revenu. Tant que cette décision n'est pas prise, `commission` et `netAmount` dans `round.ts` restent une hypothèse de travail, pas une règle métier figée.
+
+**Décision :** en attente du fondateur.
