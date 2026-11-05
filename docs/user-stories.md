@@ -2,7 +2,7 @@
 
 Chaque story suit le format « En tant que…, je veux…, afin de… ». Ses critères d'acceptation, au format « Étant donné… quand… alors… », sont les premiers tests à écrire (`AGENTS.md`, section 3.1). Les personas sont décrits dans [`user-journey.md`](user-journey.md), les parcours dans [`user-flows.md`](user-flows.md).
 
-Priorités : **haute** (bloque la démonstration de la phase 0), **moyenne**, **basse**. Une story sans issue est signalée « à créer ».
+Priorités : **haute** (bloque la démonstration de la phase 0), **moyenne**, **basse**. Chaque story renvoie à ses issues.
 
 ## Sommaire
 
@@ -30,7 +30,7 @@ En tant que visiteur, je veux comprendre ce que fait Mitemo depuis la page d'acc
 - Étant donné la page d'accueil, quand elle s'affiche, alors la promesse, les quatre étapes du cycle et le bouton Télécharger sont visibles sans défilement sur un téléphone.
 - Étant donné n'importe quelle page publique, quand on la lit, alors elle ne contient aucun des mots bannis (`architecture-information.md`, section 3.1).
 
-Phase 0, priorité moyenne, `app:web`, issue à créer.
+Phase 0, priorité moyenne, #46.
 
 ### US-SITE-02 Savoir où est l'argent
 
@@ -39,7 +39,7 @@ En tant que présidente de tontine, je veux savoir qui détient les fonds et ce 
 - Étant donné la page Sécurité, quand elle s'affiche, alors elle explique la détention des fonds, le tirage vérifiable et la liste « Mitemo ne prête pas, ne promet aucun rendement ».
 - Étant donné qu'aucune convention avec un partenaire agréé n'est signée, quand la page est publiée, alors aucun nom de partenaire n'y figure.
 
-Phase 0, priorité moyenne, `app:web`, issue à créer.
+Phase 0, priorité moyenne, #46.
 
 ### US-SITE-03 Connaître les frais avant de m'engager
 
@@ -48,7 +48,7 @@ En tant que visiteuse, je veux voir les frais sur un exemple chiffré, afin de n
 - Étant donné la page Frais, quand elle s'affiche, alors l'exemple de 10 membres à 5 000 FCFA donne une cagnotte de 45 000 FCFA, des frais de 675 FCFA et un net de 44 325 FCFA.
 - Les chiffres affichés sont calculés par la même fonction que celle de l'API, importée de `@mitemo/contracts` ou testée contre les mêmes cas.
 
-Phase 0, priorité moyenne, `app:web`, issue à créer.
+Phase 0, priorité moyenne, #46.
 
 ### US-SITE-04 Installer l'application selon mon téléphone
 
@@ -57,7 +57,7 @@ En tant que visiteuse, je veux un moyen d'installation adapté à mon téléphon
 - Étant donné la page Télécharger, quand elle s'affiche, alors elle propose Google Play, l'APK direct avec sa taille, et le code USSD pour les téléphones simples.
 - Étant donné un lien d'invitation ouvert sans l'application, quand la page s'affiche, alors l'invitation est reprise après l'installation.
 
-Phase 0, priorité moyenne, `app:web`, issue à créer.
+Phase 0, priorité moyenne, #46.
 
 ### US-SITE-05 Lire les conditions avant d'accepter
 
@@ -66,7 +66,7 @@ En tant que membre, je veux lire les conditions, la politique de confidentialit�
 - Les pages légales existent et sont liées depuis le pied de page et depuis l'inscription.
 - Leur contenu est validé par un avocat avant la phase 1 (`audit/02`, section 7).
 
-Phase 1, priorité moyenne, `app:web`, issue à créer.
+Phase 1, priorité moyenne, #50.
 
 ## E2. Authentification des membres
 
@@ -114,7 +114,7 @@ En tant que membre, je veux être prévenu et pouvoir bloquer mon compte quand u
 - Étant donné une connexion depuis un nouvel appareil, quand elle aboutit, alors une notification part vers l'ancien appareil et un SMS vers le numéro.
 - Étant donné la carence en cours, quand une sortie de fonds est demandée, alors elle est refusée ; les entrées restent possibles.
 
-Phase 1, priorité haute pour le pilote, issue à créer.
+Phase 1, priorité haute pour le pilote, #40, #51.
 
 ## E3. Tontine, invitation, garanties
 
@@ -187,7 +187,7 @@ En tant que jury ou journaliste, je veux vérifier un tirage depuis le site, san
 - Étant donné un identifiant de tirage, quand il est saisi sur `/verifier-un-tirage`, alors l'ordre recalculé est comparé à l'ordre publié.
 - La page n'expose aucun numéro de téléphone : les membres sont des identifiants opaques.
 
-Phase 0, priorité haute, #13, `app:web` issue à créer.
+Phase 0, priorité haute, #13, #38, #47.
 
 ## E5. Coffre
 
@@ -215,7 +215,7 @@ En tant que membre, je veux retirer mon disponible vers Mobile Money, afin d'uti
 - Étant donné un retrait, quand l'opérateur est indisponible, alors la demande est réessayée et son état est visible.
 - Les frais éventuels sont affichés avant la validation.
 
-Phase 1, priorité moyenne, issue à créer.
+Phase 1, priorité moyenne, #42, #52.
 
 ## E6. Échéance et arbitrage
 
@@ -226,7 +226,7 @@ En tant que membre, je veux un rappel avant l'échéance, afin d'avoir le temps 
 - Étant donné un cycle long, quand l'échéance est à 10 jours, alors un rappel est envoyé (cahier des charges, section 2.1).
 - Étant donné le plafond quotidien atteint, quand un rappel non critique doit partir, alors il n'est pas envoyé (`audit/04`, section 3).
 
-Phase 0, priorité moyenne, #16, issue de notifications à créer.
+Phase 0, priorité moyenne, #16, #39.
 
 ### US-ECH-02 Payer mon échéance d'un geste
 
@@ -272,7 +272,7 @@ En tant que membre en incident, je veux savoir exactement ce que je dois payer, 
 - Étant donné une membre en incident sur une cotisation de 5 000 FCFA, quand elle ouvre l'application, alors elle voit sa dette, la pénalité de 100 FCFA et le montant pour reconstituer sa garantie.
 - Étant donné un retard dû à l'opérateur et prouvé par les traces, quand la régularisation a lieu, alors aucune pénalité n'est appliquée (`audit/05`, section 3.2).
 
-Phase 0, priorité haute, #19, issue mobile à créer.
+Phase 0, priorité haute, #19, #49.
 
 ## E8. Distribution
 
@@ -291,7 +291,7 @@ En tant que membre, je veux voir ce que j'ai versé, reçu et payé en frais sur
 
 - Étant donné un cycle terminé, quand j'ouvre l'historique, alors versé, reçu, frais et garantie rendue sont affichés au franc près.
 
-Phase 1, priorité moyenne, issue à créer.
+Phase 1, priorité moyenne, #43, #53.
 
 ## E9. USSD
 
@@ -322,7 +322,7 @@ En tant que membre du personnel, je veux me connecter avec mon adresse, mon mot 
 - Étant donné plusieurs échecs, quand une nouvelle tentative a lieu, alors le compte est verrouillé temporairement.
 - Chaque connexion, réussie ou non, est écrite au journal d'audit.
 
-Phase 0, priorité haute, `app:api` et `app:web`, issue à créer.
+Phase 0, priorité haute, #36, #37, #48.
 
 ### US-ADM-02 Être déconnecté après inactivité
 
@@ -331,7 +331,7 @@ En tant que responsable de la sécurité, je veux que les sessions du back-offic
 - Étant donné une session inactive au-delà du délai, quand une page est demandée, alors l'utilisateur revient à la connexion.
 - Le cookie de session est `HttpOnly`, `Secure` et `SameSite=Strict`.
 
-Phase 0, priorité haute, issue à créer.
+Phase 0, priorité haute, #36, #48.
 
 ### US-ADM-03 Ne voir que ce que mon rôle permet
 
@@ -340,7 +340,7 @@ En tant qu'administrateur, je veux attribuer un rôle à chaque compte du person
 - Étant donné un compte `viewer`, quand il appelle un endpoint réservé à un autre rôle, alors l'API répond par un refus et l'essai est journalisé.
 - Étant donné un jeton de membre, quand il appelle `/admin/...`, alors l'API le refuse.
 
-Phase 0, priorité haute, issue à créer.
+Phase 0, priorité haute, #36.
 
 ### US-ADM-04 Gérer les comptes du personnel
 
@@ -349,7 +349,7 @@ En tant qu'administrateur, je veux créer, désactiver et changer le rôle d'un 
 - Étant donné un compte désactivé, quand sa session existante fait une requête, alors elle est refusée.
 - Il n'existe aucune page d'inscription publique.
 
-Phase 0, priorité moyenne, issue à créer.
+Phase 0, priorité moyenne, #36, #48.
 
 ## E11. Intégrité et réconciliation
 
@@ -402,8 +402,8 @@ En tant qu'agente du support, je veux ouvrir un litige et suivre son délai d'en
 
 - Étant donné un litige ouvert, quand le délai de 72 heures ouvrées approche, alors il est signalé (`audit/05`, section 4.1).
 
-Phase 1, priorité haute pour le pilote, issue à créer.
+Phase 1, priorité haute pour le pilote, #44, #54.
 
-## Stories sans issue
+## Issues
 
-Les stories marquées « issue à créer » portent sur le site public, l'accès au back-office, le changement de téléphone, les notifications, le retrait, le coût du cycle et les litiges. Elles sont à transformer en issues avec la même règle d'assignation : backend à Patrick, vues à Espoir (`CONTRIBUTING.md`, section Issues).
+Toutes les stories ont désormais une issue. Les issues sont assignées selon la règle de l'équipe : backend à Patrick, vues à Espoir (`CONTRIBUTING.md`, section Issues).
