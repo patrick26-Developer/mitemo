@@ -313,6 +313,7 @@ Le détail est dans [`CONTRIBUTING.md`](CONTRIBUTING.md). L'essentiel :
 | `commit-msg`   | commitlint + refus des attributions IA                                                                                                         |
 | `pre-push`     | audit des dépendances, lint, typecheck et tests de tout le monorepo                                                                            |
 | GitHub Actions | install figée, audit des dépendances, format, lint, typecheck, tests avec couverture, build, vérification de chaque message de commit de la PR |
+| Sur `main`     | `release.yml` : PR de version par application, tag `<application>-v<version>` et release GitHub à sa fusion (ADR 0004)                         |
 | Chaque lundi   | `audit.yml` : audit des dépendances, même sans changement de code                                                                              |
 
 Contourner un hook (`--no-verify`) est interdit. Si un hook bloque à tort, on corrige le hook dans une PR.
