@@ -27,7 +27,6 @@ export default tseslint.config(
       "**/coverage/**",
       "**/.turbo/**",
       "apps/**",
-      "packages/**",
     ],
   },
   js.configs.recommended,
@@ -53,12 +52,53 @@ export default tseslint.config(
           message:
             "Pas de .map() imbriqué dans le JSX : extraire l'élément de liste dans un composant dédié.",
         },
+        {
+          selector: "TSEnumDeclaration",
+          message: "Pas d'enum : utiliser un tableau `as const` et le type union dérivé.",
+        },
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@mitemo/*/src/*", "@mitemo/*/dist/*"],
+              message:
+                "Importer depuis la racine du paquet (@mitemo/contracts), jamais un fichier interne.",
+            },
+          ],
+        },
       ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
         { "ts-expect-error": "allow-with-description", "ts-ignore": true },
+      ],
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { prefer: "type-imports", fixStyle: "separate-type-imports" },
+      ],
+      "@typescript-eslint/no-import-type-side-effects": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        { selector: "typeLike", format: ["PascalCase"] },
+        {
+          selector: "interface",
+          format: ["PascalCase"],
+          custom: { regex: "^I[A-Z]", match: false },
+        },
+        {
+          selector: "typeAlias",
+          format: ["PascalCase"],
+          custom: { regex: "Type$", match: false },
+        },
       ],
     },
   },
