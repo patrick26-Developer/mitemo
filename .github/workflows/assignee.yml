@@ -1,12 +1,21 @@
 name: Assignation
 
 # Statut obligatoire : une pull request sans personne assignée ne peut pas être fusionnée.
+#
+# L'état est relu par l'API et non dans l'événement : à la création d'une PR, l'assignation
+# arrive souvent quelques secondes après l'événement `opened` (gh pr create --assignee,
+# workflow assign.yml). Le contrôle attend donc jusqu'à une minute avant de conclure, et une
+# exécution plus récente pour la même PR annule la précédente.
 on:
   pull_request:
     types: [opened, reopened, synchronize, assigned, unassigned, ready_for_review]
 
+concurrency:
+  group: assignation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
-  contents: read
+  pull-requests: read
 
 jobs:
   assignee:
@@ -16,10 +25,18 @@ jobs:
     steps:
       - name: Vérifier qu'au moins une personne est assignée
         env:
-          ASSIGNEES: ${{ join(github.event.pull_request.assignees.*.login, ', ') }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ -z "$ASSIGNEES" ]; then
-            echo "::error::Aucune personne assignée à cette pull request."
-            exit 1
-          fi
-          echo "Assignée à : $ASSIGNEES"
+          for attempt in 1 2 3 4 5 6; do
+            assignees=$(gh api "repos/$REPO/issues/$NUMBER" --jq '[.assignees[].login] | join(", ")')
+            if [ -n "$assignees" ]; then
+              echo "Assignée à : $assignees"
+              exit 0
+            fi
+            echo "Tentative $attempt : personne n'est encore assigné, nouvelle lecture dans 10 s."
+            sleep 10
+          done
+          echo "::error::Aucune personne assignée à cette pull request."
+          exit 1
