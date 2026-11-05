@@ -28,7 +28,7 @@ pnpm install        # installe les dépendances et active les hooks Git
    - écrire le code minimal qui le fait passer ;
    - refactorer.
 4. **Commits atomiques.** Un commit = un changement cohérent qui compile et dont les tests passent. Évitez les commits fourre-tout du type « wip » ou « fix ».
-5. **Pull request** vers `develop`, en remplissant le modèle. **Elle est assignée** à son auteur : le workflow `assign.yml` le fait à l'ouverture si personne ne l'est encore, et le statut `Assignation` bloque la fusion tant qu'elle n'a pas de responsable. Pour passer la main : `gh pr edit <numéro> --add-assignee <login>`. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
+5. **Pull request** vers `develop`, en remplissant le modèle. **Elle est assignée** à son auteur : le workflow `assign.yml` le fait à l'ouverture si personne ne l'est encore (une PR venant d'un fork s'assigne à la main), et le statut `Assignation` bloque la fusion tant qu'elle n'a pas de responsable. Pour passer la main : `gh pr edit <numéro> --add-assignee <login>`. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
 6. **Revue.** Au moins une approbation d'un autre membre : GitHub interdit d'approuver sa propre PR, et le ruleset interdit de fusionner sans approbation. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
 7. **Fusion** en _rebase and merge_ une fois la CI verte, pour conserver l'historique atomique. La branche est supprimée après fusion.
 

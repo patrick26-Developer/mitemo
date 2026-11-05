@@ -33,7 +33,7 @@ Outil retenu après vérification (novembre 2026) :
    | au moins un `feat:`                | 0.1.0 → 0.1.1    |
    | au moins un changement cassant (`!`) | 0.1.0 → 0.2.0  |
 
-   Le passage en 1.0.0 se décide explicitement, au lancement du pilote réel.
+   La première version de chaque application est 0.1.0 (`initial-version`) : sans ce réglage, release-please part de 1.0.0 tant qu'aucun tag n'existe ([source](https://github.com/googleapis/release-please/blob/v17.6.0/src/strategies/base.ts), `initialReleaseVersion`). Le passage en 1.0.0 se décide explicitement, au lancement du pilote réel.
 
 5. **Seule la production passe par un tag.** `staging` se déploie à chaque fusion, sans tag.
 
