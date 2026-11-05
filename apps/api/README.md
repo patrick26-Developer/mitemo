@@ -25,6 +25,14 @@ curl localhost:3000/health                # {"status":"ok"}
 
 Sur Neon, l'URL directe est celle **sans** `-pooler` dans le nom d'hôte : le pooler casse les verrous et les transactions `SERIALIZABLE`.
 
+### Base de développement : une branche Neon par développeur
+
+Chaque développeur travaille sur sa propre branche Neon, jamais sur une base partagée :
+
+1. Dans la console Neon (ou `neonctl branches create --name <prenom>`), créer une branche personnelle à partir de `main` (la branche Neon par défaut du projet).
+2. Copier ses deux chaînes de connexion (directe et poolée) dans `apps/api/.env` — jamais commité (`.gitignore` l'exclut déjà).
+3. Les tests d'intégration (`*.int-spec.ts`) tournent contre cette branche personnelle en local, et contre un conteneur PostgreSQL éphémère en CI (`.github/workflows/ci.yml`) — jamais contre la base partagée de `main`.
+
 ## Scripts
 
 | Commande                           | Effet                                                   |
@@ -32,6 +40,7 @@ Sur Neon, l'URL directe est celle **sans** `-pooler` dans le nom d'hôte : le po
 | `pnpm --filter api test`           | Tests unitaires (Vitest, SWC pour les décorateurs)      |
 | `pnpm --filter api test:ci`        | Tests unitaires avec seuils de couverture               |
 | `pnpm --filter api test:e2e`       | Tests de bout en bout (application complète, Supertest) |
+| `pnpm --filter api test:int`       | Tests d'intégration contre une vraie base PostgreSQL    |
 | `pnpm --filter api typecheck`      | Vérification TypeScript                                 |
 | `pnpm --filter api build`          | Génère le client Prisma puis compile dans `dist/`       |
 | `pnpm --filter api prisma:migrate` | Crée et applique une migration (base de développement)  |
