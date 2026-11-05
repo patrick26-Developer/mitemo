@@ -60,7 +60,7 @@ Quatre surfaces, un seul noyau. Le noyau ne sait pas par quel canal une action a
 
 | Élément       | Choix                                                                                                                       | Statut  |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Emplacement   | `apps/web`, groupe de routes `src/app/(marketing)/`                                                                         | Proposé |
+| Emplacement   | `apps/web`, groupe de routes `src/app/(marketing)/`                                                                         | Décidé, [ADR 0003](adr/0003-une-application-web-pour-le-site-et-le-back-office.md) |
 | Rendu         | Pages statiques générées au build, sauf la vérification de tirage                                                           | Proposé |
 | Données       | Aucune donnée personnelle. Une seule lecture d'API : la vérification publique d'un tirage, par son identifiant               | Proposé |
 | Langue        | Français simplifié, sans vocabulaire bancaire (`audit/06`, section 4)                                                       | Décidé  |
@@ -72,13 +72,13 @@ Le site n'a **pas d'espace membre**. Un membre agit dans l'application ou par US
 
 | Élément       | Choix                                                                                                       | Statut  |
 | ------------- | ----------------------------------------------------------------------------------------------------------- | ------- |
-| Emplacement   | `apps/web`, groupe de routes `src/app/(back-office)/admin/`                                                 | Proposé |
+| Emplacement   | `apps/web`, groupe de routes `src/app/(back-office)/admin/`                                                 | Décidé, [ADR 0003](adr/0003-une-application-web-pour-le-site-et-le-back-office.md) |
 | Rendu         | Rendu serveur à chaque requête, jamais mis en cache, `noindex`                                              | Proposé |
 | Accès         | Personnel Mitemo uniquement, comptes nominatifs, voir section 6.2                                           | Proposé |
 | Phase 0       | Consultation seule : tableau de bord d'intégrité, tontines, membres, écritures (issues #29 et #30)          | Décidé  |
 | Phase 1       | Support complet, litiges, corrections manuelles à double validation, alertes LBC/FT (`audit/07`, phase 1)   | Décidé  |
 
-**Pourquoi une seule application web pour deux publics** (proposé) : une équipe de deux personnes, un seul build, un seul jeu de composants partagés. La séparation se fait par groupe de routes, par contrôle de session côté serveur sur tout le groupe `(back-office)`, et par des endpoints d'API distincts (`/admin/...`) qui refusent tout jeton de membre. À réexaminer si le back-office doit être servi sur un domaine séparé ou derrière un réseau privé : c'est l'objet de l'ADR à écrire (section 9).
+**Pourquoi une seule application web pour deux publics** (décidé, [ADR 0003](adr/0003-une-application-web-pour-le-site-et-le-back-office.md)) : une équipe de deux personnes, un seul build, un seul jeu de composants partagés. La séparation se fait par groupe de routes, par contrôle de session côté serveur sur tout le groupe `(back-office)`, et par des endpoints d'API distincts (`/admin/...`) qui refusent tout jeton de membre. À réexaminer avant la phase 1, avec le choix du domaine du back-office (section 9).
 
 ### 2.3 Application mobile
 
@@ -284,7 +284,6 @@ Observabilité prévue : Sentry pour les erreurs (`@sentry/nestjs`, `AGENTS.md`,
 
 | Sujet                                                        | Options                                                            |
 | ------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Site public et back-office : une application ou deux         | Groupes de routes dans `apps/web` (proposé) ou `apps/admin` séparée |
 | Domaine du back-office                                       | Même domaine sous `/admin`, ou sous-domaine dédié                  |
 | Authentification du personnel                                | Implémentation maison (proposé ci-dessus) ou fournisseur d'identité |
 | File durable de l'ordonnanceur                               | `pg-boss` ou table `due_at` avec travailleur élu (issue #16)       |
