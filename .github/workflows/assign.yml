@@ -1,10 +1,16 @@
 name: Assignation automatique
 
 # Toute pull request doit avoir un responsable. À l'ouverture, l'auteur est assigné
-# s'il n'y a encore personne. pull_request_target donne un jeton en écriture même
-# pour une PR venant d'un fork : aucun code de la PR n'est extrait ni exécuté ici.
+# s'il n'y a encore personne.
+#
+# Déclencheur pull_request et non pull_request_target : GitHub bloque ce dernier par
+# défaut sur les dépôts publics à partir du 2 décembre 2026
+# (https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target).
+# Avec pull_request, le jeton n'a les droits d'écriture que pour une PR ouverte depuis
+# une branche de ce dépôt : une PR venant d'un fork est ignorée ici et s'assigne à la
+# main (le statut « Assignation » bloque sa fusion tant que personne ne l'est).
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, ready_for_review]
 
 permissions:
@@ -14,6 +20,7 @@ jobs:
   assign-author:
     name: Assigner l'auteur
     if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.assignees[0] == null &&
       github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
