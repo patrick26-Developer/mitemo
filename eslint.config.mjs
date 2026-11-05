@@ -1,9 +1,20 @@
-// Configuration ESLint racine. Chaque application l'étend avec ses règles propres
-// (NestJS, Next.js, Expo) dans son propre eslint.config.mjs.
+/**
+ * Configuration ESLint racine.
+ *
+ * Chaque application (NestJS, Next.js, Expo) importe ce fichier dans son propre
+ * eslint.config.mjs et y ajoute ses règles spécifiques. Aucune règle définie ici
+ * ne doit être affaiblie dans une application.
+ */
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
+import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+
+const NESTED_MAP_IN_JSX =
+  "CallExpression[callee.property.name='map'] :matches(JSXElement, JSXFragment) CallExpression[callee.property.name='map']";
+
+const TEST_FILES = ["**/*.spec.*", "**/*.test.*", "**/*.int-spec.*", "**/*.e2e-spec.*"];
 
 export default tseslint.config(
   {
@@ -26,11 +37,23 @@ export default tseslint.config(
       globals: globals.node,
     },
     rules: {
+      "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["error", { max: 20, skipBlankLines: true, skipComments: true }],
+      "max-statements": ["error", 10],
       "max-params": ["error", 3],
       "max-depth": ["error", 3],
+      "max-nested-callbacks": ["error", 2],
       complexity: ["error", 8],
+      "no-nested-ternary": "error",
       "no-console": ["error", { allow: ["error"] }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: NESTED_MAP_IN_JSX,
+          message:
+            "Pas de .map() imbriqué dans le JSX : extraire l'élément de liste dans un composant dédié.",
+        },
+      ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
@@ -40,9 +63,45 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.spec.*", "**/*.test.*", "**/*.int-spec.*", "**/*.e2e-spec.*"],
+    files: ["**/*.tsx", "**/*.jsx"],
+    rules: {
+      "max-lines-per-function": ["error", { max: 40, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    ...jsdoc.configs["flat/recommended-error"],
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    ...jsdoc.configs["flat/recommended-typescript-error"],
+  },
+  {
+    rules: {
+      "jsdoc/require-jsdoc": [
+        "error",
+        {
+          publicOnly: true,
+          require: {
+            FunctionDeclaration: true,
+            ClassDeclaration: true,
+            MethodDefinition: true,
+            ArrowFunctionExpression: true,
+            FunctionExpression: true,
+          },
+        },
+      ],
+      "jsdoc/require-description": "error",
+      "jsdoc/no-bad-blocks": "error",
+    },
+  },
+  {
+    files: TEST_FILES,
     rules: {
       "max-lines-per-function": "off",
+      "max-statements": "off",
+      "max-nested-callbacks": ["error", 4],
+      "jsdoc/require-jsdoc": "off",
     },
   },
   prettier,
