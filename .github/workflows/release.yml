@@ -1,0 +1,50 @@
+name: Versions
+
+# Sur main, release-please lit les commits Conventional Commits de chaque application et
+# tient à jour une PR de version par application (CHANGELOG.md et version de package.json).
+# Fusionner cette PR crée le tag (api-v0.1.0, web-v0.1.0, mobile-v0.1.0) et la release
+# GitHub. Décision : docs/adr/0004-versions-et-tags-par-application.md.
+#
+# Jeton : avec le GITHUB_TOKEN par défaut, la PR de version ne déclenche aucun contrôle
+# (Qualité, Messages de commit, Assignation) et ne peut donc pas être fusionnée sur une
+# branche protégée. Le secret RELEASE_PLEASE_TOKEN (jeton d'une personne de l'équipe,
+# limité à ce dépôt) corrige cela ; à défaut, le jeton par défaut est utilisé.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: versions
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: PR de version et tags
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Résumé
+        env:
+          API: ${{ steps.release.outputs['apps/api--tag_name'] }}
+          WEB: ${{ steps.release.outputs['apps/web--tag_name'] }}
+          MOBILE: ${{ steps.release.outputs['apps/mobile--tag_name'] }}
+        run: |
+          {
+            echo "## Versions publiées"
+            echo
+            echo "- api : ${API:-aucune}"
+            echo "- web : ${WEB:-aucune}"
+            echo "- mobile : ${MOBILE:-aucune}"
+          } >> "$GITHUB_STEP_SUMMARY"
