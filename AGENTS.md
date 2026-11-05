@@ -2,6 +2,16 @@
 
 Ce fichier fixe les règles du dépôt. Il s'applique à toute personne (ou tout outil) qui écrit du code ici. En cas de doute, la règle la plus stricte l'emporte.
 
+## Règle d'or : des faits vérifiés, pas de mémoire
+
+Tout agent (humain ou outil) qui travaille ici s'appuie sur des **données réelles et vérifiées**, jamais sur des souvenirs ou des suppositions.
+
+- **Rechercher avant d'écrire.** Avant d'utiliser une API, une option de configuration ou une version de paquet, consulter la source officielle à jour : documentation du projet, registre npm (`pnpm view <paquet> version`), notes de version, code source. Une API qui « devrait exister » n'est pas une API qui existe.
+- **Vérifier les versions installées**, pas celles qu'on croit connaître : `pnpm why <paquet>`, `package.json`, `pnpm-lock.yaml`.
+- **Citer ses sources** dans la PR quand une décision repose sur une documentation externe (lien vers la page, la version ou l'avis de sécurité).
+- **Ne jamais inventer** un résultat de test, une sortie de commande ou un chiffre. Si une vérification n'a pas pu être faite, le dire explicitement.
+- **Données de test réalistes** : montants en XAF, numéros au format congolais valides (`libphonenumber-js`), dates en UTC. Générées par `@faker-js/faker` avec une graine fixe, jamais des valeurs fantaisistes qui masquent les cas limites.
+
 ## 1. Stack
 
 | Couche          | Technologie                       | Emplacement       |
@@ -147,7 +157,7 @@ Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80
 
 ### 3.4 Règles de granularité
 
-- **Une fonction = un traitement.** Si son nom contient « et », elle est à découper. Repère : 20 lignes, 3 paramètres au maximum (au-delà, un objet typé).
+- **Une fonction = un traitement.** Si son nom contient « et », elle est à découper. Pas de fonction à logique longue : 20 lignes, 10 instructions, 3 paramètres (au-delà, un objet typé), 3 niveaux d'imbrication et une complexité cyclomatique de 8 au maximum. Ces limites sont imposées par ESLint.
 - **Une classe = une intention.** Un cas d'usage = une classe avec une seule méthode publique `execute()`.
 - **Un dossier = une feature.** Pas de dossiers techniques globaux du type `controllers/`, `services/`, `utils/` à la racine de `src`.
 - **Un fichier = un concept exporté.**
@@ -157,6 +167,53 @@ Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80
 - Fichiers en `kebab-case` avec suffixe de rôle : `.entity.ts`, `.value-object.ts`, `.use-case.ts`, `.repository.ts`, `.controller.ts`, `.dto.ts`, `.module.ts`.
 - Classes en `PascalCase`, fonctions et variables en `camelCase`, constantes en `UPPER_SNAKE_CASE`.
 - Code et noms techniques en anglais. Documentation, messages de revue et textes produit en français.
+
+### 3.6 Composants (web et mobile)
+
+Un composant affiche, il ne calcule pas.
+
+- **Pas de composant à logique longue** : 40 lignes au maximum par composant. La logique (calculs, formatage, règles) vit dans `model/` et est testée sans rendu ; l'état et les effets vivent dans un hook de `hooks/`.
+- **Pas de `.map()` imbriqué dans le JSX.** Dès qu'une liste contient une autre liste, l'élément de liste devient un composant dédié (`GroupList` rend des `GroupItem`, qui rend des `MemberBadge`). Règle ESLint bloquante.
+- **Pas de ternaire imbriqué** dans le rendu : utiliser un retour anticipé ou un sous-composant.
+- **Composants de présentation purs** : ils reçoivent des props et émettent des événements. Aucun appel réseau, aucun accès direct au stockage.
+- **Props explicites et typées**, cinq au maximum. Au-delà, le composant fait trop de choses ou doit recevoir un objet métier.
+- **Réutilisable avant d'être spécifique** : avant de créer un composant, chercher dans `shared/` et dans les autres features. Un composant utilisé par deux features remonte dans `shared/`.
+- **Testable par construction** : chaque composant a son `*.spec.tsx` (Testing Library). On teste ce que voit l'utilisateur (textes, rôles, actions), pas l'implémentation.
+- **Accessibilité** : rôles et libellés renseignés, ce qui sert aussi de sélecteurs dans les tests.
+
+#### Audit de structure des composants
+
+À chaque PR qui touche `components/`, le relecteur (et l'agent avant de soumettre) vérifie :
+
+- [ ] un composant par fichier, nommé comme le fichier ;
+- [ ] aucune logique métier dans le composant (elle est dans `model/` ou un hook) ;
+- [ ] aucune liste imbriquée rendue inline ;
+- [ ] pas de duplication avec un composant existant de `shared/` ;
+- [ ] la feature n'expose ses composants que par son `index.ts` ;
+- [ ] les tests couvrent les états vide, chargement, erreur et nominal.
+
+### 3.7 Commentaires : JSDoc uniquement
+
+- Toute fonction, classe, méthode et composant **exporté** porte un bloc JSDoc (`/** ... */`) avec une description, et `@param`, `@returns`, `@throws` quand c'est pertinent. Imposé par `eslint-plugin-jsdoc`.
+- En TypeScript, les types restent dans la signature, pas dans le JSDoc. Le JSDoc explique l'intention et les règles métier.
+- Le commentaire explique **pourquoi**, pas **quoi**. Si le code a besoin d'un commentaire pour être compris, on le renomme ou on le découpe d'abord.
+- Pas de code commenté, pas de `TODO` sans numéro d'issue (`TODO(#42): ...`).
+
+```ts
+/**
+ * Enregistre la cotisation d'un membre et met à jour le solde du groupe
+ * dans une même transaction SERIALIZABLE.
+ * @throws {ContributionAlreadyRecordedError} si la période est déjà réglée.
+ */
+export class RecordContributionUseCase {
+```
+
+### 3.8 Zéro erreur, zéro avertissement
+
+- Aucune erreur et aucun avertissement tolérés : ESLint tourne en `--max-warnings=0`, TypeScript en mode strict, les tests doivent tous passer.
+- Pas de `eslint-disable` sans justification sur la même ligne et validation en revue.
+- Aucun test ignoré (`.skip`, `.only`) n'est fusionné.
+- Une erreur à l'exécution est traitée explicitement : erreur métier typée, ou remontée volontaire avec contexte. Jamais de `catch` vide.
 
 ## 4. TypeScript strict
 
@@ -172,6 +229,14 @@ Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80
 - Mots de passe et codes : `argon2`. Numéros de téléphone : `libphonenumber-js`. Dates : `luxon`, toujours en UTC en base.
 - Les logs ne contiennent ni numéro complet, ni jeton, ni montant associé à une identité.
 
+### 5.1 Audit des dépendances (CVE)
+
+- **Avant d'ajouter un paquet**, vérifier sur des sources réelles : dernière version publiée, date de dernière publication, mainteneurs actifs, licence compatible, avis de sécurité ouverts ([GitHub Advisory Database](https://github.com/advisories), `pnpm audit`). Préférer une dépendance déjà présente ou la bibliothèque standard.
+- `pnpm audit:deps` (niveau `moderate` et plus) doit être vert. Il tourne au `pre-push`, dans la CI sur chaque PR, et chaque lundi par le workflow `audit.yml`.
+- Une faille sur une dépendance transitive se corrige par mise à jour du parent, sinon par un `overrides` dans `pnpm-workspace.yaml`, **avec la référence de l'avis** (GHSA ou CVE) en commentaire. L'override est retiré dès que le parent publie le correctif.
+- Une faille qu'on ne peut pas corriger tout de suite fait l'objet d'une issue avec l'avis, l'impact réel sur Mitemo et la date de réexamen. Elle n'est jamais ignorée en silence.
+- Les mises à jour Dependabot sont relues comme du code : lire les notes de version avant de fusionner.
+
 ## 6. Collaboration
 
 Le détail est dans [`CONTRIBUTING.md`](CONTRIBUTING.md). L'essentiel :
@@ -184,12 +249,13 @@ Le détail est dans [`CONTRIBUTING.md`](CONTRIBUTING.md). L'essentiel :
 
 ## 7. Hooks Git et CI
 
-| Moment         | Ce qui tourne                                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `pre-commit`   | lint-staged (ESLint + Prettier sur les fichiers indexés), puis typecheck et tests des paquets modifiés                  |
-| `commit-msg`   | commitlint + refus des attributions IA                                                                                  |
-| `pre-push`     | lint, typecheck et tests de tout le monorepo                                                                            |
-| GitHub Actions | install figée, lint, format, typecheck, tests avec couverture, build, vérification de chaque message de commit de la PR |
+| Moment         | Ce qui tourne                                                                                                                                  |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit`   | lint-staged (ESLint + Prettier sur les fichiers indexés), puis typecheck et tests des paquets modifiés                                         |
+| `commit-msg`   | commitlint + refus des attributions IA                                                                                                         |
+| `pre-push`     | audit des dépendances, lint, typecheck et tests de tout le monorepo                                                                            |
+| GitHub Actions | install figée, audit des dépendances, format, lint, typecheck, tests avec couverture, build, vérification de chaque message de commit de la PR |
+| Chaque lundi   | `audit.yml` : audit des dépendances, même sans changement de code                                                                              |
 
 Contourner un hook (`--no-verify`) est interdit. Si un hook bloque à tort, on corrige le hook dans une PR.
 
@@ -197,7 +263,8 @@ Contourner un hook (`--no-verify`) est interdit. Si un hook bloque à tort, on c
 
 ```bash
 pnpm install                 # installe tout et active les hooks Git
-pnpm lint                    # ESLint sur tout le monorepo
+pnpm lint                    # ESLint sur tout le monorepo (zéro avertissement)
+pnpm audit:deps              # audit CVE des dépendances
 pnpm format:check            # vérification Prettier
 pnpm typecheck               # tsc --noEmit partout
 pnpm test                    # tous les tests
@@ -222,7 +289,10 @@ Une tâche est terminée quand :
 
 - [ ] les tests ont été écrits avant le code et passent ;
 - [ ] la couverture minimale est respectée ;
-- [ ] lint, format et typecheck passent ;
+- [ ] lint, format et typecheck passent sans erreur ni avertissement ;
+- [ ] `pnpm audit:deps` est vert, et toute nouvelle dépendance a été vérifiée (version, maintenance, licence, avis) ;
+- [ ] l'audit de structure des composants est fait (si l'interface est touchée) ;
+- [ ] tout élément exporté a son JSDoc ;
 - [ ] les règles de dépendance entre couches sont respectées ;
 - [ ] la documentation (README de feature, ADR, `.env.example`) est à jour ;
 - [ ] la PR a été approuvée par au moins un autre membre de l'équipe.
