@@ -4,13 +4,13 @@ Types et interfaces partagés entre `apps/api`, `apps/web` et `apps/mobile`. Sou
 
 ## Contenu
 
-| Fichier          | Rôle                                                              |
-| ---------------- | ----------------------------------------------------------------- |
-| `brand.ts`       | Types nominaux (`Brand`) pour ne pas confondre deux identifiants  |
-| `identifiers.ts` | `GroupId`, `MemberId`, `ContributionId`                           |
-| `money.ts`       | `AmountMinor` (bigint), `MoneyDto` (chaîne), lecture et écriture  |
-| `api-error.ts`   | Format unique des erreurs de l'API                                |
-| `health.ts`      | Réponse de `GET /health`                                          |
+| Fichier          | Rôle                                                             |
+| ---------------- | ---------------------------------------------------------------- |
+| `brand.ts`       | Types nominaux (`Brand`) pour ne pas confondre deux identifiants |
+| `identifiers.ts` | `GroupId`, `MemberId`, `ContributionId`                          |
+| `money.ts`       | `AmountMinor` (bigint), `MoneyDto` (chaîne), lecture et écriture |
+| `api-error.ts`   | Format unique des erreurs de l'API                               |
+| `health.ts`      | Réponse de `GET /health`                                         |
 
 ## Utilisation
 
