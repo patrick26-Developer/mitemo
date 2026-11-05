@@ -125,7 +125,7 @@ Toute décision structurante (nouvelle dépendance majeure, changement de couche
 
 - `develop` : intégration, cible de toutes les pull requests de travail.
 - `staging` : préproduction.
-- `main` : production, alimentée uniquement depuis `staging`.
+- `main` : production, alimentée uniquement depuis `staging`, à la seule exception des PR de version (section suivante).
 
 Protection à configurer sur `main`, `staging` et `develop`, dans _Settings > Branches_ sur GitHub :
 
@@ -135,6 +135,17 @@ Protection à configurer sur `main`, `staging` et `develop`, dans _Settings > Br
 - branche à jour avec la branche cible avant fusion ;
 - historique linéaire ;
 - pas de push forcé, pas de suppression.
+
+## Versions et déploiement
+
+Chaque application a sa propre version SemVer et son `CHANGELOG.md`. Les tags sont au format `api-v0.1.0`, `web-v0.1.0`, `mobile-v0.1.0`. Décision : [ADR 0004](docs/adr/0004-versions-et-tags-par-application.md).
+
+1. Le travail arrive sur `main` par la PR `staging` → `main`.
+2. Le workflow `release.yml` ouvre ou met à jour une **PR de version** par application concernée, intitulée par exemple `chore(main): release api 0.1.1`. Elle contient le `CHANGELOG.md` et la nouvelle version, calculés depuis les messages de commit.
+3. La fusion de cette PR crée le tag et la release GitHub. C'est le tag qui déclenche la mise en production.
+4. Ouvrir ensuite une PR `main` → `develop` pour ramener les versions et les `CHANGELOG.md`.
+
+On ne crée ni ne modifie jamais un tag à la main, et on ne modifie jamais un `CHANGELOG.md` à la main : on corrige le message de commit concerné dans une nouvelle PR. `staging` se déploie à chaque fusion, sans tag.
 
 ## Signaler un problème de sécurité
 
