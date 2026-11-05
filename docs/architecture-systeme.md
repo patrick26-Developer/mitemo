@@ -112,7 +112,7 @@ Un seul déployable NestJS, découpé en features à frontières nettes (`AGENTS
 | `ledger`           | Écritures en partie double, chaîne de hachage, idempotence                             | #6 à #8  | 0     |
 | `payments`         | Port de paiement unique, adaptateur simulateur puis opérateurs, automate de transaction | #14, #15 | 0     |
 | `scheduler`        | File durable adossée à PostgreSQL, minuteries du cycle                                 | #16      | 0     |
-| `notifications`    | Push, SMS, plafonds par utilisateur et par jour                                        | à créer  | 1     |
+| `notifications`    | Push, SMS, plafonds par utilisateur et par jour                                        | à créer  | 0     |
 | `ussd`             | Adaptateur de session USSD                                                             | #20      | 0     |
 | `reconciliation`   | Comparaison grand livre et relevés, alertes                                            | #21      | 0     |
 | `audit-trail`      | Journal d'audit distinct des journaux techniques, en écriture seule                    | à créer  | 0     |
