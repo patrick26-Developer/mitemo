@@ -1,0 +1,53 @@
+name: Messages de commit
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    name: Messages de commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Seuls les commits apportés par la PR sont contrôlés : ceux déjà publiés sur la
+      # branche cible ou sur main font partie de l'historique et ne sont pas réécrits.
+      - name: Conventional Commits et aucune attribution IA
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          status=0
+          for sha in $(git rev-list "$HEAD" --not "origin/$BASE_REF" origin/main); do
+            git log -1 --format=%B "$sha" > "$RUNNER_TEMP/msg"
+            if ! pnpm exec commitlint --edit "$RUNNER_TEMP/msg"; then
+              echo "::error::Commit $sha : message non conforme à Conventional Commits"
+              status=1
+            fi
+            if ! node scripts/check-commit-message.mjs "$RUNNER_TEMP/msg"; then
+              echo "::error::Commit $sha : attribution IA interdite"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: Titre de la PR
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$TITLE" | pnpm exec commitlint --verbose

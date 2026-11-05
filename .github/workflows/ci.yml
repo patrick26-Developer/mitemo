@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, staging, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Qualité
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Installation figée
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit des dépendances (CVE)
+        run: pnpm audit:deps
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Tests et couverture
+        run: pnpm test:ci
+
+      - name: Tests e2e
+        run: pnpm test:e2e
+
+      - name: Build
+        run: pnpm build
+
+      - name: Rapport de couverture
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: "**/coverage/"
+          if-no-files-found: ignore

@@ -1,0 +1,27 @@
+name: Assignation automatique
+
+# Toute pull request doit avoir un responsable. À l'ouverture, l'auteur est assigné
+# s'il n'y a encore personne. pull_request_target donne un jeton en écriture même
+# pour une PR venant d'un fork : aucun code de la PR n'est extrait ni exécuté ici.
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign-author:
+    name: Assigner l'auteur
+    if: >-
+      github.event.pull_request.assignees[0] == null &&
+      github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Assigner l'auteur de la PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: gh pr edit "$PR_URL" --add-assignee "$AUTHOR"
