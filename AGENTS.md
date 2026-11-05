@@ -14,17 +14,25 @@ Tout agent (humain ou outil) qui travaille ici s'appuie sur des **données réel
 
 ## 1. Stack
 
-| Couche          | Technologie                       | Emplacement       |
-| --------------- | --------------------------------- | ----------------- |
-| API             | NestJS + TypeScript               | `apps/api`        |
-| ORM             | Prisma                            | `apps/api/prisma` |
-| Base de données | PostgreSQL (hébergé sur Neon)     | -                 |
-| Web             | Next.js (App Router) + TypeScript | `apps/web`        |
-| Mobile          | Expo (Expo Router) + TypeScript   | `apps/mobile`     |
-| Code partagé    | Contrats, types, utilitaires purs | `packages/*`      |
-| Monorepo        | pnpm workspaces + Turborepo       | racine            |
+| Couche          | Technologie                       | Version | Emplacement       |
+| --------------- | --------------------------------- | ------- | ----------------- |
+| API             | NestJS (ESM) + TypeScript         | 12      | `apps/api`        |
+| ORM             | Prisma (+ `@prisma/adapter-pg`)   | 7       | `apps/api/prisma` |
+| Base de données | PostgreSQL (hébergé sur Neon)     | -       | -                 |
+| Web             | Next.js (App Router) + TypeScript | 16      | `apps/web`        |
+| Mobile          | Expo (Expo Router) + TypeScript   | SDK 58  | `apps/mobile`     |
+| Code partagé    | Contrats, types, utilitaires purs | -       | `packages/*`      |
+| Monorepo        | pnpm workspaces + Turborepo       | 10 / 2  | racine            |
+| Langage         | TypeScript                        | 6.0     | racine            |
 
-Gestionnaire de paquets : **pnpm uniquement** (`npm` et `yarn` sont interdits). Version de Node : voir `.nvmrc`.
+Gestionnaire de paquets : **pnpm uniquement** (`npm` et `yarn` sont interdits). Version de Node : voir `.nvmrc`. Les versions exactes font foi dans `pnpm-lock.yaml`, pas dans ce tableau.
+
+Points de version vérifiés à la mise en place (novembre 2026), à revérifier à chaque montée de version :
+
+- **NestJS 12** : paquets ESM uniquement, l'API est donc en ESM (`"type": "module"`, imports relatifs en `.js`).
+- **Prisma 7** : générateur `prisma-client` avec `output` obligatoire (client généré dans `apps/api/src/generated/`, non versionné), URL de connexion dans `prisma.config.ts` et non plus dans le schéma, adaptateur `@prisma/adapter-pg` obligatoire. Le dist-tag `latest` de `prisma` a pointé sur une RC : toujours épingler une version stable.
+- **Expo SDK 58** : impose React 19.3.0 et React Native 0.88.1 ; le web s'aligne sur la même version de React. Toujours ajouter une dépendance native avec `pnpm exec expo install`, jamais avec `pnpm add`.
+- **TypeScript 6.0** : typescript-eslint ne supporte pas encore TypeScript 7.
 
 ### 1.1 PostgreSQL et Neon
 
@@ -60,13 +68,14 @@ mitemo/
 │           ├── features/
 │           └── shared/
 ├── packages/
-│   ├── contracts/           schémas d'échange API <-> clients (types + validation)
-│   ├── eslint-config/       configuration ESLint partagée
-│   └── tsconfig/            configurations TypeScript partagées
+│   └── contracts/           types et contrats d'échange API <-> clients
 ├── docs/
 │   ├── adr/                 décisions d'architecture (une décision = un fichier)
 │   └── audit/
-└── scripts/                 outillage du dépôt
+├── scripts/                 outillage du dépôt
+├── eslint.config.mjs        configuration ESLint unique (blocs ciblés par application)
+├── tsconfig.base.json       options TypeScript strictes héritées partout
+└── pnpm-workspace.yaml      workspaces, scripts d'installation autorisés, overrides de sécurité
 ```
 
 ### 2.1 Une feature côté API
@@ -131,14 +140,20 @@ Conséquences pratiques :
 - Tests de propriétés (`fast-check`) pour tout calcul monétaire et toute règle d'équilibre du grand livre.
 - Un test ne dépend ni de l'heure système, ni du réseau, ni de l'ordre d'exécution. L'horloge est injectée.
 
-| Type             | Suffixe              | Outil                     | Portée                                  |
-| ---------------- | -------------------- | ------------------------- | --------------------------------------- |
-| Unitaire         | `*.spec.ts(x)`       | Jest                      | domain, application, composants, hooks  |
-| Unitaire paquets | `*.spec.ts`          | `node:test`               | `packages/*` (TypeScript natif de Node) |
-| Intégration      | `*.int-spec.ts`      | Jest + PostgreSQL de test | adaptateurs Prisma, transactions        |
-| E2E API          | `test/*.e2e-spec.ts` | Jest + Supertest          | endpoints HTTP                          |
-| E2E web          | `e2e/*.spec.ts`      | Playwright                | parcours utilisateur critiques          |
-| E2E mobile       | `.maestro/*.yaml`    | Maestro                   | parcours utilisateur critiques          |
+| Type             | Suffixe              | Outil                       | Portée                                  |
+| ---------------- | -------------------- | --------------------------- | --------------------------------------- |
+| Unitaire API     | `*.spec.ts`          | Vitest (+ SWC)              | domain, application, presentation       |
+| Unitaire web     | `*.spec.tsx`         | Vitest + Testing Library    | composants, hooks, model                |
+| Unitaire mobile  | `*.spec.tsx`         | Jest (`jest-expo`) + RNTL   | composants, hooks, model                |
+| Unitaire paquets | `*.spec.ts`          | `node:test`                 | `packages/*` (TypeScript natif de Node) |
+| Intégration      | `*.int-spec.ts`      | Vitest + PostgreSQL de test | adaptateurs Prisma, transactions        |
+| E2E API          | `test/*.e2e-spec.ts` | Vitest + Supertest          | endpoints HTTP                          |
+| E2E web          | `e2e/*.spec.ts`      | Playwright                  | parcours utilisateur critiques          |
+| E2E mobile       | `.maestro/*.yaml`    | Maestro                     | parcours utilisateur critiques          |
+
+Pourquoi trois outils : chacun est le choix par défaut officiel de sa plateforme (Vitest pour un projet NestJS ESM et dans le guide Next.js, `jest-expo` pour Expo). Ne pas les unifier de force.
+
+Sur le mobile, les tests ne vont **jamais** dans `app/` : Expo Router transformerait chaque fichier en route. L'écran vit dans `src/features/<feature>/components/` et `app/` ne fait que le monter.
 
 Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80 %** sur le reste.
 
@@ -271,6 +286,8 @@ Les entités du domaine ne sont **jamais** exposées telles quelles aux clients 
 - Une faille sur une dépendance transitive se corrige par mise à jour du parent, sinon par un `overrides` dans `pnpm-workspace.yaml`, **avec la référence de l'avis** (GHSA ou CVE) en commentaire. L'override est retiré dès que le parent publie le correctif.
 - Une faille qu'on ne peut pas corriger tout de suite fait l'objet d'une issue avec l'avis, l'impact réel sur Mitemo et la date de réexamen. Elle n'est jamais ignorée en silence.
 - Les mises à jour Dependabot sont relues comme du code : lire les notes de version avant de fusionner.
+- **Scripts d'installation** : pnpm les bloque par défaut. Seuls les paquets listés dans `onlyBuiltDependencies` peuvent en exécuter ; ceux listés dans `ignoredBuiltDependencies` sont refusés en connaissance de cause. Tout ajout se justifie en PR.
+- **Écarts de pairs** : un avertissement de dépendance pair se corrige (bonne version) ou s'accepte explicitement dans `peerDependencyRules` avec la raison et la source. Jamais ignoré.
 
 ## 6. Collaboration
 
@@ -302,7 +319,8 @@ pnpm lint                    # ESLint sur tout le monorepo (zéro avertissement)
 pnpm audit:deps              # audit CVE des dépendances
 pnpm format:check            # vérification Prettier
 pnpm typecheck               # tsc --noEmit partout
-pnpm test                    # tous les tests
+pnpm test                    # tous les tests unitaires
+pnpm test:e2e                # tests de bout en bout
 pnpm build                   # build de toutes les applications
 pnpm --filter api test       # tests d'une seule application
 ```
