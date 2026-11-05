@@ -16,6 +16,7 @@
     "typecheck": "turbo run typecheck",
     "test": "pnpm test:scripts && turbo run test",
     "test:ci": "pnpm test:scripts && turbo run test:ci",
+    "test:e2e": "turbo run test:e2e",
     "test:scripts": "node --test scripts/",
     "test:affected": "pnpm test:scripts && turbo run typecheck test --filter=...[HEAD]",
     "audit:deps": "pnpm audit --audit-level=moderate",
