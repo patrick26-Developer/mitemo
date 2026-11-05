@@ -29,7 +29,7 @@ pnpm install        # installe les dépendances et active les hooks Git
    - refactorer.
 4. **Commits atomiques.** Un commit = un changement cohérent qui compile et dont les tests passent. Évitez les commits fourre-tout du type « wip » ou « fix ».
 5. **Pull request** vers `develop`, en remplissant le modèle. **Elle est assignée** à son auteur : le workflow `assign.yml` le fait à l'ouverture si personne ne l'est encore, et le statut `Assignation` bloque la fusion tant qu'elle n'a pas de responsable. Pour passer la main : `gh pr edit <numéro> --add-assignee <login>`. Gardez les PR petites (repère : moins de 400 lignes modifiées hors fichiers générés).
-6. **Revue.** Au moins une approbation d'un autre membre. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
+6. **Revue.** Au moins une approbation d'un autre membre : GitHub interdit d'approuver sa propre PR, et le ruleset interdit de fusionner sans approbation. L'auteur répond à chaque commentaire et ne résout pas lui-même les fils ouverts par le relecteur.
 7. **Fusion** en _rebase and merge_ une fois la CI verte, pour conserver l'historique atomique. La branche est supprimée après fusion.
 
 ## Issues
@@ -127,14 +127,27 @@ Toute décision structurante (nouvelle dépendance majeure, changement de couche
 - `staging` : préproduction.
 - `main` : production, alimentée uniquement depuis `staging`.
 
-Protection à configurer sur `main`, `staging` et `develop`, dans _Settings > Branches_ sur GitHub :
+`main`, `staging` et `develop` sont protégées par le ruleset [`.github/rulesets/branches-protegees.json`](.github/rulesets/branches-protegees.json) :
 
-- pull request obligatoire avant fusion, une approbation minimum ;
-- approbation de CODEOWNERS requise ;
-- statuts obligatoires : `Qualité`, `Messages de commit` et `Assignation` ;
-- branche à jour avec la branche cible avant fusion ;
-- historique linéaire ;
-- pas de push forcé, pas de suppression.
+- **personne ne fusionne sa propre PR sans l'approbation de l'autre membre**, administrateurs compris (aucune exception dans `bypass_actors`) ;
+- une approbation minimum, d'un propriétaire du code (`CODEOWNERS`) qui n'est pas l'auteur ;
+- l'approbation doit porter sur le dernier push : un nouveau commit l'annule, et la personne qui a poussé en dernier ne peut pas approuver ;
+- toutes les conversations résolues ;
+- statuts obligatoires `Qualité`, `Messages de commit` et `Assignation`, sur une branche à jour avec la cible ;
+- ni push forcé, ni suppression de branche.
+
+**Seul l'auteur met sa branche à jour** (bouton « Update branch » ou rebase). Si le relecteur le fait, il devient le dernier à avoir poussé et ne peut plus approuver.
+
+Application ou mise à jour, par un administrateur :
+
+```bash
+# Création
+gh api -X POST repos/patrick26-Developer/mitemo/rulesets --input .github/rulesets/branches-protegees.json
+# Mise à jour d'un ruleset existant
+gh api -X PUT repos/patrick26-Developer/mitemo/rulesets/<id> --input .github/rulesets/branches-protegees.json
+```
+
+Le fichier fait foi : toute modification des règles passe par une PR sur ce fichier, puis est appliquée par un administrateur.
 
 ## Signaler un problème de sécurité
 
