@@ -12,6 +12,9 @@ jobs:
     name: Messages de commit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -47,7 +50,26 @@ jobs:
           done
           exit $status
 
+      # Une PR de promotion (develop → staging, staging → main) ouverte depuis l'interface
+      # de GitHub prend le nom de la branche comme titre (« Develop »). Si ce titre n'est
+      # pas conforme, il est remplacé par le titre attendu avant le contrôle. Une
+      # modification faite avec GITHUB_TOKEN ne relance aucun workflow : pas de boucle.
       - name: Titre de la PR
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TITLE: ${{ github.event.pull_request.title }}
-        run: echo "$TITLE" | pnpm exec commitlint --verbose
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          case "$HEAD_REF:$BASE_REF" in
+            develop:staging | staging:main) promotion=$SAME_REPO ;;
+            *) promotion=false ;;
+          esac
+          if [ "$promotion" = true ] && ! echo "$TITLE" | pnpm exec commitlint > /dev/null 2>&1; then
+            TITLE="chore(release): promouvoir $HEAD_REF vers $BASE_REF"
+            gh pr edit "$PR_URL" --title "$TITLE"
+            echo "Titre de promotion remplacé par : $TITLE"
+          fi
+          echo "$TITLE" | pnpm exec commitlint --verbose
