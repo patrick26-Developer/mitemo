@@ -44,6 +44,9 @@ jobs:
       - name: Installation figée
         run: pnpm install --frozen-lockfile
 
+      - name: Génération du client Prisma
+        run: pnpm --filter api prisma:generate
+
       - name: Audit des dépendances (CVE)
         run: pnpm audit:deps
 
