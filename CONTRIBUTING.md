@@ -88,6 +88,9 @@ Le relecteur vérifie, dans cet ordre :
 3. Une fonction fait un traitement, une classe porte une intention.
 4. Aucun montant en flottant, aucune écriture de solde hors transaction `SERIALIZABLE`.
 5. Aucun secret, aucune donnée personnelle dans les logs.
+6. Structure des composants : pas de logique métier, pas de `.map()` imbriqué, pas de duplication avec `shared/` (checklist complète dans `AGENTS.md`, section 3.6).
+7. Tout élément exporté a un JSDoc qui explique l'intention.
+8. Toute nouvelle dépendance est justifiée dans la PR : version, maintenance, licence, avis de sécurité, avec les liens vers les sources.
 
 Commentaires préfixés pour lever toute ambiguïté :
 
