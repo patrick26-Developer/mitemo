@@ -131,13 +131,14 @@ Conséquences pratiques :
 - Tests de propriétés (`fast-check`) pour tout calcul monétaire et toute règle d'équilibre du grand livre.
 - Un test ne dépend ni de l'heure système, ni du réseau, ni de l'ordre d'exécution. L'horloge est injectée.
 
-| Type        | Suffixe              | Outil                     | Portée                                 |
-| ----------- | -------------------- | ------------------------- | -------------------------------------- |
-| Unitaire    | `*.spec.ts(x)`       | Jest                      | domain, application, composants, hooks |
-| Intégration | `*.int-spec.ts`      | Jest + PostgreSQL de test | adaptateurs Prisma, transactions       |
-| E2E API     | `test/*.e2e-spec.ts` | Jest + Supertest          | endpoints HTTP                         |
-| E2E web     | `e2e/*.spec.ts`      | Playwright                | parcours utilisateur critiques         |
-| E2E mobile  | `.maestro/*.yaml`    | Maestro                   | parcours utilisateur critiques         |
+| Type             | Suffixe              | Outil                     | Portée                                  |
+| ---------------- | -------------------- | ------------------------- | --------------------------------------- |
+| Unitaire         | `*.spec.ts(x)`       | Jest                      | domain, application, composants, hooks  |
+| Unitaire paquets | `*.spec.ts`          | `node:test`               | `packages/*` (TypeScript natif de Node) |
+| Intégration      | `*.int-spec.ts`      | Jest + PostgreSQL de test | adaptateurs Prisma, transactions        |
+| E2E API          | `test/*.e2e-spec.ts` | Jest + Supertest          | endpoints HTTP                          |
+| E2E web          | `e2e/*.spec.ts`      | Playwright                | parcours utilisateur critiques          |
+| E2E mobile       | `.maestro/*.yaml`    | Maestro                   | parcours utilisateur critiques          |
 
 Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80 %** sur le reste.
 
@@ -214,6 +215,40 @@ export class RecordContributionUseCase {
 - Pas de `eslint-disable` sans justification sur la même ligne et validation en revue.
 - Aucun test ignoré (`.skip`, `.only`) n'est fusionné.
 - Une erreur à l'exécution est traitée explicitement : erreur métier typée, ou remontée volontaire avec contexte. Jamais de `catch` vide.
+
+### 3.9 Types et interfaces partagés
+
+Un type qui traverse le réseau est défini **une seule fois**, dans `packages/contracts` (`@mitemo/contracts`), et importé par l'API, le web et le mobile. Il n'est jamais redéclaré dans une application.
+
+**Où vit un type :**
+
+| Le type décrit...                                       | Emplacement                              |
+| ------------------------------------------------------- | ---------------------------------------- |
+| un échange HTTP (requête, réponse, erreur, montant, ID) | `packages/contracts`                     |
+| une règle métier (entité, value object, port)           | `apps/api/src/features/<feature>/domain` |
+| des props de composant, un état d'écran                 | le fichier du composant ou du hook       |
+| un type utilisé par deux features d'une même app        | `src/shared/` de cette app               |
+
+Les entités du domaine ne sont **jamais** exposées telles quelles aux clients : la couche `presentation` les convertit en contrat.
+
+**Règles d'écriture (imposées par ESLint et TypeScript) :**
+
+- `interface` pour une forme d'objet ou un port ; `type` pour une union, un alias ou un type dérivé.
+- Pas de préfixe `I`, pas de suffixe `Type`. Suffixes de rôle : `XxxRequest`, `XxxResponse`, `XxxDto`, `XxxRepository`, `XxxProps`.
+- Pas d'`enum` : un tableau `as const` et l'union dérivée (`(typeof CURRENCIES)[number]`), utilisables à la fois comme valeurs et comme types.
+- Identifiants et montants **nominaux** avec `Brand` : un `GroupId` ne peut pas être passé là où un `MemberId` est attendu, un `bigint` brut n'est pas un `AmountMinor`.
+- Propriétés `readonly` et `readonly T[]` par défaut dans les contrats.
+- Formats JSON fixés : montant en chaîne d'entier (`SerializedAmount`), date en chaîne ISO 8601 UTC, identifiant en UUID.
+- `import type` / `export type` pour tout ce qui n'est qu'un type.
+- Import par la racine du paquet uniquement (`@mitemo/contracts`), jamais `@mitemo/contracts/src/...`.
+- `unknown` plutôt que `any` pour une donnée externe, puis validation à la frontière.
+- Chaque type et chaque champ non évident a son JSDoc, **unité comprise** (« en plus petite unité de la devise », « en UTC »).
+
+**Évolution d'un contrat :**
+
+- Ajouter un champ optionnel ou un code d'erreur : PR normale, mais les clients le gèrent dans la même PR.
+- Renommer, supprimer ou changer le type d'un champ : changement cassant. Commit `feat(contracts)!:`, mise à jour de l'API et des deux clients dans la même PR, et note dans la description.
+- Le paquet a ses propres tests, y compris des tests de types (`// @ts-expect-error <raison>`) qui garantissent qu'un mauvais usage ne compile pas.
 
 ## 4. TypeScript strict
 
