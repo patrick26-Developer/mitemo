@@ -1,0 +1,44 @@
+name: Bug
+description: Un comportement ne correspond pas à ce qui est attendu.
+title: "fix: "
+labels: ["bug", "à trier"]
+body:
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Application concernée
+      options:
+        - api
+        - web
+        - mobile
+        - autre
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Se connecter en tant que trésorier
+        2. Ouvrir le groupe ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportement observé
+      description: Messages d'erreur, logs (sans donnée personnelle), captures.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit
+      placeholder: "ex. 3f2a1c9 ou v0.3.0"
