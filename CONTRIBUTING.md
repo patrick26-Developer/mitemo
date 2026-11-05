@@ -127,6 +127,8 @@ Toute décision structurante (nouvelle dépendance majeure, changement de couche
 - `staging` : préproduction.
 - `main` : production, alimentée uniquement depuis `staging`, à la seule exception des PR de version (section suivante).
 
+Une PR de promotion (`develop` → `staging`, `staging` → `main`) se fusionne en _merge commit_, pour garder les branches alignées. Si son titre n'est pas conforme (GitHub propose « Develop » par défaut), le workflow `commits.yml` le remplace par `chore(release): promouvoir <source> vers <cible>`.
+
 `main`, `staging` et `develop` sont protégées par le ruleset [`.github/rulesets/branches-protegees.json`](.github/rulesets/branches-protegees.json) :
 
 - **personne ne fusionne sa propre PR sans l'approbation de l'autre membre**, administrateurs compris (aucune exception dans `bypass_actors`) ;
