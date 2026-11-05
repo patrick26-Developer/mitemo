@@ -22,7 +22,8 @@ Tout agent (humain ou outil) qui travaille ici s'appuie sur des **données réel
 | Web             | Next.js (App Router) + TypeScript | 16      | `apps/web`        |
 | Mobile          | Expo (Expo Router) + TypeScript   | SDK 58  | `apps/mobile`     |
 | Code partagé    | Contrats, types, utilitaires purs | -       | `packages/*`      |
-| Monorepo        | pnpm workspaces + Turborepo       | 10 / 2  | racine            |
+| Monorepo        | pnpm workspaces + Turborepo       | 12 / 2  | racine            |
+| Runtime         | Node.js (LTS active « Lithium »)  | 26      | `.nvmrc`          |
 | Langage         | TypeScript                        | 6.0     | racine            |
 
 Gestionnaire de paquets : **pnpm uniquement** (`npm` et `yarn` sont interdits). Version de Node : voir `.nvmrc`. Les versions exactes font foi dans `pnpm-lock.yaml`, pas dans ce tableau.
@@ -33,6 +34,10 @@ Points de version vérifiés à la mise en place (novembre 2026), à revérifier
 - **Prisma 7** : générateur `prisma-client` avec `output` obligatoire (client généré dans `apps/api/src/generated/`, non versionné), URL de connexion dans `prisma.config.ts` et non plus dans le schéma, adaptateur `@prisma/adapter-pg` obligatoire. Le dist-tag `latest` de `prisma` a pointé sur une RC : toujours épingler une version stable.
 - **Expo SDK 58** : impose React 19.3.0 et React Native 0.88.1 ; le web s'aligne sur la même version de React. Toujours ajouter une dépendance native avec `pnpm exec expo install`, jamais avec `pnpm add`.
 - **TypeScript 6.0** : typescript-eslint ne supporte pas encore TypeScript 7.
+- **Node.js 26** : LTS active depuis le 28 octobre 2026 (Node 24 est passé en maintenance le 20 octobre 2026). Source : calendrier officiel `github.com/nodejs/Release`. On suit toujours la LTS **active**.
+- **pnpm 12** : ne lit plus que l'authentification et le registre dans `.npmrc` (tous les réglages sont dans `pnpm-workspace.yaml`), refuse tout réglage inconnu, et applique par défaut une quarantaine `minimumReleaseAge` : une version publiée depuis moins de 24 heures est refusée.
+
+**Politique de version** : chaque dépendance est à sa **dernière version stable**, sans CVE, sauf contrainte documentée ici ou dans `pnpm-workspace.yaml` (React fixé par Expo, TypeScript par typescript-eslint). Jamais de RC, alpha ou beta. Une version encore en quarantaine se remplace par la précédente ; on ne crée **jamais** d'exception `minimumReleaseAgeExclude` (pnpm peut en ajouter une de lui-même : la retirer).
 
 ### 1.1 PostgreSQL et Neon
 
@@ -286,7 +291,7 @@ Les entités du domaine ne sont **jamais** exposées telles quelles aux clients 
 - Une faille sur une dépendance transitive se corrige par mise à jour du parent, sinon par un `overrides` dans `pnpm-workspace.yaml`, **avec la référence de l'avis** (GHSA ou CVE) en commentaire. L'override est retiré dès que le parent publie le correctif.
 - Une faille qu'on ne peut pas corriger tout de suite fait l'objet d'une issue avec l'avis, l'impact réel sur Mitemo et la date de réexamen. Elle n'est jamais ignorée en silence.
 - Les mises à jour Dependabot sont relues comme du code : lire les notes de version avant de fusionner.
-- **Scripts d'installation** : pnpm les bloque par défaut. Seuls les paquets listés dans `onlyBuiltDependencies` peuvent en exécuter ; ceux listés dans `ignoredBuiltDependencies` sont refusés en connaissance de cause. Tout ajout se justifie en PR.
+- **Scripts d'installation** : pnpm les bloque par défaut. `allowBuilds` dans `pnpm-workspace.yaml` liste chaque paquet concerné : `true` autorisé, `false` refusé en connaissance de cause. Un paquet absent de la liste fait échouer l'installation. Tout ajout se justifie en PR.
 - **Écarts de pairs** : un avertissement de dépendance pair se corrige (bonne version) ou s'accepte explicitement dans `peerDependencyRules` avec la raison et la source. Jamais ignoré.
 
 ## 6. Collaboration
@@ -294,6 +299,7 @@ Les entités du domaine ne sont **jamais** exposées telles quelles aux clients 
 Le détail est dans [`CONTRIBUTING.md`](CONTRIBUTING.md). L'essentiel :
 
 - Aucun push direct sur `main`. Tout passe par une pull request revue et verte en CI.
+- **Toute pull request est assignée** à la personne qui en répond (l'auteur par défaut, assigné automatiquement à l'ouverture). Une PR sans assignation ne peut pas être fusionnée : le statut `Assignation` est obligatoire.
 - Branches : `type/numero-description-courte` (exemple : `feat/42-enregistrer-cotisation`).
 - Commits au format **Conventional Commits**, vérifiés par `commitlint`.
 - **Commits atomiques** : un commit = un changement cohérent et testable.
