@@ -4,11 +4,11 @@ Chaque parcours décrit les écrans, les décisions et les sorties d'erreur d'un
 
 | N° | Parcours                                   | Surface      | Phase | Issues      |
 | -- | ------------------------------------------ | ------------ | ----- | ----------- |
-| 1  | Découvrir Mitemo et installer l'application | Site public  | 0     | à créer     |
-| 2  | Vérifier un tirage                         | Site, app    | 0     | #13, #26    |
+| 1  | Découvrir Mitemo et installer l'application | Site public  | 0     | #46         |
+| 2  | Vérifier un tirage                         | Site, app    | 0     | #38, #47, #26 |
 | 3  | S'inscrire                                 | Application  | 0     | #9, #23     |
 | 4  | Se reconnecter                             | Application  | 0     | #9, #23     |
-| 5  | Changer de téléphone                       | Application  | 1     | à créer     |
+| 5  | Changer de téléphone                       | Application  | 1     | #40, #51    |
 | 6  | Créer une tontine et inviter               | Application  | 0     | #10, #11, #24 |
 | 7  | Rejoindre une tontine                      | Application  | 0     | #11, #12, #25 |
 | 8  | Mettre de l'argent dans son coffre         | Application  | 0     | #15, #27    |
@@ -16,7 +16,7 @@ Chaque parcours décrit les écrans, les décisions et les sorties d'erreur d'un
 | 10 | Régler une échéance par USSD               | USSD         | 0     | #20         |
 | 11 | Défaut et cascade                          | Système      | 0     | #19         |
 | 12 | Recevoir sa cagnotte                       | Application  | 0     | #18         |
-| 13 | Se connecter au back-office                | Back-office  | 0     | à créer     |
+| 13 | Se connecter au back-office                | Back-office  | 0     | #36, #48    |
 | 14 | Contrôler l'intégrité                      | Back-office  | 0     | #21, #29    |
 | 15 | Aider un membre                            | Back-office  | 0     | #30         |
 

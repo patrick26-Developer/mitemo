@@ -103,7 +103,7 @@ Un seul déployable NestJS, découpé en features à frontières nettes (`AGENTS
 | Feature            | Responsabilité                                                                         | Issues   | Phase |
 | ------------------ | -------------------------------------------------------------------------------------- | -------- | ----- |
 | `identity`         | Enrôlement par numéro et OTP, PIN, appareils, sessions des membres                     | #9       | 0     |
-| `staff-identity`   | Comptes du personnel, mot de passe et second facteur, rôles                            | à créer  | 0     |
+| `staff-identity`   | Comptes du personnel, mot de passe et second facteur, rôles                            | #36      | 0     |
 | `tontines`         | Création, paramètres, automate de la tontine                                           | #10      | 0     |
 | `memberships`      | Invitations par jeton, automate de l'adhésion                                          | #11      | 0     |
 | `guarantees`       | Blocage des garanties, quorum, restitution                                             | #12      | 0     |
@@ -112,12 +112,12 @@ Un seul déployable NestJS, découpé en features à frontières nettes (`AGENTS
 | `ledger`           | Écritures en partie double, chaîne de hachage, idempotence                             | #6 à #8  | 0     |
 | `payments`         | Port de paiement unique, adaptateur simulateur puis opérateurs, automate de transaction | #14, #15 | 0     |
 | `scheduler`        | File durable adossée à PostgreSQL, minuteries du cycle                                 | #16      | 0     |
-| `notifications`    | Push, SMS, plafonds par utilisateur et par jour                                        | à créer  | 1     |
+| `notifications`    | Push, SMS, plafonds par utilisateur et par jour                                        | #39      | 0     |
 | `ussd`             | Adaptateur de session USSD                                                             | #20      | 0     |
 | `reconciliation`   | Comparaison grand livre et relevés, alertes                                            | #21      | 0     |
-| `audit-trail`      | Journal d'audit distinct des journaux techniques, en écriture seule                    | à créer  | 0     |
+| `audit-trail`      | Journal d'audit distinct des journaux techniques, en écriture seule                    | #37      | 0     |
 | `back-office`      | Endpoints de consultation pour le personnel                                            | #30      | 0     |
-| `disputes`         | Procédure de litige                                                                    | à créer  | 1     |
+| `disputes`         | Procédure de litige                                                                    | #44      | 1     |
 | `compliance`       | Paliers KYC, plafonds consolidés, surveillance LBC/FT                                  | à créer  | 1     |
 | `health`           | Sonde de vie                                                                           | existant | 0     |
 
