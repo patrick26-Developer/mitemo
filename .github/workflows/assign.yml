@@ -26,9 +26,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # L'état est relu par l'API : avec `gh pr create --assignee`, l'assignation arrive
+      # juste après l'événement `opened`, qui la montre encore vide. L'ajout passe par
+      # l'API REST, qui ne fait rien si la personne est déjà assignée.
       - name: Assigner l'auteur de la PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-        run: gh pr edit "$PR_URL" --add-assignee "$AUTHOR"
+        run: |
+          count=$(gh api "repos/$REPO/issues/$NUMBER" --jq '.assignees | length')
+          if [ "$count" -gt 0 ]; then
+            echo "Déjà assignée, rien à faire."
+            exit 0
+          fi
+          gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$AUTHOR" --silent
+          echo "Assignée à $AUTHOR."
