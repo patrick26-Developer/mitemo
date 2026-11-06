@@ -9,10 +9,15 @@ export type {
   ContributionId,
   GroupId,
   InvitationToken,
+  LoginChallengeId,
   MemberId,
+  MovementId,
+  RistourneId,
   RoundId,
+  SavingsCardId,
   TontineId,
   TransactionId,
+  UserId,
 } from "./identifiers.ts";
 export type { HealthResponse } from "./health.ts";
 export { API_ERROR_CODES } from "./api-error.ts";
@@ -51,3 +56,36 @@ export type {
 } from "./round.ts";
 export { TRANSACTION_STATES } from "./transaction.ts";
 export type { FundWalletRequest, FundWalletResponse, TransactionState } from "./transaction.ts";
+export { USER_ROLES } from "./auth.ts";
+export type {
+  CurrentUser,
+  SessionResponse,
+  StartLoginRequest,
+  StartLoginResponse,
+  UserRole,
+  VerifyLoginRequest,
+} from "./auth.ts";
+export { IDEMPOTENCY_KEY_HEADER, MOVEMENT_KINDS, PROGRAM_KINDS } from "./wallet.ts";
+export type {
+  MovementKind,
+  ProgramKind,
+  ProgramRef,
+  SimulateFundingRequest,
+  SimulateFundingResponse,
+  WalletMovement,
+  WalletMovementsResponse,
+  WalletSummaryResponse,
+} from "./wallet.ts";
+export { INSTALLMENT_STATES, SAVINGS_CARD_STATES, SCHEDULE_FREQUENCIES } from "./savings-card.ts";
+export type {
+  CreateSavingsCardRequest,
+  Installment,
+  InstallmentState,
+  PayInstallmentRequest,
+  SavingsCardFee,
+  SavingsCardQuoteResponse,
+  SavingsCardResponse,
+  SavingsCardState,
+  SavingsCardTerms,
+  ScheduleFrequency,
+} from "./savings-card.ts";
