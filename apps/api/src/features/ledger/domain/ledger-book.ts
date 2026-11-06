@@ -1,8 +1,12 @@
 import type { JournalEntry } from "./journal-entry.js";
 
 /**
- * Plan de comptes du grand livre (issue #6). Les noms sont des valeurs
- * techniques stables, jamais affichées telles quelles à l'utilisateur.
+ * Plan de comptes du grand livre (issue #6), complété pour le sprint de
+ * démonstration : `CLEARING_SIMULATOR` est la contrepartie des
+ * approvisionnements simulés, distincte des comptes de compensation des
+ * opérateurs réels ; chaque carte de pointage et chaque ristourne a sa caisse.
+ * Les noms sont des valeurs techniques stables, jamais affichées telles quelles.
+ * Doit rester identique à la contrainte `ledger_account_kind_check` en base.
  */
 export const LEDGER_ACCOUNT_KINDS = [
   "WALLET_USER",
@@ -11,6 +15,9 @@ export const LEDGER_ACCOUNT_KINDS = [
   "GUARANTEE_MEMBER",
   "CLEARING_MTN",
   "CLEARING_AIRTEL",
+  "CLEARING_SIMULATOR",
+  "SAVINGS_CARD_CAISSE",
+  "RISTOURNE_CAISSE",
   "PLATFORM_REVENUE",
   "PLATFORM_FEES_PSP",
   "SUSPENSE",
@@ -21,10 +28,16 @@ export type LedgerAccountKind = (typeof LEDGER_ACCOUNT_KINDS)[number];
 
 /**
  * Natures de comptes dont le solde ne peut jamais devenir négatif. L'issue #6
- * l'exige pour les portefeuilles ; les comptes de compensation, de revenus et
- * d'attente peuvent, eux, porter un solde négatif.
+ * l'exige pour les portefeuilles ; une caisse ne peut pas non plus verser plus
+ * qu'elle n'a reçu. Les comptes de compensation, de revenus et d'attente
+ * peuvent, eux, porter un solde négatif. Doit rester identique à la fonction
+ * `ledger_check_non_negative` en base.
  */
-const NON_NEGATIVE_KINDS: ReadonlySet<LedgerAccountKind> = new Set(["WALLET_USER"]);
+export const NON_NEGATIVE_KINDS: ReadonlySet<LedgerAccountKind> = new Set([
+  "WALLET_USER",
+  "SAVINGS_CARD_CAISSE",
+  "RISTOURNE_CAISSE",
+]);
 
 /** Compte du grand livre. */
 export interface LedgerAccount {
@@ -131,7 +144,7 @@ export class LedgerBook {
  * @param entry Écriture à analyser.
  * @returns Pour chaque compte, la somme de ses imputations dans l'écriture.
  */
-function netChanges(entry: JournalEntry): Map<string, bigint> {
+export function netChanges(entry: JournalEntry): Map<string, bigint> {
   const changes = new Map<string, bigint>();
   for (const line of entry.lines) {
     changes.set(line.accountId, (changes.get(line.accountId) ?? 0n) + line.amount);

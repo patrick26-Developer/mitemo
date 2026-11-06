@@ -31,7 +31,14 @@ Chaque développeur travaille sur sa propre branche Neon, jamais sur une base pa
 
 1. Dans la console Neon (ou `neonctl branches create --name <prenom>`), créer une branche personnelle à partir de `main` (la branche Neon par défaut du projet).
 2. Copier ses deux chaînes de connexion (directe et poolée) dans `apps/api/.env` — jamais commité (`.gitignore` l'exclut déjà).
-3. Les tests d'intégration (`*.int-spec.ts`) tournent contre cette branche personnelle en local, et contre un conteneur PostgreSQL éphémère en CI (`.github/workflows/ci.yml`) — jamais contre la base partagée de `main`.
+3. Les tests d'intégration (`*.int-spec.ts`) ne tournent **jamais** contre Neon : ils appliquent les migrations puis écrivent des écritures que la base interdit de supprimer. Ils exigent une base dédiée et jetable, désignée par `TEST_DATABASE_URL`, et refusent de démarrer sans elle ou si elle désigne un hôte `*.neon.tech`. En CI, c'est le service PostgreSQL du workflow (`.github/workflows/ci.yml`). En local :
+
+   ```sh
+   docker run -d --rm --name mitemo-test-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=mitemo_test -p 55432:5432 postgres:18
+   TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:55432/mitemo_test pnpm --filter api test:int
+   ```
+
+   `docker rm -f mitemo-test-pg` supprime la base de test. La mise en place globale (`test/int/global-setup.ts`) applique les migrations avec `prisma migrate deploy`, qui n'efface rien.
 
 ## Scripts
 

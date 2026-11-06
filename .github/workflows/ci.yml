@@ -62,10 +62,12 @@ jobs:
       - name: Tests et couverture
         run: pnpm test:ci
 
+      # Base dédiée et jetable : les tests appliquent les migrations puis écrivent des
+      # écritures que la base interdit de supprimer. Ils refusent toute autre base.
       - name: Tests d'intégration (PostgreSQL réel)
         run: pnpm --filter api test:int
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mitemo_test
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mitemo_test
 
       - name: Tests e2e
         # Appel direct (pas `pnpm test:e2e` via turbo) : turbo ne transmet que les
