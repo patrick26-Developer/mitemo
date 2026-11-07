@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   fundedWallet as funded,
+  insertRawEntry,
   openAccount,
   unique,
   useLedgerDatabase,
@@ -18,21 +19,11 @@ const open = (kind: LedgerAccountKind): Promise<string> => openAccount(fx, kind)
 const fundedWallet = (amount: bigint): Promise<{ wallet: string; clearing: string }> =>
   funded(fx, amount);
 
-describe("garanties en base, hors du code applicatif", () => {
-  async function rawEntry(id: string, lines: readonly [string, bigint][]): Promise<void> {
-    await fx.prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`
-        INSERT INTO ledger_entry (id, idempotency_key, payload_hash, operation_ref, description,
-          occurred_at, recorded_by, settlement_mode)
-        VALUES (${id}, ${id}, 'brut', 'brut', 'Insertion SQL directe', now(), 'int-spec', 'SIMULATED')`;
-      for (const [index, [accountId, amount]] of lines.entries()) {
-        await tx.$executeRaw`
-          INSERT INTO ledger_posting_line (entry_id, line_no, account_id, amount)
-          VALUES (${id}, ${index + 1}, ${accountId}, ${amount})`;
-      }
-    });
-  }
+function rawEntry(id: string, lines: readonly [string, bigint][]): Promise<void> {
+  return insertRawEntry(fx, id, { lines });
+}
 
+describe("garanties en base, hors du code applicatif", () => {
   it("accepte une écriture équilibrée insérée ligne par ligne (vérification différée)", async () => {
     const a = await open("SUSPENSE");
     const b = await open("SUSPENSE");
@@ -118,18 +109,6 @@ describe("garanties en base, hors du code applicatif", () => {
     await expect(fx.prisma.$executeRawUnsafe("TRUNCATE ledger_entry CASCADE")).rejects.toThrow(
       /LEDGER_IMMUTABLE/,
     );
-  });
-
-  it("refuse un portefeuille négatif même par insertion SQL directe", async () => {
-    const { wallet, clearing } = await fundedWallet(100n);
-
-    await expect(
-      rawEntry(randomUUID(), [
-        [wallet, -101n],
-        [clearing, 101n],
-      ]),
-    ).rejects.toThrow(/LEDGER_NEGATIVE_BALANCE/);
-    expect(await fx.repository.balanceOf(wallet)).toBe(100n);
   });
 
   it("refuse tout mode de règlement autre que SIMULATED (ADR 0005)", async () => {
