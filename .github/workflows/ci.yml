@@ -64,8 +64,8 @@ jobs:
 
       # Base dédiée et jetable : les tests appliquent les migrations puis écrivent des
       # écritures que la base interdit de supprimer. Ils refusent toute autre base.
-      - name: Tests d'intégration (PostgreSQL réel)
-        run: pnpm --filter api test:int
+      - name: Tests d'intégration et couverture de l'adaptateur
+        run: pnpm --filter api test:int:ci
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mitemo_test
 
@@ -85,5 +85,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: "**/coverage/"
+          path: |
+            **/coverage/
+            **/coverage-int/
           if-no-files-found: ignore

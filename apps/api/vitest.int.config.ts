@@ -21,5 +21,18 @@ export default defineConfig({
     globalSetup: ["./test/int/global-setup.ts"],
     testTimeout: 30_000,
     hookTimeout: 120_000,
+    coverage: {
+      provider: "v8",
+      // Les tests unitaires excluent les adaptateurs Prisma : leur couverture
+      // est mesurée ici, contre une vraie base, et publiée à part.
+      include: ["src/features/*/infrastructure/prisma-*.repository.ts"],
+      reportsDirectory: "./coverage-int",
+      thresholds: {
+        lines: 80,
+        branches: 80,
+        functions: 80,
+        statements: 80,
+      },
+    },
   },
 });
