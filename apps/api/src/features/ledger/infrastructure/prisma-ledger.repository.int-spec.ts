@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { toAmountMinor } from "@mitemo/contracts";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,13 +12,17 @@ import {
   unique,
   useLedgerDatabase,
 } from "../../../../test/int/ledger-fixtures.js";
-import { reverseEntry } from "../domain/journal-entry.js";
+import { createJournalEntry, reverseEntry } from "../domain/journal-entry.js";
 import {
   InsufficientBalanceError,
   UnknownAccountError,
   type LedgerAccountKind,
 } from "../domain/ledger-book.js";
-import { ClosedAccountError, IdempotencyConflictError } from "../domain/ledger.repository.js";
+import {
+  ClosedAccountError,
+  IdempotencyConflictError,
+  ReversalMismatchError,
+} from "../domain/ledger.repository.js";
 
 const fx = useLedgerDatabase();
 const open = (kind: LedgerAccountKind): Promise<string> => openAccount(fx, kind);
@@ -98,6 +103,29 @@ describe("PrismaLedgerRepository — enregistrement", () => {
     ).rejects.toThrow(/déjà annulée/);
     expect(await fx.repository.balanceOf(wallet)).toBe(0n);
   });
+
+  it("refuse une contre-écriture qui n'inverse pas exactement l'originale", async () => {
+    const clearing = await open("CLEARING_SIMULATOR");
+    const wallet = await open("WALLET_USER");
+    const original = transfer(clearing, wallet, 1_000n);
+    await fx.repository.post(command(original));
+    const bogusReversal = createJournalEntry({
+      id: randomUUID(),
+      occurredAt: AT,
+      description: "Fausse annulation",
+      reverses: original.id,
+      lines: [
+        { accountId: wallet, amount: toAmountMinor(-500n) },
+        { accountId: clearing, amount: toAmountMinor(500n) },
+      ],
+    });
+
+    await expect(fx.repository.post(command(bogusReversal))).rejects.toBeInstanceOf(
+      ReversalMismatchError,
+    );
+    expect(await fx.repository.balanceOf(wallet)).toBe(1_000n);
+    expect(await fx.prisma.ledgerEntry.count({ where: { reversesEntryId: original.id } })).toBe(0);
+  });
 });
 
 describe("PrismaLedgerRepository — idempotence", () => {
@@ -125,6 +153,26 @@ describe("PrismaLedgerRepository — idempotence", () => {
       fx.repository.post(command(transfer(clearing, wallet, 701n), key)),
     ).rejects.toBeInstanceOf(IdempotencyConflictError);
     expect(await fx.repository.balanceOf(wallet)).toBe(700n);
+  });
+
+  it("refuse une clé rejouée par un autre auteur", async () => {
+    const clearing = await open("CLEARING_SIMULATOR");
+    const wallet = await open("WALLET_USER");
+    const key = randomUUID();
+    await fx.repository.post(command(transfer(clearing, wallet, 700n), key));
+
+    await expect(
+      fx.repository.post({
+        ...command(transfer(clearing, wallet, 700n), key),
+        recordedBy: "autre-auteur",
+      }),
+    ).rejects.toBeInstanceOf(IdempotencyConflictError);
+
+    expect(await fx.repository.balanceOf(wallet)).toBe(700n);
+    const stored = await fx.prisma.ledgerEntry.findUniqueOrThrow({
+      where: { idempotencyKey: key },
+    });
+    expect(stored.recordedBy).toBe("int-spec");
   });
 
   it("deux demandes concurrentes avec la même clé ne produisent qu'une écriture", async () => {

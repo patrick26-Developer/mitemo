@@ -106,6 +106,31 @@ export function reverseEntry(original: JournalEntry, meta: ReversalInput): Journ
   });
 }
 
+/**
+ * Indique si des imputations annulent exactement d'autres imputations.
+ * La comparaison porte sur les couples (compte, montant) et leur multiplicité,
+ * jamais sur l'ordre des lignes : le rang d'une imputation est une présentation.
+ * @param original Imputations de l'écriture d'origine.
+ * @param reversal Imputations de la contre-écriture.
+ * @returns `true` si chaque ligne de `reversal` est l'opposé exact d'une ligne
+ *   de `original`, avec le même nombre d'occurrences.
+ */
+export function negatesExactly(
+  original: readonly PostingLine[],
+  reversal: readonly PostingLine[],
+): boolean {
+  const originalKeys = original.map((line) => postingKey(line.accountId, line.amount)).sort();
+  const reversalKeys = reversal.map((line) => postingKey(line.accountId, -line.amount)).sort();
+  return (
+    originalKeys.length === reversalKeys.length &&
+    originalKeys.every((key, index) => key === reversalKeys[index])
+  );
+}
+
+function postingKey(accountId: string, amount: bigint): string {
+  return `${accountId}\u0000${amount.toString()}`;
+}
+
 function assertWellFormed(input: JournalEntryInput): void {
   if (input.id.trim().length === 0) throw new InvalidEntryError("Identifiant d'écriture vide");
   if (input.description.trim().length === 0) throw new InvalidEntryError("Libellé d'écriture vide");

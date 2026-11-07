@@ -1,11 +1,11 @@
-import { createHash } from "node:crypto";
+import { toAmountMinor } from "@mitemo/contracts";
 
 import { Prisma, type PrismaClient } from "../../../generated/prisma/client.js";
 import {
   TransactionRaceError,
   withTransactionRetry,
 } from "../../../shared/database/transaction-retry.js";
-import type { JournalEntry } from "../domain/journal-entry.js";
+import { negatesExactly, type JournalEntry, type PostingLine } from "../domain/journal-entry.js";
 import {
   InsufficientBalanceError,
   netChanges,
@@ -18,10 +18,12 @@ import {
   ClosedAccountError,
   EntryAlreadyReversedError,
   IdempotencyConflictError,
+  ReversalMismatchError,
   type LedgerRepository,
   type PostEntryCommand,
   type PostEntryResult,
 } from "../domain/ledger.repository.js";
+import { fingerprint } from "./ledger-entry-fingerprint.js";
 
 type Tx = Prisma.TransactionClient;
 
@@ -117,9 +119,7 @@ async function findReplay(
   const existing = await tx.ledgerEntry.findUnique({ where: { idempotencyKey } });
   if (existing === null) return undefined;
   if (existing.payloadHash !== payloadHash) {
-    throw new IdempotencyConflictError(
-      `Clé d'idempotence déjà utilisée pour un autre contenu : ${idempotencyKey}`,
-    );
+    throw new IdempotencyConflictError(`Clé d'idempotence réutilisée : ${idempotencyKey}`);
   }
   return { status: "REPLAYED", entryId: existing.id };
 }
@@ -127,7 +127,10 @@ async function findReplay(
 async function assertPostable(tx: Tx, entry: JournalEntry): Promise<void> {
   const changes = netChanges(entry);
   const kinds = await requireOpenAccounts(tx, [...changes.keys()]);
-  if (entry.reverses !== undefined) await assertNotReversed(tx, entry.reverses);
+  if (entry.reverses !== undefined) {
+    await assertNotReversed(tx, entry.reverses);
+    await assertReversalExact(tx, entry.reverses, entry.lines);
+  }
   for (const [accountId, change] of changes) {
     if (change >= 0n || !NON_NEGATIVE_KINDS.has(kinds.get(accountId) as LedgerAccountKind)) {
       continue;
@@ -153,6 +156,28 @@ async function assertNotReversed(tx: Tx, originalId: string): Promise<void> {
   const reversal = await tx.ledgerEntry.findUnique({ where: { reversesEntryId: originalId } });
   if (reversal !== null) {
     throw new EntryAlreadyReversedError(`Écriture déjà annulée : ${originalId}`);
+  }
+}
+
+async function assertReversalExact(
+  tx: Tx,
+  originalId: string,
+  reversalLines: readonly PostingLine[],
+): Promise<void> {
+  const original = await tx.ledgerEntry.findUnique({
+    where: { id: originalId },
+    select: { lines: { select: { accountId: true, amount: true } } },
+  });
+  // Une écriture d'origine absente est refusée par la clé étrangère à l'insertion.
+  if (original === null) return;
+  const originalLines = original.lines.map((line) => ({
+    accountId: line.accountId,
+    amount: toAmountMinor(line.amount),
+  }));
+  if (!negatesExactly(originalLines, reversalLines)) {
+    throw new ReversalMismatchError(
+      `La contre-écriture n'annule pas exactement l'écriture ${originalId}`,
+    );
   }
 }
 
@@ -208,25 +233,6 @@ async function sumBalance(client: Tx | PrismaClient, accountId: string): Promise
 }
 
 /**
- * Empreinte du contenu d'une demande, sans l'identifiant d'écriture : une
- * demande rejouée reçoit souvent un nouvel identifiant, pas un nouveau contenu.
- * @param command Demande d'enregistrement.
- * @returns Empreinte SHA-256 hexadécimale.
- */
-function fingerprint(command: PostEntryCommand): string {
-  const { entry } = command;
-  const canonical = JSON.stringify({
-    operationRef: command.operationRef,
-    settlementMode: command.settlementMode,
-    description: entry.description,
-    occurredAt: entry.occurredAt,
-    reverses: entry.reverses ?? null,
-    lines: entry.lines.map((line) => [line.accountId, line.amount.toString()]),
-  });
-  return createHash("sha256").update(canonical).digest("hex");
-}
-
-/**
  * Traduit les refus de la base, ultime garde-fou, en erreurs du domaine.
  * @param error Erreur levée par la transaction.
  * @returns L'erreur du domaine correspondante, ou l'erreur d'origine.
@@ -237,6 +243,9 @@ function translateDatabaseError(error: unknown): unknown {
   }
   if (mentions(error, "LEDGER_ACCOUNT_CLOSED")) {
     return new ClosedAccountError("Compte clôturé", { cause: error });
+  }
+  if (mentions(error, "LEDGER_REVERSAL_MISMATCH")) {
+    return new ReversalMismatchError("Contre-écriture inexacte", { cause: error });
   }
   if (mentions(error, "reverses_entry_id")) {
     return new EntryAlreadyReversedError("Écriture déjà annulée", { cause: error });

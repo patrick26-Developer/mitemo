@@ -20,15 +20,19 @@ export interface PostEntryCommand {
   readonly idempotencyKey: string;
   /** Opération métier à l'origine de l'écriture, par exemple « funding:<id> ». */
   readonly operationRef: string;
-  /** Auteur de l'enregistrement : utilisateur, simulateur ou planificateur. */
+  /**
+   * Auteur de l'enregistrement : utilisateur, simulateur ou planificateur.
+   * Fait partie de l'empreinte d'idempotence : une même clé présentée par un
+   * autre auteur est un conflit, jamais un rejeu silencieux.
+   */
   readonly recordedBy: string;
   readonly settlementMode: SettlementMode;
 }
 
 /**
  * Résultat d'un enregistrement. `REPLAYED` signale une demande déjà traitée
- * avec la même clé et le même contenu : rien n'a été écrit une seconde fois,
- * et `entryId` est celui de l'écriture d'origine.
+ * avec la même clé, le même contenu et le même auteur : rien n'a été écrit une
+ * seconde fois, et `entryId` est celui de l'écriture d'origine.
  */
 export interface PostEntryResult {
   readonly status: "RECORDED" | "REPLAYED";
@@ -48,6 +52,11 @@ export class EntryAlreadyReversedError extends Error {
 /** Levée quand une imputation vise un compte clôturé. */
 export class ClosedAccountError extends Error {
   override readonly name = "ClosedAccountError";
+}
+
+/** Levée quand une contre-écriture n'inverse pas exactement les lignes de l'originale. */
+export class ReversalMismatchError extends Error {
+  override readonly name = "ReversalMismatchError";
 }
 
 /**

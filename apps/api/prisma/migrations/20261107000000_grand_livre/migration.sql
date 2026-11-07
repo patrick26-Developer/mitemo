@@ -61,7 +61,8 @@ ALTER TABLE "ledger_posting_line" ADD CONSTRAINT "ledger_posting_line_account_id
 
 -- ===========================================================================
 -- Garanties du grand livre que Prisma ne sait pas exprimer (issue #6).
--- Chaque garantie est vérifiée par src/features/ledger/infrastructure/ledger.int-spec.ts.
+-- Chaque garantie est vérifiée par les tests d'intégration du grand livre
+-- (src/features/ledger/infrastructure/ledger-*.int-spec.ts).
 -- Les messages commencent par un code stable (LEDGER_...) lu par l'adaptateur.
 -- ===========================================================================
 
@@ -172,6 +173,59 @@ CREATE CONSTRAINT TRIGGER "ledger_entry_balanced" AFTER INSERT ON "ledger_entry"
   DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION "ledger_check_entry_balanced"();
 CREATE CONSTRAINT TRIGGER "ledger_posting_line_balanced" AFTER INSERT ON "ledger_posting_line"
   DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION "ledger_check_entry_balanced"();
+
+-- Contre-écritures exactes -----------------------------------------------------
+-- Une contre-écriture annule chaque ligne de l'originale : mêmes comptes,
+-- montants opposés, même multiplicité. L'ordre des lignes n'est pas comptable.
+-- Différé : les lignes des deux écritures peuvent être insérées dans n'importe
+-- quel ordre au sein d'une même transaction.
+
+CREATE FUNCTION "ledger_check_reversal_exact"() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  reversal_id TEXT;
+  original_id TEXT;
+  mismatch BIGINT;
+BEGIN
+  IF TG_TABLE_NAME = 'ledger_entry' THEN
+    reversal_id := NEW."id";
+    original_id := NEW."reverses_entry_id";
+  ELSE
+    reversal_id := NEW."entry_id";
+    SELECT "reverses_entry_id" INTO original_id
+      FROM "ledger_entry" WHERE "id" = reversal_id;
+    -- Ligne ajoutée à l'écriture d'origine : retrouver sa contre-écriture.
+    IF original_id IS NULL THEN
+      original_id := reversal_id;
+      SELECT "id" INTO reversal_id
+        FROM "ledger_entry" WHERE "reverses_entry_id" = original_id;
+    END IF;
+  END IF;
+  IF reversal_id IS NULL OR original_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+  SELECT count(*) INTO mismatch FROM (
+    (SELECT "account_id", "amount" FROM "ledger_posting_line" WHERE "entry_id" = reversal_id
+     EXCEPT ALL
+     SELECT "account_id", -"amount" FROM "ledger_posting_line" WHERE "entry_id" = original_id)
+    UNION ALL
+    (SELECT "account_id", -"amount" FROM "ledger_posting_line" WHERE "entry_id" = original_id
+     EXCEPT ALL
+     SELECT "account_id", "amount" FROM "ledger_posting_line" WHERE "entry_id" = reversal_id)
+  ) AS differences;
+  IF mismatch <> 0 THEN
+    RAISE EXCEPTION 'LEDGER_REVERSAL_MISMATCH: la contre-écriture % n''annule pas exactement %',
+      reversal_id, original_id;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+CREATE CONSTRAINT TRIGGER "ledger_entry_reversal_exact" AFTER INSERT ON "ledger_entry"
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
+  WHEN (NEW."reverses_entry_id" IS NOT NULL)
+  EXECUTE FUNCTION "ledger_check_reversal_exact"();
+CREATE CONSTRAINT TRIGGER "ledger_posting_line_reversal_exact" AFTER INSERT ON "ledger_posting_line"
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION "ledger_check_reversal_exact"();
 
 -- Soldes non négatifs vérifiés en fin de transaction -----------------------------
 -- Doit rester identique à NON_NEGATIVE_KINDS (ledger-book.ts). En SERIALIZABLE, la

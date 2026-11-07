@@ -119,3 +119,37 @@ export async function fundedWallet(
   await fixture.repository.post(command(transfer(clearing, wallet, amount)));
   return { wallet, clearing };
 }
+
+/** Imputations et annulation éventuelle d'une écriture insérée en SQL direct. */
+export interface RawEntryData {
+  readonly lines: readonly [string, bigint][];
+  readonly reversesEntryId?: string | null;
+}
+
+/**
+ * Insère une écriture et ses imputations en SQL direct, sans passer par le
+ * dépôt : les tests de garanties prouvent ainsi que la base elle-même refuse.
+ * @param fixture Connexion de test.
+ * @param id Identifiant de l'écriture.
+ * @param data Imputations et écriture annulée, le cas échéant.
+ * @param data.lines Couples (compte, montant signé).
+ * @param data.reversesEntryId Écriture annulée, le cas échéant.
+ */
+export async function insertRawEntry(
+  fixture: LedgerFixture,
+  id: string,
+  { lines, reversesEntryId }: RawEntryData,
+): Promise<void> {
+  await fixture.prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`
+      INSERT INTO ledger_entry (id, idempotency_key, payload_hash, operation_ref, description,
+        occurred_at, recorded_by, settlement_mode, reverses_entry_id)
+      VALUES (${id}, ${id}, 'brut', 'brut', 'Insertion SQL directe', now(), 'int-spec', 'SIMULATED',
+        ${reversesEntryId ?? null})`;
+    for (const [index, [accountId, amount]] of lines.entries()) {
+      await tx.$executeRaw`
+        INSERT INTO ledger_posting_line (entry_id, line_no, account_id, amount)
+        VALUES (${id}, ${index + 1}, ${accountId}, ${amount})`;
+    }
+  });
+}
