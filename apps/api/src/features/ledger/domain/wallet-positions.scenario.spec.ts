@@ -6,12 +6,14 @@ import { createJournalEntry } from "./journal-entry.js";
 import { InsufficientBalanceError, LedgerBook } from "./ledger-book.js";
 
 // Vérifie, sur le grand livre, la définition comptable des soldes du
-// portefeuille publiée dans @mitemo/contracts (wallet.ts) :
+// portefeuille retenue pour le sprint (contrat wallet, apporté par #85) :
 // - disponible = compte WALLET_USER de l'utilisateur ;
 // - affecté    = caisses de SES cartes de pointage personnelles ;
 // - bloqué     = son compte de garantie (aucune garantie dans la démonstration) ;
 // - en attente = approvisionnements non confirmés : aucune écriture, donc hors grand livre.
 // Chaque solde lit des comptes distincts : aucun montant ne compte deux fois.
+// Le contrat wallet correspondant est apporté par #85 dans packages/contracts ;
+// ce test n'en dépend pas, afin de rester exécutable sans cette branche.
 
 const AT = toIsoDateTime("2026-11-08T09:00:00.000Z");
 

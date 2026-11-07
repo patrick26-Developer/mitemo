@@ -38,7 +38,7 @@ Chaque développeur travaille sur sa propre branche Neon, jamais sur une base pa
    TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:55432/mitemo_test pnpm --filter api test:int
    ```
 
-   `docker rm -f mitemo-test-pg` supprime la base de test. La mise en place globale (`test/int/global-setup.ts`) applique les migrations avec `prisma migrate deploy`, qui n'efface rien.
+   `docker rm -f mitemo-test-pg` supprime la base de test. La mise en place globale (`test/int/global-setup.ts`) applique les migrations avec `prisma migrate deploy`, qui n'efface rien. La couverture de l'adaptateur Prisma est mesurée séparément par `pnpm --filter api test:int:ci` et publiée dans `coverage-int/`.
 
 ## Scripts
 
@@ -48,6 +48,7 @@ Chaque développeur travaille sur sa propre branche Neon, jamais sur une base pa
 | `pnpm --filter api test:ci`        | Tests unitaires avec seuils de couverture               |
 | `pnpm --filter api test:e2e`       | Tests de bout en bout (application complète, Supertest) |
 | `pnpm --filter api test:int`       | Tests d'intégration contre une vraie base PostgreSQL    |
+| `pnpm --filter api test:int:ci`    | Idem, avec couverture de l'adaptateur PostgreSQL        |
 | `pnpm --filter api typecheck`      | Vérification TypeScript                                 |
 | `pnpm --filter api build`          | Génère le client Prisma puis compile dans `dist/`       |
 | `pnpm --filter api prisma:migrate` | Crée et applique une migration (base de développement)  |
@@ -69,13 +70,15 @@ prisma/              schema.prisma et migrations
 test/                tests e2e
 ```
 
-Feature existante : `health` (`GET /health`, sonde de vie).
+Features existantes : `health` (`GET /health`, sonde de vie) et `ledger`
+(grand livre en partie double : domaine, persistance PostgreSQL et garanties
+en base ; aucun endpoint HTTP à ce stade).
 
 ## Règles propres à l'API
 
 - Montants en `BIGINT` côté base et `bigint` côté code, jamais de flottant. En JSON, un montant est une chaîne d'entier (`@mitemo/contracts`).
-- Aucune écriture du grand livre n'est modifiée ni supprimée : une correction est une contre-écriture.
-- Toute écriture porte une clé d'idempotence.
+- Aucune écriture du grand livre n'est modifiée ni supprimée : une correction est une contre-écriture qui annule exactement les lignes de l'originale.
+- Toute écriture porte une clé d'idempotence. Un rejeu doit avoir le même contenu et le même auteur ; une clé réutilisée par un autre auteur est un conflit.
 - Une migration fusionnée n'est jamais modifiée.
 - Ne jamais journaliser un PIN, un OTP ou un numéro complet.
 

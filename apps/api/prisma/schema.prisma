@@ -14,7 +14,7 @@ datasource db {
 // Grand livre (issue #6). Aucun solde n'est stocké : il se calcule toujours à
 // partir des imputations. Les garanties que Prisma ne sait pas exprimer
 // (CHECK, interdiction de modifier, équilibre vérifié en fin de transaction)
-// sont dans la migration SQL, et testées dans ledger.int-spec.ts.
+// sont dans la migration SQL, et testées par les ledger-*.int-spec.ts.
 // ---------------------------------------------------------------------------
 
 /// Compte du grand livre. Ne se supprime jamais ; peut seulement être clôturé.
