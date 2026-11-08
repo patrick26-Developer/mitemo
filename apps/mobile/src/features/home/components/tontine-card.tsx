@@ -18,7 +18,11 @@ export interface TontineCardProps {
   readonly index: number;
 }
 
-/** Corps de la carte de tontine. */
+/**
+ * Affiche le contenu de la carte de tontine.
+ * @param props Props du corps.
+ * @returns Le contenu de la carte.
+ */
 function TontineCardBody(props: { readonly item: HomeTontine }) {
   const { item } = props;
 

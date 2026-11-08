@@ -13,7 +13,11 @@ export interface SavingsCardProps {
   readonly index: number;
 }
 
-/** Corps de la carte de caisse. */
+/**
+ * Affiche le contenu de la carte de caisse.
+ * @param props Props du corps.
+ * @returns Le contenu de la carte.
+ */
 function SavingsCardBody(props: { readonly item: HomeSavings }) {
   const { item } = props;
 
