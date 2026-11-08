@@ -2,8 +2,8 @@ import type { LucideIcon } from "lucide-react-native";
 import { Pressable, StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 
-import { useTabItemAnimation } from "../hooks/use-tab-item-animation";
-import { PALETTE } from "../theme/palette";
+import { useTabItemAnimation } from "@/shared/hooks/use-tab-item-animation";
+import { PALETTE } from "@/shared/theme/palette";
 
 /** Props d'un onglet de la barre de navigation. */
 export interface TabItemProps {

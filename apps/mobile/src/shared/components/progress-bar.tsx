@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { PALETTE } from "../theme/palette";
+import { PALETTE } from "@/shared/theme/palette";
 
 /** Hauteur de la barre, en points. */
 const TRACK_HEIGHT = 18;

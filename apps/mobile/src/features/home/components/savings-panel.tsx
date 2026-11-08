@@ -1,11 +1,11 @@
 import { CalendarDays, ShieldCheck } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-import { BarcodeStrip } from "../../../shared/components/barcode-strip";
-import { formatAmount } from "../../../shared/format/format-amount";
-import { HAIRLINE_WIDTH } from "../../../shared/theme/hairline-width";
-import { PALETTE } from "../../../shared/theme/palette";
-import type { HomeSavings } from "../model/home-content";
+import { BarcodeStrip } from "@/shared/components/barcode-strip";
+import { formatAmount } from "@/shared/format/format-amount";
+import { HAIRLINE_WIDTH } from "@/shared/theme/hairline-width";
+import { PALETTE } from "@/shared/theme/palette";
+import type { HomeSavings } from "./model/home-content";
 
 /** Props du panneau de caisse. */
 export interface SavingsPanelProps {

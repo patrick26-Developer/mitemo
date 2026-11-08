@@ -1,8 +1,8 @@
 import { Bell, Info, Search } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
-import { PALETTE } from "../../../shared/theme/palette";
-import { HOME_USER } from "../model/home-content";
+import { PALETTE } from "@/shared/theme/palette";
+import { HOME_USER } from "./model/home-content";
 
 /**
  * Affiche la salutation, l'avatar du membre et les actions rapides.

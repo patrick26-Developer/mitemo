@@ -1,9 +1,9 @@
 import { router } from "expo-router";
 import { FlatList, View } from "react-native";
 
-import { SectionTitle } from "../../../shared/components/section-title";
-import { HOME_SAVINGS } from "../model/home-content";
-import { CARD_GAP, CARD_WIDTH } from "../model/home-layout";
+import { SectionTitle } from "@/shared/components/section-title";
+import { HOME_SAVINGS } from "./model/home-content";
+import { CARD_GAP, CARD_WIDTH } from "./model/home-layout";
 import { SavingsCard } from "./savings-card";
 
 /**

@@ -9,7 +9,7 @@ import {
 } from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
 
-import { PALETTE } from "../theme/palette";
+import { PALETTE } from "@/shared/theme/palette";
 
 const COLLAPSED_WIDTH = 56;
 const EXPANDED_WIDTH = 132;

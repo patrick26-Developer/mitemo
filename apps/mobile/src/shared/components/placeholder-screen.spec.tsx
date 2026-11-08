@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react-native";
 
-import { renderWithSafeArea } from "../testing/render-with-safe-area";
+import { renderWithSafeArea } from "@/shared/testing/render-with-safe-area";
 import { PlaceholderScreen } from "./placeholder-screen";
 
 describe("PlaceholderScreen", () => {

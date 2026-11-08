@@ -1,13 +1,13 @@
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { Users } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import { BarcodeStrip } from "../../../shared/components/barcode-strip";
-import { formatAmount } from "../../../shared/format/format-amount";
-import { PALETTE } from "../../../shared/theme/palette";
-import type { HomeTontine } from "../model/home-content";
-import { CARD_WIDTH } from "../model/home-layout";
+import { BarcodeStrip } from "@/shared/components/barcode-strip";
+import { formatAmount } from "@/shared/format/format-amount";
+import { PALETTE } from "@/shared/theme/palette";
+import type { HomeTontine } from "./model/home-content";
+import { CARD_WIDTH } from "./model/home-layout";
 import { RadialCard } from "./radial-card";
 import { TontineRound } from "./tontine-round";
 
@@ -74,11 +74,9 @@ export function TontineCard(props: TontineCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
-      <Link href={`/tontine/${item.id}`} asChild>
-        <View>
-          <TontineCardBody item={item} />
-        </View>
-      </Link>
+      <Pressable onPress={() => router.push(`/tontine/${item.id}`)}>
+        <TontineCardBody item={item} />
+      </Pressable>
     </Animated.View>
   );
 }
