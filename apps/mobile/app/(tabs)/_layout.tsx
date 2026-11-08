@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { AnimatedTabBar } from "../../shared/components/animated-tab-bar";
+import { AnimatedTabBar } from "../../src/shared/components/animated-tab-bar";
 
 /**
  * Navigation par onglets.

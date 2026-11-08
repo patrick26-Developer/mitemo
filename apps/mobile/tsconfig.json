@@ -2,13 +2,8 @@
   "extends": ["../../tsconfig.base.json", "expo/tsconfig.base"],
   "compilerOptions": {
     "declaration": false,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@/features/*": ["src/features/*"],
-      "@/shared/*": ["src/shared/*"]
-    },
+    "ignoreDeprecations": "6.0",
     "types": ["jest", "expo/types", "uniwind/types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-import { ProgressBar } from "../../shared/components/progress-bar";
+import { ProgressBar } from "../../../shared/components/progress-bar";
 
 /** Props de la progression d'une tontine. */
 export interface TontineRoundProps {

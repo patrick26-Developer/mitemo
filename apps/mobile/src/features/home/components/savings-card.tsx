@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import type { HomeSavings } from "./model/home-content";
-import { CARD_WIDTH } from "./model/home-layout";
+import type { HomeSavings } from "../model/home-content";
+import { CARD_WIDTH } from "../model/home-layout";
 import { SavingsPanel } from "./savings-panel";
 
 /** Props de la carte de caisse. */
@@ -23,7 +23,10 @@ function SavingsCardBody(props: { readonly item: HomeSavings }) {
   const { item } = props;
 
   return (
-    <View className="rounded-[20px] p-0.5" style={{ width: CARD_WIDTH, backgroundColor: item.tint }}>
+    <View
+      className="rounded-[20px] p-0.5"
+      style={{ width: CARD_WIDTH, backgroundColor: item.tint }}
+    >
       <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
         {item.title}
       </Text>
@@ -42,7 +45,7 @@ export function SavingsCard(props: SavingsCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
-      <Pressable onPress={() => router.push(`/caisse/${item.id}`)}>
+      <Pressable onPress={() => router.push(`/savings-detail/${item.id}`)}>
         <SavingsCardBody item={item} />
       </Pressable>
     </Animated.View>
