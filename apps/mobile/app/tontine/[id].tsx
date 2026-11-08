@@ -1,9 +1,13 @@
-import { PlaceholderScreen } from "../../src/shared/components/placeholder-screen";
+import { useLocalSearchParams } from "expo-router";
+
+import { TontineDetailScreen } from "../../src/features/tontines";
 
 /**
- * Écran de détail d'une tontine.
+ * Route de détail d'une tontine.
  * @returns L'écran de détail de la tontine.
  */
 export default function TontineDetailRoute() {
-  return <PlaceholderScreen title="Détail de la tontine" />;
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  return <TontineDetailScreen id={id} />;
 }

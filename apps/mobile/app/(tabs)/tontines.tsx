@@ -1,9 +1,9 @@
-import { PlaceholderScreen } from "../../src/shared/components/placeholder-screen";
+import { TontinesScreen } from "../../src/features/tontines";
 
 /**
  * Route de l'onglet Tontines.
  * @returns L'écran des tontines.
  */
 export default function TontinesRoute() {
-  return <PlaceholderScreen title="Tontines" />;
+  return <TontinesScreen />;
 }

@@ -20,6 +20,8 @@
   --color-muted: #4a5168;
   /* Texte courant sur fond clair. */
   --color-muted-strong: #262a36;
+  /* Encre d'une action destructive, comme la déconnexion. */
+  --color-danger: #b42318;
   /* Filet de séparation de la barre d'onglets. */
   --color-hairline: #e5e5e5;
   /* Texte atténué sur fond sombre. */

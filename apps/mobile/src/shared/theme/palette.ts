@@ -12,6 +12,7 @@ export const PALETTE = {
   tabInk: "#0B1B33",
   tabActive: "#DEECF7",
   muted: "#4A5168",
+  danger: "#B42318",
   white: "#FFFFFF",
   onDarkFaint: "rgba(255,255,255,0.6)",
   barcodeOnBrand: "rgba(255,255,255,0.35)",

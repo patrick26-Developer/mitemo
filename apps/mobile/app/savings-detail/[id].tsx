@@ -1,9 +1,13 @@
-import { PlaceholderScreen } from "../../src/shared/components/placeholder-screen";
+import { useLocalSearchParams } from "expo-router";
+
+import { SavingsDetailScreen } from "../../src/features/savings";
 
 /**
- * Écran de détail d'une caisse.
+ * Route de détail d'une caisse.
  * @returns L'écran de détail de la caisse.
  */
 export default function SavingsDetailRoute() {
-  return <PlaceholderScreen title="Détail de la caisse" />;
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  return <SavingsDetailScreen id={id} />;
 }
