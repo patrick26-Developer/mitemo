@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+  /* Bleu de marque, fond du bandeau de l'accueil. */
+  --color-brand: #083edf;
+  /* Voile du bleu de marque, fond de la barre de progression. */
+  --color-brand-veil: rgba(8, 62, 223, 0.125);
+  /* Encre des textes sur fond clair. */
+  --color-ink: #0e1423;
+  /* Fond des cartes sombres. */
+  --color-card: #0e1423;
+  /* Encre de la barre d'onglets. */
+  --color-tab-ink: #0b1b33;
+  /* Fond de la pastille de l'onglet actif. */
+  --color-tab-active: #deecf7;
+  /* Vert de l'avatar du membre. */
+  --color-avatar: #278734;
+  /* Texte secondaire sur fond clair. */
+  --color-muted: #4a5168;
+  /* Texte courant sur fond clair. */
+  --color-muted-strong: #262a36;
+  /* Filet de séparation de la barre d'onglets. */
+  --color-hairline: #e5e5e5;
+  /* Texte atténué sur fond sombre. */
+  --color-on-dark-muted: rgba(255, 255, 255, 0.75);
+  /* Texte le plus discret sur fond sombre. */
+  --color-on-dark-faint: rgba(255, 255, 255, 0.6);
+  /* Devise et valeurs secondaires sur fond sombre. */
+  --color-on-dark-soft: rgba(255, 255, 255, 0.85);
+  /* Filet de séparation sur fond sombre. */
+  --color-on-dark-line: rgba(255, 255, 255, 0.45);
+  /* Filet discret entre deux blocs sombres. */
+  --color-on-dark-divider: rgba(255, 255, 255, 0.25);
+  /* Fond translucide de la pastille d'actions du bandeau. */
+  --color-on-dark-glass: rgba(255, 255, 255, 0.16);
+  /* Bordure translucide de la pastille d'actions du bandeau. */
+  --color-on-dark-glass-border: rgba(255, 255, 255, 0.063);
+  /* Bordure de la carte de tontine. */
+  --color-card-border: rgba(190, 196, 214, 0.5);
+  /* Bordure du bandeau dégradé d'une tontine. */
+  --color-header-border: #aebff4;
+  /* Bordure de la règle de cotisation d'une tontine. */
+  --color-rule-border: rgba(88, 93, 106, 0.376);
+  /* Bordure du panneau sombre d'une caisse. */
+  --color-savings-border: rgba(120, 140, 240, 0.6);
+}
