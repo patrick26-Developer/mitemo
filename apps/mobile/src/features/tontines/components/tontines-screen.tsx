@@ -19,8 +19,8 @@ export function TontinesScreen() {
         data={DEMO_TONTINES}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="items-center gap-3 pb-6"
-        renderItem={({ item, index }) => <TontineCard item={item} index={index} />}
+        contentContainerClassName="gap-3 px-4 pb-6"
+        renderItem={({ item, index }) => <TontineCard item={item} index={index} width="100%" />}
       />
     </View>
   );

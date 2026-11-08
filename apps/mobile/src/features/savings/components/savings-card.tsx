@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import type { DimensionValue } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import type { DemoSavings } from "../../../shared/demo/savings";
@@ -11,6 +12,8 @@ export interface SavingsCardProps {
   readonly item: DemoSavings;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
+  /** Largeur de la carte ; largeur de la home par défaut. */
+  readonly width?: DimensionValue;
 }
 
 /**
@@ -23,10 +26,7 @@ function SavingsCardBody(props: { readonly item: DemoSavings }) {
   const { item } = props;
 
   return (
-    <View
-      className="rounded-[20px] p-0.5"
-      style={{ width: CARD_WIDTH, backgroundColor: item.tint }}
-    >
+    <View className="rounded-[20px] p-0.5" style={{ backgroundColor: item.tint }}>
       <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
         {item.title}
       </Text>
@@ -37,14 +37,14 @@ function SavingsCardBody(props: { readonly item: DemoSavings }) {
 
 /**
  * Affiche une caisse d'épargne et son avancement vers l'objectif.
- * @param props Caisse à afficher et rang dans la liste.
+ * @param props Caisse à afficher, rang dans la liste et largeur.
  * @returns La carte de caisse.
  */
 export function SavingsCard(props: SavingsCardProps) {
-  const { item, index } = props;
+  const { item, index, width = CARD_WIDTH } = props;
 
   return (
-    <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
+    <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)} style={{ width }}>
       <Pressable onPress={() => router.push(`/savings-detail/${item.id}`)}>
         <SavingsCardBody item={item} />
       </Pressable>
