@@ -18,6 +18,47 @@ export interface TontineCardProps {
   readonly index: number;
 }
 
+/** Corps de la carte de tontine. */
+function TontineCardBody(props: { readonly item: HomeTontine }) {
+  const { item } = props;
+
+  return (
+    <View
+      className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2"
+      style={{ width: CARD_WIDTH }}
+    >
+      <RadialCard
+        colors={item.headerColors}
+        className="h-[84px] items-center justify-center overflow-hidden rounded-[14px] border border-header-border px-3 py-2"
+      >
+        <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
+          {item.name}
+        </Text>
+      </RadialCard>
+
+      <View className="gap-6 px-4 pb-4 pt-1">
+        <View className="flex-row items-center">
+          <Users size={16} color={PALETTE.muted} />
+          <Text className="ml-2 text-[16px] text-muted-strong">{item.members} membres</Text>
+        </View>
+
+        <View className="self-start rounded-[18px] border border-rule-border px-3 py-1.5">
+          <Text className="text-[16px] text-ink">
+            {formatAmount(item.amount)} FCFA {item.frequency}
+          </Text>
+        </View>
+
+        <TontineRound round={item.round} totalRounds={item.totalRounds} />
+        <BarcodeStrip color={PALETTE.barcodeOnCard} />
+
+        <Text className="text-[13px] text-muted">
+          Tour de <Text className="font-bold text-ink">{item.currentBeneficiary}</Text>
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 /**
  * Affiche une tontine : règle du groupe et avancement du cycle.
  * @param props Tontine à afficher et rang dans la liste.
@@ -33,39 +74,7 @@ export function TontineCard(props: TontineCardProps) {
         accessibilityRole="button"
         accessibilityLabel={item.name}
       >
-        <View
-          className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2"
-          style={{ width: CARD_WIDTH }}
-        >
-          <RadialCard
-            colors={item.headerColors}
-            className="h-[84px] items-center justify-center overflow-hidden rounded-[14px] border border-header-border px-3 py-2"
-          >
-            <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
-              {item.name}
-            </Text>
-          </RadialCard>
-
-          <View className="gap-6 px-4 pb-4 pt-1">
-            <View className="flex-row items-center">
-              <Users size={16} color={PALETTE.muted} />
-              <Text className="ml-2 text-[16px] text-muted-strong">{item.members} membres</Text>
-            </View>
-
-            <View className="self-start rounded-[18px] border border-rule-border px-3 py-1.5">
-              <Text className="text-[16px] text-ink">
-                {formatAmount(item.amount)} FCFA {item.frequency}
-              </Text>
-            </View>
-
-            <TontineRound round={item.round} totalRounds={item.totalRounds} />
-            <BarcodeStrip color={PALETTE.barcodeOnCard} />
-
-            <Text className="text-[13px] text-muted">
-              Tour de <Text className="font-bold text-ink">{item.currentBeneficiary}</Text>
-            </Text>
-          </View>
-        </View>
+        <TontineCardBody item={item} />
       </Pressable>
     </Animated.View>
   );

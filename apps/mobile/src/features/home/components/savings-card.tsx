@@ -13,6 +13,20 @@ export interface SavingsCardProps {
   readonly index: number;
 }
 
+/** Corps de la carte de caisse. */
+function SavingsCardBody(props: { readonly item: HomeSavings }) {
+  const { item } = props;
+
+  return (
+    <View className="rounded-[20px] p-0.5" style={{ width: CARD_WIDTH, backgroundColor: item.tint }}>
+      <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
+        {item.title}
+      </Text>
+      <SavingsPanel item={item} />
+    </View>
+  );
+}
+
 /**
  * Affiche une caisse d'épargne et son avancement vers l'objectif.
  * @param props Caisse à afficher et rang dans la liste.
@@ -28,15 +42,7 @@ export function SavingsCard(props: SavingsCardProps) {
         accessibilityRole="button"
         accessibilityLabel={item.title}
       >
-        <View
-          className="rounded-[20px] p-0.5"
-          style={{ width: CARD_WIDTH, backgroundColor: item.tint }}
-        >
-          <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
-            {item.title}
-          </Text>
-          <SavingsPanel item={item} />
-        </View>
+        <SavingsCardBody item={item} />
       </Pressable>
     </Animated.View>
   );
