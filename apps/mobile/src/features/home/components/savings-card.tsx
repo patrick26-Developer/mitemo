@@ -43,7 +43,7 @@ export function SavingsCard(props: SavingsCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
       <Pressable
-        onPress={() => router.push(`/savings/${item.id}`)}
+        onPress={() => router.push(`/caisse/${item.id}`)}
         accessibilityRole="button"
         accessibilityLabel={item.title}
       >

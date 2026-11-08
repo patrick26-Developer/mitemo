@@ -75,7 +75,7 @@ export function TontineCard(props: TontineCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
       <Pressable
-        onPress={() => router.push(`/tontines/${item.id}`)}
+        onPress={() => router.push(`/tontine/${item.id}`)}
         accessibilityRole="button"
         accessibilityLabel={item.name}
       >
