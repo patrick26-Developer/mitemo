@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { FlatList, View } from "react-native";
 
 import { SectionTitle } from "../../../shared/components/section-title";
@@ -12,7 +13,7 @@ import { SavingsCard } from "./savings-card";
 export function SavingsSection() {
   return (
     <View className="mt-4 flex-col gap-3">
-      <SectionTitle label="Mes caisses" />
+      <SectionTitle label="Mes caisses" onPress={() => router.push("/savings")} />
       <FlatList
         data={HOME_SAVINGS}
         keyExtractor={(item) => item.id}
