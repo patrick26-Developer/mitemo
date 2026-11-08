@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HatchPattern } from "@/shared/components/hatch-pattern";
+import { HatchPattern } from "../../shared/components/hatch-pattern";
 import { HomeHero } from "./home-hero";
 import { SavingsSection } from "./savings-section";
 import { TontinesSection } from "./tontines-section";

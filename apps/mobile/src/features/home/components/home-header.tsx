@@ -1,7 +1,7 @@
 import { Bell, Info, Search } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
-import { PALETTE } from "@/shared/theme/palette";
+import { PALETTE } from "../../shared/theme/palette";
 import { HOME_USER } from "./model/home-content";
 
 /**

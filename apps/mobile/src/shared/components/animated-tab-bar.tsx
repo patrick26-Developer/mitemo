@@ -4,7 +4,7 @@ import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HAIRLINE_WIDTH } from "@/shared/theme/hairline-width";
+import { HAIRLINE_WIDTH } from "../../shared/theme/hairline-width";
 import { TabItem } from "./tab-item";
 
 /** Libellé et icône de chaque onglet, par nom de route Expo Router. */

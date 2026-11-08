@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react-native";
 import { Pressable, Text } from "react-native";
 
-import { PALETTE } from "@/shared/theme/palette";
+import { PALETTE } from "../../shared/theme/palette";
 
 /** Teinte du titre, choisie selon le fond sur lequel il est posé. */
 export type SectionTitleTone = "light" | "dark";

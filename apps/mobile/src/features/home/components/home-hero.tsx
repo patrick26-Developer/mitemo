@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 
-import { PALETTE } from "@/shared/theme/palette";
+import { PALETTE } from "../../shared/theme/palette";
 import { BalanceCard } from "./balance-card";
 import { HomeHeader } from "./home-header";
 

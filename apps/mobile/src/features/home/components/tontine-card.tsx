@@ -3,9 +3,9 @@ import { Users } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import { BarcodeStrip } from "@/shared/components/barcode-strip";
-import { formatAmount } from "@/shared/format/format-amount";
-import { PALETTE } from "@/shared/theme/palette";
+import { BarcodeStrip } from "../../shared/components/barcode-strip";
+import { formatAmount } from "../../shared/format/format-amount";
+import { PALETTE } from "../../shared/theme/palette";
 import type { HomeTontine } from "./model/home-content";
 import { CARD_WIDTH } from "./model/home-layout";
 import { RadialCard } from "./radial-card";

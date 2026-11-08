@@ -1,4 +1,4 @@
-import { PlaceholderScreen } from "@/shared/components/placeholder-screen";
+import { PlaceholderScreen } from "../../shared/components/placeholder-screen";
 
 /**
  * Route de l'onglet Profil.

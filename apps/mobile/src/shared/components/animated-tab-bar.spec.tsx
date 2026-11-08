@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 
-import { renderWithSafeArea } from "@/shared/testing/render-with-safe-area";
+import { renderWithSafeArea } from "../../shared/testing/render-with-safe-area";
 import { AnimatedTabBar } from "./animated-tab-bar";
 
 const ROUTES = [

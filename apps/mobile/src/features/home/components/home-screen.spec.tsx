@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react-native";
 
-import { renderWithSafeArea } from "@/shared/testing/render-with-safe-area";
+import { renderWithSafeArea } from "../../shared/testing/render-with-safe-area";
 import { HomeScreen } from "./home-screen";
 
 describe("HomeScreen", () => {

@@ -2,10 +2,10 @@ import { ShieldCheck } from "lucide-react-native";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import { BarcodeStrip } from "@/shared/components/barcode-strip";
-import { formatAmount } from "@/shared/format/format-amount";
-import { HAIRLINE_WIDTH } from "@/shared/theme/hairline-width";
-import { PALETTE } from "@/shared/theme/palette";
+import { BarcodeStrip } from "../../shared/components/barcode-strip";
+import { formatAmount } from "../../shared/format/format-amount";
+import { HAIRLINE_WIDTH } from "../../shared/theme/hairline-width";
+import { PALETTE } from "../../shared/theme/palette";
 import { HOME_BALANCE } from "./model/home-content";
 
 /** Durée de l'apparition de la carte, en millisecondes. */
