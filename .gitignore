@@ -20,6 +20,7 @@ web-build/
 
 # Tests
 coverage/
+coverage-int/
 playwright-report/
 test-results/
 

@@ -25,6 +25,11 @@ export default defineConfig({
         // vérifiée par prisma.service.int-spec.ts contre une vraie base, pas par
         // un test unitaire qui mockerait l'adaptateur Prisma sans rien prouver.
         "src/shared/database/prisma.service.ts",
+        // Adaptateurs Prisma : leur comportement (contraintes, déclencheurs, concurrence)
+        // n'a de sens que contre une vraie base. Ils sont couverts par leur fichier
+        // *.int-spec.ts, et leur couverture est mesurée séparément par `test:int:ci`
+        // dans coverage-int/, jamais par un mock.
+        "src/features/*/infrastructure/prisma-*.repository.ts",
       ],
       thresholds: {
         lines: 80,

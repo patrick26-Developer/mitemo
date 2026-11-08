@@ -72,6 +72,21 @@ describe("LedgerBook", () => {
     expect(book.balanceOf("clearing:mtn")).toBe(-1_000n);
   });
 
+  it.each(["SAVINGS_CARD_CAISSE", "RISTOURNE_CAISSE"] as const)(
+    "refuse qu'une caisse %s verse plus qu'elle n'a reçu",
+    (kind) => {
+      const book = bookWithWalletAndClearing();
+      book.openAccount({ id: "caisse:carte-1", kind });
+      book.post(transfer("e1", { from: "clearing:mtn", to: "wallet:grace", amount: 1_000n }));
+      book.post(transfer("e2", { from: "wallet:grace", to: "caisse:carte-1", amount: 500n }));
+
+      expect(() =>
+        book.post(transfer("e3", { from: "caisse:carte-1", to: "wallet:grace", amount: 501n })),
+      ).toThrow(InsufficientBalanceError);
+      expect(book.balanceOf("caisse:carte-1")).toBe(500n);
+    },
+  );
+
   it("refuse une écriture sur un compte inconnu, et n'écrit rien", () => {
     const book = bookWithWalletAndClearing();
 

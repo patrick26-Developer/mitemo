@@ -9,3 +9,68 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ---------------------------------------------------------------------------
+// Grand livre (issue #6). Aucun solde n'est stocké : il se calcule toujours à
+// partir des imputations. Les garanties que Prisma ne sait pas exprimer
+// (CHECK, interdiction de modifier, équilibre vérifié en fin de transaction)
+// sont dans la migration SQL, et testées par les ledger-*.int-spec.ts.
+// ---------------------------------------------------------------------------
+
+/// Compte du grand livre. Ne se supprime jamais ; peut seulement être clôturé.
+model LedgerAccount {
+  /// Identifiant stable, par exemple « wallet:<userId> ».
+  id       String              @id
+  /// Nature du compte, limitée par une contrainte CHECK à LEDGER_ACCOUNT_KINDS.
+  kind     String
+  openedAt DateTime            @default(now()) @map("opened_at") @db.Timestamptz(3)
+  /// Une fois renseignée, plus aucune imputation n'est acceptée sur le compte.
+  closedAt DateTime?           @map("closed_at") @db.Timestamptz(3)
+  lines    LedgerPostingLine[]
+
+  @@map("ledger_account")
+}
+
+/// Écriture du grand livre, immuable une fois enregistrée.
+model LedgerEntry {
+  id              String              @id
+  /// Clé d'idempotence : une même demande ne produit jamais deux écritures.
+  idempotencyKey  String              @unique @map("idempotency_key")
+  /// Empreinte du contenu, pour refuser une clé réutilisée avec un autre contenu.
+  payloadHash     String              @map("payload_hash")
+  /// Référence de l'opération métier à l'origine de l'écriture (ex. « funding:<id> »).
+  operationRef    String              @map("operation_ref")
+  description     String
+  /// Date métier de l'opération.
+  occurredAt      DateTime            @map("occurred_at") @db.Timestamptz(3)
+  /// Date d'enregistrement, fixée par la base.
+  recordedAt      DateTime            @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  /// Auteur de l'enregistrement (utilisateur, simulateur, planificateur).
+  recordedBy      String              @map("recorded_by")
+  /// Mode de règlement. Seul « SIMULATED » est accepté par la base (ADR 0005).
+  settlementMode  String              @map("settlement_mode")
+  /// Écriture annulée par celle-ci ; une écriture ne s'annule qu'une fois.
+  reversesEntryId String?             @unique @map("reverses_entry_id")
+  reverses        LedgerEntry?        @relation("Reversal", fields: [reversesEntryId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  reversedBy      LedgerEntry?        @relation("Reversal")
+  lines           LedgerPostingLine[]
+
+  @@index([operationRef])
+  @@map("ledger_entry")
+}
+
+/// Imputation d'une écriture sur un compte. Montant signé, jamais nul.
+model LedgerPostingLine {
+  entryId   String        @map("entry_id")
+  /// Rang de l'imputation dans l'écriture, à partir de 1.
+  lineNo    Int           @map("line_no") @db.SmallInt
+  accountId String        @map("account_id")
+  /// FCFA entiers ; positif = le solde du compte augmente.
+  amount    BigInt
+  entry     LedgerEntry   @relation(fields: [entryId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  account   LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([entryId, lineNo])
+  @@index([accountId])
+  @@map("ledger_posting_line")
+}
