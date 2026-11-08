@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import type { HomeSavings } from "../model/home-content";
@@ -22,15 +23,21 @@ export function SavingsCard(props: SavingsCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
-      <View
-        className="rounded-[20px] p-0.5"
-        style={{ width: CARD_WIDTH, backgroundColor: item.tint }}
+      <Pressable
+        onPress={() => router.push(`/savings/${item.id}`)}
+        accessibilityRole="button"
+        accessibilityLabel={item.title}
       >
-        <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
-          {item.title}
-        </Text>
-        <SavingsPanel item={item} />
-      </View>
+        <View
+          className="rounded-[20px] p-0.5"
+          style={{ width: CARD_WIDTH, backgroundColor: item.tint }}
+        >
+          <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
+            {item.title}
+          </Text>
+          <SavingsPanel item={item} />
+        </View>
+      </Pressable>
     </Animated.View>
   );
 }
