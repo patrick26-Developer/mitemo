@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "../../../shared/components/screen-header";
 import { DEMO_TONTINES } from "../../../shared/demo/tontines";
-import { TontineListItem } from "./tontine-list-item";
+import { TontineCard } from "./tontine-card";
 
 /**
  * Écran de la liste complète des tontines du membre.
@@ -19,8 +19,8 @@ export function TontinesScreen() {
         data={DEMO_TONTINES}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-3 px-4 pb-6"
-        renderItem={({ item }) => <TontineListItem item={item} />}
+        contentContainerClassName="items-center gap-3 pb-6"
+        renderItem={({ item, index }) => <TontineCard item={item} index={index} />}
       />
     </View>
   );

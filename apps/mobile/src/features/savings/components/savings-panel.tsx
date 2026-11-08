@@ -5,11 +5,11 @@ import { BarcodeStrip } from "../../../shared/components/barcode-strip";
 import { formatAmount } from "../../../shared/format/format-amount";
 import { HAIRLINE_WIDTH } from "../../../shared/theme/hairline-width";
 import { PALETTE } from "../../../shared/theme/palette";
-import type { HomeSavings } from "../model/home-content";
+import type { DemoSavings } from "../../../shared/demo/savings";
 
 /** Props du panneau de caisse. */
 export interface SavingsPanelProps {
-  readonly item: HomeSavings;
+  readonly item: DemoSavings;
 }
 
 /**

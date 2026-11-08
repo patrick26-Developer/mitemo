@@ -6,14 +6,14 @@ import Animated, { FadeInRight } from "react-native-reanimated";
 import { BarcodeStrip } from "../../../shared/components/barcode-strip";
 import { formatAmount } from "../../../shared/format/format-amount";
 import { PALETTE } from "../../../shared/theme/palette";
-import type { HomeTontine } from "../model/home-content";
-import { CARD_WIDTH } from "../model/home-layout";
+import type { DemoTontine } from "../../../shared/demo/tontines";
+import { CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { RadialCard } from "./radial-card";
 import { TontineRound } from "./tontine-round";
 
 /** Props de la carte de tontine. */
 export interface TontineCardProps {
-  readonly item: HomeTontine;
+  readonly item: DemoTontine;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
 }
@@ -24,7 +24,7 @@ export interface TontineCardProps {
  * @param props.item Données de la tontine.
  * @returns Le contenu de la carte.
  */
-function TontineCardBody(props: { readonly item: HomeTontine }) {
+function TontineCardBody(props: { readonly item: DemoTontine }) {
   const { item } = props;
 
   return (

@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { HatchPattern } from "../../../shared/components/hatch-pattern";
-import { CARD_INNER_WIDTH } from "../model/home-layout";
+import { CARD_INNER_WIDTH } from "../../../shared/theme/card-layout";
 
 /** Hauteur du bandeau dégradé, en points. */
 const HEADER_HEIGHT = 84;

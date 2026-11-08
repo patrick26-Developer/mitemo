@@ -16,7 +16,8 @@ describe("SavingsScreen", () => {
 
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
     expect(screen.getByText(/20 000/)).toBeOnTheScreen();
-    expect(screen.getByText("Objectif 30 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getAllByText("Objectif")).toHaveLength(2);
+    expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
   });
 
   it("affiche l'échéance de chaque caisse", async () => {

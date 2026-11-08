@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "../../../shared/components/screen-header";
 import { DEMO_SAVINGS } from "../../../shared/demo/savings";
-import { SavingsListItem } from "./savings-list-item";
+import { SavingsCard } from "./savings-card";
 
 /**
  * Écran de la liste complète des caisses d'épargne du membre.
@@ -19,8 +19,8 @@ export function SavingsScreen() {
         data={DEMO_SAVINGS}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-3 px-4 pb-6"
-        renderItem={({ item }) => <SavingsListItem item={item} />}
+        contentContainerClassName="items-center gap-3 pb-6"
+        renderItem={({ item, index }) => <SavingsCard item={item} index={index} />}
       />
     </View>
   );

@@ -2,13 +2,13 @@ import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import type { HomeSavings } from "../model/home-content";
-import { CARD_WIDTH } from "../model/home-layout";
+import type { DemoSavings } from "../../../shared/demo/savings";
+import { CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsPanel } from "./savings-panel";
 
 /** Props de la carte de caisse. */
 export interface SavingsCardProps {
-  readonly item: HomeSavings;
+  readonly item: DemoSavings;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
 }
@@ -19,7 +19,7 @@ export interface SavingsCardProps {
  * @param props.item Données de la caisse.
  * @returns Le contenu de la carte.
  */
-function SavingsCardBody(props: { readonly item: HomeSavings }) {
+function SavingsCardBody(props: { readonly item: DemoSavings }) {
   const { item } = props;
 
   return (
