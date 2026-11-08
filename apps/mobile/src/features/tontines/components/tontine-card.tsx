@@ -32,14 +32,16 @@ function TontineCardBody(props: { readonly item: DemoTontine }) {
 
   return (
     <View className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2">
-      <RadialCard
-        colors={item.headerColors}
-        className="h-[84px] items-center justify-center overflow-hidden rounded-[14px] border border-header-border px-3 py-2"
-      >
-        <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
-          {item.name}
-        </Text>
-      </RadialCard>
+      <View className="overflow-hidden rounded-[14px] border border-header-border">
+        <RadialCard
+          colors={item.headerColors}
+          className="h-[84px] items-center justify-center px-3 py-2"
+        >
+          <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
+            {item.name}
+          </Text>
+        </RadialCard>
+      </View>
 
       <View className="gap-6 px-4 pb-4 pt-1">
         <View className="flex-row items-center">

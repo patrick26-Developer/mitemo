@@ -1,4 +1,4 @@
-import type { StyleProp, ViewStyle } from "react-native";
+import type { DimensionValue, StyleProp, ViewStyle } from "react-native";
 import Svg, { Defs, Line, Pattern, Rect } from "react-native-svg";
 
 /**
@@ -16,9 +16,9 @@ const HATCH_STROKE = 0.18;
  */
 export interface HatchPatternProps {
   /** Largeur du motif ; pleine largeur du parent par défaut. */
-  readonly width?: number;
+  readonly width?: NonNullable<DimensionValue>;
   /** Hauteur du motif, en points. */
-  readonly height?: number;
+  readonly height?: NonNullable<DimensionValue>;
   readonly style?: StyleProp<ViewStyle>;
 }
 
@@ -35,7 +35,7 @@ export function HatchPattern(props: HatchPatternProps) {
       <Defs>
         <HatchTile />
       </Defs>
-      <Rect width="100%" height={height} fill="url(#hatch)" />
+      <Rect width="100%" height="100%" fill="url(#hatch)" />
     </Svg>
   );
 }
