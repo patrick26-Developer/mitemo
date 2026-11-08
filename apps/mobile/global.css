@@ -44,6 +44,6 @@
   --color-header-border: #aebff4;
   /* Bordure de la règle de cotisation d'une tontine. */
   --color-rule-border: rgba(88, 93, 106, 0.376);
-  /* Bordure du panneau sombre d'une caisse. */
+  /* Bordure du panneau sombre d'une carte. */
   --color-savings-border: rgba(120, 140, 240, 0.6);
 }

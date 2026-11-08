@@ -6,7 +6,7 @@ import type { DemoSavings } from "../../../shared/demo/savings";
 import { CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsPanel } from "./savings-panel";
 
-/** Props de la carte de caisse. */
+/** Props de la carte de pointage. */
 export interface SavingsCardProps {
   readonly item: DemoSavings;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
@@ -16,9 +16,9 @@ export interface SavingsCardProps {
 }
 
 /**
- * Affiche le contenu de la carte de caisse.
+ * Affiche le contenu de la carte de pointage.
  * @param props Props du corps.
- * @param props.item Données de la caisse.
+ * @param props.item Données de la carte.
  * @returns Le contenu de la carte.
  */
 function SavingsCardBody(props: { readonly item: DemoSavings }) {
@@ -35,9 +35,9 @@ function SavingsCardBody(props: { readonly item: DemoSavings }) {
 }
 
 /**
- * Affiche une caisse d'épargne et son avancement vers l'objectif.
- * @param props Caisse à afficher, rang dans la liste et largeur.
- * @returns La carte de caisse.
+ * Affiche une carte de pointage et son avancement vers l'objectif.
+ * @param props Carte à afficher, rang dans la liste et largeur.
+ * @returns La carte de pointage.
  */
 export function SavingsCard(props: SavingsCardProps) {
   const { item, index, width = CARD_WIDTH } = props;

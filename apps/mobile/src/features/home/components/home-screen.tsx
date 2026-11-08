@@ -8,7 +8,7 @@ import { TontinesSection } from "./tontines-section";
 import { HatchPattern } from "../../../shared/components/hatch-pattern";
 
 /**
- * Écran d'accueil : solde du membre, tontines et caisses en cours.
+ * Écran d'accueil : solde du membre, tontines et cartes de pointage en cours.
  * @returns L'écran d'accueil.
  */
 export function HomeScreen() {

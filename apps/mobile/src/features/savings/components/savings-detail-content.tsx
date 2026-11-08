@@ -5,14 +5,14 @@ import { formatAmount } from "../../../shared/format/format-amount";
 import type { DemoSavings } from "../../../shared/demo/savings";
 import { SavingsSummaryCard } from "./savings-summary-card";
 
-/** Props du contenu d'une caisse trouvée. */
+/** Props du contenu d'une carte trouvée. */
 export interface SavingsDetailContentProps {
   readonly item: DemoSavings;
 }
 
 /**
  * Calcule le montant restant à épargner pour atteindre l'objectif.
- * @param item Caisse concernée.
+ * @param item Carte concernée.
  * @returns Le reste à épargner, jamais négatif.
  */
 function remainingToSave(item: DemoSavings): bigint {
@@ -20,9 +20,9 @@ function remainingToSave(item: DemoSavings): bigint {
 }
 
 /**
- * Affiche la synthèse, les échéances et la description d'une caisse.
- * @param props Caisse à afficher.
- * @returns Le contenu détaillé de la caisse.
+ * Affiche la synthèse, les échéances et la description d'une carte.
+ * @param props Carte à afficher.
+ * @returns Le contenu détaillé de la carte.
  */
 export function SavingsDetailContent(props: SavingsDetailContentProps) {
   const { item } = props;

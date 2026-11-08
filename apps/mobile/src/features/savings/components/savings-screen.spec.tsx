@@ -4,14 +4,14 @@ import { renderWithSafeArea } from "../../../shared/testing/render-with-safe-are
 import { SavingsScreen } from "./savings-screen";
 
 describe("SavingsScreen", () => {
-  it("affiche le titre et le nombre de caisses", async () => {
+  it("affiche le titre et le nombre de cartes de pointage", async () => {
     await renderWithSafeArea(<SavingsScreen />);
 
-    expect(screen.getByRole("header", { name: "Mes caisses" })).toBeOnTheScreen();
-    expect(screen.getByText("2 caisses d'épargne")).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Mes cartes de pointage" })).toBeOnTheScreen();
+    expect(screen.getByText("2 cartes de pointage")).toBeOnTheScreen();
   });
 
-  it("liste les caisses avec leur montant et leur objectif", async () => {
+  it("liste les cartes avec leur montant et leur objectif", async () => {
     await renderWithSafeArea(<SavingsScreen />);
 
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
@@ -20,7 +20,7 @@ describe("SavingsScreen", () => {
     expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
   });
 
-  it("affiche l'échéance de chaque caisse", async () => {
+  it("affiche l'échéance de chaque carte", async () => {
     await renderWithSafeArea(<SavingsScreen />);
 
     expect(screen.getByText("Jusqu'au 31 Décembre 2026")).toBeOnTheScreen();

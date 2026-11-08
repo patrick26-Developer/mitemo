@@ -36,7 +36,7 @@ describe("AnimatedTabBar", () => {
 
     expect(screen.getByRole("tab", { name: "Accueil" })).toBeOnTheScreen();
     expect(screen.getByRole("tab", { name: "Tontines" })).toBeOnTheScreen();
-    expect(screen.getByRole("tab", { name: "Caisses" })).toBeOnTheScreen();
+    expect(screen.getByRole("tab", { name: "Cartes" })).toBeOnTheScreen();
     expect(screen.getByRole("tab", { name: "Profil" })).toBeOnTheScreen();
   });
 
@@ -52,7 +52,7 @@ describe("AnimatedTabBar", () => {
     const { props, navigateToTab } = buildProps(0);
     await renderWithSafeArea(<AnimatedTabBar {...props} />);
 
-    fireEvent.press(screen.getByRole("tab", { name: "Caisses" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Cartes" }));
 
     expect(navigateToTab).toHaveBeenCalledWith("savings-key");
   });

@@ -6,10 +6,10 @@ import { EmptyState } from "./empty-state";
 describe("EmptyState", () => {
   it("affiche le titre et le message", async () => {
     await renderWithSafeArea(
-      <EmptyState title="Caisse introuvable" message="Cette caisse a été supprimée." />,
+      <EmptyState title="Carte introuvable" message="Cette carte a été supprimée." />,
     );
 
-    expect(screen.getByRole("header", { name: "Caisse introuvable" })).toBeOnTheScreen();
-    expect(screen.getByText("Cette caisse a été supprimée.")).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Carte introuvable" })).toBeOnTheScreen();
+    expect(screen.getByText("Cette carte a été supprimée.")).toBeOnTheScreen();
   });
 });

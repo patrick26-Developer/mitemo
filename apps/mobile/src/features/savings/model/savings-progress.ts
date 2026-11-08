@@ -2,7 +2,7 @@
 const SCALE = 10_000n;
 
 /**
- * Calcule la part épargnée d'une caisse.
+ * Calcule la part épargnée d'une carte de pointage.
  * @param current Montant épargné, en plus petite unité de la devise.
  * @param goal Objectif d'épargne, en plus petite unité de la devise.
  * @returns La part épargnée, bornée entre 0 et 1.

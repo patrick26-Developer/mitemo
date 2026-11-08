@@ -11,7 +11,7 @@ import { TabItem } from "./tab-item";
 const TABS: Readonly<Record<string, { label: string; icon: LucideIcon }>> = {
   index: { label: "Accueil", icon: House },
   tontines: { label: "Tontines", icon: BadgePercent },
-  savings: { label: "Caisses", icon: Stamp },
+  savings: { label: "Cartes", icon: Stamp },
   profile: { label: "Profil", icon: User },
 };
 

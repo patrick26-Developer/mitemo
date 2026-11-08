@@ -7,13 +7,13 @@ import { SavingsCard } from "../../savings";
 import { HOME_SAVINGS } from "../model/home-content";
 
 /**
- * Affiche le titre et la liste horizontale des caisses d'épargne.
- * @returns La section des caisses.
+ * Affiche le titre et la liste horizontale des cartes de pointage.
+ * @returns La section des cartes de pointage.
  */
 export function SavingsSection() {
   return (
     <View className="mt-4 flex-col gap-3">
-      <SectionTitle label="Mes caisses" onPress={() => router.push("/savings")} />
+      <SectionTitle label="Mes cartes de pointage" onPress={() => router.push("/savings")} />
       <FlatList
         data={HOME_SAVINGS}
         keyExtractor={(item) => item.id}

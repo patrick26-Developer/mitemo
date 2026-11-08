@@ -27,10 +27,10 @@ describe("HomeScreen", () => {
     expect(screen.getByText("Tour 4 / 10")).toBeOnTheScreen();
   });
 
-  it("liste les caisses du membre", async () => {
+  it("liste les cartes de pointage du membre", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
-    expect(screen.getByText("Mes caisses")).toBeOnTheScreen();
+    expect(screen.getByText("Mes cartes de pointage")).toBeOnTheScreen();
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
   });
 });

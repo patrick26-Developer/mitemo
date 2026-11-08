@@ -7,15 +7,18 @@ import { FULL_CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsCard } from "./savings-card";
 
 /**
- * Écran de la liste complète des caisses d'épargne du membre.
- * @returns L'écran des caisses.
+ * Écran de la liste complète des cartes de pointage du membre.
+ * @returns L'écran des cartes de pointage.
  */
 export function SavingsScreen() {
   const insets = useSafeAreaInsets();
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
-      <ScreenHeader title="Mes caisses" subtitle={`${DEMO_SAVINGS.length} caisses d'épargne`} />
+      <ScreenHeader
+        title="Mes cartes de pointage"
+        subtitle={`${DEMO_SAVINGS.length} cartes de pointage`}
+      />
       <FlatList
         data={DEMO_SAVINGS}
         keyExtractor={(item) => item.id}

@@ -7,15 +7,15 @@ import { HAIRLINE_WIDTH } from "../../../shared/theme/hairline-width";
 import { PALETTE } from "../../../shared/theme/palette";
 import type { DemoSavings } from "../../../shared/demo/savings";
 
-/** Props du panneau de caisse. */
+/** Props du panneau de carte. */
 export interface SavingsPanelProps {
   readonly item: DemoSavings;
 }
 
 /**
- * Affiche le montant épargné, l'objectif et l'échéance d'une caisse.
- * @param props Caisse à afficher.
- * @returns Le panneau sombre de la caisse.
+ * Affiche le montant épargné, l'objectif et l'échéance d'une carte.
+ * @param props Carte à afficher.
+ * @returns Le panneau sombre de la carte.
  */
 export function SavingsPanel(props: SavingsPanelProps) {
   const { item } = props;

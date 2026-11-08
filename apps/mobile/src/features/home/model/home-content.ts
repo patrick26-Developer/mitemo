@@ -19,7 +19,7 @@ export interface HomeBalance {
 /** Tontine suivie par le membre, résumée sur une carte d'accueil. */
 export type HomeTontine = DemoTontine;
 
-/** Caisse d'épargne suivie sur l'accueil. */
+/** Carte de pointage suivie sur l'accueil. */
 export type HomeSavings = DemoSavings;
 
 /** Membre affiché tant que l'authentification n'est pas branchée. */
@@ -34,5 +34,5 @@ export const HOME_BALANCE: HomeBalance = { available: 12_500n, saved: 2_500n };
 /** Tontines affichées tant que l'API n'est pas branchée. */
 export const HOME_TONTINES: readonly HomeTontine[] = DEMO_TONTINES;
 
-/** Caisses affichées tant que l'API n'est pas branchée. */
+/** Cartes de pointage affichées tant que l'API n'est pas branchée. */
 export const HOME_SAVINGS: readonly HomeSavings[] = DEMO_SAVINGS;

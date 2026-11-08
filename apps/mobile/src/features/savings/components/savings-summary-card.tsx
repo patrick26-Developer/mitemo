@@ -5,14 +5,14 @@ import { formatAmount } from "../../../shared/format/format-amount";
 import type { DemoSavings } from "../../../shared/demo/savings";
 import { savingsProgress } from "../model/savings-progress";
 
-/** Props de la carte de synthèse d'une caisse. */
+/** Props de la carte de synthèse d'une carte de pointage. */
 export interface SavingsSummaryCardProps {
   readonly item: DemoSavings;
 }
 
 /**
- * Affiche le montant épargné, l'objectif et la progression d'une caisse.
- * @param props Caisse à résumer.
+ * Affiche le montant épargné, l'objectif et la progression d'une carte.
+ * @param props Carte à résumer.
  * @returns La carte de synthèse.
  */
 export function SavingsSummaryCard(props: SavingsSummaryCardProps) {

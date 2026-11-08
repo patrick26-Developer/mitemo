@@ -50,7 +50,7 @@ par `app/_layout.tsx` : `bg-card`, `text-ink`, `text-on-dark-muted`, etc.
 
 Trois exceptions, documentées dans le code :
 
-- les valeurs calculées à l'exécution (largeur de carte, teinte d'une caisse) restent en `style` ;
+- les valeurs calculées à l'exécution (largeur de carte, teinte d'une carte) restent en `style` ;
 - les composants natifs tiers (`Svg`, `LinearGradient`, icônes) n'acceptent pas de `className` et
   reçoivent leurs couleurs depuis `src/shared/theme/palette.ts`, qui reprend les valeurs de
   `global.css` ;

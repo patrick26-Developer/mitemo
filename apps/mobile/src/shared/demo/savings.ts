@@ -1,4 +1,4 @@
-/** Caisse d'épargne de démonstration, affichée tant que l'API n'est pas branchée. */
+/** Carte de pointage de démonstration, affichée tant que l'API n'est pas branchée. */
 export interface DemoSavings {
   readonly id: string;
   readonly title: string;
@@ -11,7 +11,7 @@ export interface DemoSavings {
   readonly description: string;
 }
 
-/** Caisses de démonstration, communes à l'accueil, à la liste et au détail. */
+/** Cartes de pointage de démonstration, communes à l'accueil, à la liste et au détail. */
 export const DEMO_SAVINGS: readonly DemoSavings[] = [
   {
     id: "1",
@@ -21,7 +21,7 @@ export const DEMO_SAVINGS: readonly DemoSavings[] = [
     until: "31 Décembre 2026",
     tint: "#CFD8FF",
     description:
-      "Mise de côté pour le loyer de janvier. L'échéance se règle directement depuis la caisse.",
+      "Mise de côté pour le loyer de janvier. L'échéance se règle directement depuis la carte.",
   },
   {
     id: "2",
