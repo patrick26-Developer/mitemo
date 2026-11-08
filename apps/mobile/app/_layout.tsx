@@ -1,21 +1,25 @@
-import "../global.css";
-
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
+import { AnimatedTabBar } from "../src/shared/components/animated-tab-bar";
+
 /**
- * Navigation racine : onglets avec pile pour les écrans de détail.
- * @returns La pile de navigation et la barre d'état.
+ * Navigation par onglets.
+ * @returns Les onglets et la barre d'état.
  */
-export default function RootLayout() {
+export default function TabsLayout() {
   return (
     <>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="tontine/[id]" />
-        <Stack.Screen name="caisse/[id]" />
-      </Stack>
+      <Tabs
+        tabBar={(props) => <AnimatedTabBar {...props} />}
+        screenOptions={{ headerShown: false, animation: "shift" }}
+      >
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="tontines" />
+        <Tabs.Screen name="savings" />
+        <Tabs.Screen name="profile" />
+      </Tabs>
     </>
   );
 }
