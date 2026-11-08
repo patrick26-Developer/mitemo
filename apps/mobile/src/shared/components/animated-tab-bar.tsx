@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react-native";
-import { House, Ticket, UserRound, UsersRoundCollaboration } from "lucide-react-native";
+import { House, UserRound, UsersRoundCollaboration, Wallet } from "lucide-react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,7 +11,7 @@ import { TabItem } from "./tab-item";
 const TABS: Readonly<Record<string, { label: string; icon: LucideIcon }>> = {
   index: { label: "Accueil", icon: House },
   tontines: { label: "Tontines", icon: UsersRoundCollaboration },
-  savings: { label: "Cartes", icon: Ticket },
+  savings: { label: "Cartes", icon: Wallet },
   profile: { label: "Profil", icon: UserRound },
 };
 
