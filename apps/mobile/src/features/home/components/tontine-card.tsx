@@ -1,5 +1,6 @@
+import { router } from "expo-router";
 import { Users } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import { BarcodeStrip } from "../../../shared/components/barcode-strip";
@@ -27,39 +28,45 @@ export function TontineCard(props: TontineCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
-      <View
-        className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2"
-        style={{ width: CARD_WIDTH }}
+      <Pressable
+        onPress={() => router.push(`/tontines/${item.id}`)}
+        accessibilityRole="button"
+        accessibilityLabel={item.name}
       >
-        <RadialCard
-          colors={item.headerColors}
-          className="h-[84px] items-center justify-center overflow-hidden rounded-[14px] border border-header-border px-3 py-2"
+        <View
+          className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2"
+          style={{ width: CARD_WIDTH }}
         >
-          <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
-            {item.name}
-          </Text>
-        </RadialCard>
+          <RadialCard
+            colors={item.headerColors}
+            className="h-[84px] items-center justify-center overflow-hidden rounded-[14px] border border-header-border px-3 py-2"
+          >
+            <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
+              {item.name}
+            </Text>
+          </RadialCard>
 
-        <View className="gap-6 px-4 pb-4 pt-1">
-          <View className="flex-row items-center">
-            <Users size={16} color={PALETTE.muted} />
-            <Text className="ml-2 text-[16px] text-muted-strong">{item.members} membres</Text>
-          </View>
+          <View className="gap-6 px-4 pb-4 pt-1">
+            <View className="flex-row items-center">
+              <Users size={16} color={PALETTE.muted} />
+              <Text className="ml-2 text-[16px] text-muted-strong">{item.members} membres</Text>
+            </View>
 
-          <View className="self-start rounded-[18px] border border-rule-border px-3 py-1.5">
-            <Text className="text-[16px] text-ink">
-              {formatAmount(item.amount)} FCFA {item.frequency}
+            <View className="self-start rounded-[18px] border border-rule-border px-3 py-1.5">
+              <Text className="text-[16px] text-ink">
+                {formatAmount(item.amount)} FCFA {item.frequency}
+              </Text>
+            </View>
+
+            <TontineRound round={item.round} totalRounds={item.totalRounds} />
+            <BarcodeStrip color={PALETTE.barcodeOnCard} />
+
+            <Text className="text-[13px] text-muted">
+              Tour de <Text className="font-bold text-ink">{item.currentBeneficiary}</Text>
             </Text>
           </View>
-
-          <TontineRound round={item.round} totalRounds={item.totalRounds} />
-          <BarcodeStrip color={PALETTE.barcodeOnCard} />
-
-          <Text className="text-[13px] text-muted">
-            Tour de <Text className="font-bold text-ink">{item.currentBeneficiary}</Text>
-          </Text>
         </View>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
