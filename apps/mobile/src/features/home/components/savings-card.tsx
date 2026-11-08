@@ -16,6 +16,7 @@ export interface SavingsCardProps {
 /**
  * Affiche le contenu de la carte de caisse.
  * @param props Props du corps.
+ * @param props.item Données de la caisse.
  * @returns Le contenu de la carte.
  */
 function SavingsCardBody(props: { readonly item: HomeSavings }) {
