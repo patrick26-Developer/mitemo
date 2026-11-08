@@ -2,7 +2,7 @@
   "extends": ["../../tsconfig.base.json", "expo/tsconfig.base"],
   "compilerOptions": {
     "declaration": false,
-    "types": ["jest"]
+    "types": ["jest", "expo/types", "uniwind/types"]
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
