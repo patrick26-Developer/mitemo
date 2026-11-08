@@ -12,6 +12,8 @@ export interface TabItemProps {
   readonly icon: LucideIcon;
   readonly onPress: () => void;
   readonly onLongPress: () => void;
+  /** Identifiant de test posé sur l'icône. */
+  readonly testID?: string;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface TabItemProps {
  * @returns La pastille de l'onglet.
  */
 export function TabItem(props: TabItemProps) {
-  const { focused, label, icon: Icon, onPress, onLongPress } = props;
+  const { focused, label, icon: Icon, onPress, onLongPress, testID } = props;
   const { pillStyle, labelStyle, iconStyle } = useTabItemAnimation(focused);
 
   return (
@@ -34,7 +36,13 @@ export function TabItem(props: TabItemProps) {
     >
       <Animated.View style={[styles.pill, pillStyle]}>
         <Animated.View style={iconStyle}>
-          <Icon size={26} color={PALETTE.tabInk} strokeWidth={1.8} />
+          <Icon
+            {...(testID === undefined ? {} : { testID })}
+            size={26}
+            color={PALETTE.tabInk}
+            fill={focused ? PALETTE.tabInk : "none"}
+            strokeWidth={1.8}
+          />
         </Animated.View>
         <Animated.Text numberOfLines={1} style={[styles.label, labelStyle]}>
           {label}

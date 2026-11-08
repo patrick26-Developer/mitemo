@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react-native";
-import { BadgePercent, House, Stamp, User } from "lucide-react-native";
+import { House, User, Users, WalletCards } from "lucide-react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,8 +10,8 @@ import { TabItem } from "./tab-item";
 /** Libellé et icône de chaque onglet, par nom de route Expo Router. */
 const TABS: Readonly<Record<string, { label: string; icon: LucideIcon }>> = {
   index: { label: "Accueil", icon: House },
-  tontines: { label: "Tontines", icon: BadgePercent },
-  savings: { label: "Cartes", icon: Stamp },
+  tontines: { label: "Tontines", icon: Users },
+  savings: { label: "Cartes", icon: WalletCards },
   profile: { label: "Profil", icon: User },
 };
 
