@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenHeader } from "../../../shared/components/screen-header";
 import { DEMO_SAVINGS } from "../../../shared/demo/savings";
+import { FULL_CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsCard } from "./savings-card";
 
 /**
@@ -20,7 +21,9 @@ export function SavingsScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerClassName="gap-3 px-4 pb-6"
-        renderItem={({ item, index }) => <SavingsCard item={item} index={index} width="100%" />}
+        renderItem={({ item, index }) => (
+          <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />
+        )}
       />
     </View>
   );

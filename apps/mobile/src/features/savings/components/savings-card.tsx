@@ -1,6 +1,5 @@
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import type { DimensionValue } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import type { DemoSavings } from "../../../shared/demo/savings";
@@ -12,8 +11,8 @@ export interface SavingsCardProps {
   readonly item: DemoSavings;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
-  /** Largeur de la carte ; largeur de la home par défaut. */
-  readonly width?: DimensionValue;
+  /** Largeur totale de la carte, en points ; largeur de la home par défaut. */
+  readonly width?: number;
 }
 
 /**
