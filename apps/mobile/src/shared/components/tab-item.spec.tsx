@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react-native";
-import { Users } from "lucide-react-native";
+import { UserRound } from "lucide-react-native";
 
 import { renderWithSafeArea } from "../../shared/testing/render-with-safe-area";
 import { PALETTE } from "../../shared/theme/palette";
@@ -12,8 +12,8 @@ describe("TabItem", () => {
     await renderWithSafeArea(
       <TabItem
         focused
-        label="Tontines"
-        icon={Users}
+        label="Profil"
+        icon={UserRound}
         onPress={NOOP}
         onLongPress={NOOP}
         testID="tab-icon"
@@ -29,8 +29,8 @@ describe("TabItem", () => {
     await renderWithSafeArea(
       <TabItem
         focused={false}
-        label="Tontines"
-        icon={Users}
+        label="Profil"
+        icon={UserRound}
         onPress={NOOP}
         onLongPress={NOOP}
         testID="tab-icon"

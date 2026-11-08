@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react-native";
-import { House, User, Users, WalletCards } from "lucide-react-native";
+import { House, Ticket, UserRound, UsersRoundCollaboration } from "lucide-react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,9 +10,9 @@ import { TabItem } from "./tab-item";
 /** Libellé et icône de chaque onglet, par nom de route Expo Router. */
 const TABS: Readonly<Record<string, { label: string; icon: LucideIcon }>> = {
   index: { label: "Accueil", icon: House },
-  tontines: { label: "Tontines", icon: Users },
-  savings: { label: "Cartes", icon: WalletCards },
-  profile: { label: "Profil", icon: User },
+  tontines: { label: "Tontines", icon: UsersRoundCollaboration },
+  savings: { label: "Cartes", icon: Ticket },
+  profile: { label: "Profil", icon: UserRound },
 };
 
 /** Marge basse minimale de la barre, en points, au-dessus de la zone sûre. */
@@ -67,6 +67,7 @@ export function AnimatedTabBar(props: BottomTabBarProps) {
 const styles = StyleSheet.create({
   shell: {
     borderTopWidth: HAIRLINE_WIDTH,
+    borderCurve: "continuous",
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 12,

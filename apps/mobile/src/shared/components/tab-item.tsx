@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingLeft: 16,
     borderRadius: 27,
+    borderCurve: "continuous",
     flexDirection: "row",
     alignItems: "center",
     overflow: "hidden",
