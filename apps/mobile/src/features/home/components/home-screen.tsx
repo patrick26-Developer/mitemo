@@ -1,25 +1,31 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { HatchPattern } from "../../../shared/components/hatch-pattern";
+import { HomeHero } from "./home-hero";
+import { SavingsSection } from "./savings-section";
+import { TontinesSection } from "./tontines-section";
 
 /**
- * Écran d'accueil : présente Mitemo avant la connexion.
+ * Écran d'accueil : solde du membre, tontines et caisses en cours.
  * @returns L'écran d'accueil.
  */
 export function HomeScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
-      <Text accessibilityRole="header" style={styles.title}>
-        Mitemo
-      </Text>
-      <Text style={styles.tagline}>
-        L&apos;épargne solidaire connectée : vos tontines et caisses de solidarité, sécurisées et
-        numériques, pour gérer votre épargne collective en toute confiance.
-      </Text>
+    <View className="flex-1 bg-white">
+      <StatusBar style="light" />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <HomeHero topInset={insets.top} />
+        <TontinesSection />
+        <HatchPattern />
+        <SavingsSection />
+        <View className="mt-5">
+          <HatchPattern />
+        </View>
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, gap: 12 },
-  title: { fontSize: 32, fontWeight: "700" },
-  tagline: { fontSize: 16, lineHeight: 24 },
-});
