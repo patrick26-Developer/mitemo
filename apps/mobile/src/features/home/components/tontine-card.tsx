@@ -75,7 +75,9 @@ export function TontineCard(props: TontineCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
       <Link href={`/tontine/${item.id}`} asChild>
-        <TontineCardBody item={item} />
+        <View>
+          <TontineCardBody item={item} />
+        </View>
       </Link>
     </Animated.View>
   );

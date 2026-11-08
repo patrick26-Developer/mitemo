@@ -43,7 +43,9 @@ export function SavingsCard(props: SavingsCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)}>
       <Link href={`/caisse/${item.id}`} asChild>
-        <SavingsCardBody item={item} />
+        <View>
+          <SavingsCardBody item={item} />
+        </View>
       </Link>
     </Animated.View>
   );
