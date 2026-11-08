@@ -1,13 +1,19 @@
 import type { StyleProp, ViewStyle } from "react-native";
 import Svg, { Defs, Line, Pattern, Rect } from "react-native-svg";
 
-/** Distance horizontale entre deux hachures, en points. */
+/**
+ * Distance horizontale entre deux hachures, en points.
+ */
 const HATCH_SPACING = 3.62;
 
-/** Épaisseur d'une hachure ; au-delà, les traits deviennent trop marqués. */
+/**
+ * Épaisseur d'une hachure ; au-delà, les traits deviennent trop marqués.
+ */
 const HATCH_STROKE = 0.18;
 
-/** Props du motif hachuré. */
+/**
+ * Props du motif hachuré.
+ */
 export interface HatchPatternProps {
   /** Largeur du motif ; pleine largeur du parent par défaut. */
   readonly width?: number;
