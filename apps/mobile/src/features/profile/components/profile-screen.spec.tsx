@@ -56,8 +56,9 @@ describe("ProfileScreen", () => {
   it("place la création du compte et l'identité de l'application en pied de page", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    expect(screen.getByText("Compte créé en 2026")).toBeOnTheScreen();
-    expect(screen.getByText(/^Mitemo /)).toBeOnTheScreen();
+    expect(screen.getByText("Compte créé le 12/03/2026")).toBeOnTheScreen();
+    expect(screen.getByText("Mitemo")).toBeOnTheScreen();
+    expect(screen.getByText("version 0.0.0")).toBeOnTheScreen();
   });
 
   it("n'affiche plus l'ancienneté dans l'en-tête", async () => {

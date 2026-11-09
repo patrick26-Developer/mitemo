@@ -4,7 +4,7 @@ export interface DemoMember {
   readonly avatarInitial: string;
   /** Numéro au format international, affiché en lecture seule sur le profil. */
   readonly phone: string;
-  /** Année de création du compte, affichée en pied de profil. */
+  /** Date de création du compte, en UTC. */
   readonly createdAt: string;
 }
 
@@ -13,5 +13,5 @@ export const DEMO_MEMBER: DemoMember = {
   name: "Précieuse",
   avatarInitial: "P",
   phone: "+242 06 512 34 56",
-  createdAt: "2026",
+  createdAt: "2026-03-12",
 };
