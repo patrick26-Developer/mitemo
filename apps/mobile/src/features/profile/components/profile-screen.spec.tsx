@@ -53,7 +53,7 @@ describe("ProfileScreen", () => {
     expect(screen.getByRole("button", { name: "Modifier la photo" })).toBeOnTheScreen();
   });
 
-  it("place la création du compte et l'identité de l'application en pied de page", async () => {
+  it("affiche la création du compte et l'identité de l'application", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
     expect(screen.getByText("Compte créé le 12/03/2026")).toBeOnTheScreen();

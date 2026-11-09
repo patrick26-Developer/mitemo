@@ -28,8 +28,8 @@ export function ProfileScreen() {
         {PROFILE_GROUPS.map((group) => (
           <ProfileGroup key={group.title} group={group} />
         ))}
-        <ProfileSignOut />
-        <ProfileFooter createdAt={DEMO_MEMBER.createdAt} />
+        <ProfileSignOut createdAt={DEMO_MEMBER.createdAt} />
+        <ProfileFooter />
       </View>
     </ScrollView>
   );
