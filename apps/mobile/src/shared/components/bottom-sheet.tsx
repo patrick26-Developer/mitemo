@@ -152,6 +152,7 @@ function SheetSurface(props: SheetSurfaceProps) {
       style={[
         styles.surface,
         {
+          minHeight: layout.minHeight,
           maxHeight: layout.maxHeight,
           paddingBottom: layout.paddingBottom,
           marginBottom: layout.marginBottom,

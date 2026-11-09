@@ -71,6 +71,7 @@ function AuthSheet(props: AuthSheetProps) {
       style={[
         styles.sheet,
         {
+          minHeight: layout.minHeight,
           maxHeight: layout.maxHeight,
           paddingBottom: layout.paddingBottom,
           marginBottom: layout.marginBottom,

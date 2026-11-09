@@ -2,6 +2,7 @@ import {
   SHEET_BOTTOM_PADDING,
   SHEET_MARGIN,
   SHEET_MAX_HEIGHT_RATIO,
+  SHEET_MIN_HEIGHT_RATIO,
   computeSheetLayout,
 } from "./sheet-layout";
 
@@ -15,6 +16,7 @@ describe("computeSheetLayout", () => {
     });
 
     expect(layout).toEqual({
+      minHeight: 844 * SHEET_MIN_HEIGHT_RATIO,
       maxHeight: 844 * SHEET_MAX_HEIGHT_RATIO,
       paddingBottom: 320 + SHEET_BOTTOM_PADDING,
       marginBottom: SHEET_MARGIN,
@@ -63,7 +65,7 @@ describe("computeSheetLayout", () => {
     expect(opened.maxHeight).toBe(closed.maxHeight);
   });
 
-  it("limite la carte à la part maximale de l'écran", () => {
+  it("borne la carte entre une hauteur minimale et une hauteur maximale", () => {
     const layout = computeSheetLayout({
       platform: "android",
       keyboardHeight: 0,
@@ -71,6 +73,7 @@ describe("computeSheetLayout", () => {
       screenHeight: 640,
     });
 
+    expect(layout.minHeight).toBe(640 * SHEET_MIN_HEIGHT_RATIO);
     expect(layout.maxHeight).toBe(640 * SHEET_MAX_HEIGHT_RATIO);
   });
 });
