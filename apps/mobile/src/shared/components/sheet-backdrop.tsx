@@ -19,6 +19,7 @@ export function SheetBackdrop(props: SheetBackdropProps) {
   return (
     <>
       <View className="absolute inset-0 bg-ink/60" />
+      <View className="absolute inset-0 bg-sheet-veil" />
       <GridBackground />
       <Pressable
         accessibilityRole="button"
