@@ -1,16 +1,13 @@
-import { SheetText } from "../../../../shared/components/sheet-text";
 import { TERMS_SECTIONS } from "../../model/profile-documents";
-import { LegalContent } from "./legal-content";
+import { LegalSheet } from "./legal-sheet";
+
+/** Date de dernière mise à jour des conditions, telle qu'affichée. */
+const UPDATED_AT = "novembre 2026";
 
 /**
  * Affiche les conditions d'utilisation.
  * @returns Le contenu de la feuille « Conditions d'utilisation ».
  */
 export function TermsSheet() {
-  return (
-    <>
-      <SheetText>Dernière mise à jour : novembre 2026.</SheetText>
-      <LegalContent sections={TERMS_SECTIONS} />
-    </>
-  );
+  return <LegalSheet updatedAt={UPDATED_AT} sections={TERMS_SECTIONS} />;
 }

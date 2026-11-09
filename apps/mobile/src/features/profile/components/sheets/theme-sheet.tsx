@@ -1,8 +1,11 @@
-import { SheetRow } from "../../../../shared/components/sheet-row";
+import { SheetOptionList } from "../../../../shared/components/sheet-option-list";
 import { SheetSection } from "../../../../shared/components/sheet-section";
 import { SheetText } from "../../../../shared/components/sheet-text";
 import { PROFILE_THEMES } from "../../model/profile-content";
 import { useProfilePreferences } from "../../model/profile-preferences";
+
+/** Thèmes proposés, sous la forme attendue par la liste d'options. */
+const THEME_OPTIONS = PROFILE_THEMES.map((theme) => ({ value: theme, label: theme }));
 
 /**
  * Affiche les thèmes proposés et enregistre le choix du membre.
@@ -15,14 +18,7 @@ export function ThemeSheet() {
   return (
     <>
       <SheetSection title="Apparence">
-        {PROFILE_THEMES.map((option) => (
-          <SheetRow
-            key={option}
-            label={option}
-            selected={option === theme}
-            onPress={() => setTheme(option)}
-          />
-        ))}
+        <SheetOptionList options={THEME_OPTIONS} selected={theme} onSelect={setTheme} />
       </SheetSection>
       <SheetText>
         Le mode système suit le réglage clair ou sombre de votre téléphone. Le choix est conservé à

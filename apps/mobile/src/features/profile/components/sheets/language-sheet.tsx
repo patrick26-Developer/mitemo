@@ -1,8 +1,14 @@
-import { SheetRow } from "../../../../shared/components/sheet-row";
+import { SheetOptionList } from "../../../../shared/components/sheet-option-list";
 import { SheetSection } from "../../../../shared/components/sheet-section";
 import { SheetText } from "../../../../shared/components/sheet-text";
 import { PROFILE_LANGUAGES } from "../../model/profile-content";
 import { useProfilePreferences } from "../../model/profile-preferences";
+
+/** Langues proposées, sous la forme attendue par la liste d'options. */
+const LANGUAGE_OPTIONS = PROFILE_LANGUAGES.map((language) => ({
+  value: language,
+  label: language,
+}));
 
 /**
  * Affiche les langues proposées et enregistre le choix du membre.
@@ -15,14 +21,7 @@ export function LanguageSheet() {
   return (
     <>
       <SheetSection title="Langue de l'interface">
-        {PROFILE_LANGUAGES.map((option) => (
-          <SheetRow
-            key={option}
-            label={option}
-            selected={option === language}
-            onPress={() => setLanguage(option)}
-          />
-        ))}
+        <SheetOptionList options={LANGUAGE_OPTIONS} selected={language} onSelect={setLanguage} />
       </SheetSection>
       <SheetText>
         {
