@@ -26,7 +26,9 @@ export interface ListHeaderProps {
  * Affiche le filtre d'état d'une liste et ses actions rapides.
  *
  * Posé en `ListHeaderComponent` collant d'une `FlatList`, il reste en haut de
- * l'écran pendant que les éléments défilent dessous, d'où son fond opaque.
+ * l'écran pendant que les éléments défilent dessous. Son fond reste
+ * transparent : les cartes passent derrière les contrôles, qui portent leur
+ * propre fond.
  * @param props Filtre courant, changement de filtre et actions.
  * @returns L'en-tête de liste.
  */
@@ -34,7 +36,7 @@ export function ListHeader(props: ListHeaderProps) {
   const { filter, onFilterChange, onSearch, onAdd } = props;
 
   return (
-    <View className="flex-row items-center justify-between bg-white pb-5">
+    <View className="flex-row items-center justify-between pb-5">
       <SegmentedControl options={FILTER_OPTIONS} value={filter} onChange={onFilterChange} />
 
       <View className="flex-row items-center gap-3 rounded-[22px] border border-rule-border bg-tab-active px-3 py-2.5">
