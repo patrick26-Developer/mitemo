@@ -26,4 +26,11 @@ describe("ProfileScreen", () => {
     expect(screen.getByText("Centre d'aide")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeOnTheScreen();
   });
+
+  it("propose l'historique et le choix du thème", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByRole("button", { name: "Historique" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Thème" })).toBeOnTheScreen();
+  });
 });

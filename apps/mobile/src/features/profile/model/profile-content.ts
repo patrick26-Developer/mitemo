@@ -1,4 +1,13 @@
-import { Bell, CircleHelp, CreditCard, Globe, ShieldCheck, UserRound } from "lucide-react-native";
+import {
+  Bell,
+  CircleHelp,
+  CreditCard,
+  Globe,
+  History,
+  ShieldCheck,
+  SunMoon,
+  UserRound,
+} from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 
 /** Action proposée sur l'écran de profil. */
@@ -21,12 +30,14 @@ export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
     actions: [
       { id: "identity", label: "Mes informations", icon: UserRound },
       { id: "payment", label: "Moyen de paiement", icon: CreditCard },
+      { id: "history", label: "Historique", icon: History },
     ],
   },
   {
     title: "Préférences",
     actions: [
       { id: "language", label: "Langue", icon: Globe },
+      { id: "theme", label: "Thème", icon: SunMoon },
       { id: "notifications", label: "Notifications", icon: Bell },
     ],
   },
