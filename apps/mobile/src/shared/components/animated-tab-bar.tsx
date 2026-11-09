@@ -7,13 +7,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HAIRLINE_WIDTH } from "../../shared/theme/hairline-width";
 import { TabItem } from "./tab-item";
 
-/** Libellé et icône de chaque onglet, par nom de route Expo Router. */
-const TABS: Readonly<Record<string, { label: string; icon: LucideIcon }>> = {
-  index: { label: "Accueil", icon: House },
-  tontines: { label: "Tontines", icon: UsersRoundCollaboration },
-  savings: { label: "Cartes", icon: Wallet },
-  profile: { label: "Profil", icon: UserRound },
-};
+/** Onglets de l'application, dans l'ordre où ils sont affichés. */
+const TABS: readonly {
+  readonly name: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+}[] = [
+  { name: "index", label: "Accueil", icon: House },
+  { name: "tontines", label: "Tontines", icon: UsersRoundCollaboration },
+  { name: "savings", label: "Cartes", icon: Wallet },
+  { name: "profile", label: "Profil", icon: UserRound },
+];
 
 /** Marge basse minimale de la barre, en points, au-dessus de la zone sûre. */
 const MIN_BOTTOM_INSET = 16;
@@ -26,6 +30,11 @@ const MIN_BOTTOM_INSET = 16;
 export function AnimatedTabBar(props: BottomTabBarProps) {
   const { state, emitter, navigateToTab } = props;
   const insets = useSafeAreaInsets();
+  const focusedKey = state.routes[state.index]?.key;
+  const renderedTabs = TABS.flatMap((tab) => {
+    const route = state.routes.find(({ name }) => name === tab.name);
+    return route === undefined ? [] : [{ ...tab, route }];
+  });
 
   const emitTabPress = (routeKey: string) =>
     emitter.emit({ type: "tabPress", target: routeKey, canPreventDefault: true });
@@ -38,10 +47,8 @@ export function AnimatedTabBar(props: BottomTabBarProps) {
       className="flex-row items-center justify-between rounded-b-[40px] border-t border-hairline bg-white px-5 pt-4"
       style={[styles.shell, { paddingBottom: Math.max(insets.bottom, MIN_BOTTOM_INSET) }]}
     >
-      {state.routes.map((route, index) => {
-        const tab = TABS[route.name];
-        if (!tab) return null;
-        const focused = state.index === index;
+      {renderedTabs.map(({ route, label, icon }) => {
+        const focused = route.key === focusedKey;
 
         const onPress = () => {
           const event = emitTabPress(route.key);
@@ -52,8 +59,8 @@ export function AnimatedTabBar(props: BottomTabBarProps) {
           <TabItem
             key={route.key}
             focused={focused}
-            label={tab.label}
-            icon={tab.icon}
+            label={label}
+            icon={icon}
             onPress={onPress}
             onLongPress={() => emitLongPress(route.key)}
           />

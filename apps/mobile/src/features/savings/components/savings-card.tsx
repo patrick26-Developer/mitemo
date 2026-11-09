@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
+import { PressableScale } from "../../../shared/components/pressable-scale";
 import type { DemoSavings } from "../../../shared/demo/savings";
 import { CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsPanel } from "./savings-panel";
@@ -44,9 +45,12 @@ export function SavingsCard(props: SavingsCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)} style={{ width }}>
-      <Pressable onPress={() => router.push(`/savings-detail/${item.id}`)}>
+      <PressableScale
+        accessibilityLabel={`Ouvrir ${item.title}`}
+        onPress={() => router.push(`/savings-detail/${item.id}`)}
+      >
         <SavingsCardBody item={item} />
-      </Pressable>
+      </PressableScale>
     </Animated.View>
   );
 }

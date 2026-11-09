@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { renderWithSafeArea } from "../../../shared/testing/render-with-safe-area";
 import { TontinesScreen } from "./tontines-screen";
@@ -28,6 +28,33 @@ describe("TontinesScreen", () => {
 
     expect(await screen.findByText("Tontine du Quartier")).toBeOnTheScreen();
     expect(screen.queryByText("Tontine du Marché Tolal")).not.toBeOnTheScreen();
+  });
+
+  it("filtre les tontines avec la recherche de la liste", async () => {
+    await renderWithSafeArea(<TontinesScreen />);
+
+    fireEvent.press(screen.getByRole("button", { name: "Rechercher" }));
+    fireEvent.changeText(await screen.findByPlaceholderText("Rechercher une tontine"), "amis");
+
+    expect(screen.getByText("Tontine des Amis")).toBeOnTheScreen();
+    await waitFor(() =>
+      expect(screen.queryByText("Tontine du Marché Tolal")).not.toBeOnTheScreen(),
+    );
+  });
+
+  it("ouvre la feuille de création depuis le bouton plus", async () => {
+    await renderWithSafeArea(<TontinesScreen />);
+
+    fireEvent.press(screen.getByRole("button", { name: "Ajouter" }));
+
+    expect(await screen.findByText("Nouvelle tontine")).toBeOnTheScreen();
+    expect(screen.getByText("Comment ça marche")).toBeOnTheScreen();
+  });
+
+  it("affiche le fond pointillé", async () => {
+    await renderWithSafeArea(<TontinesScreen />);
+
+    expect(screen.getByTestId("dotted-background")).toBeOnTheScreen();
   });
 
   it("affiche l'avancement et le bénéficiaire du tour", async () => {

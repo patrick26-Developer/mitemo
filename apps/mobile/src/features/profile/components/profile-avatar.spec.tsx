@@ -24,8 +24,27 @@ describe("ProfileAvatar", () => {
     const onPress = jest.fn();
     await renderWithSafeArea(<ProfileAvatar initial="P" photoUri={null} onPress={onPress} />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Modifier la photo" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Modifier la photo" }));
 
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("affiche l'enregistrement en cours sur la photo", async () => {
+    await renderWithSafeArea(
+      <ProfileAvatar initial="P" photoUri="file:///avatar.jpg" isSaving onPress={jest.fn()} />,
+    );
+
+    expect(screen.getByTestId("profile-photo-saving")).toBeOnTheScreen();
+  });
+
+  it("n'ouvre pas la galerie pendant l'enregistrement", async () => {
+    const onPress = jest.fn();
+    await renderWithSafeArea(
+      <ProfileAvatar initial="P" photoUri={null} isSaving onPress={onPress} />,
+    );
+
+    await fireEvent.press(screen.getByRole("button", { name: "Enregistrement de la photo" }));
+
+    expect(onPress).not.toHaveBeenCalled();
   });
 });

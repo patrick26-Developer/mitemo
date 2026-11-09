@@ -4,16 +4,17 @@ import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { renderWithSafeArea } from "../../shared/testing/render-with-safe-area";
 import { AnimatedTabBar } from "./animated-tab-bar";
 
+/** Routes du navigateur, dans l'ordre trié par Expo Router (nom le plus court d'abord). */
 const ROUTES = [
   { key: "index-key", name: "index" },
-  { key: "tontines-key", name: "tontines" },
-  { key: "savings-key", name: "savings" },
   { key: "profile-key", name: "profile" },
+  { key: "savings-key", name: "savings" },
+  { key: "tontines-key", name: "tontines" },
 ];
 
 /**
  * Construit des props minimales de barre d'onglets.
- * @param index Rang de l'onglet actif.
+ * @param index Rang de l'onglet actif dans l'état du navigateur.
  * @returns Props de test et fonctions espionnes.
  */
 function buildProps(index: number) {
@@ -30,21 +31,23 @@ function buildProps(index: number) {
 }
 
 describe("AnimatedTabBar", () => {
-  it("affiche les quatre onglets", async () => {
+  it("affiche les quatre onglets dans l'ordre voulu, quel que soit l'ordre des routes", async () => {
     const { props } = buildProps(0);
     await renderWithSafeArea(<AnimatedTabBar {...props} />);
 
-    expect(screen.getByRole("tab", { name: "Accueil" })).toBeOnTheScreen();
-    expect(screen.getByRole("tab", { name: "Tontines" })).toBeOnTheScreen();
-    expect(screen.getByRole("tab", { name: "Cartes" })).toBeOnTheScreen();
-    expect(screen.getByRole("tab", { name: "Profil" })).toBeOnTheScreen();
+    expect(screen.getAllByRole("tab").map((tab) => tab.props["accessibilityLabel"])).toEqual([
+      "Accueil",
+      "Tontines",
+      "Cartes",
+      "Profil",
+    ]);
   });
 
   it("marque l'onglet actif comme sélectionné", async () => {
     const { props } = buildProps(1);
     await renderWithSafeArea(<AnimatedTabBar {...props} />);
 
-    expect(screen.getByRole("tab", { name: "Tontines" })).toBeSelected();
+    expect(screen.getByRole("tab", { name: "Profil" })).toBeSelected();
     expect(screen.getByRole("tab", { name: "Accueil" })).not.toBeSelected();
   });
 

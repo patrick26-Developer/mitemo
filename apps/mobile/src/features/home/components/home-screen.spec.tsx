@@ -1,14 +1,26 @@
 import { screen } from "@testing-library/react-native";
 
+import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/member-store";
 import { renderWithSafeArea } from "../../../shared/testing/render-with-safe-area";
 import { HomeScreen } from "./home-screen";
 
 describe("HomeScreen", () => {
+  beforeEach(() => {
+    useMemberStore.setState(INITIAL_MEMBER_PROFILE);
+  });
+
   it("salue le membre connecté", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
     expect(screen.getByText("Bonjour")).toBeOnTheScreen();
     expect(screen.getByText("Précieuse")).toBeOnTheScreen();
+  });
+
+  it("affiche la photo partagée du membre", async () => {
+    useMemberStore.getState().setPhoto("file:///documents/profile-photo.jpg");
+    await renderWithSafeArea(<HomeScreen />);
+
+    expect(screen.getByTestId("home-photo")).toBeOnTheScreen();
   });
 
   it("affiche le solde disponible et le montant mis de côté", async () => {
@@ -22,7 +34,7 @@ describe("HomeScreen", () => {
   it("liste les tontines du membre", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
-    expect(screen.getByText("Mes Tontines")).toBeOnTheScreen();
+    expect(screen.getByText("2 Tontines")).toBeOnTheScreen();
     expect(screen.getByText("Tontine du Marché Tolal")).toBeOnTheScreen();
     expect(screen.getByText("Tour 4 / 10")).toBeOnTheScreen();
   });
@@ -30,7 +42,7 @@ describe("HomeScreen", () => {
   it("liste les cartes de pointage du membre", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
-    expect(screen.getByText("Mes cartes de pointage")).toBeOnTheScreen();
+    expect(screen.getByText("2 Cartes de pointage")).toBeOnTheScreen();
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
   });
 });

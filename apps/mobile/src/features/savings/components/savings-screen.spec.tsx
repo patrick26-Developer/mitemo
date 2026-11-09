@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { renderWithSafeArea } from "../../../shared/testing/render-with-safe-area";
 import { SavingsScreen } from "./savings-screen";
@@ -29,6 +29,24 @@ describe("SavingsScreen", () => {
 
     expect(await screen.findByText("Fonds d'urgence")).toBeOnTheScreen();
     expect(screen.queryByText("Loyer de Janvier")).not.toBeOnTheScreen();
+  });
+
+  it("filtre les cartes avec la recherche de la liste", async () => {
+    await renderWithSafeArea(<SavingsScreen />);
+
+    fireEvent.press(screen.getByRole("button", { name: "Rechercher" }));
+    fireEvent.changeText(await screen.findByPlaceholderText("Rechercher une carte"), "santé");
+
+    expect(screen.getByText("Assurance santé")).toBeOnTheScreen();
+    await waitFor(() => expect(screen.queryByText("Loyer de Janvier")).not.toBeOnTheScreen());
+  });
+
+  it("ouvre la feuille de création depuis le bouton plus", async () => {
+    await renderWithSafeArea(<SavingsScreen />);
+
+    fireEvent.press(screen.getByRole("button", { name: "Ajouter" }));
+
+    expect(await screen.findByText("Nouvelle carte")).toBeOnTheScreen();
   });
 
   it("affiche l'échéance de chaque carte", async () => {

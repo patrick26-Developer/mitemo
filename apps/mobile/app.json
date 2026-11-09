@@ -12,7 +12,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Mitemo utilise votre photo pour votre profil."
+          "photosPermission": "Mitemo utilise votre photo pour votre profil.",
+          "cameraPermission": "Mitemo utilise l'appareil photo pour votre photo de profil."
         }
       ]
     ]
