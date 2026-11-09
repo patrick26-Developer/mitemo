@@ -52,4 +52,17 @@ describe("ProfileScreen", () => {
 
     expect(screen.getByRole("button", { name: "Modifier la photo" })).toBeOnTheScreen();
   });
+
+  it("place la création du compte et l'identité de l'application en pied de page", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByText("Compte créé en 2026")).toBeOnTheScreen();
+    expect(screen.getByText(/^Mitemo /)).toBeOnTheScreen();
+  });
+
+  it("n'affiche plus l'ancienneté dans l'en-tête", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.queryByText(/Membre depuis/)).not.toBeOnTheScreen();
+  });
 });

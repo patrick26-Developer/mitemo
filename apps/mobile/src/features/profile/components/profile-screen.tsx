@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DEMO_MEMBER } from "../../../shared/demo/member";
 import { useProfilePhoto } from "../hooks/use-profile-photo";
 import { PROFILE_GROUPS } from "../model/profile-content";
+import { ProfileFooter } from "./profile-footer";
 import { ProfileGroup } from "./profile-group";
 import { ProfileHeader } from "./profile-header";
 import { ProfileSignOut } from "./profile-sign-out";
@@ -28,6 +29,7 @@ export function ProfileScreen() {
           <ProfileGroup key={group.title} group={group} />
         ))}
         <ProfileSignOut />
+        <ProfileFooter createdAt={DEMO_MEMBER.createdAt} />
       </View>
     </ScrollView>
   );

@@ -12,7 +12,7 @@ export interface ProfileHeaderProps {
 }
 
 /**
- * Affiche la photo, le nom, le numéro et l'ancienneté du membre.
+ * Affiche la photo, le nom et le numéro du membre.
  * @param props Membre à afficher, photo courante et action de modification.
  * @returns L'en-tête du profil.
  */
@@ -27,7 +27,6 @@ export function ProfileHeader(props: ProfileHeaderProps) {
           {member.name}
         </Text>
         <Text className="text-[14px] text-muted">{member.phone}</Text>
-        <Text className="text-[12px] text-muted">{member.joinedAt}</Text>
       </View>
     </View>
   );
