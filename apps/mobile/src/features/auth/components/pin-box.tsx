@@ -38,8 +38,8 @@ export function PinBox(props: PinBoxProps) {
 /** Styles de la case, repris de la maquette. */
 const styles = StyleSheet.create({
   box: {
-    width: 58,
-    height: 58,
+    width: 64,
+    height: 64,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 16,

@@ -8,7 +8,6 @@ import { AUTH_ENTRANCE_DELAY, AUTH_ENTRANCE_DURATION } from "../model/auth-theme
 import { AuthErrorText } from "./auth-error-text";
 import { AuthHeading } from "./auth-heading";
 import { AuthLayout } from "./auth-layout";
-import { PinDemoHint } from "./pin-demo-hint";
 import { PinKeypad } from "./pin-keypad";
 import { PinRow } from "./pin-row";
 
@@ -62,7 +61,6 @@ export function PinScreen() {
           {...(isSignUp ? {} : { onForgot: showForgotPin })}
         />
       </Animated.View>
-      {isSignUp ? null : <PinDemoHint />}
     </AuthLayout>
   );
 }

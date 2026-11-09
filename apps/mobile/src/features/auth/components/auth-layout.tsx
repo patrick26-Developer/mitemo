@@ -63,17 +63,29 @@ export function AuthLayout(props: AuthLayoutProps) {
 
 /** Styles du fond bleu et de la feuille ancrée en bas. */
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: AUTH_COLORS.background },
-  logoArea: { flex: 1, alignItems: "center", justifyContent: "center" },
+  root: { flex: 1, backgroundColor: AUTH_COLORS.background, justifyContent: "flex-end" },
+  logoArea: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    top: 150,
+    left: 0,
+    right: 0,
+  },
   sheet: {
     maxHeight: "88%",
     flexShrink: 1,
     backgroundColor: AUTH_COLORS.sheet,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    borderBottomRightRadius: 48,
+    borderBottomLeftRadius: 48,
     borderTopWidth: 1,
     borderColor: AUTH_COLORS.sheetBorder,
     paddingHorizontal: 20,
+    marginHorizontal: 8,
+    marginBottom: 8,
     paddingTop: 14,
   },
   handle: {
@@ -85,5 +97,5 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: AUTH_COLORS.handle,
   },
-  content: { paddingTop: 18, paddingBottom: 4 },
+  content: { paddingTop: 12 },
 });
