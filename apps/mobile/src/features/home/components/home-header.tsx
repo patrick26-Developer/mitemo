@@ -1,14 +1,12 @@
 import { Info } from "lucide-react-native";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { MemberPhoto } from "../../../shared/components/member-photo";
 import { useMemberStore } from "../../../shared/member/member-store";
 import { PALETTE } from "../../../shared/theme/palette";
 
 /** Côté de l'avatar de l'accueil, en points. */
 const AVATAR_SIZE = 48;
-
-/** Style rond de la photo, aux dimensions de l'avatar. */
-const PHOTO_STYLE = { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2 };
 
 /**
  * Affiche la salutation et l'avatar partagé du membre.
@@ -21,13 +19,13 @@ export function HomeHeader() {
 
   return (
     <View className="mb-[18px] flex-row items-center gap-2.5 px-4">
-      <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white bg-avatar">
-        {photoUri ? (
-          <Image testID="home-photo" source={{ uri: photoUri }} style={PHOTO_STYLE} />
-        ) : (
-          <Text className="text-[18px] font-bold text-white">{avatarInitial}</Text>
-        )}
-      </View>
+      <MemberPhoto
+        photoUri={photoUri}
+        initial={avatarInitial}
+        size={AVATAR_SIZE}
+        testID="home-photo"
+        className="border border-white"
+      />
       <View className="flex-col gap-0.5">
         <Text className="text-[13px] text-on-dark-muted">Bonjour</Text>
         <View className="flex-row items-center gap-2">

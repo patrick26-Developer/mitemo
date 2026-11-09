@@ -1,18 +1,12 @@
 import { Camera } from "lucide-react-native";
-import { ActivityIndicator, Image, Text, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import { ActivityIndicator, View } from "react-native";
 
+import { MemberPhoto } from "../../../shared/components/member-photo";
 import { PressableScale } from "../../../shared/components/pressable-scale";
 import { PALETTE } from "../../../shared/theme/palette";
 
 /** Côté de l'avatar, en points. */
 const AVATAR_SIZE = 64;
-
-/** Style carré de la photo, aux dimensions de l'avatar. */
-const PHOTO_STYLE = { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2 };
-
-/** Durée d'apparition de la nouvelle photo, en millisecondes. */
-const PHOTO_FADE = 220;
 
 /** Absorbe l'appui pendant l'enregistrement, sans rouvrir la galerie. */
 function ignorePress(): void {}
@@ -45,14 +39,13 @@ export function ProfileAvatar(props: ProfileAvatarProps) {
       onPress={handlePress}
       className="h-16 w-16 rounded-full"
     >
-      <View className="h-16 w-16 items-center justify-center rounded-full bg-avatar">
-        {photoUri ? (
-          <Animated.View key={photoUri} entering={FadeIn.duration(PHOTO_FADE)} style={PHOTO_STYLE}>
-            <Image testID="profile-photo" source={{ uri: photoUri }} style={PHOTO_STYLE} />
-          </Animated.View>
-        ) : (
-          <Text className="text-[24px] font-bold text-white">{initial}</Text>
-        )}
+      <View className="h-16 w-16">
+        <MemberPhoto
+          photoUri={photoUri}
+          initial={initial}
+          size={AVATAR_SIZE}
+          testID="profile-photo"
+        />
         {isSaving ? (
           <View
             testID="profile-photo-saving"
