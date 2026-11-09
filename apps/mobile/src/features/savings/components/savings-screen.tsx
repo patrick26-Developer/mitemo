@@ -34,20 +34,18 @@ export function SavingsScreen() {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
-      <ListHeader filter={filter} onFilterChange={setFilter} />
-      {savings.length === 0 ? (
-        <EmptyState title={emptyState.title} message={emptyState.message} />
-      ) : (
-        <FlatList
-          data={savings}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="gap-3 px-4 pb-6"
-          renderItem={({ item, index }) => (
-            <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />
-          )}
-        />
-      )}
+      <FlatList
+        data={savings}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={<ListHeader filter={filter} onFilterChange={setFilter} />}
+        stickyHeaderIndices={[0]}
+        ListEmptyComponent={<EmptyState title={emptyState.title} message={emptyState.message} />}
+        contentContainerClassName="grow gap-3 px-4 pb-6"
+        renderItem={({ item, index }) => (
+          <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />
+        )}
+      />
     </View>
   );
 }
