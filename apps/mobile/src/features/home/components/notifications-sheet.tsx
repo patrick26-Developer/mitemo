@@ -2,6 +2,7 @@ import { Bell } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 import { BottomSheet } from "../../../shared/components/bottom-sheet";
+import { SheetInfoCard } from "../../../shared/components/sheet-info-card";
 import { SheetSection } from "../../../shared/components/sheet-section";
 import { PALETTE } from "../../../shared/theme/palette";
 import { HOME_NOTIFICATIONS } from "../model/home-notifications";
@@ -24,10 +25,7 @@ export function NotificationsSheet(props: NotificationsSheetProps) {
     <BottomSheet visible={visible} title="Notifications" onClose={onClose}>
       <SheetSection title="Récentes">
         {HOME_NOTIFICATIONS.map((notification) => (
-          <View
-            key={notification.id}
-            className="gap-1 rounded-[14px] border border-card-border px-4 py-3"
-          >
+          <SheetInfoCard key={notification.id}>
             <View className="flex-row items-center gap-2">
               <Bell size={16} color={PALETTE.brand} />
               <Text className="flex-1 text-[15px] font-semibold text-ink">
@@ -36,7 +34,7 @@ export function NotificationsSheet(props: NotificationsSheetProps) {
               <Text className="text-[11px] text-muted">{notification.time}</Text>
             </View>
             <Text className="text-[13px] leading-5 text-muted">{notification.message}</Text>
-          </View>
+          </SheetInfoCard>
         ))}
       </SheetSection>
     </BottomSheet>

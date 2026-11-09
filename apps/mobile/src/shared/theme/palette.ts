@@ -19,3 +19,6 @@ export const PALETTE = {
   barcodeOnCard: "rgba(23,27,42,0.35)",
   barcodeOnSavings: "rgba(225,228,238,0.35)",
 } as const;
+
+/** Couleurs de la piste d'un commutateur : éteint puis allumé. */
+export const SWITCH_TRACK_COLORS = { false: PALETTE.tabActive, true: PALETTE.brand } as const;

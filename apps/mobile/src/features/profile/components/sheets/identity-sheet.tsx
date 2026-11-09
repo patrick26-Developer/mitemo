@@ -1,13 +1,14 @@
 import { BadgeCheck } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
 
+import { DetailCard } from "../../../../shared/components/detail-card";
 import { DetailRow } from "../../../../shared/components/detail-row";
+import { SheetBadge } from "../../../../shared/components/sheet-badge";
+import { SheetSecondaryButton } from "../../../../shared/components/sheet-secondary-button";
 import { SheetSection } from "../../../../shared/components/sheet-section";
 import { SheetText } from "../../../../shared/components/sheet-text";
 import { formatDate } from "../../../../shared/format/format-date";
 import { useMemberStore } from "../../../../shared/member/member-store";
-import { PALETTE } from "../../../../shared/theme/palette";
 import { IdentityEditForm } from "./identity-edit-form";
 
 /**
@@ -44,28 +45,16 @@ function IdentitySummary(props: IdentitySummaryProps) {
   return (
     <>
       <SheetSection title="Identité">
-        <View className="gap-3 rounded-[16px] border border-card-border p-4">
+        <DetailCard>
           <DetailRow label="Prénom" value={firstName} />
           <DetailRow label="Nom" value={lastName} />
           <DetailRow label="Profession ou formation" value={occupation} />
           <DetailRow label="Téléphone" value={phone} />
           <DetailRow label="Compte créé le" value={formatDate(createdAt)} />
-        </View>
-        <View className="flex-row items-center gap-2 self-start rounded-full bg-brand-veil px-3 py-1.5">
-          <BadgeCheck size={16} color={PALETTE.brand} />
-          <Text className="text-[13px] font-medium text-brand">Compte vérifié</Text>
-        </View>
+        </DetailCard>
+        <SheetBadge icon={BadgeCheck} label="Compte vérifié" />
       </SheetSection>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Modifier mes informations"
-        onPress={onEdit}
-        className="rounded-[16px] border border-card-border py-3.5"
-      >
-        <Text className="text-center text-[15px] font-medium text-ink">
-          Modifier mes informations
-        </Text>
-      </Pressable>
+      <SheetSecondaryButton label="Modifier mes informations" onPress={onEdit} />
       <SheetText>
         {
           "Votre numéro sert à retrouver vos tontines et à sécuriser vos connexions. Il n'est jamais partagé avec les autres membres."

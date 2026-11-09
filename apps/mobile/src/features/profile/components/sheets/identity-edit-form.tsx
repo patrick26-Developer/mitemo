@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import { PressableScale } from "../../../../shared/components/pressable-scale";
+import { SheetPrimaryButton } from "../../../../shared/components/sheet-primary-button";
+import { SheetSecondaryButton } from "../../../../shared/components/sheet-secondary-button";
 import { SheetTextField } from "../../../../shared/components/sheet-text-field";
 import type { IdentityField, IdentityFormState } from "../../hooks/use-identity-edit";
 import { useIdentityEdit } from "../../hooks/use-identity-edit";
@@ -62,21 +63,12 @@ function IdentityActions(props: IdentityActionsProps) {
 
   return (
     <View className="gap-3">
-      <PressableScale
-        accessibilityLabel="Enregistrer"
-        onPress={onSave}
-        className="rounded-[16px] bg-brand"
-      >
-        <Text className="py-3.5 text-center text-[15px] font-semibold text-white">Enregistrer</Text>
-      </PressableScale>
-      <Pressable
-        accessibilityRole="button"
+      <SheetPrimaryButton label="Enregistrer" onPress={onSave} />
+      <SheetSecondaryButton
+        label="Annuler"
         accessibilityLabel="Annuler la modification"
         onPress={onCancel}
-        className="rounded-[16px] border border-card-border py-3.5"
-      >
-        <Text className="text-center text-[15px] font-medium text-ink">Annuler</Text>
-      </Pressable>
+      />
     </View>
   );
 }
