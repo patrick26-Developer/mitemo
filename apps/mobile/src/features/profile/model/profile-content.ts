@@ -61,7 +61,8 @@ export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
   {
     title: "Mon compte",
     actions: [
-      { id: "identity", label: "Mes informations", icon: UserRound },
+      { id: "identity", label: "Informations personnelles", icon: UserRound },
+      { id: "security", label: "Sécurité", icon: ShieldCheck },
       { id: "payment", label: "Moyen de paiement", icon: CreditCard },
       { id: "history", label: "Historique", icon: History },
     ],
@@ -76,10 +77,7 @@ export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
   },
   {
     title: "Aide",
-    actions: [
-      { id: "security", label: "Sécurité", icon: ShieldCheck },
-      { id: "help", label: "Centre d'aide", icon: CircleHelp },
-    ],
+    actions: [{ id: "help", label: "Centre d'aide", icon: CircleHelp }],
   },
   {
     title: "Légal",

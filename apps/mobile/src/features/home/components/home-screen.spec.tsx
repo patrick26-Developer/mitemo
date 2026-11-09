@@ -13,7 +13,7 @@ describe("HomeScreen", () => {
     await renderWithSafeArea(<HomeScreen />);
 
     expect(screen.getByText("Bonjour")).toBeOnTheScreen();
-    expect(screen.getByText("Précieuse")).toBeOnTheScreen();
+    expect(screen.getByText("Précieuse Mavoungou")).toBeOnTheScreen();
   });
 
   it("affiche la photo partagée du membre", async () => {

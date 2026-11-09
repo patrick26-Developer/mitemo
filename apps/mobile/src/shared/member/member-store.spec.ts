@@ -12,7 +12,8 @@ describe("useMemberStore", () => {
   it("part du membre de démonstration, sans photo", () => {
     const state = useMemberStore.getState();
 
-    expect(state.name).toBe("Précieuse");
+    expect(state.name).toBe("Précieuse Mavoungou");
+    expect(state.occupation).toBe("Commerçante");
     expect(state.photoUri).toBeNull();
     expect(state.photoPendingUpload).toBe(false);
   });
@@ -42,11 +43,16 @@ describe("useMemberStore", () => {
 
   it("met à jour l'identité après une inscription", () => {
     useMemberStore.getState().updateIdentity({
-      name: "Aimée",
+      firstName: "Aimée",
+      lastName: "Mbemba",
+      occupation: "Commerçante",
       phone: "+242 06 512 3456",
     });
 
-    expect(useMemberStore.getState().name).toBe("Aimée");
+    expect(useMemberStore.getState().name).toBe("Aimée Mbemba");
+    expect(useMemberStore.getState().firstName).toBe("Aimée");
+    expect(useMemberStore.getState().lastName).toBe("Mbemba");
+    expect(useMemberStore.getState().occupation).toBe("Commerçante");
     expect(useMemberStore.getState().avatarInitial).toBe("A");
     expect(useMemberStore.getState().phone).toBe("+242 06 512 3456");
   });

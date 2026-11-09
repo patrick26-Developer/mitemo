@@ -5,6 +5,7 @@ import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PALETTE } from "../theme/palette";
+import { SheetBackdrop } from "./sheet-backdrop";
 
 /** Course d'ouverture de la feuille, en points. */
 const OPEN_OFFSET = 560;
@@ -54,12 +55,7 @@ export function BottomSheet(props: BottomSheetProps) {
       onRequestClose={close}
     >
       <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Fermer la feuille"
-          className="absolute inset-0 bg-ink/50"
-          onPress={close}
-        />
+        <SheetBackdrop onPress={close} />
         <SheetSurface
           translateY={translateY}
           title={title}
@@ -109,11 +105,11 @@ function SheetSurface(props: SheetSurfaceProps) {
   return (
     <Animated.View
       testID="bottom-sheet"
-      className="max-h-[88%] rounded-t-[36px] border border-b-0 border-card-border bg-white px-4 pt-3"
+      className="max-h-[90%] rounded-t-[24px] border border-b-0 border-card-border bg-white px-5 pt-4"
       style={[styles.surface, { transform: [{ translateY }], paddingBottom: bottomInset + 20 }]}
     >
       <View className="mb-3 items-center">
-        <View className="h-1 w-10 rounded-full bg-brand/25" />
+        <View className="h-1 w-10 rounded-full bg-ink/20" />
       </View>
       <View className="mb-2 flex-row items-center justify-between">
         <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">

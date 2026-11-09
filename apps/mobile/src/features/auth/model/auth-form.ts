@@ -16,8 +16,17 @@ export const PIN_LENGTH = 4;
 /** Code PIN de démonstration, en attendant la vérification par l'API. */
 export const DEMO_PIN = "1234";
 
-/** Longueur minimale d'un nom de membre. */
+/** Longueur minimale d'un prénom, d'un nom ou d'une profession. */
 const MIN_NAME_LENGTH = 2;
+
+/** Saisie de la première étape d'inscription. */
+export interface SignUpInput {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly occupation: string;
+  /** Chiffres du numéro local, sans indicatif. */
+  readonly digits: string;
+}
 
 /** Groupes de chiffres du numéro local : 2-3-2-2. */
 const PHONE_GROUPS = [2, 5, 7, 9] as const;
@@ -114,12 +123,13 @@ export function isValidPhoneDigits(digits: string): boolean {
 }
 
 /**
- * Indique si le nom saisi est assez long pour identifier le membre.
- * @param name Nom saisi.
- * @returns Vrai si le nom contient au moins deux caractères utiles.
+ * Indique si un prénom, un nom ou une profession est assez long pour identifier
+ * le membre.
+ * @param value Saisie à contrôler.
+ * @returns Vrai si la saisie contient au moins deux caractères utiles.
  */
-export function isValidName(name: string): boolean {
-  return name.trim().length >= MIN_NAME_LENGTH;
+export function isValidPersonName(value: string): boolean {
+  return value.trim().length >= MIN_NAME_LENGTH;
 }
 
 /**
@@ -141,14 +151,24 @@ export function isValidDemoPin(pin: string): boolean {
 }
 
 /**
- * Valide le nom et le numéro de la première étape d'inscription.
- * @param name Nom saisi.
- * @param digits Chiffres du numéro local.
+ * Valide l'identité et le numéro de la première étape d'inscription.
+ * @param input Prénom, nom, profession et chiffres du numéro.
  * @returns Le message d'erreur, ou une chaîne vide si tout est correct.
  */
-export function signUpError(name: string, digits: string): string {
-  if (!isValidName(name)) return "Entrez un nom d'au moins deux caractères.";
-  if (!isValidPhoneDigits(digits)) {
+export function signUpError(input: SignUpInput): string {
+  if (!isValidPersonName(input.firstName)) {
+    return "Entrez un prénom d'au moins deux caractères.";
+  }
+
+  if (!isValidPersonName(input.lastName)) {
+    return "Entrez un nom d'au moins deux caractères.";
+  }
+
+  if (!isValidPersonName(input.occupation)) {
+    return "Indiquez votre profession ou votre formation.";
+  }
+
+  if (!isValidPhoneDigits(input.digits)) {
     return "Entrez un numéro congolais valide, par exemple 06 570 66 22.";
   }
 
