@@ -41,7 +41,7 @@ export function SegmentedControl<Value extends string>(props: SegmentedControlPr
             accessibilityState={{ selected }}
             accessibilityLabel={option.label}
             onPress={() => onChange(option.value)}
-            className={`rounded-full px-3 py-2  ${selected ? "bg-white" : ""}`}
+            className={`rounded-full px-3 py-3  ${selected ? "bg-white" : ""}`}
             style={CONTINUOUS_CORNERS}
           >
             <Text

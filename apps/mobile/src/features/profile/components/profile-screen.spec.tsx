@@ -33,4 +33,37 @@ describe("ProfileScreen", () => {
     expect(screen.getByRole("button", { name: "Historique" })).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Thème" })).toBeOnTheScreen();
   });
+
+  it("affiche le nom du thème courant", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByText("Système")).toBeOnTheScreen();
+  });
+
+  it("affiche les documents légaux", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByRole("button", { name: "Politique de confidentialité" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Conditions d'utilisation" })).toBeOnTheScreen();
+  });
+
+  it("permet de modifier la photo de profil", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByRole("button", { name: "Modifier la photo" })).toBeOnTheScreen();
+  });
+
+  it("affiche la création du compte et l'identité de l'application", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByText("Compte créé le 12/03/2026")).toBeOnTheScreen();
+    expect(screen.getByText("Mitemo")).toBeOnTheScreen();
+    expect(screen.getByText("version 0.0.0")).toBeOnTheScreen();
+  });
+
+  it("n'affiche plus l'ancienneté dans l'en-tête", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.queryByText(/Membre depuis/)).not.toBeOnTheScreen();
+  });
 });
