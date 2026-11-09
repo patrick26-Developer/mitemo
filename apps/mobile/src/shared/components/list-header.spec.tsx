@@ -14,6 +14,21 @@ describe("ListHeader", () => {
     expect(screen.getByRole("button", { name: "Ajouter" })).toBeOnTheScreen();
   });
 
+  it("ouvre un champ de recherche sur place", async () => {
+    await renderWithSafeArea(
+      <ListHeader
+        topInset={0}
+        filter="active"
+        onFilterChange={jest.fn()}
+        search={{ query: "", onChange: jest.fn(), placeholder: "Rechercher une tontine" }}
+      />,
+    );
+
+    fireEvent.press(screen.getByRole("button", { name: "Rechercher" }));
+
+    expect(await screen.findByPlaceholderText("Rechercher une tontine")).toBeOnTheScreen();
+  });
+
   it("remonte le filtre choisi", async () => {
     const onFilterChange = jest.fn();
     await renderWithSafeArea(

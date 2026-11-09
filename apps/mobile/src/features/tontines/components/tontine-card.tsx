@@ -1,9 +1,10 @@
 import { router } from "expo-router";
 import { Users } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import { BarcodeStrip } from "../../../shared/components/barcode-strip";
+import { PressableScale } from "../../../shared/components/pressable-scale";
 import { formatAmount } from "../../../shared/format/format-amount";
 import type { DemoTontine } from "../../../shared/demo/tontines";
 import { CARD_WIDTH, computeHeaderWidth } from "../../../shared/theme/card-layout";
@@ -77,9 +78,12 @@ export function TontineCard(props: TontineCardProps) {
 
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)} style={{ width }}>
-      <Pressable onPress={() => router.push(`/tontine/${item.id}`)}>
+      <PressableScale
+        accessibilityLabel={`Ouvrir ${item.name}`}
+        onPress={() => router.push(`/tontine/${item.id}`)}
+      >
         <TontineCardBody item={item} headerWidth={computeHeaderWidth(width)} />
-      </Pressable>
+      </PressableScale>
     </Animated.View>
   );
 }

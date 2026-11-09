@@ -12,6 +12,8 @@ module.exports = {
     "^lucide-react-native$":
       "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
     "^react-native-reanimated$": "<rootDir>/jest/mocks/react-native-reanimated.js",
+    "^@react-native-async-storage/async-storage$":
+      "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
   },
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.spec.{ts,tsx}"],
   coverageThreshold: {

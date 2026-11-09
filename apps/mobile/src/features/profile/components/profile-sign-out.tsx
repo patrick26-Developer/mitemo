@@ -14,6 +14,8 @@ const CREATED_AT_STYLE = { opacity: 0.6 } as const;
 export interface ProfileSignOutProps {
   /** Date de création du compte, en UTC. */
   readonly createdAt: string;
+  /** Ouvre la confirmation de déconnexion. */
+  readonly onPress?: () => void;
 }
 
 /**
@@ -23,7 +25,7 @@ export interface ProfileSignOutProps {
  * @returns La section de compte.
  */
 export function ProfileSignOut(props: ProfileSignOutProps) {
-  const { createdAt } = props;
+  const { createdAt, onPress } = props;
 
   return (
     <View className="px-4">
@@ -41,6 +43,7 @@ export function ProfileSignOut(props: ProfileSignOutProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Se déconnecter"
+          onPress={onPress}
           className="flex-row items-center gap-3 px-4 py-3.5"
         >
           <View testID="sign-out-icon" style={LOG_OUT_STYLE}>

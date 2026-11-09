@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 
 /**
  * Double de test de Reanimated : son implémentation native et son
@@ -42,7 +42,15 @@ function animatedStyle(factory) {
  * @returns {{ value: unknown }} La valeur partagée.
  */
 function sharedValue(initial) {
-  return { value: initial };
+  const shared = {
+    value: initial,
+    get: () => shared.value,
+    set: (next) => {
+      shared.value = typeof next === "function" ? next(shared.value) : next;
+    },
+  };
+
+  return shared;
 }
 
 /**
@@ -56,26 +64,77 @@ function delayed(delay, value) {
 }
 
 /**
- * Conserve l'animation d'entrée pour permettre le chaînage `delay().duration()`.
- * @returns {{ delay: () => unknown, duration: () => unknown }} L'animation d'entrée.
+ * Conserve l'animation d'entrée pour permettre ses chaînages : délai, durée,
+ * ressort et courbe.
+ * @returns {{ delay: () => unknown, duration: () => unknown, springify: () => unknown, damping: () => unknown, stiffness: () => unknown, easing: () => unknown }} L'animation d'entrée.
  */
 function keepEntering() {
   return entering;
 }
 
-const entering = { delay: keepEntering, duration: keepEntering };
+const entering = {
+  delay: keepEntering,
+  duration: keepEntering,
+  springify: keepEntering,
+  damping: keepEntering,
+  stiffness: keepEntering,
+  easing: keepEntering,
+};
+
+/**
+ * Rend immédiatement la dernière valeur d'une séquence.
+ * @param {...unknown} values Valeurs de la séquence.
+ * @returns {unknown} La dernière valeur.
+ */
+function lastValue(...values) {
+  return values[values.length - 1];
+}
+
+/**
+ * Rend une courbe d'accélération neutre.
+ * @returns {unknown} La fonction d'identité.
+ */
+function bezierEasing() {
+  return identity;
+}
+
+/**
+ * Exécute immédiatement une fonction prévue pour le fil UI.
+ * @param {() => void} callback Fonction à exécuter.
+ * @returns {() => void} La même fonction.
+ */
+function runOnJSCallback(callback) {
+  return callback;
+}
 
 export default {
   View,
   Text,
+  Image,
+  ScrollView,
 };
 
-export const Easing = { out: identity, cubic: identity };
+export const Easing = {
+  out: identity,
+  cubic: identity,
+  linear: identity,
+  inOut: identity,
+  bezier: bezierEasing,
+};
+export const FadeIn = entering;
 export const FadeInDown = entering;
 export const FadeInRight = entering;
+export const FadeOut = entering;
+export const SlideInDown = entering;
+export const SlideOutDown = entering;
+export const ZoomIn = entering;
 export const interpolate = finalValue;
 export const interpolateColor = finalValue;
+export const runOnJS = runOnJSCallback;
 export const useAnimatedStyle = animatedStyle;
 export const useSharedValue = sharedValue;
 export const withDelay = delayed;
+export const withRepeat = identity;
+export const withSequence = lastValue;
+export const withSpring = identity;
 export const withTiming = identity;
