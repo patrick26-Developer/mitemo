@@ -31,8 +31,12 @@ export const HOME_USER: HomeUser = {
 /** Soldes affichés tant que l'API n'est pas branchée. */
 export const HOME_BALANCE: HomeBalance = { available: 12_500n, saved: 2_500n };
 
-/** Tontines affichées tant que l'API n'est pas branchée. */
-export const HOME_TONTINES: readonly HomeTontine[] = DEMO_TONTINES;
+/** Tontines en cours affichées tant que l'API n'est pas branchée. */
+export const HOME_TONTINES: readonly HomeTontine[] = DEMO_TONTINES.filter(
+  (item) => item.state === "ACTIVE",
+);
 
-/** Cartes de pointage affichées tant que l'API n'est pas branchée. */
-export const HOME_SAVINGS: readonly HomeSavings[] = DEMO_SAVINGS;
+/** Cartes de pointage en cours affichées tant que l'API n'est pas branchée. */
+export const HOME_SAVINGS: readonly HomeSavings[] = DEMO_SAVINGS.filter(
+  (item) => item.state === "ACTIVE",
+);

@@ -1,10 +1,26 @@
+import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ScreenHeader } from "../../../shared/components/screen-header";
+import { EmptyState } from "../../../shared/components/empty-state";
+import { ListHeader } from "../../../shared/components/list-header";
 import { DEMO_SAVINGS } from "../../../shared/demo/savings";
+import { matchesFilter } from "../../../shared/model/list-filter";
+import type { ListFilter } from "../../../shared/model/list-filter";
 import { FULL_CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsCard } from "./savings-card";
+
+/** Message affiché quand le filtre ne retient aucune carte. */
+const EMPTY_STATES: Readonly<Record<ListFilter, { title: string; message: string }>> = {
+  active: {
+    title: "Aucune carte active",
+    message: "Créez une carte de pointage pour la voir apparaître ici.",
+  },
+  completed: {
+    title: "Aucune carte terminée",
+    message: "Les cartes clôturées apparaîtront ici.",
+  },
+};
 
 /**
  * Écran de la liste complète des cartes de pointage du membre.
@@ -12,22 +28,26 @@ import { SavingsCard } from "./savings-card";
  */
 export function SavingsScreen() {
   const insets = useSafeAreaInsets();
+  const [filter, setFilter] = useState<ListFilter>("active");
+  const savings = DEMO_SAVINGS.filter((item) => matchesFilter(item.state === "COMPLETED", filter));
+  const emptyState = EMPTY_STATES[filter];
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
-      <ScreenHeader
-        title="Mes cartes de pointage"
-        subtitle={`${DEMO_SAVINGS.length} cartes de pointage`}
-      />
-      <FlatList
-        data={DEMO_SAVINGS}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-3 px-4 pb-6"
-        renderItem={({ item, index }) => (
-          <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />
-        )}
-      />
+      <ListHeader filter={filter} onFilterChange={setFilter} />
+      {savings.length === 0 ? (
+        <EmptyState title={emptyState.title} message={emptyState.message} />
+      ) : (
+        <FlatList
+          data={savings}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="gap-3 px-4 pb-6"
+          renderItem={({ item, index }) => (
+            <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />
+          )}
+        />
+      )}
     </View>
   );
 }
