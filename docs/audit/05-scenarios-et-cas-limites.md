@@ -18,16 +18,16 @@ Traitement : voir §4.6 de `03-architecture-technique.md`. Délai de carence, no
 
 Premier vecteur de fraude du mobile money dans la région. L'attaquant obtient une SIM au nom de la victime chez un revendeur, puis reçoit tous ses OTP. Comme l'authentification de Mitemo repose **exclusivement** sur le numéro (§1.2), ce scénario donne un accès total.
 
-C'est le prix à payer du choix « zéro CNI », et ce choix reste bon — mais il doit être compensé :
+C'est le prix à payer du choix « zéro CNI », et ce choix reste bon - mais il doit être compensé :
 
 - Liaison forte à l'appareil, et traitement de tout nouvel appareil comme hostile par défaut.
-- Interrogation de l'ancienneté de la SIM auprès de l'opérateur quand l'API l'autorise — **à inscrire explicitement dans la négociation du partenariat opérateur**.
+- Interrogation de l'ancienneté de la SIM auprès de l'opérateur quand l'API l'autorise - **à inscrire explicitement dans la négociation du partenariat opérateur**.
 - Code secret de récupération remis à l'inscription, hors canal SMS.
 - Au-delà d'un seuil de solde, exiger un second facteur non lié au téléphone : un contact de confiance, ou la validation de l'administrateur du groupe.
 
 ### 1.3 Changement de numéro volontaire
 
-Fréquent (changement d'opérateur, numéro perdu). Il faut une procédure de migration de compte qui préserve l'historique et le score — sinon l'utilisateur recrée un compte et perd l'actif que vous essayez de construire.
+Fréquent (changement d'opérateur, numéro perdu). Il faut une procédure de migration de compte qui préserve l'historique et le score - sinon l'utilisateur recrée un compte et perd l'actif que vous essayez de construire.
 
 ### 1.4 Un téléphone pour plusieurs personnes
 
@@ -87,7 +87,7 @@ Variante LBC/FT : une tontine qui n'épargne rien mais fait tourner de l'argent 
 
 Non traité. Ses obligations cumulées peuvent largement dépasser sa capacité. Son défaut touche alors dix groupes à la fois.
 
-Traitement : consolider l'exposition **par personne**, afficher le total des engagements à l'utilisateur, plafonner par palier KYC, et avertir le groupe quand un candidat est déjà très engagé — sans révéler ses montants, ce qui serait une violation de sa vie privée. Un simple indicateur de niveau d'engagement suffit.
+Traitement : consolider l'exposition **par personne**, afficher le total des engagements à l'utilisateur, plafonner par palier KYC, et avertir le groupe quand un candidat est déjà très engagé - sans révéler ses montants, ce qui serait une violation de sa vie privée. Un simple indicateur de niveau d'engagement suffit.
 
 ---
 
@@ -103,7 +103,7 @@ Traitement : la cagnotte est **toujours** créditée au portefeuille interne (op
 
 Un encaissement initié, confirmé par l'opérateur trois heures plus tard, alors que l'échéance est passée et que la réserve a déjà comblé le manque. Qui est remboursé, dans quel ordre, et avec quelles écritures ?
 
-Traitement : cascade de remboursement inverse (réserve d'abord reconstituée, puis portefeuille du membre), annulation de la pénalité si le retard est imputable à l'opérateur — point important : **un utilisateur ne doit jamais être pénalisé pour une lenteur de l'opérateur**, et il faut pouvoir le prouver, d'où le traçage recommandé en §4.7 de `03`.
+Traitement : cascade de remboursement inverse (réserve d'abord reconstituée, puis portefeuille du membre), annulation de la pénalité si le retard est imputable à l'opérateur - point important : **un utilisateur ne doit jamais être pénalisé pour une lenteur de l'opérateur**, et il faut pouvoir le prouver, d'où le traçage recommandé en §4.7 de `03`.
 
 ### 3.3 Paiement partiel
 
@@ -117,7 +117,7 @@ Il appuie deux fois, ou dépose deux fois par inquiétude. Doit créditer le por
 
 ### 3.5 Retrait du solde libre
 
-Non traité. Un utilisateur a 20 000 FCFA au portefeuille dont 5 000 engagés dans une tontine. Il doit pouvoir retirer les 15 000 libres — et ce retrait coûte ~1 % à Mitemo.
+Non traité. Un utilisateur a 20 000 FCFA au portefeuille dont 5 000 engagés dans une tontine. Il doit pouvoir retirer les 15 000 libres - et ce retrait coûte ~1 % à Mitemo.
 
 Traitement : distinguer clairement **solde disponible** et **solde engagé** dans l'interface (c'est aussi une exigence de confiance), et prévoir des frais de retrait répercutés ou un seuil de gratuité mensuel.
 
@@ -129,7 +129,7 @@ Traitement : tout arrondi est explicite, documenté, et son reliquat est **imput
 
 ### 3.7 Opération contestée
 
-Un membre affirme n'avoir jamais autorisé un transfert. Sans journal d'audit complet (appareil, horodatage, canal, mode d'authentification), c'est sa parole contre la vôtre — et c'est précisément pourquoi l'arbitrage par SMS sans PIN du §4.1 est intenable juridiquement.
+Un membre affirme n'avoir jamais autorisé un transfert. Sans journal d'audit complet (appareil, horodatage, canal, mode d'authentification), c'est sa parole contre la vôtre - et c'est précisément pourquoi l'arbitrage par SMS sans PIN du §4.1 est intenable juridiquement.
 
 ---
 
@@ -141,7 +141,7 @@ Le §1.1 crée cet état. Rien ne dit qui le déclenche, qui arbitre, selon quel
 
 À spécifier minimalement :
 - **Qui déclenche** : tout membre, ou le système sur détection d'anomalie.
-- **Effet immédiat** : gel des distributions, maintien des cotisations, ou gel total ? À trancher — le gel total punit les membres de bonne foi.
+- **Effet immédiat** : gel des distributions, maintien des cotisations, ou gel total ? À trancher - le gel total punit les membres de bonne foi.
 - **Qui arbitre** : support Mitemo en première instance ? Vote du groupe ? Quelle légitimité ?
 - **Délai d'engagement** : publié et tenu. 72 heures ouvrées est un engagement crédible et défendable.
 - **Sortie** : retour en `ACTIVE`, clôture anticipée, ou exclusion d'un membre.
@@ -157,7 +157,7 @@ Traitement : double validation obligatoire par deux comptes distincts, motif obl
 
 ### 4.3 Groupe inactif
 
-Un groupe en `RECRUTEMENT` qui n'atteint jamais son quorum, avec des garanties déjà bloquées. Il faut une expiration automatique et la restitution des garanties. Sans cela, de l'argent d'utilisateurs reste bloqué indéfiniment — et c'est le type de situation qui fait une plainte.
+Un groupe en `RECRUTEMENT` qui n'atteint jamais son quorum, avec des garanties déjà bloquées. Il faut une expiration automatique et la restitution des garanties. Sans cela, de l'argent d'utilisateurs reste bloqué indéfiniment - et c'est le type de situation qui fait une plainte.
 
 ### 4.4 Migration d'un groupe existant vers Mitemo **[opportunité produit]**
 
@@ -172,7 +172,7 @@ Une tontine réelle existe depuis trois ans, au cahier, et veut passer au numér
 - Chaque membre a ensuite une raison personnelle de s'équiper, puisqu'il voit son propre historique se construire.
 - Et cela fonctionne même là où le réseau et le mobile money ne suivent pas.
 
-Risque à encadrer : une cotisation déclarée mais non reçue. La solution est la confirmation par le membre (par USSD ou dans l'application), ce qui fait du « mode cahier » un **registre à double confirmation** — plus fiable que le cahier papier, qui est le véritable concurrent de Mitemo.
+Risque à encadrer : une cotisation déclarée mais non reçue. La solution est la confirmation par le membre (par USSD ou dans l'application), ce qui fait du « mode cahier » un **registre à double confirmation** - plus fiable que le cahier papier, qui est le véritable concurrent de Mitemo.
 
 C'est peut-être la fonctionnalité la plus intelligente à ajouter au cahier des charges, et elle ne coûte presque rien à développer.
 
