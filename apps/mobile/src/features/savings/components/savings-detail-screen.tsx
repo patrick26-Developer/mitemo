@@ -1,8 +1,6 @@
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { DetailHeader } from "../../../shared/components/detail-header";
 import { EmptyState } from "../../../shared/components/empty-state";
+import { ScreenFrame } from "../../../shared/components/screen-frame";
 import { DEMO_SAVINGS } from "../../../shared/demo/savings";
 import { SavingsDetailContent } from "./savings-detail-content";
 
@@ -19,11 +17,10 @@ export interface SavingsDetailScreenProps {
  */
 export function SavingsDetailScreen(props: SavingsDetailScreenProps) {
   const { id } = props;
-  const insets = useSafeAreaInsets();
   const savings = DEMO_SAVINGS.find((item) => item.id === id);
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
+    <ScreenFrame>
       <DetailHeader title={savings?.title ?? "Carte"} />
       {savings ? (
         <SavingsDetailContent item={savings} />
@@ -33,6 +30,6 @@ export function SavingsDetailScreen(props: SavingsDetailScreenProps) {
           message="Cette carte n'existe pas ou a été supprimée."
         />
       )}
-    </View>
+    </ScreenFrame>
   );
 }

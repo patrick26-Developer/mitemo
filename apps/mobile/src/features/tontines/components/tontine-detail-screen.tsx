@@ -1,8 +1,6 @@
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { DetailHeader } from "../../../shared/components/detail-header";
 import { EmptyState } from "../../../shared/components/empty-state";
+import { ScreenFrame } from "../../../shared/components/screen-frame";
 import { DEMO_TONTINES } from "../../../shared/demo/tontines";
 import { TontineDetailContent } from "./tontine-detail-content";
 
@@ -19,11 +17,10 @@ export interface TontineDetailScreenProps {
  */
 export function TontineDetailScreen(props: TontineDetailScreenProps) {
   const { id } = props;
-  const insets = useSafeAreaInsets();
   const tontine = DEMO_TONTINES.find((item) => item.id === id);
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
+    <ScreenFrame>
       <DetailHeader title={tontine?.name ?? "Tontine"} />
       {tontine ? (
         <TontineDetailContent item={tontine} />
@@ -33,6 +30,6 @@ export function TontineDetailScreen(props: TontineDetailScreenProps) {
           message="Cette tontine n'existe pas ou a été supprimée."
         />
       )}
-    </View>
+    </ScreenFrame>
   );
 }

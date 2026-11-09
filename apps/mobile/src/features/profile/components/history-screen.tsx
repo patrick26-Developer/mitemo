@@ -1,8 +1,7 @@
 import { ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DetailHeader } from "../../../shared/components/detail-header";
-import { DottedBackground } from "../../../shared/components/dotted-background";
+import { ScreenFrame } from "../../../shared/components/screen-frame";
 import { PROFILE_HISTORY } from "../model/profile-history";
 import { HistoryRow } from "./history-row";
 
@@ -11,11 +10,8 @@ import { HistoryRow } from "./history-row";
  * @returns La page d'historique.
  */
 export function HistoryScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
-      <DottedBackground />
+    <ScreenFrame>
       <DetailHeader title="Historique" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4 px-4 pb-10">
         <Text className="text-[13px] font-medium uppercase text-muted">Dernières opérations</Text>
@@ -29,6 +25,6 @@ export function HistoryScreen() {
           confirmée met à jour le tour de la tontine.
         </Text>
       </ScrollView>
-    </View>
+    </ScreenFrame>
   );
 }
