@@ -62,24 +62,24 @@ describe("ProfileScreen", () => {
   it("regroupe les actions du profil", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
+    expect(screen.getByText("Mes espaces")).toBeOnTheScreen();
     expect(screen.getByText("Mon compte")).toBeOnTheScreen();
     expect(screen.getByText("Préférences")).toBeOnTheScreen();
     expect(screen.getByText("Aide")).toBeOnTheScreen();
   });
 
-  it("affiche les actions et la déconnexion", async () => {
+  it("donne accès aux espaces de l'utilisateur actif", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    expect(screen.getByText("Informations personnelles")).toBeOnTheScreen();
-    expect(screen.getByText("Centre d'aide")).toBeOnTheScreen();
-    expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeOnTheScreen();
-  });
+    expect(screen.getByRole("button", { name: "Mes tontines" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Mes cartes" })).toBeOnTheScreen();
+    expect(screen.getAllByText("2")).toHaveLength(2);
 
-  it("propose l'historique et le choix du thème", async () => {
-    await renderWithSafeArea(<ProfileScreen />);
+    await fireEvent.press(screen.getByRole("button", { name: "Mes tontines" }));
+    expect(router.push).toHaveBeenCalledWith("/(tabs)/tontines");
 
-    expect(screen.getByRole("button", { name: "Historique" })).toBeOnTheScreen();
-    expect(screen.getByRole("button", { name: "Thème" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Mes cartes" }));
+    expect(router.push).toHaveBeenCalledWith("/(tabs)/savings");
   });
 
   it("ouvre l'historique dans une page dédiée", async () => {

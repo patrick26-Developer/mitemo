@@ -1,6 +1,8 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import type { PhoneNumber } from "libphonenumber-js";
 
+import { isValidPersonName } from "../../../shared/model/person-name";
+
 /** Pays par défaut des numéros saisis, le Congo-Brazzaville. */
 export const DEFAULT_PHONE_COUNTRY = "CG";
 
@@ -15,9 +17,6 @@ export const PIN_LENGTH = 4;
 
 /** Code PIN de démonstration, en attendant la vérification par l'API. */
 export const DEMO_PIN = "1234";
-
-/** Longueur minimale d'un prénom, d'un nom ou d'une profession. */
-const MIN_NAME_LENGTH = 2;
 
 /** Saisie de la première étape d'inscription. */
 export interface SignUpInput {
@@ -120,16 +119,6 @@ export function toInternationalPhone(digits: string): string {
  */
 export function isValidPhoneDigits(digits: string): boolean {
   return digits.length === PHONE_DIGITS && isValidPhone(`${PHONE_COUNTRY_CODE}${digits}`);
-}
-
-/**
- * Indique si un prénom, un nom ou une profession est assez long pour identifier
- * le membre.
- * @param value Saisie à contrôler.
- * @returns Vrai si la saisie contient au moins deux caractères utiles.
- */
-export function isValidPersonName(value: string): boolean {
-  return value.trim().length >= MIN_NAME_LENGTH;
 }
 
 /**

@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Defs, Line, Pattern, Rect } from "react-native-svg";
 
 /** Distance entre deux lignes de la grille, en points. */
-const GRID_SPACING = 28;
+const GRID_SPACING = 16;
 
 /** Couleur par défaut des lignes, discrète sur un fond sombre. */
 const DEFAULT_LINE_COLOR = "rgba(255, 255, 255, 0.09)";

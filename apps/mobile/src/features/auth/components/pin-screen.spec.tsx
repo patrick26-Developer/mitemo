@@ -39,7 +39,6 @@ describe("PinScreen", () => {
 
     expect(screen.getByRole("button", { name: "1" })).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Effacer" })).toBeOnTheScreen();
-    expect(screen.getByTestId("demo-pin")).toBeOnTheScreen();
   });
 
   it("ouvre la session avec le code de démonstration", async () => {

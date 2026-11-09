@@ -14,6 +14,8 @@ import { ThemeSheet } from "./sheets/theme-sheet";
 
 /** Contenu affiché pour chaque action ; l'historique a sa propre page. */
 const ACTION_SHEETS: Readonly<Record<ProfileActionId, ComponentType | null>> = {
+  tontines: null,
+  cards: null,
   identity: IdentitySheet,
   payment: PaymentSheet,
   history: null,

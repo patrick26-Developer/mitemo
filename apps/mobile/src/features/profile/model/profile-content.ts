@@ -6,11 +6,16 @@ import {
   Globe,
   History,
   Lock,
+  PiggyBank,
   ShieldCheck,
   SunMoon,
   UserRound,
+  UsersRound,
 } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
+
+import { DEMO_SAVINGS } from "../../../shared/demo/savings";
+import { DEMO_TONTINES } from "../../../shared/demo/tontines";
 
 /** Thèmes proposés par l'application. */
 export const PROFILE_THEMES = ["Système", "Clair", "Sombre"] as const;
@@ -26,6 +31,8 @@ export type ProfileLanguage = (typeof PROFILE_LANGUAGES)[number];
 
 /** Identifiants des actions du profil, chacun ouvrant sa feuille. */
 export const PROFILE_ACTION_IDS = [
+  "tontines",
+  "cards",
   "identity",
   "payment",
   "history",
@@ -56,8 +63,26 @@ export interface ProfileGroupContent {
   readonly actions: readonly ProfileActionContent[];
 }
 
+/** Nombre de tontines actives du membre de démonstration. */
+const ACTIVE_TONTINE_COUNT = DEMO_TONTINES.filter((item) => item.state === "ACTIVE").length;
+
+/** Nombre de cartes de pointage actives du membre de démonstration. */
+const ACTIVE_CARD_COUNT = DEMO_SAVINGS.filter((item) => item.state === "ACTIVE").length;
+
 /** Groupes d'actions du profil. */
 export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
+  {
+    title: "Mes espaces",
+    actions: [
+      {
+        id: "tontines",
+        label: "Mes tontines",
+        icon: UsersRound,
+        value: String(ACTIVE_TONTINE_COUNT),
+      },
+      { id: "cards", label: "Mes cartes", icon: PiggyBank, value: String(ACTIVE_CARD_COUNT) },
+    ],
+  },
   {
     title: "Mon compte",
     actions: [

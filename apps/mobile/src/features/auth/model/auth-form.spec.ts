@@ -3,7 +3,6 @@ import {
   PIN_LENGTH,
   formatPhoneInput,
   isValidDemoPin,
-  isValidPersonName,
   isValidPin,
   isValidPhoneDigits,
   keepPhoneDigits,
@@ -40,13 +39,6 @@ describe("isValidPhoneDigits", () => {
   it("rejette un numéro incomplet ou invalide", () => {
     expect(isValidPhoneDigits("0657")).toBe(false);
     expect(isValidPhoneDigits("123456789")).toBe(false);
-  });
-});
-
-describe("isValidPersonName", () => {
-  it("exige au moins deux caractères utiles", () => {
-    expect(isValidPersonName(" A ")).toBe(false);
-    expect(isValidPersonName("Aimée")).toBe(true);
   });
 });
 

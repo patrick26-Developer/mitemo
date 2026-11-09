@@ -17,6 +17,16 @@ export function useProfileActions() {
       return;
     }
 
+    if (action.id === "tontines") {
+      router.push("/(tabs)/tontines");
+      return;
+    }
+
+    if (action.id === "cards") {
+      router.push("/(tabs)/savings");
+      return;
+    }
+
     setSelectedAction(action);
   };
 
