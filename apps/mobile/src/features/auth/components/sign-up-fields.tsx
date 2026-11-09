@@ -18,22 +18,19 @@ export function SignUpFields(props: SignUpFieldsProps) {
   return (
     <>
       <AuthTextField
-        placeholder="Précieuse"
+        kind="firstName"
         value={form.firstName}
         onChangeText={(value) => form.update("firstName", value)}
-        accessibilityLabel="Prénom"
       />
       <AuthTextField
-        placeholder="Mavoungou"
+        kind="lastName"
         value={form.lastName}
         onChangeText={(value) => form.update("lastName", value)}
-        accessibilityLabel="Nom"
       />
       <AuthTextField
-        placeholder="Commerçante, étudiante…"
+        kind="occupation"
         value={form.occupation}
         onChangeText={(value) => form.update("occupation", value)}
-        accessibilityLabel="Profession ou formation"
       />
       <PhoneField digits={form.digits} onChange={(value) => form.update("digits", value)} />
     </>

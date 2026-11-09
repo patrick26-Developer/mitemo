@@ -34,6 +34,16 @@ describe("SignUpScreen", () => {
     expect(screen.getByLabelText("Profession ou formation")).toBeOnTheScreen();
   });
 
+  it("affiche des libellés visibles et explique la profession", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+
+    expect(screen.getByText("Prénom")).toBeOnTheScreen();
+    expect(screen.getByText("Nom")).toBeOnTheScreen();
+    expect(screen.getByText("Profession ou formation")).toBeOnTheScreen();
+    expect(screen.getByText("Numéro de téléphone")).toBeOnTheScreen();
+    expect(screen.getByText("Sert à adapter vos tontines et votre suivi.")).toBeOnTheScreen();
+  });
+
   it("refuse un prénom trop court", async () => {
     await renderWithSafeArea(<SignUpScreen />);
     await fillForm();
