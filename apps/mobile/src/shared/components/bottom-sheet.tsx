@@ -3,18 +3,22 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
   Animated,
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
+import type { GestureResponderHandlers } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useKeyboardHeight } from "../hooks/use-keyboard-height";
 import { useSheetDrag } from "../hooks/use-sheet-drag";
+import type { SheetLayout } from "../model/sheet-layout";
+import { SHEET_MARGIN, computeSheetLayout } from "../model/sheet-layout";
 import { PALETTE } from "../theme/palette";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "./sheet-animation";
 import { SheetBackdrop } from "./sheet-backdrop";
@@ -30,13 +34,25 @@ export interface BottomSheetProps {
 /**
  * Affiche un contenu dans une feuille qui monte depuis le bas, plutôt que dans
  * une nouvelle page : le contexte de l'écran reste visible derrière.
+ *
+ * La feuille reprend la carte d'authentification : mêmes marges, mêmes coins,
+ * même marge basse constante. Le clavier ne la déplace pas, sa place est
+ * réservée sous le contenu, qui grandit vers le haut.
  * @param props Visibilité, titre, fermeture et contenu.
  * @returns La feuille modale.
  */
 export function BottomSheet(props: BottomSheetProps) {
   const { visible, title, onClose, children } = props;
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const { height: screenHeight } = useWindowDimensions();
   const [translateY] = useState(() => new Animated.Value(SHEET_OPEN_OFFSET));
+  const layout = computeSheetLayout({
+    platform: Platform.OS === "android" ? "android" : "ios",
+    keyboardHeight,
+    bottomInset: insets.bottom,
+    screenHeight,
+  });
 
   useEffect(() => {
     if (!visible) {
@@ -55,23 +71,14 @@ export function BottomSheet(props: BottomSheetProps) {
       transparent
       animationType="none"
       statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={close}
     >
       <View className="flex-1 justify-end">
         <SheetBackdrop onPress={close} />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          pointerEvents="box-none"
-        >
-          <SheetSurface
-            translateY={translateY}
-            title={title}
-            onClose={close}
-            bottomInset={insets.bottom}
-          >
-            {children}
-          </SheetSurface>
-        </KeyboardAvoidingView>
+        <SheetSurface translateY={translateY} title={title} onClose={close} layout={layout}>
+          {children}
+        </SheetSurface>
       </View>
     </Modal>
   );
@@ -82,8 +89,46 @@ interface SheetSurfaceProps {
   readonly translateY: Animated.Value;
   readonly title: string;
   readonly onClose: () => void;
-  readonly bottomInset: number;
+  readonly layout: SheetLayout;
   readonly children: ReactNode;
+}
+
+/** Props de l'en-tête glissable d'une feuille. */
+interface SheetHeaderProps {
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly dragHandlers: GestureResponderHandlers;
+}
+
+/**
+ * Rend la poignée, le titre et le bouton de fermeture de la feuille.
+ * @param props Titre, fermeture et gestionnaires du glissement.
+ * @returns L'en-tête glissable.
+ */
+function SheetHeader(props: SheetHeaderProps) {
+  const { title, onClose, dragHandlers } = props;
+
+  return (
+    <View {...dragHandlers}>
+      <View className="mb-3 items-center">
+        <View className="h-1 w-10 rounded-full bg-ink/20" />
+      </View>
+      <View className="mb-2 flex-row items-center justify-between">
+        <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">
+          {title}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Fermer"
+          hitSlop={8}
+          onPress={onClose}
+          className="h-9 w-9 items-center justify-center rounded-full bg-brand-veil"
+        >
+          <X size={18} color={PALETTE.brand} />
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 /**
@@ -91,11 +136,11 @@ interface SheetSurfaceProps {
  * La forme reprend celle de la carte d'authentification : marges de 8 points,
  * coins hauts de 24 et coins bas de 48, pour que toutes les feuilles se
  * ressemblent.
- * @param props Translation courante, en-tête, fermeture et marge basse.
+ * @param props Translation courante, en-tête, fermeture et dimensions.
  * @returns La surface animée.
  */
 function SheetSurface(props: SheetSurfaceProps) {
-  const { translateY, title, onClose, bottomInset, children } = props;
+  const { translateY, title, onClose, layout, children } = props;
   const panHandlers = useSheetDrag(translateY, onClose);
 
   return (
@@ -103,28 +148,19 @@ function SheetSurface(props: SheetSurfaceProps) {
       testID="bottom-sheet"
       accessibilityViewIsModal
       importantForAccessibility="yes"
-      className="mx-2 mb-2 max-h-[90%] rounded-t-[24px] rounded-b-[48px] border-t border-card-border bg-white px-5 pt-3.5"
-      style={[styles.surface, { transform: [{ translateY }], paddingBottom: bottomInset + 20 }]}
+      className="rounded-t-[24px] rounded-b-[48px] border-t border-card-border bg-white px-5 pt-3.5"
+      style={[
+        styles.surface,
+        {
+          maxHeight: layout.maxHeight,
+          paddingBottom: layout.paddingBottom,
+          marginBottom: layout.marginBottom,
+          marginHorizontal: SHEET_MARGIN,
+          transform: [{ translateY }],
+        },
+      ]}
     >
-      <View {...panHandlers}>
-        <View className="mb-3 items-center">
-          <View className="h-1 w-10 rounded-full bg-ink/20" />
-        </View>
-        <View className="mb-2 flex-row items-center justify-between">
-          <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">
-            {title}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Fermer"
-            hitSlop={8}
-            onPress={onClose}
-            className="h-9 w-9 items-center justify-center rounded-full bg-brand-veil"
-          >
-            <X size={18} color={PALETTE.brand} />
-          </Pressable>
-        </View>
-      </View>
+      <SheetHeader title={title} onClose={onClose} dragHandlers={panHandlers} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -139,6 +175,7 @@ function SheetSurface(props: SheetSurfaceProps) {
 /** Ombre portée de la feuille, que Tailwind n'exprime pas côté natif. */
 const styles = StyleSheet.create({
   surface: {
+    flexShrink: 1,
     shadowColor: "#000",
     shadowOpacity: 0.16,
     shadowRadius: 24,

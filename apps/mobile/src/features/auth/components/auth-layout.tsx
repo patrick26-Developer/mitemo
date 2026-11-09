@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GridBackground } from "../../../shared/components/grid-background";
 import { useKeyboardHeight } from "../../../shared/hooks/use-keyboard-height";
+import type { SheetLayout } from "../../../shared/model/sheet-layout";
+import { SHEET_MARGIN, computeSheetLayout } from "../../../shared/model/sheet-layout";
 import { AUTH_COLORS } from "../model/auth-theme";
-import type { AuthSheetLayout } from "../model/auth-sheet-layout";
-import { computeAuthSheetLayout } from "../model/auth-sheet-layout";
 import { AuthCornerDecor } from "./auth-corner-decor";
 import { AuthLogo } from "./auth-logo";
 
@@ -31,7 +31,7 @@ export function AuthLayout(props: AuthLayoutProps) {
   const { children } = props;
   const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
-  const sheetLayout = computeAuthSheetLayout({
+  const sheetLayout = computeSheetLayout({
     platform: Platform.OS === "android" ? "android" : "ios",
     keyboardHeight,
     bottomInset: insets.bottom,
@@ -52,7 +52,7 @@ export function AuthLayout(props: AuthLayoutProps) {
 
 /** Props de la carte d'authentification. */
 interface AuthSheetProps {
-  readonly layout: AuthSheetLayout;
+  readonly layout: SheetLayout;
   readonly children: ReactNode;
 }
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: AUTH_COLORS.sheetBorder,
     paddingHorizontal: 20,
-    marginHorizontal: 8,
+    marginHorizontal: SHEET_MARGIN,
     paddingTop: 14,
   },
   handle: {
