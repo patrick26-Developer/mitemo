@@ -10,19 +10,19 @@ import { useAuthDraft } from "../model/auth-draft";
  * @returns Le mode, l'action de réussite, le retour et l'absence de brouillon.
  */
 export function usePinSession() {
-  const { mode, name, phone, reset } = useAuthDraft();
+  const { mode, firstName, lastName, occupation, phone, reset } = useAuthDraft();
   const updateIdentity = useMemberStore((state) => state.updateIdentity);
   const isSignUp = mode === "sign-up";
   const missingDraft = phone === "";
 
   const complete = useCallback(() => {
     if (isSignUp) {
-      updateIdentity({ name, phone });
+      updateIdentity({ firstName, lastName, occupation, phone });
     }
 
     reset();
     router.replace("/(tabs)");
-  }, [isSignUp, name, phone, reset, updateIdentity]);
+  }, [isSignUp, firstName, lastName, occupation, phone, reset, updateIdentity]);
 
   const back = useCallback(() => router.back(), []);
 

@@ -8,11 +8,10 @@ import { AuthFooterLink } from "./auth-footer-link";
 import { AuthHeading } from "./auth-heading";
 import { AuthLayout } from "./auth-layout";
 import { AuthPrimaryButton } from "./auth-primary-button";
-import { AuthTextField } from "./auth-text-field";
-import { PhoneField } from "./phone-field";
+import { SignUpFields } from "./sign-up-fields";
 
 /**
- * Première étape d'inscription : nom et numéro de téléphone.
+ * Première étape d'inscription : identité, profession et numéro de téléphone.
  * @returns L'écran d'inscription.
  */
 export function SignUpScreen() {
@@ -22,19 +21,13 @@ export function SignUpScreen() {
     <AuthLayout>
       <AuthHeading
         title="Créer un compte"
-        subtitle="Rejoignez vos tontines en quelques secondes."
+        subtitle="Rejoignez vos tontines en quelques secondes. Le reste de vos informations se complète dans votre profil."
         onBack={() => router.back()}
       />
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.body).duration(AUTH_ENTRANCE_DURATION)}
       >
-        <AuthTextField
-          placeholder="Précieuse"
-          value={form.name}
-          onChangeText={(value) => form.update("name", value)}
-          accessibilityLabel="Nom complet"
-        />
-        <PhoneField digits={form.digits} onChange={(value) => form.update("digits", value)} />
+        <SignUpFields form={form} />
         <AuthErrorText message={form.message} />
       </Animated.View>
       <Animated.View

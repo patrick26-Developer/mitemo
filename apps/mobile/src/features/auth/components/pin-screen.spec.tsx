@@ -76,13 +76,19 @@ describe("PinScreen", () => {
   });
 
   it("enregistre l'identité à la fin d'une inscription", async () => {
-    useAuthDraft.getState().startSignUp("Aimée", "+242 06 570 6622");
+    useAuthDraft
+      .getState()
+      .startSignUp(
+        { firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" },
+        "+242 06 570 6622",
+      );
     await renderWithSafeArea(<PinScreen />);
 
     await enterPin("1234");
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/(tabs)"));
-    expect(useMemberStore.getState().name).toBe("Aimée");
+    expect(useMemberStore.getState().name).toBe("Aimée Mbemba");
+    expect(useMemberStore.getState().occupation).toBe("Commerçante");
     expect(useMemberStore.getState().phone).toBe("+242 06 570 6622");
 
     await act(async () => {});

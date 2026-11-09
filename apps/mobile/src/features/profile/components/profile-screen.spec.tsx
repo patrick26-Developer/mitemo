@@ -55,7 +55,7 @@ describe("ProfileScreen", () => {
   it("affiche le membre connecté", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    expect(screen.getByRole("header", { name: "Précieuse" })).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Précieuse Mavoungou" })).toBeOnTheScreen();
     expect(screen.getByText("+242 06 512 34 56")).toBeOnTheScreen();
   });
 
@@ -70,7 +70,7 @@ describe("ProfileScreen", () => {
   it("affiche les actions et la déconnexion", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    expect(screen.getByText("Mes informations")).toBeOnTheScreen();
+    expect(screen.getByText("Informations personnelles")).toBeOnTheScreen();
     expect(screen.getByText("Centre d'aide")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeOnTheScreen();
   });
@@ -204,9 +204,9 @@ describe("ProfileScreen", () => {
   it("ouvre une feuille pour une action au lieu d'une seconde page", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Mes informations" }));
+    fireEvent.press(screen.getByRole("button", { name: "Informations personnelles" }));
 
-    expect(await screen.findByText("Nom complet")).toBeOnTheScreen();
+    expect(await screen.findByText("Profession ou formation")).toBeOnTheScreen();
     expect(screen.getByText("Compte vérifié")).toBeOnTheScreen();
   });
 

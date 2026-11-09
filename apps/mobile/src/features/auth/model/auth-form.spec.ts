@@ -3,7 +3,7 @@ import {
   PIN_LENGTH,
   formatPhoneInput,
   isValidDemoPin,
-  isValidName,
+  isValidPersonName,
   isValidPin,
   isValidPhoneDigits,
   keepPhoneDigits,
@@ -43,10 +43,10 @@ describe("isValidPhoneDigits", () => {
   });
 });
 
-describe("isValidName", () => {
+describe("isValidPersonName", () => {
   it("exige au moins deux caractères utiles", () => {
-    expect(isValidName(" A ")).toBe(false);
-    expect(isValidName("Aimée")).toBe(true);
+    expect(isValidPersonName(" A ")).toBe(false);
+    expect(isValidPersonName("Aimée")).toBe(true);
   });
 });
 
@@ -67,9 +67,21 @@ describe("isValidDemoPin", () => {
 });
 
 describe("signUpError", () => {
-  it("valide le nom puis le numéro", () => {
-    expect(signUpError("A", "065706622")).toContain("nom");
-    expect(signUpError("Aimée", "123")).toContain("numéro");
-    expect(signUpError("Aimée", "065706622")).toBe("");
+  const valid = {
+    firstName: "Aimée",
+    lastName: "Mbemba",
+    occupation: "Commerçante",
+    digits: "065706622",
+  };
+
+  it("valide le prénom, le nom, la profession puis le numéro", () => {
+    expect(signUpError({ ...valid, firstName: "A" })).toContain("prénom");
+    expect(signUpError({ ...valid, lastName: "" })).toContain("nom");
+    expect(signUpError({ ...valid, occupation: " " })).toContain("profession");
+    expect(signUpError({ ...valid, digits: "123" })).toContain("numéro");
+  });
+
+  it("accepte une identité complète", () => {
+    expect(signUpError(valid)).toBe("");
   });
 });

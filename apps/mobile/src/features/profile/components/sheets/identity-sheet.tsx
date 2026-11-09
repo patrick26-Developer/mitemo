@@ -13,7 +13,9 @@ import { PALETTE } from "../../../../shared/theme/palette";
  * @returns Le contenu de la feuille « Mes informations ».
  */
 export function IdentitySheet() {
-  const name = useMemberStore((state) => state.name);
+  const firstName = useMemberStore((state) => state.firstName);
+  const lastName = useMemberStore((state) => state.lastName);
+  const occupation = useMemberStore((state) => state.occupation);
   const phone = useMemberStore((state) => state.phone);
   const createdAt = useMemberStore((state) => state.createdAt);
 
@@ -21,7 +23,9 @@ export function IdentitySheet() {
     <>
       <SheetSection title="Identité">
         <View className="gap-3 rounded-[16px] border border-card-border p-4">
-          <DetailRow label="Nom complet" value={name} />
+          <DetailRow label="Prénom" value={firstName} />
+          <DetailRow label="Nom" value={lastName} />
+          <DetailRow label="Profession ou formation" value={occupation} />
           <DetailRow label="Téléphone" value={phone} />
           <DetailRow label="Compte créé le" value={formatDate(createdAt)} />
         </View>
