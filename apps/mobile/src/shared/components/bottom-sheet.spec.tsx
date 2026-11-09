@@ -14,6 +14,7 @@ describe("BottomSheet", () => {
 
     expect(screen.getByRole("header", { name: "Mes informations" })).toBeOnTheScreen();
     expect(screen.getByText("Contenu de la feuille")).toBeOnTheScreen();
+    expect(screen.getByTestId("grid-background")).toBeOnTheScreen();
   });
 
   it("ne rend rien quand elle est fermée", async () => {

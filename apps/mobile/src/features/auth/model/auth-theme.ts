@@ -16,6 +16,7 @@ export const AUTH_COLORS = {
   sheetBorder: "rgba(0,0,0,0.1)",
   handle: "#8E9099",
   shadow: "#0A3BE0",
+  gridLine: "rgba(255, 255, 255, 0.10)",
 } as const;
 
 /** Délais d'apparition des blocs d'un écran, en millisecondes. */

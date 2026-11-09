@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "re
 import Animated, { Easing, SlideInDown, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { GridBackground } from "../../../shared/components/grid-background";
 import { AUTH_COLORS } from "../model/auth-theme";
 import { AuthCornerDecor } from "./auth-corner-decor";
 import { AuthLogo } from "./auth-logo";
@@ -13,12 +14,12 @@ export interface AuthLayoutProps {
   readonly children: ReactNode;
 }
 
-/** Marge basse minimale de la feuille, en points. */
-const MIN_BOTTOM_GAP = 10;
+/** Marge basse ajoutée à la zone sûre, en points. */
+const SHEET_BOTTOM_PADDING = 20;
 
 /**
- * Pose le fond bleu, le logo et la feuille blanche qui porte un formulaire
- * d'authentification.
+ * Pose le fond bleu quadrillé, le logo et la feuille blanche qui porte le
+ * formulaire d'authentification.
  * @param props Contenu de l'étape courante.
  * @returns L'écran d'authentification complet.
  */
@@ -29,6 +30,7 @@ export function AuthLayout(props: AuthLayoutProps) {
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
+      <GridBackground lineColor={AUTH_COLORS.gridLine} />
       <AuthCornerDecor side="left" />
       <AuthCornerDecor side="right" />
       <KeyboardAvoidingView
@@ -43,7 +45,7 @@ export function AuthLayout(props: AuthLayoutProps) {
         <Animated.View
           testID="auth-sheet"
           entering={SlideInDown.duration(550).easing(Easing.out(Easing.cubic))}
-          style={[styles.sheet, { marginBottom: Math.max(insets.bottom, MIN_BOTTOM_GAP) }]}
+          style={[styles.sheet, { paddingBottom: insets.bottom + SHEET_BOTTOM_PADDING }]}
         >
           <View style={styles.handle} />
           <ScrollView
@@ -59,18 +61,20 @@ export function AuthLayout(props: AuthLayoutProps) {
   );
 }
 
-/** Styles du fond bleu et de la feuille blanche. */
+/** Styles du fond bleu et de la feuille ancrée en bas. */
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: AUTH_COLORS.background },
   logoArea: { flex: 1, alignItems: "center", justifyContent: "center" },
   sheet: {
-    maxHeight: "82%",
+    maxHeight: "88%",
     flexShrink: 1,
     backgroundColor: AUTH_COLORS.sheet,
-    borderRadius: 36,
-    marginHorizontal: 12,
-    borderWidth: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
     borderColor: AUTH_COLORS.sheetBorder,
+    paddingHorizontal: 20,
+    paddingTop: 14,
   },
   handle: {
     position: "absolute",
@@ -81,5 +85,5 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: AUTH_COLORS.handle,
   },
-  content: { paddingHorizontal: 24, paddingTop: 30, paddingBottom: 28 },
+  content: { paddingTop: 18, paddingBottom: 4 },
 });
