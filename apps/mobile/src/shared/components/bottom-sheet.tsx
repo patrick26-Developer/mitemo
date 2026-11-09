@@ -88,6 +88,9 @@ interface SheetSurfaceProps {
 
 /**
  * Rend la surface de la feuille, son en-tête glissable et son contenu défilant.
+ * La forme reprend celle de la carte d'authentification : marges de 8 points,
+ * coins hauts de 24 et coins bas de 48, pour que toutes les feuilles se
+ * ressemblent.
  * @param props Translation courante, en-tête, fermeture et marge basse.
  * @returns La surface animée.
  */
@@ -100,7 +103,7 @@ function SheetSurface(props: SheetSurfaceProps) {
       testID="bottom-sheet"
       accessibilityViewIsModal
       importantForAccessibility="yes"
-      className="max-h-[90%] rounded-t-[24px] border border-b-0 border-card-border bg-white px-5 pt-4"
+      className="mx-2 mb-2 max-h-[90%] rounded-t-[24px] rounded-b-[48px] border-t border-card-border bg-white px-5 pt-3.5"
       style={[styles.surface, { transform: [{ translateY }], paddingBottom: bottomInset + 20 }]}
     >
       <View {...panHandlers}>
