@@ -1,11 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, SlideInDown, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GridBackground } from "../../../shared/components/grid-background";
+import { useKeyboardHeight } from "../../../shared/hooks/use-keyboard-height";
 import { AUTH_COLORS } from "../model/auth-theme";
+import type { AuthSheetLayout } from "../model/auth-sheet-layout";
+import { computeAuthSheetLayout } from "../model/auth-sheet-layout";
 import { AuthCornerDecor } from "./auth-corner-decor";
 import { AuthLogo } from "./auth-logo";
 
@@ -14,18 +17,26 @@ export interface AuthLayoutProps {
   readonly children: ReactNode;
 }
 
-/** Marge basse ajoutée à la zone sûre, en points. */
-const SHEET_BOTTOM_PADDING = 20;
+/** Hauteur physique de l'écran, indépendante du clavier. */
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 /**
  * Pose le fond bleu quadrillé, le logo et la feuille blanche qui porte le
- * formulaire d'authentification.
+ * formulaire d'authentification. Le clavier ne déplace pas la carte : sa place
+ * est réservée dans la carte, qui grandit vers le haut.
  * @param props Contenu de l'étape courante.
  * @returns L'écran d'authentification complet.
  */
 export function AuthLayout(props: AuthLayoutProps) {
   const { children } = props;
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const sheetLayout = computeAuthSheetLayout({
+    platform: Platform.OS === "android" ? "android" : "ios",
+    keyboardHeight,
+    bottomInset: insets.bottom,
+    screenHeight: SCREEN_HEIGHT,
+  });
 
   return (
     <View style={styles.root}>
@@ -33,30 +44,70 @@ export function AuthLayout(props: AuthLayoutProps) {
       <GridBackground lineColor={AUTH_COLORS.gridLine} />
       <AuthCornerDecor side="left" />
       <AuthCornerDecor side="right" />
-      <KeyboardAvoidingView
-        style={styles.root}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <AuthLogoArea topInset={insets.top} />
+      <AuthSheet layout={sheetLayout}>{children}</AuthSheet>
+    </View>
+  );
+}
+
+/** Props de la carte d'authentification. */
+interface AuthSheetProps {
+  readonly layout: AuthSheetLayout;
+  readonly children: ReactNode;
+}
+
+/**
+ * Rend la carte blanche, sa poignée et son contenu défilant.
+ * @param props Dimensions calculées et contenu de l'étape.
+ * @returns La carte ancrée en bas de l'écran.
+ */
+function AuthSheet(props: AuthSheetProps) {
+  const { layout, children } = props;
+
+  return (
+    <Animated.View
+      testID="auth-sheet"
+      entering={SlideInDown.duration(550).easing(Easing.out(Easing.cubic))}
+      style={[
+        styles.sheet,
+        {
+          maxHeight: layout.maxHeight,
+          paddingBottom: layout.paddingBottom,
+          marginBottom: layout.marginBottom,
+        },
+      ]}
+    >
+      <View style={styles.handle} />
+      <ScrollView
+        testID="auth-scroll"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
       >
-        <View style={[styles.logoArea, { paddingTop: insets.top }]}>
-          <Animated.View entering={ZoomIn.duration(600)}>
-            <AuthLogo />
-          </Animated.View>
-        </View>
-        <Animated.View
-          testID="auth-sheet"
-          entering={SlideInDown.duration(550).easing(Easing.out(Easing.cubic))}
-          style={[styles.sheet, { paddingBottom: insets.bottom + SHEET_BOTTOM_PADDING }]}
-        >
-          <View style={styles.handle} />
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.content}
-          >
-            {children}
-          </ScrollView>
-        </Animated.View>
-      </KeyboardAvoidingView>
+        {children}
+      </ScrollView>
+    </Animated.View>
+  );
+}
+
+/** Props de la zone du logo. */
+interface AuthLogoAreaProps {
+  readonly topInset: number;
+}
+
+/**
+ * Affiche le logo centré sur le fond bleu, au-dessus de la carte.
+ * @param props Marge haute de la zone sûre.
+ * @returns Le logo centré.
+ */
+function AuthLogoArea(props: AuthLogoAreaProps) {
+  const { topInset } = props;
+
+  return (
+    <View style={[styles.logoArea, { paddingTop: topInset }]}>
+      <Animated.View entering={ZoomIn.duration(600)}>
+        <AuthLogo />
+      </Animated.View>
     </View>
   );
 }
@@ -74,7 +125,6 @@ const styles = StyleSheet.create({
     right: 0,
   },
   sheet: {
-    maxHeight: "88%",
     flexShrink: 1,
     backgroundColor: AUTH_COLORS.sheet,
     borderTopLeftRadius: 24,
@@ -85,7 +135,6 @@ const styles = StyleSheet.create({
     borderColor: AUTH_COLORS.sheetBorder,
     paddingHorizontal: 20,
     marginHorizontal: 8,
-    marginBottom: 8,
     paddingTop: 14,
   },
   handle: {
