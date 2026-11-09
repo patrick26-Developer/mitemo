@@ -4,6 +4,9 @@ import { Pressable, Text, View } from "react-native";
 import { formatDate } from "../../../shared/format/format-date";
 import { PALETTE } from "../../../shared/theme/palette";
 
+/** L'icône de sortie regarde vers la gauche : elle est retournée à 180°. */
+const LOG_OUT_STYLE = { transform: [{ rotate: "180deg" }] } as const;
+
 /** Props de la section de compte du profil. */
 export interface ProfileSignOutProps {
   /** Date de création du compte, en UTC. */
@@ -24,7 +27,7 @@ export function ProfileSignOut(props: ProfileSignOutProps) {
       <View className="overflow-hidden rounded-[18px] border border-card-border bg-white">
         <View className="flex-row items-center gap-3 border-b border-card-border px-4 py-3.5">
           <CalendarDays size={20} color={PALETTE.muted} />
-          <Text className="flex-1 text-[16px] text-ink">
+          <Text className="flex-1 text-[16px] text-muted">
             {`Compte créé le ${formatDate(createdAt)}`}
           </Text>
         </View>
@@ -33,7 +36,9 @@ export function ProfileSignOut(props: ProfileSignOutProps) {
           accessibilityLabel="Se déconnecter"
           className="flex-row items-center gap-3 px-4 py-3.5"
         >
-          <LogOut size={20} color={PALETTE.danger} />
+          <View testID="sign-out-icon" style={LOG_OUT_STYLE}>
+            <LogOut size={20} color={PALETTE.danger} />
+          </View>
           <Text className="flex-1 text-[16px] font-medium text-danger">Se déconnecter</Text>
         </Pressable>
       </View>

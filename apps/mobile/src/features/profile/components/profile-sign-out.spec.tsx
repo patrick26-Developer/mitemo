@@ -15,4 +15,12 @@ describe("ProfileSignOut", () => {
 
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeOnTheScreen();
   });
+
+  it("retourne l'icône de déconnexion à 180 degrés", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByTestId("sign-out-icon")).toHaveStyle({
+      transform: [{ rotate: "180deg" }],
+    });
+  });
 });
