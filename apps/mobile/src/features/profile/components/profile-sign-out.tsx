@@ -7,6 +7,9 @@ import { PALETTE } from "../../../shared/theme/palette";
 /** L'icône de sortie regarde vers la gauche : elle est retournée à 180°. */
 const LOG_OUT_STYLE = { transform: [{ rotate: "180deg" }] } as const;
 
+/** La ligne de création du compte est une information secondaire, donc atténuée. */
+const CREATED_AT_STYLE = { opacity: 0.6 } as const;
+
 /** Props de la section de compte du profil. */
 export interface ProfileSignOutProps {
   /** Date de création du compte, en UTC. */
@@ -25,7 +28,11 @@ export function ProfileSignOut(props: ProfileSignOutProps) {
   return (
     <View className="px-4">
       <View className="overflow-hidden rounded-[18px] border border-card-border bg-white">
-        <View className="flex-row items-center gap-3 border-b border-card-border px-4 py-3.5">
+        <View
+          testID="account-created-row"
+          style={CREATED_AT_STYLE}
+          className="flex-row items-center gap-3 border-b border-card-border px-4 py-3.5"
+        >
           <CalendarDays size={20} color={PALETTE.muted} />
           <Text className="flex-1 text-[16px] text-muted">
             {`Compte créé le ${formatDate(createdAt)}`}

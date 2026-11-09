@@ -23,4 +23,10 @@ describe("ProfileSignOut", () => {
       transform: [{ rotate: "180deg" }],
     });
   });
+
+  it("atténue la ligne de création du compte", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByTestId("account-created-row")).toHaveStyle({ opacity: 0.6 });
+  });
 });
