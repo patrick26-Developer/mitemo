@@ -12,8 +12,13 @@ const FILTER_OPTIONS = [
   { value: "completed", label: "Terminées" },
 ] as const satisfies readonly SegmentedControlOption<ListFilter>[];
 
+/** Espace entre la zone sûre de l'écran et la barre, en points. */
+const TOP_GAP = 12;
+
 /** Props de l'en-tête d'une liste. */
 export interface ListHeaderProps {
+  /** Marge haute de la zone sûre de l'écran, en points. */
+  readonly topInset: number;
   readonly filter: ListFilter;
   readonly onFilterChange: (filter: ListFilter) => void;
   /** Action de recherche, absente tant que l'écran dédié n'existe pas. */
@@ -28,15 +33,17 @@ export interface ListHeaderProps {
  * Posé en `ListHeaderComponent` collant d'une `FlatList`, il reste en haut de
  * l'écran pendant que les éléments défilent dessous. Son fond reste
  * transparent : les cartes passent derrière les contrôles, qui portent leur
- * propre fond.
- * @param props Filtre courant, changement de filtre et actions.
+ * propre fond. La marge de zone sûre est portée par l'en-tête pour que les
+ * cartes défilent jusqu'au bord haut de l'écran.
+ * @param props Zone sûre, filtre courant, changement de filtre et actions.
  * @returns L'en-tête de liste.
  */
 export function ListHeader(props: ListHeaderProps) {
-  const { filter, onFilterChange, onSearch, onAdd } = props;
+  const { topInset, filter, onFilterChange, onSearch, onAdd } = props;
+  const style = { paddingTop: topInset + TOP_GAP };
 
   return (
-    <View className="flex-row items-center justify-between pb-5">
+    <View className="flex-row items-center justify-between pb-5" style={style}>
       <SegmentedControl options={FILTER_OPTIONS} value={filter} onChange={onFilterChange} />
 
       <View className="flex-row items-center gap-3 rounded-[22px] border border-rule-border bg-tab-active px-3 py-2.5">

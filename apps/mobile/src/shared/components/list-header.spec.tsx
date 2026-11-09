@@ -5,7 +5,9 @@ import { ListHeader } from "./list-header";
 
 describe("ListHeader", () => {
   it("affiche le filtre et les actions rapides", async () => {
-    await renderWithSafeArea(<ListHeader filter="active" onFilterChange={jest.fn()} />);
+    await renderWithSafeArea(
+      <ListHeader topInset={0} filter="active" onFilterChange={jest.fn()} />,
+    );
 
     expect(screen.getByRole("tab", { name: "Actives" })).toBeSelected();
     expect(screen.getByRole("button", { name: "Rechercher" })).toBeOnTheScreen();
@@ -14,7 +16,9 @@ describe("ListHeader", () => {
 
   it("remonte le filtre choisi", async () => {
     const onFilterChange = jest.fn();
-    await renderWithSafeArea(<ListHeader filter="active" onFilterChange={onFilterChange} />);
+    await renderWithSafeArea(
+      <ListHeader topInset={0} filter="active" onFilterChange={onFilterChange} />,
+    );
 
     fireEvent.press(screen.getByRole("tab", { name: "Terminées" }));
 

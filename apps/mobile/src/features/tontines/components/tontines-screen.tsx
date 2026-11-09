@@ -35,12 +35,14 @@ export function TontinesScreen() {
   const emptyState = EMPTY_STATES[filter];
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-white">
       <FlatList
         data={tontines}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader filter={filter} onFilterChange={setFilter} />}
+        ListHeaderComponent={
+          <ListHeader topInset={insets.top} filter={filter} onFilterChange={setFilter} />
+        }
         stickyHeaderIndices={[0]}
         ListEmptyComponent={<EmptyState title={emptyState.title} message={emptyState.message} />}
         contentContainerClassName="grow gap-3 px-4 pb-6"
