@@ -1,8 +1,8 @@
 import { router } from "expo-router";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { HorizontalCardList } from "../../../shared/components/horizontal-card-list";
 import { SectionTitle } from "../../../shared/components/section-title";
-import { CARD_GAP, CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { SavingsCard } from "../../savings";
 import { HOME_SAVINGS, formatCountLabel } from "../model/home-content";
 
@@ -17,15 +17,10 @@ export function SavingsSection() {
         label={formatCountLabel(HOME_SAVINGS.length, "Carte de pointage", "Cartes de pointage")}
         onPress={() => router.push("/savings")}
       />
-      <FlatList
-        data={HOME_SAVINGS}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + CARD_GAP}
-        decelerationRate="fast"
-        contentContainerClassName="gap-3 px-4"
-        renderItem={({ item, index }) => <SavingsCard item={item} index={index} />}
+      <HorizontalCardList
+        items={HOME_SAVINGS}
+        keyOf={(item) => item.id}
+        renderItem={(item, index) => <SavingsCard item={item} index={index} />}
       />
     </View>
   );

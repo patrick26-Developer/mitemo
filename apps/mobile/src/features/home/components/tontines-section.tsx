@@ -1,8 +1,8 @@
 import { router } from "expo-router";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { HorizontalCardList } from "../../../shared/components/horizontal-card-list";
 import { SectionTitle } from "../../../shared/components/section-title";
-import { CARD_GAP, CARD_WIDTH } from "../../../shared/theme/card-layout";
 import { TontineCard } from "../../tontines";
 import { HOME_TONTINES, formatCountLabel } from "../model/home-content";
 
@@ -18,15 +18,10 @@ export function TontinesSection() {
         tone="light"
         onPress={() => router.push("/tontines")}
       />
-      <FlatList
-        data={HOME_TONTINES}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + CARD_GAP}
-        decelerationRate="fast"
-        contentContainerClassName="gap-3 px-4"
-        renderItem={({ item, index }) => <TontineCard item={item} index={index} />}
+      <HorizontalCardList
+        items={HOME_TONTINES}
+        keyOf={(item) => item.id}
+        renderItem={(item, index) => <TontineCard item={item} index={index} />}
       />
     </View>
   );
