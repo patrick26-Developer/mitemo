@@ -28,7 +28,7 @@ describe("groupSearchResults", () => {
   it("regroupe les résultats par type sans groupe vide", () => {
     const groups = groupSearchResults(searchEntries("tontine"));
 
-    expect(groups.map((group) => group.title)).toEqual(["Tontines", "Pages"]);
+    expect(groups.map((group) => group.title)).toEqual(["Tontines", "Profil", "Pages"]);
   });
 
   it("conserve l'ordre des résultats dans chaque groupe", () => {
