@@ -18,8 +18,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardHeight } from "../hooks/use-keyboard-height";
 import { useSheetDrag } from "../hooks/use-sheet-drag";
 import type { SheetLayout } from "../model/sheet-layout";
-import { SHEET_MARGIN, computeSheetLayout } from "../model/sheet-layout";
+import { computeSheetLayout } from "../model/sheet-layout";
 import { PALETTE } from "../theme/palette";
+import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../theme/sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "./sheet-animation";
 import { SheetBackdrop } from "./sheet-backdrop";
 
@@ -111,7 +112,7 @@ function SheetHeader(props: SheetHeaderProps) {
   return (
     <View {...dragHandlers}>
       <View className="mb-3 items-center">
-        <View className="h-1 w-10 rounded-full bg-ink/20" />
+        <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
       </View>
       <View className="mb-2 flex-row items-center justify-between">
         <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">
@@ -133,9 +134,8 @@ function SheetHeader(props: SheetHeaderProps) {
 
 /**
  * Rend la surface de la feuille, son en-tête glissable et son contenu défilant.
- * La forme reprend celle de la carte d'authentification : marges de 8 points,
- * coins hauts de 24 et coins bas de 48, pour que toutes les feuilles se
- * ressemblent.
+ * La forme vient de `computeSheetCardStyle`, la même que la carte
+ * d'authentification.
  * @param props Translation courante, en-tête, fermeture et dimensions.
  * @returns La surface animée.
  */
@@ -148,18 +148,8 @@ function SheetSurface(props: SheetSurfaceProps) {
       testID="bottom-sheet"
       accessibilityViewIsModal
       importantForAccessibility="yes"
-      className="rounded-t-[24px] rounded-b-[48px] border-t border-card-border bg-white px-5 pt-3.5"
-      style={[
-        styles.surface,
-        {
-          minHeight: layout.minHeight,
-          maxHeight: layout.maxHeight,
-          paddingBottom: layout.paddingBottom,
-          marginBottom: layout.marginBottom,
-          marginHorizontal: SHEET_MARGIN,
-          transform: [{ translateY }],
-        },
-      ]}
+      className="border-card-border"
+      style={[styles.surface, computeSheetCardStyle(layout), { transform: [{ translateY }] }]}
     >
       <SheetHeader title={title} onClose={onClose} dragHandlers={panHandlers} />
       <ScrollView
@@ -176,7 +166,6 @@ function SheetSurface(props: SheetSurfaceProps) {
 /** Ombre portée de la feuille, que Tailwind n'exprime pas côté natif. */
 const styles = StyleSheet.create({
   surface: {
-    flexShrink: 1,
     shadowColor: "#000",
     shadowOpacity: 0.16,
     shadowRadius: 24,

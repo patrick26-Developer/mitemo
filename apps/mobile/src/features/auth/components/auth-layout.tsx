@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GridBackground } from "../../../shared/components/grid-background";
 import { useKeyboardHeight } from "../../../shared/hooks/use-keyboard-height";
 import type { SheetLayout } from "../../../shared/model/sheet-layout";
-import { SHEET_MARGIN, computeSheetLayout } from "../../../shared/model/sheet-layout";
+import { computeSheetLayout } from "../../../shared/model/sheet-layout";
+import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../../shared/theme/sheet-card";
 import { AUTH_COLORS } from "../model/auth-theme";
 import { AuthCornerDecor } from "./auth-corner-decor";
 import { AuthLogo } from "./auth-logo";
@@ -68,17 +69,9 @@ function AuthSheet(props: AuthSheetProps) {
     <Animated.View
       testID="auth-sheet"
       entering={SlideInDown.duration(550).easing(Easing.out(Easing.cubic))}
-      style={[
-        styles.sheet,
-        {
-          minHeight: layout.minHeight,
-          maxHeight: layout.maxHeight,
-          paddingBottom: layout.paddingBottom,
-          marginBottom: layout.marginBottom,
-        },
-      ]}
+      style={[computeSheetCardStyle(layout), styles.sheetBorder]}
     >
-      <View style={styles.handle} />
+      <View style={[SHEET_HANDLE_SHAPE, styles.handle]} />
       <ScrollView
         testID="auth-scroll"
         keyboardShouldPersistTaps="handled"
@@ -125,26 +118,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  sheet: {
-    flexShrink: 1,
-    backgroundColor: AUTH_COLORS.sheet,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderBottomRightRadius: 48,
-    borderBottomLeftRadius: 48,
-    borderTopWidth: 1,
-    borderColor: AUTH_COLORS.sheetBorder,
-    paddingHorizontal: 20,
-    marginHorizontal: SHEET_MARGIN,
-    paddingTop: 14,
-  },
+  sheetBorder: { borderColor: AUTH_COLORS.sheetBorder },
   handle: {
     position: "absolute",
     top: 8,
     alignSelf: "center",
-    width: 42,
-    height: 3,
-    borderRadius: 2,
     backgroundColor: AUTH_COLORS.handle,
   },
   content: { paddingTop: 12 },
