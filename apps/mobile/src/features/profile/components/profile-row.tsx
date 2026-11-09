@@ -28,6 +28,7 @@ export function ProfileRow(props: ProfileRowProps) {
     >
       <Icon size={20} color={PALETTE.muted} />
       <Text className="flex-1 text-[16px] text-ink">{action.label}</Text>
+      {action.value ? <Text className="text-[14px] text-muted">{action.value}</Text> : null}
       <ChevronRight size={16} color={PALETTE.muted} />
     </Pressable>
   );

@@ -33,4 +33,23 @@ describe("ProfileScreen", () => {
     expect(screen.getByRole("button", { name: "Historique" })).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Thème" })).toBeOnTheScreen();
   });
+
+  it("affiche le nom du thème courant", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByText("Système")).toBeOnTheScreen();
+  });
+
+  it("affiche les documents légaux", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByRole("button", { name: "Politique de confidentialité" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Conditions d'utilisation" })).toBeOnTheScreen();
+  });
+
+  it("permet de modifier la photo de profil", async () => {
+    await renderWithSafeArea(<ProfileScreen />);
+
+    expect(screen.getByRole("button", { name: "Modifier la photo" })).toBeOnTheScreen();
+  });
 });

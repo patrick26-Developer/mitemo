@@ -2,6 +2,7 @@ import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DEMO_MEMBER } from "../../../shared/demo/member";
+import { useProfilePhoto } from "../hooks/use-profile-photo";
 import { PROFILE_GROUPS } from "../model/profile-content";
 import { ProfileGroup } from "./profile-group";
 import { ProfileHeader } from "./profile-header";
@@ -13,6 +14,7 @@ import { ProfileSignOut } from "./profile-sign-out";
  */
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { photoUri, pickPhoto } = useProfilePhoto();
 
   return (
     <ScrollView
@@ -21,7 +23,7 @@ export function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View className="gap-6 pb-10">
-        <ProfileHeader member={DEMO_MEMBER} />
+        <ProfileHeader member={DEMO_MEMBER} photoUri={photoUri} onChangePhoto={pickPhoto} />
         {PROFILE_GROUPS.map((group) => (
           <ProfileGroup key={group.title} group={group} />
         ))}
