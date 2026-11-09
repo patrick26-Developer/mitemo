@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import type { ListFilter } from "../../shared/model/list-filter";
 import { ListActions } from "./list-actions";
-import { ListSearchField } from "./list-search-field";
+import { SearchField } from "./search-field";
 import type { SegmentedControlOption } from "./segmented-control";
 import { SegmentedControl } from "./segmented-control";
 
@@ -61,11 +61,12 @@ export function ListHeader(props: ListHeaderProps) {
       style={{ paddingTop: topInset + TOP_GAP }}
     >
       {searchOpen ? (
-        <ListSearchField
+        <SearchField
           value={query}
           onChangeText={changeQuery}
-          onCancel={cancelSearch}
           placeholder={search?.placeholder ?? "Rechercher"}
+          accessibilityLabel="Rechercher dans la liste"
+          clear={{ label: "Annuler la recherche", onPress: cancelSearch, alwaysVisible: true }}
         />
       ) : (
         <>
