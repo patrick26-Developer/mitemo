@@ -19,4 +19,4 @@ Ces documents sont une revue critique destinée à être challengée, pas une sp
 
 1. **Les API marchandes mobile money ne sont pas gratuites** (3-4 % à l'encaissement, ~1 % au décaissement au Congo). La commission de 1,5 % couvre 30 % du coût de transaction. Correction par la boucle fermée, documentée dans `01`.
 2. **Le SMS ne peut être ni le canal principal ni un moyen d'autorisation de paiement.** Trop cher (il dépasse à lui seul la recette) et sans authentification. La réponse est l'USSD, documentée dans `04`.
-3. **Le levier le plus fort n'est pas technique.** Une lettre d'intention avec un établissement agréé COBAC vaut, devant un jury comme devant un partenaire, plus que n'importe quelle fonctionnalité — et c'est l'élément au plus long délai d'obtention.
+3. **Le levier le plus fort n'est pas technique.** Une lettre d'intention avec un établissement agréé COBAC vaut, devant un jury comme devant un partenaire, plus que n'importe quelle fonctionnalité - et c'est l'élément au plus long délai d'obtention.

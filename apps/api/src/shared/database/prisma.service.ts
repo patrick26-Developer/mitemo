@@ -9,7 +9,7 @@ import { readDatabaseUrl } from "./database-url.js";
  *
  * Utilise DATABASE_URL (connexion directe, non poolée) : requis pour les futures
  * écritures du grand livre en isolation SERIALIZABLE et pour les verrous explicites.
- * Le pooler Neon (mode transaction) casse ces garanties — voir AGENTS.md, section 1.1.
+ * Le pooler Neon (mode transaction) casse ces garanties - voir AGENTS.md, section 1.1.
  */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

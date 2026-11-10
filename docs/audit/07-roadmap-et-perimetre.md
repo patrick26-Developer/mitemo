@@ -2,7 +2,7 @@
 
 ---
 
-## Phase 0 — Concours et démonstration (maintenant)
+## Phase 0 - Concours et démonstration (maintenant)
 
 Hypothèse : il faut quelque chose de montrable à court terme, avec une équipe réduite et sans argent réel en circulation.
 
@@ -41,20 +41,20 @@ Par ordre d'effet de levier décroissant :
 
 ### Si le concours est à onze jours
 
-Cadrer encore plus serré : la lettre d'intention et les quatre documents ci-dessus, plus une maquette cliquable (Figma) du parcours complet, plus une démonstration en direct du seul tirage vérifiable — qui est le seul élément véritablement original et qui tient dans un script de quelques dizaines de lignes.
+Cadrer encore plus serré : la lettre d'intention et les quatre documents ci-dessus, plus une maquette cliquable (Figma) du parcours complet, plus une démonstration en direct du seul tirage vérifiable - qui est le seul élément véritablement original et qui tient dans un script de quelques dizaines de lignes.
 
 **Une maquette honnête accompagnée d'une lettre d'intention bat un prototype fragile sans partenaire.** C'est contre-intuitif pour un développeur, mais c'est ainsi que les jurys arbitrent : ils savent que le code se fait, ils savent que la conformité et les partenariats ne s'improvisent pas.
 
 ---
 
-## Phase 1 — Pilote réel (3 à 4 mois après le partenariat)
+## Phase 1 - Pilote réel (3 à 4 mois après le partenariat)
 
 **Condition de démarrage, non négociable : la convention signée avec l'établissement agréé.** Pas de pilote avec de l'argent réel sans parapluie réglementaire.
 
 ### Périmètre
 
 - Un seul marché, 20 groupes, environ 200 membres (voir `06-go-to-market-communication.md`).
-- Intégration réelle d'**un seul** opérateur d'abord — celui dont la tarification est la meilleure après négociation.
+- Intégration réelle d'**un seul** opérateur d'abord - celui dont la tarification est la meilleure après négociation.
 - Plafonds de palier KYC 0 appliqués strictement.
 - USSD en production chez cet opérateur.
 - Réconciliation quotidienne avec alerte, surveillée par un humain chaque matin.
@@ -86,7 +86,7 @@ Si le coût de paiement reste au-dessus de 2,5 %, **ne pas passer à l'échelle*
 
 ---
 
-## Phase 2 — Viabilité économique et extension (6 à 12 mois)
+## Phase 2 - Viabilité économique et extension (6 à 12 mois)
 
 L'objectif de cette phase n'est pas la croissance : c'est de **rendre l'unité économique positive**. Croître avant cela multiplie la perte.
 
@@ -102,7 +102,7 @@ L'objectif de cette phase n'est pas la croissance : c'est de **rendre l'unité �
 
 ---
 
-## Phase 3 — Scoring et origination de crédit (12 à 24 mois)
+## Phase 3 - Scoring et origination de crédit (12 à 24 mois)
 
 C'est ici que la vision se réalise et que la marge apparaît.
 
@@ -122,7 +122,7 @@ C'est ici que la vision se réalise et que la marge apparaît.
 | Prêter sur fonds propres | La vision l'exclut, à juste titre. Change complètement le régime réglementaire et le profil de risque. |
 | Promettre un rendement sur l'épargne | Devient un produit de placement, donc un agrément de plus, et un risque de requalification en système pyramidal. |
 | Tontines ouvertes au public | La vision l'exclut explicitement. C'est aussi la porte ouverte à la fraude de masse. |
-| Cryptomonnaie ou *blockchain* | Aucun besoin réel ici — le tirage vérifiable se fait avec une simple fonction de hachage. Ajouterait un risque réglementaire majeur pour zéro bénéfice utilisateur. |
+| Cryptomonnaie ou *blockchain* | Aucun besoin réel ici - le tirage vérifiable se fait avec une simple fonction de hachage. Ajouterait un risque réglementaire majeur pour zéro bénéfice utilisateur. |
 | Devenir un opérateur de paiement | C'est l'anti-stratégie de la vision, et elle a raison. |
 | Microservices | Voir `03` §4.2. |
 
@@ -133,7 +133,7 @@ C'est ici que la vision se réalise et que la marge apparaît.
 | Risque | Probabilité | Atténuation |
 |---|---|---|
 | **Aucun partenaire agréé n'accepte** | Moyenne | Approcher trois partenaires en parallèle dès maintenant, dont un opérateur télécom en montage super-marchand. Plan de repli : posture C de `02`, sans portefeuille. |
-| **Les frais opérateur restent prohibitifs** | Moyenne à élevée | Boucle fermée, réseau d'agents, répercussion transparente, et négociation d'un tarif « inclusion financière » — argument que le label d'un concours renforce beaucoup |
+| **Les frais opérateur restent prohibitifs** | Moyenne à élevée | Boucle fermée, réseau d'agents, répercussion transparente, et négociation d'un tarif « inclusion financière » - argument que le label d'un concours renforce beaucoup |
 | **Un incident de fraude en phase pilote** | Moyenne | Plafonds KYC bas, carence au ré-enrôlement, plafonnement des cagnottes sur groupes neufs, revue humaine systématique au-dessus d'un seuil. Un seul vol raconté dans un marché peut arrêter le projet. |
 
 Les deux premiers se traitent par des rendez-vous, pas par du code. C'est pourquoi ils sont en tête de la liste de priorités de `00-synthese-et-points-critiques.md`.
