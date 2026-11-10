@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { PHONE_COUNTRY_CODE, formatPhoneInput, keepPhoneDigits } from "../model/model.auth-form";
 import { AUTH_COLORS } from "../model/model.auth-theme";
+import { AuthFieldIcon } from "./icon.auth-field";
 
 /** Props du champ de numéro de téléphone. */
 export interface PhoneFieldProps {
@@ -10,6 +11,8 @@ export interface PhoneFieldProps {
   readonly digits: string;
   /** Reçoit les chiffres saisis, nettoyés et limités à neuf. */
   readonly onChange: (digits: string) => void;
+  /** Délai avant le dessin de l'icône, en millisecondes. */
+  readonly iconDelay?: number;
 }
 
 /**
@@ -18,13 +21,21 @@ export interface PhoneFieldProps {
  * @returns Le champ de téléphone.
  */
 export function PhoneField(props: PhoneFieldProps) {
-  const { digits, onChange } = props;
+  const { digits, onChange, iconDelay = 0 } = props;
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Numéro de téléphone</Text>
       <View style={[styles.row, focused && styles.rowFocused]}>
+        <View style={styles.icon}>
+          <AuthFieldIcon
+            kind="phone"
+            color={focused ? AUTH_COLORS.button : AUTH_COLORS.muted}
+            delay={iconDelay}
+            testID="auth-icon-phone"
+          />
+        </View>
         <View style={styles.codeBox}>
           <Text style={styles.code}>{PHONE_COUNTRY_CODE}</Text>
         </View>
@@ -63,10 +74,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   rowFocused: { borderColor: AUTH_COLORS.button, borderWidth: 1.5 },
+  icon: { paddingLeft: 14, paddingRight: 10 },
   codeBox: {
     height: "100%",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingRight: 14,
     borderRightWidth: 1,
     borderRightColor: AUTH_COLORS.border,
   },
@@ -74,9 +86,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: "100%",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     fontSize: 18,
     color: AUTH_COLORS.body,
   },
-  helper: { marginTop: 4, fontSize: 12, lineHeight: 17, color: AUTH_COLORS.muted },
 });

@@ -34,6 +34,15 @@ describe("SignUpScreen", () => {
     expect(screen.getByLabelText("Profession ou formation")).toBeOnTheScreen();
   });
 
+  it("dessine une icône filaire sur chaque champ", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+
+    expect(screen.getByTestId("auth-icon-firstName")).toBeOnTheScreen();
+    expect(screen.getByTestId("auth-icon-lastName")).toBeOnTheScreen();
+    expect(screen.getByTestId("auth-icon-occupation")).toBeOnTheScreen();
+    expect(screen.getByTestId("auth-icon-phone")).toBeOnTheScreen();
+  });
+
   it("affiche des libellés visibles et explique la profession", async () => {
     await renderWithSafeArea(<SignUpScreen />);
 

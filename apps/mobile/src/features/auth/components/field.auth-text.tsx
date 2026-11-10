@@ -3,6 +3,8 @@ import type { TextInputProps } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { AUTH_COLORS } from "../model/model.auth-theme";
+import type { AuthFieldIconKind } from "./icon.auth-field";
+import { AuthFieldIcon } from "./icon.auth-field";
 
 /** Champs texte de la première étape d'inscription. */
 export const AUTH_TEXT_FIELD_KINDS = ["firstName", "lastName", "occupation"] as const;
@@ -15,6 +17,7 @@ interface AuthTextFieldContent {
   readonly label: string;
   readonly placeholder: string;
   readonly helper?: string;
+  readonly icon: AuthFieldIconKind;
   readonly autoComplete: TextInputProps["autoComplete"];
   readonly textContentType: TextInputProps["textContentType"];
 }
@@ -24,12 +27,14 @@ const FIELD_CONTENT: Readonly<Record<AuthTextFieldKind, AuthTextFieldContent>> =
   firstName: {
     label: "Prénom",
     placeholder: "Précieuse",
+    icon: "person",
     autoComplete: "given-name",
     textContentType: "givenName",
   },
   lastName: {
     label: "Nom",
     placeholder: "Mavoungou",
+    icon: "person",
     autoComplete: "family-name",
     textContentType: "familyName",
   },
@@ -37,6 +42,7 @@ const FIELD_CONTENT: Readonly<Record<AuthTextFieldKind, AuthTextFieldContent>> =
     label: "Profession ou formation",
     placeholder: "Commerçante, étudiante…",
     helper: "Sert à adapter vos tontines et votre suivi.",
+    icon: "work",
     autoComplete: "organization-title",
     textContentType: "jobTitle",
   },
@@ -47,6 +53,8 @@ export interface AuthTextFieldProps {
   readonly kind: AuthTextFieldKind;
   readonly value: string;
   readonly onChangeText: (value: string) => void;
+  /** Délai avant le dessin de l'icône, en millisecondes. */
+  readonly iconDelay?: number;
 }
 
 /**
@@ -55,27 +63,35 @@ export interface AuthTextFieldProps {
  * @returns Le champ texte complet.
  */
 export function AuthTextField(props: AuthTextFieldProps) {
-  const { kind, value, onChangeText } = props;
+  const { kind, value, onChangeText, iconDelay = 0 } = props;
   const content = FIELD_CONTENT[kind];
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{content.label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={content.placeholder}
-        placeholderTextColor={AUTH_COLORS.placeholder}
-        accessibilityLabel={content.label}
-        autoCapitalize="words"
-        autoComplete={content.autoComplete}
-        textContentType={content.textContentType}
-        autoCorrect={false}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={[styles.input, focused && styles.inputFocused]}
-      />
+      <View style={[styles.field, focused && styles.fieldFocused]}>
+        <AuthFieldIcon
+          kind={content.icon}
+          color={focused ? AUTH_COLORS.button : AUTH_COLORS.muted}
+          delay={iconDelay}
+          testID={`auth-icon-${kind}`}
+        />
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={content.placeholder}
+          placeholderTextColor={AUTH_COLORS.placeholder}
+          accessibilityLabel={content.label}
+          autoCapitalize="words"
+          autoComplete={content.autoComplete}
+          textContentType={content.textContentType}
+          autoCorrect={false}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={styles.input}
+        />
+      </View>
       {content.helper === undefined ? null : <Text style={styles.helper}>{content.helper}</Text>}
     </View>
   );
@@ -85,16 +101,24 @@ export function AuthTextField(props: AuthTextFieldProps) {
 const styles = StyleSheet.create({
   container: { marginBottom: 12 },
   label: { marginBottom: 6, fontSize: 13, fontWeight: "600", color: AUTH_COLORS.body },
-  input: {
+  field: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     height: 54,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: AUTH_COLORS.border,
     backgroundColor: AUTH_COLORS.field,
-    paddingHorizontal: 16,
+    paddingLeft: 14,
+  },
+  fieldFocused: { borderColor: AUTH_COLORS.button, borderWidth: 1.5 },
+  input: {
+    flex: 1,
+    height: "100%",
+    paddingRight: 16,
     fontSize: 18,
     color: AUTH_COLORS.body,
   },
-  inputFocused: { borderColor: AUTH_COLORS.button, borderWidth: 1.5 },
   helper: { marginTop: 4, fontSize: 12, lineHeight: 17, color: AUTH_COLORS.muted },
 });

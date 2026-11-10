@@ -23,6 +23,12 @@ describe("SignInScreen", () => {
     expect(screen.getByRole("button", { name: "Se connecter" })).toBeOnTheScreen();
   });
 
+  it("dessine l'icône filaire du téléphone", async () => {
+    await renderWithSafeArea(<SignInScreen />);
+
+    expect(screen.getByTestId("auth-icon-phone")).toBeOnTheScreen();
+  });
+
   it("formate le numéro pendant la saisie", async () => {
     await renderWithSafeArea(<SignInScreen />);
 

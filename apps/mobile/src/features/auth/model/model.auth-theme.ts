@@ -30,3 +30,9 @@ export const AUTH_ENTRANCE_DELAY = {
 
 /** Durée d'une apparition, en millisecondes. */
 export const AUTH_ENTRANCE_DURATION = 450;
+
+/** Délai avant le dessin de la première icône de champ, en millisecondes. */
+export const AUTH_ICON_DELAY = 500;
+
+/** Écart entre le dessin de deux icônes de champ, en millisecondes. */
+export const AUTH_ICON_STEP = 80;

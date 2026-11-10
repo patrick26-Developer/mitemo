@@ -107,11 +107,21 @@ function runOnJSCallback(callback) {
   return callback;
 }
 
+/**
+ * Laisse le composant inchangé : les props animées sont calculées à la main.
+ * @param {unknown} component Composant à animer.
+ * @returns {unknown} Le même composant.
+ */
+function createAnimatedComponent(component) {
+  return component;
+}
+
 export default {
   View,
   Text,
   Image,
   ScrollView,
+  createAnimatedComponent,
 };
 
 export const Easing = {
@@ -131,7 +141,16 @@ export const ZoomIn = entering;
 export const interpolate = finalValue;
 export const interpolateColor = finalValue;
 export const runOnJS = runOnJSCallback;
+/**
+ * Ignore la préférence de réduction des animations dans les tests.
+ * @returns {boolean} Faux, pour laisser les animations se jouer.
+ */
+export function useReducedMotion() {
+  return false;
+}
+
 export const useAnimatedStyle = animatedStyle;
+export const useAnimatedProps = animatedStyle;
 export const useSharedValue = sharedValue;
 export const withDelay = delayed;
 export const withRepeat = identity;
