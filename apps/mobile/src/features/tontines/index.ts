@@ -1,3 +1,3 @@
-export { TontineDetailScreen } from "./components/tontine-detail-screen";
-export { TontineCard } from "./components/tontine-card";
-export { TontinesScreen } from "./components/tontines-screen";
+export { TontineDetailScreen } from "./components/screen.tontine-detail";
+export { TontineCard } from "./components/card.tontine";
+export { TontinesScreen } from "./components/screen.tontines";

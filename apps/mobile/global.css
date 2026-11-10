@@ -8,6 +8,8 @@
   --color-brand-veil: rgba(8, 62, 223, 0.125);
   /* Encre des textes sur fond clair. */
   --color-ink: #0e1423;
+  /* Calque du voile des feuilles, posé sur l'encre. */
+  --color-sheet-veil: rgba(38, 37, 55, 0.24);
   /* Fond des cartes sombres. */
   --color-card: #0e1423;
   /* Encre de la barre d'onglets. */

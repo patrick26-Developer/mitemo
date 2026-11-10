@@ -127,6 +127,26 @@ src/features/contributions/
 
 Les fichiers de route (`app/`) se limitent à assembler des composants de features.
 
+Côté mobile, tout ce qui est réutilisable par plusieurs features vit dans `src/shared/`, et les composants partagés sont rangés par taille :
+
+```
+src/shared/
+├── components/
+│   ├── atoms/     briques indivisibles (icône, badge, bouton, ligne, décor)
+│   └── macros/    assemblages réutilisables (feuille, écran, champ, barre d'onglets)
+├── demo/          données de démonstration
+├── format/        formatage (montants, dates, téléphones)
+├── hooks/         hooks génériques
+├── member/        état global du membre
+├── model/         logique pure partagée
+├── testing/       utilitaires de test
+└── theme/         couleurs, espacements, styles
+```
+
+- Un composant utilisé par au moins deux features remonte dans `shared/components/` : **atome** s'il ne compose aucun autre composant, **macro** dès qu'il en assemble plusieurs.
+- Une logique ou un type utilisé par deux features remonte dans `shared/model/` (ou `shared/hooks/` s'il porte de l'état ou des effets).
+- Une feature n'importe jamais le fichier interne d'une autre feature ; elle passe par `shared/` ou par l'`index.ts` de l'autre feature.
+
 ## 3. Principes de conception
 
 ### 3.1 TDD obligatoire
@@ -185,7 +205,9 @@ Couverture minimale exigée en CI : **90 %** sur `domain` et `application`, **80
 
 ### 3.5 Nommage
 
-- Fichiers en `kebab-case` avec suffixe de rôle : `.entity.ts`, `.value-object.ts`, `.use-case.ts`, `.repository.ts`, `.controller.ts`, `.dto.ts`, `.module.ts`.
+- **API et web** : fichiers en `kebab-case` avec suffixe de rôle : `.entity.ts`, `.value-object.ts`, `.use-case.ts`, `.repository.ts`, `.controller.ts`, `.dto.ts`, `.module.ts`.
+- **Mobile (`apps/mobile/src`)** : fichiers en `type.sujet`, séparés par des points, le type de brique d'abord, puis le sujet en `kebab-case` : `screen.home.tsx`, `card.savings.tsx`, `icon.draw.tsx`, `field.auth-text.tsx`, `hook.profile-actions.ts`, `model.auth-theme.ts`, `store.member.ts`, `theme.palette.ts`. Le suffixe de test s'ajoute après le sujet : `screen.home.spec.tsx`.
+- Les fichiers de route de `apps/mobile/app/` gardent le nom imposé par Expo Router, qui définit l'URL (`index.tsx`, `sign-in.tsx`, `[id].tsx`) : ils ne suivent pas le motif `type.sujet`.
 - Classes en `PascalCase`, fonctions et variables en `camelCase`, constantes en `UPPER_SNAKE_CASE`.
 - Code et noms techniques en anglais. Documentation, messages de revue et textes produit en français.
 
@@ -198,7 +220,7 @@ Un composant affiche, il ne calcule pas.
 - **Pas de ternaire imbriqué** dans le rendu : utiliser un retour anticipé ou un sous-composant.
 - **Composants de présentation purs** : ils reçoivent des props et émettent des événements. Aucun appel réseau, aucun accès direct au stockage.
 - **Props explicites et typées**, cinq au maximum. Au-delà, le composant fait trop de choses ou doit recevoir un objet métier.
-- **Réutilisable avant d'être spécifique** : avant de créer un composant, chercher dans `shared/` et dans les autres features. Un composant utilisé par deux features remonte dans `shared/`.
+- **Réutilisable avant d'être spécifique** : avant de créer un composant, chercher dans `shared/` et dans les autres features. Un composant utilisé par deux features remonte dans `shared/components/`, en `atoms/` s'il ne compose rien, en `macros/` s'il assemble d'autres composants.
 - **Testable par construction** : chaque composant a son `*.spec.tsx` (Testing Library). On teste ce que voit l'utilisateur (textes, rôles, actions), pas l'implémentation.
 - **Accessibilité** : rôles et libellés renseignés, ce qui sert aussi de sélecteurs dans les tests.
 

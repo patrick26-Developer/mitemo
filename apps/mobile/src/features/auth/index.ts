@@ -1,3 +1,3 @@
-export { PinScreen } from "./components/pin-screen";
-export { SignInScreen } from "./components/sign-in-screen";
-export { SignUpScreen } from "./components/sign-up-screen";
+export { PinScreen } from "./components/screen.pin";
+export { SignInScreen } from "./components/screen.sign-in";
+export { SignUpScreen } from "./components/screen.sign-up";
