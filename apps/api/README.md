@@ -30,7 +30,7 @@ Sur Neon, l'URL directe est celle **sans** `-pooler` dans le nom d'hôte : le po
 Chaque développeur travaille sur sa propre branche Neon, jamais sur une base partagée :
 
 1. Dans la console Neon (ou `neonctl branches create --name <prenom>`), créer une branche personnelle à partir de `main` (la branche Neon par défaut du projet).
-2. Copier ses deux chaînes de connexion (directe et poolée) dans `apps/api/.env` — jamais commité (`.gitignore` l'exclut déjà).
+2. Copier ses deux chaînes de connexion (directe et poolée) dans `apps/api/.env` - jamais commité (`.gitignore` l'exclut déjà).
 3. Les tests d'intégration (`*.int-spec.ts`) ne tournent **jamais** contre Neon : ils appliquent les migrations puis écrivent des écritures que la base interdit de supprimer. Ils exigent une base dédiée et jetable, désignée par `TEST_DATABASE_URL`, et refusent de démarrer sans elle ou si elle désigne un hôte `*.neon.tech`. En CI, c'est le service PostgreSQL du workflow (`.github/workflows/ci.yml`). En local :
 
    ```sh

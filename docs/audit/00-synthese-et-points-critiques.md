@@ -1,4 +1,4 @@
-# SYNTHÈSE D'AUDIT — POINTS CRITIQUES
+# SYNTHÈSE D'AUDIT - POINTS CRITIQUES
 
 **Objet :** Revue des documents `document_vision_strat_gie_mitemo.md` et `cahier_des_charges_fonctionnel_mitemo.md`
 **Date :** 4 novembre 2026
@@ -21,7 +21,7 @@ Ces choix sont bons et plusieurs sont contre-intuitifs. Ils ne doivent pas être
 
 ## Les deux problèmes bloquants
 
-### P1 — Le modèle économique est en perte d'environ 3× (l'hypothèse « API marchandes gratuites » est fausse)
+### P1 - Le modèle économique est en perte d'environ 3× (l'hypothèse « API marchandes gratuites » est fausse)
 
 Le §2 du cahier des charges repose sur cette phrase : « *un modèle de grand livre à compensation interne adossé aux API marchandes gratuites* », et le §2.4 annonce que les passerelles commerce « *garantissent un service gratuit pour l'utilisateur* ».
 
@@ -41,7 +41,7 @@ La commission couvre **30 % du coût de transaction**. Et le cas le plus doulour
 
 Ce n'est pas un problème de prix à ajuster de quelques points de base. C'est un problème d'architecture de flux. Traité dans `01-modele-economique.md`.
 
-### P2 — Le SMS comme canal principal est insoutenable financièrement et insuffisant juridiquement
+### P2 - Le SMS comme canal principal est insoutenable financièrement et insuffisant juridiquement
 
 **Coût.** Un SMS A2P vers le Congo coûte 23 à 56 FCFA via un agrégateur international, et de l'ordre de 8 à 20 FCFA en direct négocié avec l'opérateur. Or le moteur d'alertes des §2.1 et §2.3 est volontairement bavard : rappel à J−10, relances tous les 2 jours, « *rappel matinal de flux continu* » pour les cycles ultra-courts, SMS de conseil budgétaire, demande d'arbitrage, confirmation. Soit 7 à 8 messages par membre et par tour. Sur le cycle ci-dessus : **~14 000 FCFA de SMS**, plus du double de la recette de 6 750 FCFA. Le SMS seul coule le modèle.
 
@@ -53,24 +53,24 @@ Ce n'est pas un problème de prix à ajuster de quelques points de base. C'est u
 
 ## Les trois problèmes sérieux mais réparables
 
-### P3 — Le statut réglementaire est esquissé, pas construit
+### P3 - Le statut réglementaire est esquissé, pas construit
 
-La vision dit « Mitemo n'est pas une banque » et prévoit des comptes miroirs chez un partenaire agréé COBAC. L'intention est juste. Mais un portefeuille interne porteur d'un solde, transférable de gré à gré (§2.6) et retirable vers l'extérieur (§2.5), **est** de la monnaie électronique au sens du cadre CEMAC. Dire « nous ne sommes pas une banque » ne suffit pas : il faut nommer sous quel agrément on opère, et l'architecture diffère selon la réponse. Trois postures possibles, une seule réaliste à court terme — voir `02-conformite-reglementaire.md`.
+La vision dit « Mitemo n'est pas une banque » et prévoit des comptes miroirs chez un partenaire agréé COBAC. L'intention est juste. Mais un portefeuille interne porteur d'un solde, transférable de gré à gré (§2.6) et retirable vers l'extérieur (§2.5), **est** de la monnaie électronique au sens du cadre CEMAC. Dire « nous ne sommes pas une banque » ne suffit pas : il faut nommer sous quel agrément on opère, et l'architecture diffère selon la réponse. Trois postures possibles, une seule réaliste à court terme - voir `02-conformite-reglementaire.md`.
 
-### P4 — Le grand livre ne boucle pas : règles métier incomplètes
+### P4 - Le grand livre ne boucle pas : règles métier incomplètes
 
 Le §5 exige l'ACID et l'absence de « monnaie virtuelle orpheline ». L'intention est bonne, mais plusieurs règles sont sous-spécifiées au point qu'aucune implémentation ne peut être correcte :
 
 - **§2.5** : la cagnotte vaut `C × (N−1)`. Le document ne dit jamais si le bénéficiaire cotise à son propre tour. Les deux conventions existent dans les tontines réelles, et le choix change le nombre de tours, le total versé par membre et l'équité de l'ordre.
 - **§3.1 / §3.2** : la réserve vaut `N × C/2`, un défaut coûte `C`. Elle absorbe donc `N/2` défauts sur tout le cycle. Le document ne dit pas ce qui se passe quand elle est vide, si la garantie **du défaillant** est consommée en premier (elle doit l'être), qui la reconstitue, ni comment elle est restituée à la clôture. Il manque une **cascade d'imputation** explicite.
 - **§2.2** : « ANNULER → gel 24 h sans incident de paiement » est, tel qu'écrit, un laissez-passer illimité. Il faut un plafond.
-- **§1.3** : la pondération de confiance n'a aucun signal dans un groupe neuf — tout le monde est à zéro, la règle du « dernier tiers » est indéfinie. Et dans la vraie vie l'ordre se négocie (frais de scolarité en septembre, stock avant les fêtes).
+- **§1.3** : la pondération de confiance n'a aucun signal dans un groupe neuf - tout le monde est à zéro, la règle du « dernier tiers » est indéfinie. Et dans la vraie vie l'ordre se négocie (frais de scolarité en septembre, stock avant les fêtes).
 - **§1.3** : « algorithme aléatoire vérifiable » est une intention, pas une propriété. Sans protocole nommé, ce n'est pas vérifiable.
 - Partout : l'arrondi de la commission n'est pas spécifié. 1,5 % de 37 500 FCFA = 562,5 FCFA, et le FCFA n'a pas de sous-unité pratique.
 
 Correctifs proposés dans `03-architecture-technique.md`.
 
-### P5 — Les scénarios de production manquent
+### P5 - Les scénarios de production manquent
 
 Le cahier des charges décrit le chemin heureux et un seul chemin d'échec (l'impayé). Il manque notamment : perte de téléphone et **SIM swap** (premier vecteur de fraude du mobile money dans la région), disparition ou décès de l'administrateur, décès d'un membre, sortie en cours de cycle, collusion de l'administrateur avec de faux membres, panne opérateur pendant une distribution, fonds « en vol » et réconciliation, exposition d'un membre présent dans cinq tontines, et surtout : **qui arbitre un litige, selon quelle procédure, sous quel délai**. L'état « En Litige » existe dans l'automate mais n'a aucune définition opérationnelle.
 
@@ -93,14 +93,14 @@ Liste complète dans `05-scenarios-et-cas-limites.md`.
 
 ## Note sur le concours
 
-Le document de vision cite le **concours U-Shine Congo 2026**. Je n'ai pas trouvé de trace publique de cet événement — à vérifier de ton côté, c'est peut-être un programme interne ou peu référencé.
+Le document de vision cite le **concours U-Shine Congo 2026**. Je n'ai pas trouvé de trace publique de cet événement - à vérifier de ton côté, c'est peut-être un programme interne ou peu référencé.
 
 En revanche une opportunité parallèle existe, et le calendrier est serré : **INNOV'ACTION GLOBAL GATEWAY**, lancé par la Délégation de l'Union européenne à Brazzaville le 12 octobre 2026. Ouvert aux Congolais de 18 à 35 ans, quatre axes dont le numérique, **candidatures jusqu'au 15 novembre 2026 à minuit**, 12 lauréats primés de 1 à 4,5 millions FCFA et 24 entrepreneurs accompagnés six mois. Mitemo correspond précisément à la thématique inclusion financière. Il reste onze jours.
 
 ---
 
 **Sources**
-- [Fees & Pricing by Country — PawaPay](https://www.pawapay.io/fees)
-- [SMS Pricing in Republic of the Congo — Twilio](https://www.twilio.com/en-us/sms/pricing/cg)
-- [API Paiement Mobile Congo-Brazzaville : Guide 2026 — Simiz](https://simiz.io/blog/api-paiement-mobile-congo-orchestrateur)
-- [INNOV'ACTION GLOBAL GATEWAY — Délégation de l'UE au Congo](https://www.eeas.europa.eu/delegations/congo-brazzaville/innovaction-global-gateway-lunion-europeenne-mise-sur-le-talent-de-la-jeunesse-congolaise_fr)
+- [Fees & Pricing by Country - PawaPay](https://www.pawapay.io/fees)
+- [SMS Pricing in Republic of the Congo - Twilio](https://www.twilio.com/en-us/sms/pricing/cg)
+- [API Paiement Mobile Congo-Brazzaville : Guide 2026 - Simiz](https://simiz.io/blog/api-paiement-mobile-congo-orchestrateur)
+- [INNOV'ACTION GLOBAL GATEWAY - Délégation de l'UE au Congo](https://www.eeas.europa.eu/delegations/congo-brazzaville/innovaction-global-gateway-lunion-europeenne-mise-sur-le-talent-de-la-jeunesse-congolaise_fr)
