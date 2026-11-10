@@ -1,3 +1,3 @@
-export { SavingsDetailScreen } from "./components/savings-detail-screen";
-export { SavingsCard } from "./components/savings-card";
-export { SavingsScreen } from "./components/savings-screen";
+export { SavingsDetailScreen } from "./components/screen.savings-detail";
+export { SavingsCard } from "./components/card.savings";
+export { SavingsScreen } from "./components/screen.savings";

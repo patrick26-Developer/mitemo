@@ -1,0 +1,32 @@
+import { screen } from "@testing-library/react-native";
+
+import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
+import { ProfileSignOut } from "./card.profile-sign-out";
+
+describe("ProfileSignOut", () => {
+  it("affiche la date de création du compte", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByText("Compte créé le 12/03/2026")).toBeOnTheScreen();
+  });
+
+  it("propose la déconnexion", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeOnTheScreen();
+  });
+
+  it("retourne l'icône de déconnexion à 180 degrés", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByTestId("sign-out-icon")).toHaveStyle({
+      transform: [{ rotate: "180deg" }],
+    });
+  });
+
+  it("atténue la ligne de création du compte", async () => {
+    await renderWithSafeArea(<ProfileSignOut createdAt="2026-03-12" />);
+
+    expect(screen.getByTestId("account-created-row")).toHaveStyle({ opacity: 0.6 });
+  });
+});

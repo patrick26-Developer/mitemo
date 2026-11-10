@@ -1,3 +1,3 @@
-export { HistoryScreen } from "./components/history-screen";
-export { ProfilePhotoSync } from "./components/profile-photo-sync";
-export { ProfileScreen } from "./components/profile-screen";
+export { HistoryScreen } from "./components/screen.history";
+export { ProfilePhotoSync } from "./components/sync.profile-photo";
+export { ProfileScreen } from "./components/screen.profile";
