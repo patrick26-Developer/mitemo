@@ -14,6 +14,8 @@ web-build/
 **/src/generated/
 **/next-env.d.ts
 **/expo-env.d.ts
+# Types de classes générés par le serveur Metro d'Uniwind
+**/uniwind-types.d.ts
 
 # Turborepo
 .turbo/

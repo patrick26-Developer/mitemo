@@ -1,10 +1,20 @@
 /**
  * Tests unitaires du mobile : preset officiel d'Expo, rendu avec Testing Library.
+ * Deux paquets sont remplacés : `lucide-react-native`, qui n'expose que du module
+ * ES sous la condition `react-native`, et `react-native-reanimated`, dont les
+ * implémentations native et web ne fonctionnent pas sous Jest.
  * @type {import("jest").Config}
  */
 module.exports = {
   preset: "jest-expo",
   testMatch: ["<rootDir>/src/**/*.spec.{ts,tsx}"],
+  moduleNameMapper: {
+    "^lucide-react-native$":
+      "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
+    "^react-native-reanimated$": "<rootDir>/jest/mocks/react-native-reanimated.js",
+    "^@react-native-async-storage/async-storage$":
+      "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
+  },
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.spec.{ts,tsx}"],
   coverageThreshold: {
     global: { lines: 80, branches: 80, functions: 80, statements: 80 },

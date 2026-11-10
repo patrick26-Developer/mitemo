@@ -37,10 +37,25 @@ src/
     api/               appels à l'API, typés par @mitemo/contracts
     model/             logique pure, testée sans rendu
     index.ts           seule porte d'entrée de la feature
-  shared/              composants réutilisés (code visuel vert, orange, rouge)
+  shared/              briques transverses : components/, format/, hooks/, theme/, testing/
 ```
 
 Feature existante : `home` (écran d'accueil).
+
+## Style (Uniwind)
+
+Le style passe par les classes Tailwind d'Uniwind (`className`), jamais par `StyleSheet` pour
+du statique. Les jetons de couleur sont déclarés une fois dans `global.css` (`@theme`), importé
+par `app/_layout.tsx` : `bg-card`, `text-ink`, `text-on-dark-muted`, etc.
+
+Trois exceptions, documentées dans le code :
+
+- les valeurs calculées à l'exécution (largeur de carte, teinte d'une carte) restent en `style` ;
+- les composants natifs tiers (`Svg`, `LinearGradient`, icônes) n'acceptent pas de `className` et
+  reçoivent leurs couleurs depuis `src/shared/theme/palette.ts`, qui reprend les valeurs de
+  `global.css` ;
+- les `Animated.View` de Reanimated ne reçoivent pas de `className` : leur cadre statique reste
+  décrit dans le fichier qui les anime.
 
 ## Règles propres au mobile
 
