@@ -10,14 +10,8 @@ import { AnimatedTabBar } from "../../src/shared/components/macros/bar.tab";
 export default function TabsLayout() {
   return (
     <>
-      <StatusBar style="dark" />
-      {/*
-        Ordre imposé par Expo Router : `index` d'abord, puis les routes par
-        longueur de nom, les égalités suivant l'ordre alphabétique des fichiers.
-        Un autre ordre fait émettre un ROUTE_NAMES_CHANGED perdu au démarrage
-        (expo/expo#52969). L'ordre d'affichage voulu est porté par
-        AnimatedTabBar.
-      */}
+      <StatusBar style="auto" />
+
       <Tabs
         tabBar={(props) => <AnimatedTabBar {...props} />}
         screenOptions={{ headerShown: false, animation: "shift" }}

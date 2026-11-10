@@ -41,7 +41,7 @@ export function AuthLayout(props: AuthLayoutProps) {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="auto" />
       <GridBackground lineColor={AUTH_COLORS.gridLine} />
       <CornerDecor side="left" />
       <CornerDecor side="right" />

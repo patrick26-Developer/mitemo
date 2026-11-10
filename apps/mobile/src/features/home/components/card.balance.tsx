@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react-native";
+import { Eye } from "lucide-react-native";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
@@ -18,16 +18,16 @@ const ENTERING_DURATION = 500;
 export function BalanceCard() {
   return (
     <Animated.View entering={FadeInDown.duration(ENTERING_DURATION)}>
-      <View className="mx-4 flex-col gap-3.5 rounded-[20px] bg-card p-6">
+      <View className="mx-4 flex-col gap-3.5 rounded-[20px] border-blue-400 border-[0.5px] bg-card p-6">
         <View className="flex-row items-center">
           <Text className="text-[14px] text-white">Solde disponible</Text>
           <View className="mx-3 flex-1 bg-on-dark-line" style={HAIRLINE} />
-          <ShieldCheck size={20} color={PALETTE.white} />
+          <Eye size={20} color={PALETTE.white} />
         </View>
 
-        <Text className="mb-3.5 mt-3.5 text-[32px] font-medium text-white">
+        <Text className="mb-3.5 mt-3.5 text-[32px] font-medium text-yellow-500">
           {formatAmount(HOME_BALANCE.available)}{" "}
-          <Text className="font-light text-on-dark-soft">FCFA</Text>
+          <Text className="font-light text-on-dark-soft text-lg">FCFA</Text>
         </Text>
 
         <BarcodeStrip color={PALETTE.barcodeOnBrand} />

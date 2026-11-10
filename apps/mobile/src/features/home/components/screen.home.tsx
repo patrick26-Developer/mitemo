@@ -20,7 +20,7 @@ export function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar style="light" />
+      <StatusBar style="auto" />
       <ScrollView showsVerticalScrollIndicator={false}>
         <HomeHero topInset={insets.top} />
         <TontinesSection />

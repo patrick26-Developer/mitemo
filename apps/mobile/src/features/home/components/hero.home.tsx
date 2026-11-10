@@ -2,6 +2,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 
 import { PALETTE } from "../../../shared/theme/theme.palette";
+import { GridBackground } from "../../../shared/components/atoms/background.grid";
+import { CornerDecor } from "../../../shared/components/atoms/decor.corner";
 import { BalanceCard } from "./card.balance";
 import { HomeHeader } from "./header.home";
 
@@ -30,6 +32,9 @@ export function HomeHero(props: HomeHeroProps) {
 
   return (
     <LinearGradient colors={HERO_COLORS} locations={HERO_STOPS} style={{ height: HERO_HEIGHT }}>
+      <GridBackground />
+      <CornerDecor side="left" />
+      <CornerDecor side="right" />
       <View className="flex-col gap-6 pb-6" style={{ paddingTop: topInset + 12 }}>
         <HomeHeader />
         <BalanceCard />
