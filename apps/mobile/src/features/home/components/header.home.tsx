@@ -1,5 +1,5 @@
 import { Info } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { MemberPhoto } from "../../../shared/components/atoms/photo.member";
 import { useMemberStore } from "../../../shared/member/store.member";
@@ -8,17 +8,30 @@ import { PALETTE } from "../../../shared/theme/theme.palette";
 /** Côté de l'avatar de l'accueil, en points. */
 const AVATAR_SIZE = 48;
 
+/** Props de l'en-tête de l'accueil. */
+export interface HomeHeaderProps {
+  /** Ouvre le résumé du membre, au toucher de l'avatar ou du nom. */
+  readonly onOpenMember: () => void;
+}
+
 /**
- * Affiche la salutation et l'avatar partagé du membre.
+ * Affiche la salutation et l'avatar partagé du membre ; l'avatar et le nom
+ * ouvrent le résumé de ses informations.
+ * @param props Ouverture du résumé du membre.
  * @returns L'en-tête de l'accueil.
  */
-export function HomeHeader() {
+export function HomeHeader(props: HomeHeaderProps) {
   const photoUri = useMemberStore((state) => state.photoUri);
   const avatarInitial = useMemberStore((state) => state.avatarInitial);
   const name = useMemberStore((state) => state.name);
 
   return (
-    <View className="mb-[18px] flex-row items-center gap-2.5 px-4">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Voir mes informations"
+      onPress={props.onOpenMember}
+      className="mb-[18px] flex-row items-center gap-2.5 self-start px-4"
+    >
       <MemberPhoto
         photoUri={photoUri}
         initial={avatarInitial}
@@ -33,6 +46,6 @@ export function HomeHeader() {
           <Info size={13} color={PALETTE.white} />
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }

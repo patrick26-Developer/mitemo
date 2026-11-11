@@ -7,7 +7,7 @@ describe("HomeHero", () => {
   beforeEach(() => useMemberStore.setState(INITIAL_MEMBER_PROFILE));
 
   it("réunit la salutation et le solde", async () => {
-    await render(<HomeHero topInset={47} />);
+    await render(<HomeHero topInset={47} onOpenMember={jest.fn()} />);
 
     expect(screen.getByText("Bonjour")).toBeOnTheScreen();
     expect(screen.getByText("Solde disponible")).toBeOnTheScreen();

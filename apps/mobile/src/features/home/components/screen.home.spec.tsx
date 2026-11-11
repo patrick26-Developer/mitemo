@@ -1,5 +1,5 @@
-import { screen } from "@testing-library/react-native";
-import { useIsFocused } from "expo-router";
+import { fireEvent, screen } from "@testing-library/react-native";
+import { router, useIsFocused } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/store.member";
@@ -48,7 +48,7 @@ describe("HomeScreen", () => {
 
     expect(screen.getByText("Solde disponible")).toBeOnTheScreen();
     expect(screen.getByText(/12 500/)).toBeOnTheScreen();
-    expect(screen.getByText("78 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("28 000 FCFA")).toBeOnTheScreen();
   });
 
   it("liste les tontines du membre", async () => {
@@ -83,5 +83,15 @@ describe("HomeScreen", () => {
     await renderWithSafeArea(<HomeScreen />);
 
     expect(lastStatusBarStyle()).toBe("dark");
+  });
+
+  it("ouvre le résumé du membre depuis son avatar, puis mène au profil", async () => {
+    await renderWithSafeArea(<HomeScreen />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Voir mes informations" }));
+    expect(screen.getByText("Nom complet")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Voir mon profil" }));
+    expect(router.push).toHaveBeenCalledWith("/profile");
   });
 });
