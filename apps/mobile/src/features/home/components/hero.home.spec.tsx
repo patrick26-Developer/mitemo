@@ -1,0 +1,15 @@
+import { render, screen } from "@testing-library/react-native";
+
+import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/store.member";
+import { HomeHero } from "./hero.home";
+
+describe("HomeHero", () => {
+  beforeEach(() => useMemberStore.setState(INITIAL_MEMBER_PROFILE));
+
+  it("réunit la salutation et le solde", async () => {
+    await render(<HomeHero topInset={47} />);
+
+    expect(screen.getByText("Bonjour")).toBeOnTheScreen();
+    expect(screen.getByText("Solde disponible")).toBeOnTheScreen();
+  });
+});
