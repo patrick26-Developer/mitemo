@@ -1,5 +1,3 @@
-import { Text } from "react-native";
-
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import type { SheetButtonTone } from "../atoms/button.sheet-primary";
 import { SheetText } from "../atoms/text.sheet";
@@ -24,6 +22,7 @@ export interface ConfirmSheetProps {
 
 /**
  * Demande confirmation avant une opération irréversible ou coûteuse.
+ * Renoncer passe par la croix de la feuille : pas de bouton « Annuler ».
  * @param props Contenu, visibilité, fermeture et confirmation.
  * @returns La feuille de confirmation.
  */
@@ -38,14 +37,6 @@ export function ConfirmSheet(props: ConfirmSheetProps) {
         onPress={onConfirm}
         {...(content.tone === undefined ? {} : { tone: content.tone })}
       />
-      <Text
-        accessibilityRole="button"
-        accessibilityLabel="Annuler"
-        onPress={onClose}
-        className="py-2 text-center text-[14px] text-muted"
-      >
-        Annuler
-      </Text>
     </BottomSheet>
   );
 }

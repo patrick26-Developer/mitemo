@@ -1,6 +1,5 @@
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
-import { SheetSecondaryButton } from "../../../shared/components/atoms/button.sheet-secondary";
 import { SheetText } from "../../../shared/components/atoms/text.sheet";
 import { useSessionStore } from "../../../shared/session/store.session";
 
@@ -12,6 +11,7 @@ export interface SignOutSheetProps {
 
 /**
  * Demande confirmation avant de fermer la session et d'ouvrir la connexion.
+ * Renoncer passe par la croix de la feuille : pas de bouton « Annuler ».
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille de déconnexion.
  */
@@ -35,11 +35,6 @@ export function SignOutSheet(props: SignOutSheetProps) {
         accessibilityLabel="Confirmer la déconnexion"
         tone="danger"
         onPress={confirm}
-      />
-      <SheetSecondaryButton
-        label="Annuler"
-        accessibilityLabel="Annuler la déconnexion"
-        onPress={onClose}
       />
     </BottomSheet>
   );

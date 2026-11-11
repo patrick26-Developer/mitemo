@@ -29,14 +29,10 @@ describe("IdentityEditForm", () => {
     expect(onDone).not.toHaveBeenCalled();
   });
 
-  it("se ferme sans rien changer à l'annulation", async () => {
-    const onDone = jest.fn();
-    await renderWithSafeArea(<IdentityEditForm onDone={onDone} />);
+  it("ne propose qu'Enregistrer, la croix de la feuille servant à abandonner", async () => {
+    await renderWithSafeArea(<IdentityEditForm onDone={jest.fn()} />);
 
-    await fireEvent.changeText(screen.getByLabelText("Prénom"), "Aimée");
-    await fireEvent.press(screen.getByRole("button", { name: "Annuler la modification" }));
-
-    expect(useMemberStore.getState().firstName).toBe("Précieuse");
-    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Enregistrer" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
   });
 });

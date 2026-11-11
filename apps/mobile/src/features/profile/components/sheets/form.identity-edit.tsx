@@ -1,7 +1,6 @@
 import { Text, View } from "react-native";
 
 import { SheetPrimaryButton } from "../../../../shared/components/atoms/button.sheet-primary";
-import { SheetSecondaryButton } from "../../../../shared/components/atoms/button.sheet-secondary";
 import { SheetTextField } from "../../../../shared/components/macros/field.sheet-text";
 import type { IdentityField, IdentityFormState } from "../../hooks/hook.identity-edit";
 import { useIdentityEdit } from "../../hooks/hook.identity-edit";
@@ -16,12 +15,6 @@ export interface IdentityEditFormProps {
 interface IdentityFieldsProps {
   readonly form: IdentityFormState;
   readonly onChange: (field: IdentityField, value: string) => void;
-}
-
-/** Props des actions du formulaire d'identité. */
-interface IdentityActionsProps {
-  readonly onSave: () => void;
-  readonly onCancel: () => void;
 }
 
 /**
@@ -54,27 +47,8 @@ function IdentityFields(props: IdentityFieldsProps) {
 }
 
 /**
- * Affiche les actions d'enregistrement et d'annulation du formulaire.
- * @param props Enregistrement et annulation.
- * @returns Les actions du formulaire.
- */
-function IdentityActions(props: IdentityActionsProps) {
-  const { onSave, onCancel } = props;
-
-  return (
-    <View className="gap-3">
-      <SheetPrimaryButton label="Enregistrer" onPress={onSave} />
-      <SheetSecondaryButton
-        label="Annuler"
-        accessibilityLabel="Annuler la modification"
-        onPress={onCancel}
-      />
-    </View>
-  );
-}
-
-/**
  * Modifie le prénom, le nom et la profession du membre depuis son profil.
+ * Abandonner passe par la croix de la feuille : pas de bouton « Annuler ».
  * @param props Retour à l'affichage en lecture seule.
  * @returns Le formulaire d'identité.
  */
@@ -90,7 +64,7 @@ export function IdentityEditForm(props: IdentityEditFormProps) {
           {edit.form.error}
         </Text>
       )}
-      <IdentityActions onSave={edit.save} onCancel={onDone} />
+      <SheetPrimaryButton label="Enregistrer" onPress={edit.save} />
     </View>
   );
 }

@@ -32,15 +32,13 @@ describe("ConfirmSheet", () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it("ferme la feuille quand l'annulation est touchée", async () => {
-    const onClose = jest.fn();
+  it("se ferme par sa croix, sans bouton Annuler", async () => {
     await renderWithSafeArea(
-      <ConfirmSheet content={CONTENT} visible onClose={onClose} onConfirm={jest.fn()} />,
+      <ConfirmSheet content={CONTENT} visible onClose={jest.fn()} onConfirm={jest.fn()} />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Annuler" }));
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Fermer" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
   });
 
   it("ne rend rien quand elle est fermée", async () => {

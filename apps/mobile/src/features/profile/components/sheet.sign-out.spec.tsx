@@ -17,13 +17,13 @@ describe("SignOutSheet", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("garde la session ouverte à l'annulation", async () => {
+  it("garde la session ouverte quand la feuille se ferme par sa croix", async () => {
     const onClose = jest.fn();
     await renderWithSafeArea(<SignOutSheet visible onClose={onClose} />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Annuler la déconnexion" }));
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Fermer" }));
 
     expect(useSessionStore.getState().signedIn).toBe(true);
-    expect(onClose).toHaveBeenCalled();
   });
 });
