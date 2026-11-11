@@ -5,6 +5,9 @@ import { PALETTE } from "../../../shared/theme/theme.palette";
 import { accentRing } from "../../../shared/theme/theme.field";
 import type { MemberTurn } from "../model/model.member-turns";
 
+/** Couleur de l'état de la cotisation : vert à jour, rouge en attente. */
+const PAYMENT_COLORS = { paid: "#1F8A4C", due: PALETTE.danger } as const;
+
 /** Props d'une ligne de membre d'une tontine. */
 export interface TontineMemberRowProps {
   /** Membre et son rang de passage. */
@@ -49,7 +52,7 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
         <Text className="text-[15px] text-ink" numberOfLines={1}>
           {member.name}
         </Text>
-        <Text className="text-[12px] text-muted">{memberDetail(entry, focused)}</Text>
+        <MemberDetail entry={entry} focused={focused} />
       </View>
       {onRemove === undefined ? null : (
         <Pressable
@@ -65,14 +68,34 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
   );
 }
 
+/** Props de la ligne d'état d'un membre. */
+interface MemberDetailProps {
+  readonly entry: MemberTurn;
+  /** Vrai quand c'est son tour. */
+  readonly focused: boolean;
+}
+
 /**
- * Rédige la ligne d'état d'un membre : rôle, cotisation et tour éventuel.
- * @param entry Membre et rang de passage.
- * @param focused Vrai quand c'est son tour.
- * @returns La ligne, par exemple « Membre · En attente · À son tour ».
+ * Ligne d'état d'un membre : rôle, cotisation en couleur (vert à jour, rouge
+ * en attente) et tour éventuel, par exemple « Membre · En attente · À son tour ».
+ * @param props Membre et mise en avant.
+ * @returns La ligne d'état.
  */
-function memberDetail(entry: MemberTurn, focused: boolean): string {
-  const role = entry.member.role === "ADMIN" ? "Administrateur" : "Membre";
-  const payment = entry.member.paidCurrentRound ? "À jour" : "En attente";
-  return `${role} · ${payment}${focused ? " · À son tour" : ""}`;
+function MemberDetail(props: MemberDetailProps) {
+  const { member } = props.entry;
+  const role = member.role === "ADMIN" ? "Administrateur" : "Membre";
+  const paid = member.paidCurrentRound;
+
+  return (
+    <Text className="text-[12px] text-muted">
+      {role} ·{" "}
+      <Text
+        className="font-semibold"
+        style={{ color: paid ? PAYMENT_COLORS.paid : PAYMENT_COLORS.due }}
+      >
+        {paid ? "À jour" : "En attente"}
+      </Text>
+      {props.focused ? " · À son tour" : ""}
+    </Text>
+  );
 }

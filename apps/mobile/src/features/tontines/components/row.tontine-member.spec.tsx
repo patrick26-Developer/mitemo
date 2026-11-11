@@ -54,4 +54,14 @@ describe("TontineMemberRow", () => {
 
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
+
+  it("colore l'état de la cotisation : vert à jour, rouge en attente", async () => {
+    await render(
+      <TontineMemberRow entry={{ member: makeMember("m2", "MEMBRE", true), turn: 1 }} />,
+    );
+    expect(screen.getByText("À jour")).toHaveStyle({ color: "#1F8A4C" });
+
+    await render(<TontineMemberRow entry={{ member: makeMember("m3", "MEMBRE"), turn: 2 }} />);
+    expect(screen.getByText("En attente")).toHaveStyle({ color: "#B42318" });
+  });
 });
