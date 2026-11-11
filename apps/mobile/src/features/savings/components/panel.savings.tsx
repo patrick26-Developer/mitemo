@@ -53,6 +53,7 @@ export function SavingsPanel(props: SavingsPanelProps) {
         done={markersDone(item)}
         total={item.markersTotal}
         partial={markerFill(item)}
+        accent={item.tint}
       />
       <BarcodeStrip color={PALETTE.barcodeOnSavings} />
 

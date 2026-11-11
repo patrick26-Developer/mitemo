@@ -7,6 +7,7 @@ import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { EmptyStateContent } from "../../../shared/model/model.list-empty-state";
 import type { ListFilter } from "../../../shared/model/model.list-filter";
 import { FULL_CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
+import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
 import { SavingsCard } from "./card.savings";
 import { SavingsCreateSheet } from "./sheet.savings-create";
 
@@ -17,8 +18,8 @@ const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
     message: "Créez une carte de pointage pour la voir apparaître ici.",
   },
   completed: {
-    title: "Aucune carte terminée",
-    message: "Les cartes clôturées apparaîtront ici.",
+    title: "Aucune carte retirée",
+    message: "Les cartes terminées dont l'épargne a été retirée apparaîtront ici.",
   },
 };
 
@@ -26,10 +27,12 @@ const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
 const SAVINGS_LIST: Omit<FilterableListConfig<SavingsCardModel>, "items"> = {
   keyOf: (item) => item.id,
   labelOf: (item) => item.name,
-  isCompleted: (item) => item.state === "COMPLETED",
+  isCompleted: (item) => item.state === "ARCHIVED",
+  archivedLabel: "Retirées",
   searchPlaceholder: "Rechercher une carte",
   searchSubject: "carte",
   emptyStates: EMPTY_STATES,
+  emptyIcon: TAB_ICONS.savings,
   renderItem: (item, index) => <SavingsCard item={item} index={index} width={FULL_CARD_WIDTH} />,
 };
 

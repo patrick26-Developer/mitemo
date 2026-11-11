@@ -17,11 +17,16 @@ async function fillProject(name = "Loyer de Février"): Promise<void> {
 }
 
 /**
- * Choisit une échéance au calendrier, en validant la date proposée.
+ * Choisit une échéance au calendrier, en touchant le premier jour proposé.
  */
 async function chooseDeadline(): Promise<void> {
   await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
-  await fireEvent.press(screen.getByRole("button", { name: "Valider" }));
+  await fireEvent(
+    screen.getByTestId("native-date-picker"),
+    "change",
+    { type: "set" },
+    new Date(`${tomorrowUtc()}T00:00:00.000Z`),
+  );
 }
 
 describe("SavingsCreateSheet", () => {
@@ -48,7 +53,7 @@ describe("SavingsCreateSheet", () => {
     expect(screen.getByRole("progressbar", { name: /Étape 1 sur 2/ })).toBeOnTheScreen();
   });
 
-  it("choisit le rythme et l'échéance, puis résume les pointages", async () => {
+  it("choisit le rythme et l'échéance, puis résume les pointages sans répéter les champs", async () => {
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
     await fillProject();
 
@@ -61,7 +66,9 @@ describe("SavingsCreateSheet", () => {
 
     expect(screen.getByText("60 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("5 000 FCFA")).toBeOnTheScreen();
-    expect(screen.getByText("chaque semaine")).toBeOnTheScreen();
+    expect(screen.queryByText("chaque semaine")).toBeNull();
+    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
+    expect(screen.getByText("6 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByTestId("sheet-action-row")).toBeOnTheScreen();
   });
 

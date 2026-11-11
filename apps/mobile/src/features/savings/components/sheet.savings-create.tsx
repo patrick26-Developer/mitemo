@@ -1,4 +1,3 @@
-import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
@@ -8,9 +7,8 @@ import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
-import { formatLongDate } from "../../../shared/format/format.date";
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { formatFrequency } from "../../../shared/member/model.portfolio";
+import { CARD_FEE_PERCENT } from "../../../shared/member/model.card-fee";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { tomorrowUtc } from "../../../shared/model/model.clock";
 import { FREQUENCY_SELECT_GROUPS } from "../../../shared/model/model.frequency";
@@ -90,14 +88,13 @@ function SavingsProjectStep(
 function recapRows(recap: SavingsRecap): readonly SheetRecapRow[] {
   const rows = [
     recap.goal === null ? null : { label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
+    recap.fee === null
+      ? null
+      : { label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`, value: `${formatAmount(recap.fee)} FCFA` },
     recap.markerAmount === null
       ? null
       : { label: "Par pointage", value: `${formatAmount(recap.markerAmount)} FCFA` },
-    recap.frequency === null
-      ? null
-      : { label: "Fréquence", value: formatFrequency(recap.frequency) },
     recap.markers === null ? null : { label: "Pointages prévus", value: `${recap.markers}` },
-    recap.deadline === null ? null : { label: "Échéance", value: formatLongDate(recap.deadline) },
   ];
 
   return rows.flatMap((row) => (row === null ? [] : [row]));
@@ -157,7 +154,20 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
   };
 
   return (
-    <BottomSheet visible={props.visible} title="Nouvelle carte" onClose={close}>
+    <BottomSheet
+      visible={props.visible}
+      title="Nouvelle carte"
+      onClose={close}
+      footer={
+        <SheetStepsFooter
+          isFirst={steps.isFirst}
+          isLast={steps.isLast}
+          finalLabel="Créer la carte"
+          onBack={back}
+          onNext={next}
+        />
+      }
+    >
       <StepIndicator
         index={steps.index}
         total={steps.total}
@@ -168,14 +178,6 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
       ) : (
         <SavingsRhythmStep form={form} invalid={invalid} tontines={tontines} onChange={update} />
       )}
-      {error === null ? null : <FeedbackBanner kind="error" message={error} />}
-      <SheetStepsFooter
-        isFirst={steps.isFirst}
-        isLast={steps.isLast}
-        finalLabel="Créer la carte"
-        onBack={back}
-        onNext={next}
-      />
     </BottomSheet>
   );
 }

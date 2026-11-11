@@ -1,13 +1,15 @@
 import type { PortfolioState } from "../../../shared/member/model.portfolio-actions";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
-import type { PortfolioFeedback } from "../../../shared/hooks/hook.portfolio-feedback";
+import { nowIsoUtc } from "../../../shared/model/model.clock";
+import type { PaymentMethod } from "../../../shared/model/model.payment-method";
+import { paymentMethodLabel } from "../../../shared/model/model.payment-method";
 import { usePortfolioFeedback } from "../../../shared/hooks/hook.portfolio-feedback";
 
-/** Actions offertes sur une carte de pointage, avec leur retour à l'écran. */
+/** Actions offertes sur une carte de pointage ; leur résultat sort en toast. */
 export interface SavingsActionsState {
-  readonly feedback: PortfolioFeedback | null;
-  readonly contribute: () => void;
+  /** Pointe un marqueur, réglé par l'opérateur choisi. */
+  readonly contribute: (method: PaymentMethod) => void;
   readonly withdraw: () => void;
   readonly transfer: () => void;
 }
@@ -15,16 +17,19 @@ export interface SavingsActionsState {
 /**
  * Branche les opérations d'une carte sur le portefeuille local.
  * @param card Carte affichée.
- * @returns Les actions et le dernier retour d'opération.
+ * @returns Les actions de la carte.
  */
 export function useSavingsActions(card: SavingsCard): SavingsActionsState {
-  const { feedback, run } = usePortfolioFeedback();
+  const { run } = usePortfolioFeedback();
   const act = (action: (store: PortfolioState) => void, success: string) =>
     run(() => action(usePortfolioStore.getState()), success);
 
   return {
-    feedback,
-    contribute: () => act((store) => store.contributeCard(card.id), "Un marqueur a été ajouté."),
+    contribute: (method) =>
+      act(
+        (store) => store.contributeCard(card.id, { at: nowIsoUtc(), method }),
+        `Pointage réglé par ${paymentMethodLabel(method)}.`,
+      ),
     withdraw: () =>
       act((store) => store.withdrawCard(card.id), "L'épargne a rejoint votre solde disponible."),
     transfer: () =>

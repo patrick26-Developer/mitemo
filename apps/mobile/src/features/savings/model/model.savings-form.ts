@@ -3,6 +3,7 @@ import { z } from "zod";
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatLongDate } from "../../../shared/format/format.date";
 import type { TontineFrequency } from "../../../shared/member/model.portfolio";
+import { cardCreationFee } from "../../../shared/member/model.card-fee";
 import type { CreateCardInput } from "../../../shared/member/model.portfolio-create";
 import { parseAmountInput } from "../../../shared/model/model.amount-input";
 import { todayUtc } from "../../../shared/model/model.clock";
@@ -36,6 +37,8 @@ export interface SavingsFormState {
 export interface SavingsRecap {
   /** Objectif total, `null` tant que la saisie manque. */
   readonly goal: bigint | null;
+  /** Frais Mitemo prélevés à la création, `null` tant que l'objectif manque. */
+  readonly fee: bigint | null;
   /** Montant proposé par pointage, `null` tant que la saisie manque. */
   readonly markerAmount: bigint | null;
   /** Rythme des pointages, `null` quand la fréquence est inconnue. */
@@ -187,8 +190,8 @@ export function savingsInvalidFields(form: SavingsFormState): SavingsInvalidFiel
 }
 
 /**
- * Résume l'objectif, le rythme et le nombre de pointages d'une carte en cours
- * de saisie.
+ * Résume l'objectif, les frais Mitemo, le rythme et le nombre de pointages
+ * d'une carte en cours de saisie.
  * @param form Champs saisis.
  * @param now Instant de référence, injecté pour rendre le calcul testable.
  * @returns Les valeurs affichables, incomplètes tant que la saisie l'est.
@@ -201,8 +204,11 @@ export function savingsRecap(form: SavingsFormState, now: Date): SavingsRecap {
       ? markersForPlan({ frequency, start: todayUtc(now), deadline })
       : null;
 
+  const goal = parseAmountInput(form.goal);
+
   return {
-    goal: parseAmountInput(form.goal),
+    goal,
+    fee: goal === null ? null : cardCreationFee(goal),
     markerAmount: parseAmountInput(form.markerAmount),
     frequency,
     markers: complete,

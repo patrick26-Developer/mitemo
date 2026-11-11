@@ -100,6 +100,7 @@ describe("savingsRecap", () => {
   it("résume l'objectif, le rythme et les pointages prévus", () => {
     expect(savingsRecap(VALID_FORM, NOW)).toEqual({
       goal: 60_000n,
+      fee: 6_000n,
       markerAmount: 5_000n,
       frequency: { unit: "semaine", interval: 1 },
       markers: 16,
@@ -109,6 +110,7 @@ describe("savingsRecap", () => {
 
   it("n'affiche rien tant que la saisie est incomplète", () => {
     expect(savingsRecap({ ...VALID_FORM, goal: "" }, NOW).goal).toBeNull();
+    expect(savingsRecap({ ...VALID_FORM, goal: "" }, NOW).fee).toBeNull();
     expect(savingsRecap({ ...VALID_FORM, deadline: "" }, NOW).markers).toBeNull();
     expect(savingsRecap({ ...VALID_FORM, cadence: "annee-1" }, NOW).frequency).toBeNull();
   });
