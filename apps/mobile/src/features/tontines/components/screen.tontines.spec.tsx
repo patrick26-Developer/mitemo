@@ -48,7 +48,7 @@ describe("TontinesScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: "Ajouter" }));
 
     expect(await screen.findByText("Nouvelle tontine")).toBeOnTheScreen();
-    expect(screen.getByText("Comment ça marche")).toBeOnTheScreen();
+    expect(screen.getByText("Créer la tontine")).toBeOnTheScreen();
   });
 
   it("affiche le fond pointillé", async () => {

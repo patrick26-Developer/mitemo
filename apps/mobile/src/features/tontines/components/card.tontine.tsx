@@ -3,10 +3,11 @@ import { Users } from "lucide-react-native";
 import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import { BarcodeStrip } from "../../../shared/components/atoms/strip.barcode";
 import { PressableScale } from "../../../shared/components/atoms/scale.pressable";
+import { BarcodeStrip } from "../../../shared/components/atoms/strip.barcode";
 import { formatAmount } from "../../../shared/format/format.amount";
-import type { DemoTontine } from "../../../shared/demo/demo.tontines";
+import type { Tontine } from "../../../shared/member/model.portfolio";
+import { beneficiaryName, formatFrequency } from "../../../shared/member/model.portfolio";
 import { CARD_WIDTH, computeHeaderWidth } from "../../../shared/theme/theme.card-layout";
 import { PALETTE } from "../../../shared/theme/theme.palette";
 import { RadialCard } from "./card.radial";
@@ -14,21 +15,25 @@ import { TontineRound } from "./round.tontine";
 
 /** Props de la carte de tontine. */
 export interface TontineCardProps {
-  readonly item: DemoTontine;
+  readonly item: Tontine;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
   /** Largeur totale de la carte, en points ; largeur de la home par défaut. */
   readonly width?: number;
 }
 
+/** Props du corps d'une carte de tontine. */
+interface TontineCardBodyProps {
+  readonly item: Tontine;
+  readonly headerWidth: number;
+}
+
 /**
  * Affiche le contenu de la carte de tontine.
- * @param props Props du corps.
- * @param props.item Données de la tontine.
- * @param props.headerWidth Largeur calculée du bandeau.
+ * @param props Tontine et largeur calculée du bandeau.
  * @returns Le contenu de la carte.
  */
-function TontineCardBody(props: { readonly item: DemoTontine; readonly headerWidth: number }) {
+function TontineCardBody(props: TontineCardBodyProps) {
   const { item, headerWidth } = props;
 
   return (
@@ -48,12 +53,12 @@ function TontineCardBody(props: { readonly item: DemoTontine; readonly headerWid
       <View className="gap-6 px-4 pb-4 pt-1">
         <View className="flex-row items-center">
           <Users size={16} color={PALETTE.muted} />
-          <Text className="ml-2 text-[16px] text-muted-strong">{item.members} membres</Text>
+          <Text className="ml-2 text-[16px] text-muted-strong">{item.members.length} membres</Text>
         </View>
 
         <View className="self-start rounded-[18px] border border-rule-border px-3 py-1.5">
           <Text className="text-[16px] text-ink">
-            {formatAmount(item.amount)} FCFA {item.frequency}
+            {formatAmount(item.contribution)} FCFA {formatFrequency(item.frequency)}
           </Text>
         </View>
 
@@ -61,7 +66,7 @@ function TontineCardBody(props: { readonly item: DemoTontine; readonly headerWid
         <BarcodeStrip color={PALETTE.barcodeOnCard} />
 
         <Text className="text-[13px] text-muted">
-          Tour de <Text className="font-bold text-ink">{item.currentBeneficiary}</Text>
+          Tour de <Text className="font-bold text-ink">{beneficiaryName(item)}</Text>
         </Text>
       </View>
     </View>

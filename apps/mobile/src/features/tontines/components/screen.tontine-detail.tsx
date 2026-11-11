@@ -1,7 +1,7 @@
 import { DetailHeader } from "../../../shared/components/macros/header.detail";
 import { EmptyState } from "../../../shared/components/macros/state.empty";
 import { ScreenFrame } from "../../../shared/components/macros/frame.screen";
-import { DEMO_TONTINES } from "../../../shared/demo/demo.tontines";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { TontineDetailContent } from "./content.tontine-detail";
 
 /** Props de l'écran de détail d'une tontine. */
@@ -11,24 +11,25 @@ export interface TontineDetailScreenProps {
 }
 
 /**
- * Écran de détail d'une tontine, retrouvée par son identifiant.
+ * Écran de détail d'une tontine, retrouvée dans le portefeuille local.
  * @param props Identifiant de la tontine.
  * @returns L'écran de détail de la tontine.
  */
 export function TontineDetailScreen(props: TontineDetailScreenProps) {
   const { id } = props;
-  const tontine = DEMO_TONTINES.find((item) => item.id === id);
+  const tontines = usePortfolioStore((state) => state.tontines);
+  const tontine = tontines.find((item) => item.id === id);
 
   return (
     <ScreenFrame>
       <DetailHeader title={tontine?.name ?? "Tontine"} />
-      {tontine ? (
-        <TontineDetailContent item={tontine} />
-      ) : (
+      {tontine === undefined ? (
         <EmptyState
           title="Tontine introuvable"
           message="Cette tontine n'existe pas ou a été supprimée."
         />
+      ) : (
+        <TontineDetailContent item={tontine} />
       )}
     </ScreenFrame>
   );
