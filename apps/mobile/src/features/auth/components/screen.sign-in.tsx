@@ -1,9 +1,7 @@
 import { router } from "expo-router";
-import { useState } from "react";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import { useAuthDraft } from "../model/model.auth-draft";
-import { PHONE_DIGITS, isValidPhoneDigits, toInternationalPhone } from "../model/model.auth-form";
+import { useSignInForm } from "../hooks/hook.sign-in-form";
 import {
   AUTH_ENTRANCE_DELAY,
   AUTH_ENTRANCE_DURATION,
@@ -16,25 +14,12 @@ import { AuthLayout } from "./layout.auth";
 import { AuthPrimaryButton } from "./button.auth-primary";
 import { PhoneField } from "./field.phone";
 
-/** Message affiché quand les neuf chiffres ne forment pas un numéro valide. */
-const PHONE_ERROR = "Entrez un numéro congolais valide, par exemple 06 570 66 22.";
-
 /**
  * Première étape de connexion : saisie du numéro de téléphone.
  * @returns L'écran de connexion.
  */
 export function SignInScreen() {
-  const [digits, setDigits] = useState("");
-  const startSignIn = useAuthDraft((state) => state.startSignIn);
-  const valid = isValidPhoneDigits(digits);
-  const error = digits.length === PHONE_DIGITS && !valid ? PHONE_ERROR : "";
-
-  const submit = () => {
-    if (!valid) return;
-
-    startSignIn(toInternationalPhone(digits));
-    router.push("/(auth)/pin");
-  };
+  const { digits, setDigits, valid, error, submit } = useSignInForm();
 
   return (
     <AuthLayout>

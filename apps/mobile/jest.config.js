@@ -17,7 +17,7 @@ module.exports = {
     "^@react-native-async-storage/async-storage$":
       "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
   },
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.spec.{ts,tsx}", "!src/shared/testing/**"],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.spec.{ts,tsx}", "!src/**/testing/**"],
   coverageThreshold: {
     global: { lines: 80, branches: 80, functions: 80, statements: 80 },
   },

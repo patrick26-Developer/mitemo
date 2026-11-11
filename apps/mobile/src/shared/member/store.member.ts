@@ -37,10 +37,17 @@ export interface MemberIdentity {
 /** État partagé du membre et actions qui le modifient. */
 export interface MemberState extends MemberProfile {
   /**
-   * Remplace l'identité du membre, après une inscription réussie.
+   * Remplace l'identité du membre, par exemple après une modification.
    * @param identity Prénom, nom, profession et numéro au format international.
    */
   updateIdentity: (identity: MemberIdentity) => void;
+  /**
+   * Enregistre le compte créé sur l'appareil : identité, date de création, et
+   * aucune photo héritée d'un compte précédent.
+   * @param identity Prénom, nom, profession et numéro au format international.
+   * @param createdAt Date de création, au format `AAAA-MM-JJ` en UTC.
+   */
+  registerMember: (identity: MemberIdentity, createdAt: string) => void;
   /**
    * Enregistre la photo choisie et la marque à envoyer au serveur.
    * @param photoUri URI locale de la photo compressée.
@@ -57,6 +64,19 @@ export interface MemberState extends MemberProfile {
    * @param photoVersion Version distante de cette photo.
    */
   applyRemotePhoto: (photoUri: string, photoVersion: string) => void;
+}
+
+/**
+ * Champs du profil déduits d'une identité : nom complet et initiale.
+ * @param identity Prénom, nom, profession et numéro.
+ * @returns Les champs d'identité du profil.
+ */
+function identityState(
+  identity: MemberIdentity,
+): MemberIdentity & Pick<MemberProfile, "name" | "avatarInitial"> {
+  const name = formatFullName(identity.firstName, identity.lastName);
+
+  return { ...identity, name, avatarInitial: name.charAt(0).toUpperCase() };
 }
 
 /** Profil initial, tant que l'authentification n'est pas branchée. */
@@ -79,18 +99,15 @@ export const useMemberStore = create<MemberState>()(
   persist(
     (set) => ({
       ...INITIAL_MEMBER_PROFILE,
-      updateIdentity: ({ firstName, lastName, occupation, phone }) => {
-        const name = formatFullName(firstName, lastName);
-
+      updateIdentity: (identity) => set(identityState(identity)),
+      registerMember: (identity, createdAt) =>
         set({
-          firstName,
-          lastName,
-          occupation,
-          name,
-          phone,
-          avatarInitial: name.charAt(0).toUpperCase(),
-        });
-      },
+          ...identityState(identity),
+          createdAt,
+          photoUri: null,
+          photoVersion: null,
+          photoPendingUpload: false,
+        }),
       setPhoto: (photoUri) => set({ photoUri, photoPendingUpload: true }),
       markPhotoSynced: (photoVersion) => set({ photoPendingUpload: false, photoVersion }),
       applyRemotePhoto: (photoUri, photoVersion) =>

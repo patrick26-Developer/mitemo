@@ -139,6 +139,7 @@ src/shared/
 ├── hooks/         hooks génériques
 ├── member/        état global du membre
 ├── model/         logique pure partagée
+├── session/       session du membre (ouverte par le code PIN)
 ├── testing/       utilitaires de test
 └── theme/         couleurs, espacements, styles
 ```

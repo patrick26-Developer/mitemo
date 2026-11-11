@@ -41,6 +41,28 @@ describe("useMemberStore", () => {
     expect(useMemberStore.getState().photoPendingUpload).toBe(false);
   });
 
+  it("enregistre un nouveau compte avec sa date de création et sans photo", () => {
+    useMemberStore.getState().setPhoto("file:///ancienne-photo.jpg");
+
+    useMemberStore.getState().registerMember(
+      {
+        firstName: "Aimée",
+        lastName: "Mbemba",
+        occupation: "Commerçante",
+        phone: "+242 06 512 3456",
+      },
+      "2026-11-11",
+    );
+
+    expect(useMemberStore.getState()).toMatchObject({
+      name: "Aimée Mbemba",
+      createdAt: "2026-11-11",
+      photoUri: null,
+      photoVersion: null,
+      photoPendingUpload: false,
+    });
+  });
+
   it("met à jour l'identité après une inscription", () => {
     useMemberStore.getState().updateIdentity({
       firstName: "Aimée",

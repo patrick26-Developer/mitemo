@@ -1,9 +1,8 @@
-import { router } from "expo-router";
-
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
 import { SheetSecondaryButton } from "../../../shared/components/atoms/button.sheet-secondary";
 import { SheetText } from "../../../shared/components/atoms/text.sheet";
+import { useSessionStore } from "../../../shared/session/store.session";
 
 /** Props de la feuille de déconnexion. */
 export interface SignOutSheetProps {
@@ -18,10 +17,11 @@ export interface SignOutSheetProps {
  */
 export function SignOutSheet(props: SignOutSheetProps) {
   const { visible, onClose } = props;
+  const signOut = useSessionStore((state) => state.signOut);
 
   const confirm = () => {
     onClose();
-    router.replace("/(auth)/sign-in");
+    signOut();
   };
 
   return (

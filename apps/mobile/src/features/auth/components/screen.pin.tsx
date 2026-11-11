@@ -3,21 +3,12 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { usePinEntry } from "../hooks/hook.pin-entry";
 import { usePinSession } from "../hooks/hook.pin-session";
-import { isValidDemoPin } from "../model/model.auth-form";
 import { AUTH_ENTRANCE_DELAY, AUTH_ENTRANCE_DURATION } from "../model/model.auth-theme";
 import { AuthErrorText } from "./text.auth-error";
 import { AuthHeading } from "./heading.auth";
 import { AuthLayout } from "./layout.auth";
 import { PinKeypad } from "./keypad.pin";
 import { PinRow } from "./row.pin";
-
-/**
- * Accepte n'importe quel code de quatre chiffres lors d'une inscription.
- * @returns Toujours vrai.
- */
-function acceptPin(): boolean {
-  return true;
-}
 
 /** Explique que la réinitialisation arrivera avec l'API. */
 function showForgotPin(): void {
@@ -29,9 +20,9 @@ function showForgotPin(): void {
  * @returns L'écran du code PIN.
  */
 export function PinScreen() {
-  const { isSignUp, complete, back, missingDraft } = usePinSession();
+  const { isSignUp, verify, complete, back, missingDraft } = usePinSession();
   const { pin, error, shakeStyle, pressDigit, erase } = usePinEntry({
-    validate: isSignUp ? acceptPin : isValidDemoPin,
+    verify,
     onComplete: complete,
   });
 
