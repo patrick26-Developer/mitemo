@@ -1,6 +1,3 @@
-import { Text } from "react-native";
-
-import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
@@ -159,21 +156,15 @@ function TontineParticipantsStep(props: TontineCreateFieldsProps) {
 }
 
 /**
- * Dernière étape : tout ce qu'il faut savoir avant de confirmer.
+ * Dernière étape : tout ce qu'il faut savoir avant de créer. Le titre de
+ * l'étape suffit, le récapitulatif n'en répète pas.
  * @param props Saisie courante et mise à jour des champs.
  * @returns Le récapitulatif complet de la tontine.
  */
 function TontineRecapStep(props: TontineCreateFieldsProps) {
   const { form } = props;
 
-  return (
-    <>
-      <Text className="text-[14px] leading-5 text-muted">
-        Vérifiez le fonctionnement de la tontine avant de la confirmer.
-      </Text>
-      <SheetRecap title="Récapitulatif" rows={recapRows(form, tontineRecap(form))} />
-    </>
-  );
+  return <SheetRecap rows={recapRows(form, tontineRecap(form))} />;
 }
 
 /** Contenu de chaque étape, dans l'ordre de TONTINE_FORM_STEPS. */
@@ -186,44 +177,44 @@ const STEP_CONTENTS = [
 
 /**
  * Saisit les règles d'une nouvelle tontine en quatre étapes, la crée puis
- * propose d'inviter les membres.
+ * propose de partager son code d'invitation.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle tontine ».
  */
 export function TontineCreateSheet(props: TontineCreateSheetProps) {
-  const { form, error, steps, update, next, back, close, tontine, finish, invite, invitationCode } =
+  const { form, error, steps, update, next, back, close, tontine, finish, share, invitationCode } =
     useTontineCreate(props.onClose);
   const StepContent = STEP_CONTENTS[steps.index] ?? TontineEssentialsStep;
 
   if (tontine !== null) {
     return (
       <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={finish}>
-        <TontineCreatedPanel
-          tontine={tontine}
-          invitationCode={invitationCode}
-          onInvite={invite}
-          onClose={finish}
-        />
+        <TontineCreatedPanel tontine={tontine} invitationCode={invitationCode} onShare={share} />
       </BottomSheet>
     );
   }
 
   return (
-    <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={close}>
+    <BottomSheet
+      visible={props.visible}
+      title="Nouvelle tontine"
+      onClose={close}
+      footer={
+        <SheetStepsFooter
+          isFirst={steps.isFirst}
+          isLast={steps.isLast}
+          finalLabel="Créer la tontine"
+          onBack={back}
+          onNext={next}
+        />
+      }
+    >
       <StepIndicator
         index={steps.index}
         total={steps.total}
         title={TONTINE_FORM_STEPS[steps.index] ?? ""}
       />
       <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
-      {error === null ? null : <FeedbackBanner kind="error" message={error} />}
-      <SheetStepsFooter
-        isFirst={steps.isFirst}
-        isLast={steps.isLast}
-        finalLabel="Confirmer"
-        onBack={back}
-        onNext={next}
-      />
     </BottomSheet>
   );
 }

@@ -1,3 +1,4 @@
+import { Share } from "react-native";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -87,7 +88,10 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByDisplayValue("Tontine du Marché")).toBeOnTheScreen();
   });
 
-  it("résume tout avant de confirmer, puis laisse inviter les membres", async () => {
+  it("résume tout, crée la tontine, puis propose seulement de partager l'invitation", async () => {
+    const share = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: "sharedAction", activityType: undefined });
     const onClose = jest.fn();
     await renderWithSafeArea(<TontineCreateSheet visible onClose={onClose} />);
     await fillEssentials();
@@ -104,7 +108,9 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
+    expect(screen.queryByText("Récapitulatif")).toBeNull();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Créer la tontine" }));
 
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByText("Votre tontine est prête")).toBeOnTheScreen();
@@ -114,12 +120,15 @@ describe("TontineCreateSheet", () => {
     expect(created?.frequency).toEqual({ unit: "semaine", interval: 2 });
     expect(created?.totalRounds).toBe(6);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Inviter un membre" }));
+    const code = screen.getByTestId("tontine-invitation-code");
+    expect(code).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Terminer" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Confirmer" })).toBeNull();
 
-    expect(screen.getByTestId("tontine-invitation-code")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
 
-    await fireEvent.press(screen.getByRole("button", { name: "Terminer" }));
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(share).toHaveBeenCalledWith({
+      message: expect.stringContaining(created?.invitationCode ?? "absent") as string,
+    });
   });
 });

@@ -11,7 +11,8 @@ describe("TontineMemberList", () => {
       <TontineMemberList item={makeTontine({ state: "PENDING" })} onRemove={onRemove} />,
     );
 
-    expect(screen.getByText("Membres (3)")).toBeOnTheScreen();
+    expect(screen.getByText("Membres")).toBeOnTheScreen();
+    expect(screen.getByText("3 sur 3 inscrits")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Retirer Membre self" })).toBeNull();
 
     await fireEvent.press(screen.getByRole("button", { name: "Retirer Membre m3" }));

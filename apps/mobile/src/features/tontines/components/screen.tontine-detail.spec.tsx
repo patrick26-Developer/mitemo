@@ -1,10 +1,24 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
 
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { firstOf, makeMember, makeTontine } from "../../../shared/testing/fixtures.portfolio";
+import { useToastStore } from "../../../shared/feedback/store.toast";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { TontineDetailScreen } from "./screen.tontine-detail";
+import { SIMULATED_CONFIRMATION_MS } from "../../payments";
+
+jest.mock("../../auth", () => {
+  const { Pressable, Text } = jest.requireActual("react-native");
+
+  return {
+    PinConfirm: ({ onConfirmed }: { onConfirmed: () => void }) => (
+      <Pressable accessibilityRole="button" accessibilityLabel="Code juste" onPress={onConfirmed}>
+        <Text>Pavé du code PIN</Text>
+      </Pressable>
+    ),
+  };
+});
 
 describe("TontineDetailScreen", () => {
   beforeEach(() => {
@@ -16,30 +30,35 @@ describe("TontineDetailScreen", () => {
 
     expect(screen.getByRole("header", { name: "Tontine du Marché Tolal" })).toBeOnTheScreen();
     expect(screen.getAllByText(/5 000/).length).toBeGreaterThan(0);
-    expect(screen.getByText("10 membres")).toBeOnTheScreen();
+    expect(screen.getByText("Membres : ")).toBeOnTheScreen();
   });
 
   it("affiche le cycle et le bénéficiaire", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    expect(screen.getByText("Cycle en cours")).toBeOnTheScreen();
-    expect(screen.getByText("4 sur 10")).toBeOnTheScreen();
+    expect(screen.getByText("En cours")).toBeOnTheScreen();
+    expect(screen.getByText("Tour 4 sur 10")).toBeOnTheScreen();
     expect(screen.getAllByText("Mama Nadège").length).toBeGreaterThan(0);
   });
 
   it("ne propose aucune action quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    expect(screen.queryByRole("button", { name: "Continuer" })).not.toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 
-  it("cotise depuis le dock quand la cotisation est due", async () => {
+  it("cotise depuis le dock par Airtel Money, validé sur le téléphone", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="2" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Cotiser/ }));
+    jest.useFakeTimers();
+    await fireEvent.press(screen.getByRole("button", { name: "Payer avec Airtel Money" }));
+    await act(async () => {
+      jest.advanceTimersByTime(SIMULATED_CONFIRMATION_MS);
+    });
 
-    expect(await screen.findByText("Cotisation réglée pour ce tour.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Cotisation réglée par Airtel Money.");
     expect(
       firstOf(usePortfolioStore.getState().tontines.filter((item) => item.id === "2")).members.find(
         (member) => member.id === SELF_MEMBER_ID,
@@ -68,9 +87,9 @@ describe("TontineDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
 
-    expect(
-      await screen.findByText("Restourne confirmée : la cagnotte est distribuée."),
-    ).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe(
+      "Restourne confirmée : la cagnotte est distribuée.",
+    );
     expect(firstOf(usePortfolioStore.getState().tontines).round).toBe(2);
   });
 
@@ -79,7 +98,7 @@ describe("TontineDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Créer un code d'invitation" }));
 
-    expect(await screen.findByText("Code d'invitation prêt à partager.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Code d'invitation prêt à partager.");
     expect(screen.queryByText("Régénérer le code")).not.toBeOnTheScreen();
     expect(
       screen.queryByRole("button", { name: "Créer un code d'invitation" }),
@@ -91,4 +110,8 @@ describe("TontineDetailScreen", () => {
 
     expect(screen.getByText("Tontine introuvable")).toBeOnTheScreen();
   });
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });

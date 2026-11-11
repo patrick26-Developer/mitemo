@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { isTontineAdmin, SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
+import {
+  isTontineAdmin,
+  paidMemberCount,
+  SELF_MEMBER_ID,
+} from "../../../shared/member/model.portfolio";
 import { TontineMemberSheet } from "./sheet.tontine-member";
 import { TontineMemberRow } from "./row.tontine-member";
 
@@ -27,7 +31,12 @@ export function TontineMemberList(props: TontineMemberListProps) {
 
   return (
     <View className="gap-2">
-      <Text className="text-[16px] font-medium text-ink">Membres ({item.members.length})</Text>
+      <View className="flex-row items-center justify-between pb-1">
+        <Text accessibilityRole="header" className="text-[16px] font-medium text-ink">
+          Membres
+        </Text>
+        <Text className="text-[13px] text-muted">{membersCount(item)}</Text>
+      </View>
       {item.members.map((member) => (
         <TontineMemberRow
           key={member.id}
@@ -46,4 +55,16 @@ export function TontineMemberList(props: TontineMemberListProps) {
       />
     </View>
   );
+}
+
+/**
+ * Compte affiché à droite du titre : inscrits avant le départ, cotisations
+ * reçues pendant le cycle.
+ * @param item Tontine affichée.
+ * @returns Le compte, par exemple « 2 sur 5 ont cotisé ».
+ */
+function membersCount(item: Tontine): string {
+  const total = item.members.length;
+  if (item.state === "PENDING") return `${total} sur ${item.totalRounds} inscrits`;
+  return `${paidMemberCount(item)} sur ${total} ont cotisé`;
 }

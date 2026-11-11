@@ -1,28 +1,27 @@
 import { Text, View } from "react-native";
 
+import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
 import { SheetInfoCard } from "../../../shared/components/macros/card.sheet-info";
-import { SheetActionRow } from "../../../shared/components/macros/row.sheet-actions";
-import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { formatFrequency, tontinePot } from "../../../shared/member/model.portfolio";
+import { tontineCreatedSummary } from "../model/model.tontine-created";
 
 /** Props de la confirmation de création d'une tontine. */
 export interface TontineCreatedPanelProps {
   readonly tontine: Tontine;
-  /** Code à partager, `null` tant que le membre n'a pas invité. */
+  /** Code créé avec la tontine. */
   readonly invitationCode: string | null;
-  readonly onInvite: () => void;
-  readonly onClose: () => void;
+  /** Ouvre le partage du téléphone avec le message d'invitation. */
+  readonly onShare: () => void;
 }
 
 /**
- * Confirme la création d'une tontine et propose d'inviter les membres : la
- * feuille reste ouverte pour que le code soit partagé tout de suite.
- * @param props Tontine créée, code éventuel et actions.
+ * Confirme la création d'une tontine, montre son code d'invitation et ne
+ * propose qu'une action : le partager. La croix de la feuille la ferme.
+ * @param props Tontine créée, code et partage.
  * @returns La confirmation de création.
  */
 export function TontineCreatedPanel(props: TontineCreatedPanelProps) {
-  const { tontine, invitationCode, onInvite, onClose } = props;
+  const { tontine, invitationCode, onShare } = props;
 
   return (
     <View className="gap-4">
@@ -30,9 +29,7 @@ export function TontineCreatedPanel(props: TontineCreatedPanelProps) {
         <Text accessibilityRole="header" className="text-[20px] font-bold text-ink">
           Votre tontine est prête
         </Text>
-        <Text className="text-[14px] leading-5 text-muted">
-          {`« ${tontine.name} » réunit ${tontine.members.length} membres sur ${tontine.totalRounds} tours, ${formatFrequency(tontine.frequency)}. Cagnotte de ${formatAmount(tontinePot(tontine))} FCFA par tour.`}
-        </Text>
+        <Text className="text-[14px] leading-5 text-muted">{tontineCreatedSummary(tontine)}</Text>
       </View>
       {invitationCode === null ? null : (
         <SheetInfoCard>
@@ -46,15 +43,9 @@ export function TontineCreatedPanel(props: TontineCreatedPanelProps) {
           >
             {invitationCode}
           </Text>
-          <Text className="text-[12px] leading-4 text-muted">
-            Partagez ce code avec les personnes à intégrer à la tontine.
-          </Text>
         </SheetInfoCard>
       )}
-      <SheetActionRow
-        secondary={{ label: "Inviter un membre", onPress: onInvite }}
-        primary={{ label: "Terminer", onPress: onClose }}
-      />
+      <SheetPrimaryButton label="Partager l'invitation" onPress={onShare} />
     </View>
   );
 }
