@@ -1,3 +1,4 @@
+import { isPreviewDatabase } from "../../../shared/database/preview-database.js";
 import { NotFoundException } from "@nestjs/common";
 import type { CurrentUser, UserId } from "@mitemo/contracts";
 import type { AppUser } from "../../../generated/prisma/client.js";
@@ -17,14 +18,10 @@ export function userDto(user: AppUser): CurrentUser {
 }
 
 function isDedicatedRenderPreview(): boolean {
-  const database = URL.canParse(process.env["DATABASE_URL"] ?? "")
-    ? new URL(process.env["DATABASE_URL"] ?? "")
-    : undefined;
   return (
     process.env["RENDER"] === "true" &&
     process.env["RENDER_SERVICE_NAME"] === "mitemo-api-dev" &&
-    database?.pathname === "/mitemo_preview" &&
-    !database.hostname.endsWith(".neon.tech")
+    isPreviewDatabase(process.env)
   );
 }
 

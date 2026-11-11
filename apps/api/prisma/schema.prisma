@@ -28,6 +28,8 @@ model LedgerAccount {
   closedAt DateTime?           @map("closed_at") @db.Timestamptz(3)
   lines    LedgerPostingLine[]
 
+  walletOwner AppUser?
+
   @@map("ledger_account")
 }
 
@@ -87,6 +89,9 @@ model AppUser {
   createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   challenges      AuthChallenge[]
   sessions        AuthSession[]
+
+  walletAccountId String @unique @map("wallet_account_id")
+  walletAccount LedgerAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@map("app_user")
 }

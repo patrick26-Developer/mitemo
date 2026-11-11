@@ -2,6 +2,7 @@ import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@ne
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../../generated/prisma/client.js";
+import { requirePreviewDatabase } from "./preview-database.js";
 import { readDatabaseUrl } from "./database-url.js";
 
 /**
@@ -16,7 +17,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
-    const connectionString = readDatabaseUrl(process.env["DATABASE_URL"]);
+    const preview =
+      process.env["MITEMO_DEPLOYMENT"] === "preview" ||
+      process.env["RENDER_SERVICE_NAME"] === "mitemo-api-dev";
+    const connectionString = preview
+      ? requirePreviewDatabase(process.env)
+      : readDatabaseUrl(process.env["DATABASE_URL"]);
     const adapter = new PrismaPg({ connectionString });
     super({ adapter });
   }
