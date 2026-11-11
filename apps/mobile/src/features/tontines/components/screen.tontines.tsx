@@ -7,6 +7,7 @@ import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { EmptyStateContent } from "../../../shared/model/model.list-empty-state";
 import type { ListFilter } from "../../../shared/model/model.list-filter";
 import { FULL_CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
+import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
 import { TontineCard } from "./card.tontine";
 import { TontineCreateSheet } from "./sheet.tontine-create";
 
@@ -30,6 +31,8 @@ const TONTINE_LIST: Omit<FilterableListConfig<Tontine>, "items"> = {
   searchPlaceholder: "Rechercher une tontine",
   searchSubject: "tontine",
   emptyStates: EMPTY_STATES,
+  emptyIcon: TAB_ICONS.tontines,
+  archivedLabel: "Terminées",
   renderItem: (item, index) => <TontineCard item={item} index={index} width={FULL_CARD_WIDTH} />,
 };
 
