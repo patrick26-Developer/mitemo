@@ -49,7 +49,6 @@ export function SavingsDetailDock(props: SavingsDetailDockProps) {
             : null
         }
         secondary={canWithdraw ? { label: "Retirer", onPress: () => setConfirmOpen(true) } : null}
-        notice={actions.feedback}
       />
       <ConfirmSheet
         content={WITHDRAW_CONFIRM}

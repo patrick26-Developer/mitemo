@@ -1,6 +1,5 @@
 import { Text } from "react-native";
 
-import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
@@ -216,7 +215,6 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
         title={TONTINE_FORM_STEPS[steps.index] ?? ""}
       />
       <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
-      {error === null ? null : <FeedbackBanner kind="error" message={error} />}
       <SheetStepsFooter
         isFirst={steps.isFirst}
         isLast={steps.isLast}

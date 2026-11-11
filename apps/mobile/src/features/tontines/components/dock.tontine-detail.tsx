@@ -64,10 +64,7 @@ export function TontineDetailDock(props: TontineDetailDockProps) {
 
   return (
     <>
-      <FloatDock
-        action={primaryAction(item, actions, () => setConfirmOpen(true))}
-        notice={actions.feedback}
-      />
+      <FloatDock action={primaryAction(item, actions, () => setConfirmOpen(true))} />
       <ConfirmSheet
         content={CONFIRM_ROUND}
         visible={confirmOpen}

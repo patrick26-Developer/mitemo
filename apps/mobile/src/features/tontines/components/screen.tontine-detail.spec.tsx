@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
+import { useToastStore } from "../../../shared/feedback/store.toast";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { firstOf, makeMember, makeTontine } from "../../../shared/testing/fixtures.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
@@ -9,6 +10,7 @@ import { TontineDetailScreen } from "./screen.tontine-detail";
 describe("TontineDetailScreen", () => {
   beforeEach(() => {
     usePortfolioStore.getState().reset();
+    useToastStore.getState().dismiss();
   });
 
   it("affiche la tontine demandée", async () => {
@@ -39,7 +41,7 @@ describe("TontineDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
-    expect(await screen.findByText("Cotisation réglée pour ce tour.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Cotisation réglée pour ce tour.");
     expect(
       firstOf(usePortfolioStore.getState().tontines.filter((item) => item.id === "2")).members.find(
         (member) => member.id === SELF_MEMBER_ID,
@@ -68,9 +70,9 @@ describe("TontineDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
 
-    expect(
-      await screen.findByText("Restourne confirmée : la cagnotte est distribuée."),
-    ).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe(
+      "Restourne confirmée : la cagnotte est distribuée.",
+    );
     expect(firstOf(usePortfolioStore.getState().tontines).round).toBe(2);
   });
 
@@ -79,7 +81,7 @@ describe("TontineDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Créer un code d'invitation" }));
 
-    expect(await screen.findByText("Code d'invitation prêt à partager.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Code d'invitation prêt à partager.");
     expect(screen.queryByText("Régénérer le code")).not.toBeOnTheScreen();
     expect(
       screen.queryByRole("button", { name: "Créer un code d'invitation" }),
