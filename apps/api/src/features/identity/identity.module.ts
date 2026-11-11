@@ -4,5 +4,9 @@ import { IdentityService } from "./infrastructure/identity.service.js";
 import { IdentityController } from "./presentation/identity.controller.js";
 
 /** Registers the development identity flow. */
-@Module({ controllers: [IdentityController], providers: [IdentityService, SessionService] })
+@Module({
+  controllers: [IdentityController],
+  providers: [IdentityService, SessionService],
+  exports: [SessionService],
+})
 export class IdentityModule {}

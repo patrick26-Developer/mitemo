@@ -15,7 +15,7 @@ import type {
   StartLoginResponse,
   IsoDateTime,
 } from "@mitemo/contracts";
-import type { AppUser, AuthChallenge, Prisma } from "../../../generated/prisma/client.js";
+import { type AppUser, type AuthChallenge, Prisma } from "../../../generated/prisma/client.js";
 import { PrismaService } from "../../../shared/database/prisma.service.js";
 import { demoOnly, userDto } from "./identity-response.js";
 import { digestSessionToken, issueSessionToken } from "../domain/session-token.js";
@@ -95,15 +95,13 @@ export class IdentityService {
     displayName: string;
     pinHash: string;
   }) {
+    const walletAccount = { create: { id: "wallet:" + data.id, kind: "WALLET_USER" } };
     try {
-      return userDto(await this.prisma.appUser.create({ data: { ...data, isDemo: true } }));
+      return userDto(
+        await this.prisma.appUser.create({ data: { ...data, isDemo: true, walletAccount } }),
+      );
     } catch (error) {
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        error.code === "P2002"
-      ) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         throw new ConflictException("Ce numéro est déjà inscrit");
       }
       throw error;

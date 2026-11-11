@@ -125,6 +125,16 @@ export class SessionService {
     if (deleted.count !== 1) throw new NotFoundException();
   }
 
+  /**
+   * Resolves the authenticated wallet ownership for downstream features.
+   * @param authorization Bearer header from the request.
+   * @returns The persisted user identifier and owned ledger account.
+   */
+  async walletOwner(authorization: string | undefined) {
+    const { user } = await this.authenticate(authorization);
+    return { userId: user.id, accountId: user.walletAccountId };
+  }
+
   private async authenticate(authorization: string | undefined) {
     demoOnly();
     const token = /^Bearer ([\w-]{43})$/i.exec(authorization ?? "")?.[1];
