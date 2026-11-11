@@ -66,12 +66,6 @@ describe("HomeScreen", () => {
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
   });
 
-  it("prolonge le bleu du bandeau derrière la barre d'état", async () => {
-    await renderWithSafeArea(<HomeScreen />);
-
-    expect(screen.getByTestId("home-status-bar-backdrop")).toHaveStyle({ height: 47 });
-  });
-
   it("affiche des icônes claires quand l'accueil a le focus", async () => {
     await renderWithSafeArea(<HomeScreen />);
 

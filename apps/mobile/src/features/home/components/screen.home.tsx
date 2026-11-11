@@ -13,8 +13,8 @@ import { TontinesSection } from "./section.tontines";
 
 /**
  * Écran d'accueil : solde du membre, tontines et cartes de pointage en cours.
- * Le bleu du bandeau est prolongé derrière la barre d'état, pour que l'effet
- * de bord du défilement ne blanchisse pas le haut de l'écran.
+ * Le défilement passe sous la barre d'état, qui reste transparente : le bleu
+ * du bandeau monte jusqu'en haut sans bande fixe ajoutée par-dessus.
  * @returns L'écran d'accueil.
  */
 export function HomeScreen() {
@@ -25,12 +25,6 @@ export function HomeScreen() {
   return (
     <View className="flex-1 bg-white">
       <StatusBar style={isFocused ? "light" : "dark"} />
-      <View
-        testID="home-status-bar-backdrop"
-        pointerEvents="none"
-        className="absolute inset-x-0 top-0 bg-brand"
-        style={{ height: insets.top }}
-      />
       <ScrollView showsVerticalScrollIndicator={false}>
         <HomeHero topInset={insets.top} />
         <TontinesSection />
