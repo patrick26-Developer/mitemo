@@ -34,6 +34,18 @@ describe("TontineTransferSheet", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Choisissez un destinataire.");
   });
 
+  it("résume le destinataire et le montant avant de transférer", async () => {
+    await renderSheet(jest.fn());
+
+    expect(screen.queryByText("Transfert")).toBeNull();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Membre m2" }));
+    await fireEvent.changeText(screen.getByLabelText("Montant (FCFA)"), "2500");
+
+    expect(screen.getByText("Transfert")).toBeOnTheScreen();
+    expect(screen.getByText("2 500 FCFA")).toBeOnTheScreen();
+  });
+
   it("transfère le montant puis se ferme", async () => {
     const onTransfer = jest.fn(() => true);
     const onClose = await renderSheet(onTransfer);

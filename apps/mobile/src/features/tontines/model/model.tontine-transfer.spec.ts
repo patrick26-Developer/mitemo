@@ -1,4 +1,4 @@
-import { parseTransfer } from "./model.tontine-transfer";
+import { parseTransfer, transferRecap } from "./model.tontine-transfer";
 
 describe("parseTransfer", () => {
   it("refuse un transfert sans destinataire", () => {
@@ -17,5 +17,19 @@ describe("parseTransfer", () => {
 
   it("accepte un destinataire et un montant positif", () => {
     expect(parseTransfer("m2", "5 000")).toEqual({ ok: true, value: 5_000n });
+  });
+});
+
+describe("transferRecap", () => {
+  it("ne résume aucun montant tant que la saisie est vide", () => {
+    expect(transferRecap({ memberId: "", amount: "" })).toEqual({ amount: null });
+  });
+
+  it("résume le montant saisi, espaces de milliers tolérés", () => {
+    expect(transferRecap({ memberId: "m2", amount: "2 500" })).toEqual({ amount: 2_500n });
+  });
+
+  it("ne résume pas un montant invalide", () => {
+    expect(transferRecap({ memberId: "m2", amount: "0" })).toEqual({ amount: null });
   });
 });
