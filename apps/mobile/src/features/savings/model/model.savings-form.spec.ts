@@ -1,4 +1,4 @@
-import { INITIAL_SAVINGS_FORM, parseSavingsForm } from "./model.savings-form";
+import { INITIAL_SAVINGS_FORM, parseSavingsForm, savingsRecap } from "./model.savings-form";
 
 /** Formulaire complet valide. */
 const VALID_FORM = {
@@ -6,7 +6,7 @@ const VALID_FORM = {
   name: "Loyer de Février",
   markerAmount: "5000",
   markersTotal: "6",
-  deadline: "2027-02-28",
+  deadline: "28/02/2027",
 };
 
 describe("parseSavingsForm", () => {
@@ -53,9 +53,24 @@ describe("parseSavingsForm", () => {
   });
 
   it("refuse une échéance invalide", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, deadline: "2027-02-30" })).toEqual({
+    expect(parseSavingsForm({ ...VALID_FORM, deadline: "30/02/2027" })).toEqual({
       ok: false,
-      message: "Saisissez une échéance au format AAAA-MM-JJ.",
+      message: "Saisissez une échéance au format JJ/MM/AAAA.",
     });
+  });
+});
+
+describe("savingsRecap", () => {
+  it("résume l'objectif et l'échéance", () => {
+    expect(savingsRecap(VALID_FORM)).toEqual({ goal: 30_000n, deadline: "2027-02-28" });
+  });
+
+  it("n'affiche pas d'objectif tant que la saisie est incomplète", () => {
+    expect(savingsRecap({ ...VALID_FORM, markerAmount: "" }).goal).toBeNull();
+    expect(savingsRecap({ ...VALID_FORM, markersTotal: "0" }).goal).toBeNull();
+  });
+
+  it("ignore une échéance invalide", () => {
+    expect(savingsRecap({ ...VALID_FORM, deadline: "30/02/2027" }).deadline).toBeNull();
   });
 });

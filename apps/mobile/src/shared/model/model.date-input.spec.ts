@@ -1,21 +1,23 @@
-import { parseIsoDateInput } from "./model.date-input";
+import { parseFrenchDateInput } from "./model.date-input";
 
-describe("parseIsoDateInput", () => {
-  it("accepte une date valide au format AAAA-MM-JJ", () => {
-    expect(parseIsoDateInput("2026-12-31")).toBe("2026-12-31");
+describe("parseFrenchDateInput", () => {
+  it("convertit une date française en date ISO", () => {
+    expect(parseFrenchDateInput("31/12/2026")).toBe("2026-12-31");
+    expect(parseFrenchDateInput("5/1/2026")).toBe("2026-01-05");
   });
 
   it("tolère les espaces autour de la date", () => {
-    expect(parseIsoDateInput(" 2026-01-05 ")).toBe("2026-01-05");
+    expect(parseFrenchDateInput(" 28/02/2027 ")).toBe("2027-02-28");
   });
 
   it("refuse un autre format", () => {
-    expect(parseIsoDateInput("31/12/2026")).toBeNull();
-    expect(parseIsoDateInput("2026-12")).toBeNull();
+    expect(parseFrenchDateInput("2026-12-31")).toBeNull();
+    expect(parseFrenchDateInput("31/12")).toBeNull();
+    expect(parseFrenchDateInput("31/12/26")).toBeNull();
   });
 
-  it("refuse un jour inexistant", () => {
-    expect(parseIsoDateInput("2026-02-30")).toBeNull();
-    expect(parseIsoDateInput("2026-13-01")).toBeNull();
+  it("refuse un jour ou un mois inexistant", () => {
+    expect(parseFrenchDateInput("30/02/2026")).toBeNull();
+    expect(parseFrenchDateInput("31/13/2026")).toBeNull();
   });
 });
