@@ -24,11 +24,12 @@ describe("TontineMemberList", () => {
     expect(onRemove).toHaveBeenCalledWith("m3");
   });
 
-  it("place en tête le bénéficiaire du tour, avec son rang de passage", async () => {
+  it("garde chaque membre à son rang de passage et cercle le bénéficiaire du tour", async () => {
     await renderWithSafeArea(<TontineMemberList item={makeTontine()} onRemove={jest.fn()} />);
 
     const rows = screen.getAllByRole("button", { name: /^Historique de/ });
-    expect(rows[0]).toHaveAccessibleName("Historique de Membre m2");
+    expect(rows[0]).toHaveAccessibleName("Historique de Membre self");
+    expect(rows[1]).toBeSelected();
     expect(screen.getByText("Membre · En attente · À son tour")).toBeOnTheScreen();
     expect(screen.getByLabelText("Tour 2")).toBeOnTheScreen();
   });

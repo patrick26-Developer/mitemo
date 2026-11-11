@@ -20,8 +20,9 @@ export interface TontineMemberListProps {
 }
 
 /**
- * Affiche les membres dans l'ordre de passage, celui dont c'est le tour en
- * tête, et ouvre l'historique de cotisation d'un membre au clic. Un
+ * Affiche les membres dans l'ordre de passage, de 1 au dernier ; celui dont
+ * c'est le tour reste à sa place, cerclé. Ouvre l'historique de cotisation
+ * d'un membre au clic. Un
  * administrateur peut retirer les autres membres avant le départ, après
  * confirmation ; un simple membre voit la même liste sans gestion.
  * @param props Tontine affichée et action de retrait.

@@ -8,16 +8,12 @@ export interface MemberTurn {
 }
 
 /**
- * Range les membres pour la liste du détail : chacun garde son rang de
- * passage, et pendant le cycle le membre dont c'est le tour passe en tête,
- * suivi des prochains bénéficiaires dans l'ordre.
+ * Numérote les membres par leur rang de passage, de 1 au nombre de membres.
+ * La liste garde toujours cet ordre : le bénéficiaire du tour reste à sa
+ * place, mis en avant par la ligne elle-même.
  * @param tontine Tontine affichée.
- * @returns Les membres et leur rang, dans l'ordre d'affichage.
+ * @returns Les membres et leur rang, dans l'ordre de passage.
  */
 export function memberTurns(tontine: Tontine): readonly MemberTurn[] {
-  const turns = tontine.members.map((member, index) => ({ member, turn: index + 1 }));
-  if (tontine.state !== "ACTIVE") return turns;
-
-  const start = turns.findIndex(({ member }) => member.id === tontine.beneficiaryId);
-  return start <= 0 ? turns : [...turns.slice(start), ...turns.slice(0, start)];
+  return tontine.members.map((member, index) => ({ member, turn: index + 1 }));
 }

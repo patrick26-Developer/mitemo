@@ -22,14 +22,9 @@ describe("memberTurns", () => {
     ]);
   });
 
-  it("place en tête le membre dont c'est le tour, puis les suivants dans l'ordre", () => {
+  it("garde l'ordre de passage pendant le cycle, quel que soit le tour en cours", () => {
     const turns = memberTurns(makeTontine({ members: MEMBERS, beneficiaryId: "m3" }));
 
-    expect(turns.map(({ member, turn }) => [member.id, turn])).toEqual([
-      ["m3", 3],
-      ["m4", 4],
-      [SELF_MEMBER_ID, 1],
-      ["m2", 2],
-    ]);
+    expect(turns.map(({ turn }) => turn)).toEqual([1, 2, 3, 4]);
   });
 });
