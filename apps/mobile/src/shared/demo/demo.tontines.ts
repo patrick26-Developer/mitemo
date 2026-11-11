@@ -1,66 +1,80 @@
-/** État d'une tontine de démonstration. */
-export type DemoTontineState = "ACTIVE" | "COMPLETED";
+import type { Tontine } from "../member/model.portfolio";
 
-/** Tontine de démonstration, affichée tant que l'API n'est pas branchée. */
-export interface DemoTontine {
-  readonly id: string;
-  readonly name: string;
-  readonly members: number;
-  /** Cotisation par tour, en plus petite unité de la devise (franc CFA). */
-  readonly amount: bigint;
-  readonly frequency: string;
-  readonly round: number;
-  readonly totalRounds: number;
-  readonly currentBeneficiary: string;
-  /** État de la tontine, actif ou terminé. */
-  readonly state: DemoTontineState;
-  /** Couleurs du dégradé de l'en-tête de carte, du centre vers le bord. */
-  readonly headerColors: readonly [string, string];
-  readonly description: string;
-}
-
-/** Tontines de démonstration, communes à l'accueil, à la liste et au détail. */
-export const DEMO_TONTINES: readonly DemoTontine[] = [
+/**
+ * Tontines livrées avec l'application tant que l'API n'est pas branchée.
+ * Le membre connecté administre la première et participe à la deuxième en
+ * simple membre : les deux vues de l'écran de détail sont ainsi visibles.
+ */
+export const INITIAL_TONTINES: readonly Tontine[] = [
   {
     id: "1",
     name: "Tontine du Marché Tolal",
-    members: 10,
-    amount: 5_000n,
-    frequency: "chaque semaine",
+    contribution: 5_000n,
+    frequency: { unit: "semaine", interval: 1 },
     round: 4,
     totalRounds: 10,
-    currentBeneficiary: "Mama Nadège",
     state: "ACTIVE",
-    headerColors: ["#2CCA86", "#62F79D"],
+    beneficiaryId: "m2",
     description:
-      "Tontine hebdomadaire du marché, créée par Mama Nadège. Chaque membre reçoit le pot à tour de rôle.",
+      "Tontine hebdomadaire du marché Tolal. Chaque membre cotise 5 000 FCFA par semaine et reçoit la cagnotte à son tour.",
+    headerColors: ["#2CCA86", "#62F79D"],
+    invitationCode: null,
+    members: [
+      { id: "self", name: "Précieuse Mavoungou", role: "ADMIN", paidCurrentRound: true },
+      { id: "m2", name: "Mama Nadège", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m3", name: "Jean-Baptiste Okemba", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m4", name: "Clarisse Nzaba", role: "MEMBRE", paidCurrentRound: false },
+      { id: "m5", name: "Serge Makosso", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m6", name: "Pauline Elenga", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m7", name: "Alphonse Mabiala", role: "MEMBRE", paidCurrentRound: false },
+      { id: "m8", name: "Léonie Bantsimba", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m9", name: "David Nkodia", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m10", name: "Sylvie Tchicaya", role: "MEMBRE", paidCurrentRound: false },
+    ],
   },
   {
     id: "2",
     name: "Tontine des Amis",
-    members: 8,
-    amount: 10_000n,
-    frequency: "chaque mois",
+    contribution: 10_000n,
+    frequency: { unit: "mois", interval: 1 },
     round: 2,
-    totalRounds: 8,
-    currentBeneficiary: "Papa Jean",
+    totalRounds: 6,
     state: "ACTIVE",
-    headerColors: ["#8B9BCE", "#C0CCF5"],
+    beneficiaryId: "m5",
     description:
-      "Tontine mensuelle entre amis. Les cotisations servent à financer un projet personnel à chaque tour.",
+      "Tontine mensuelle du groupe d'amis. La cagnotte est remise à un membre différent chaque mois.",
+    headerColors: ["#F5B94A", "#FAD98C"],
+    invitationCode: null,
+    members: [
+      { id: "m1", name: "Serge Makosso", role: "ADMIN", paidCurrentRound: true },
+      { id: "self", name: "Précieuse Mavoungou", role: "MEMBRE", paidCurrentRound: false },
+      { id: "m3", name: "Clarisse Nzaba", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m4", name: "Jean-Baptiste Okemba", role: "MEMBRE", paidCurrentRound: false },
+      { id: "m5", name: "Pauline Elenga", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m6", name: "David Nkodia", role: "MEMBRE", paidCurrentRound: false },
+    ],
   },
   {
     id: "3",
     name: "Tontine du Quartier",
-    members: 12,
-    amount: 3_000n,
-    frequency: "chaque mois",
-    round: 12,
-    totalRounds: 12,
-    currentBeneficiary: "Mama Esther",
+    contribution: 3_000n,
+    frequency: { unit: "semaine", interval: 1 },
+    round: 8,
+    totalRounds: 8,
     state: "COMPLETED",
-    headerColors: ["#F2B84B", "#F7D98A"],
-    description:
-      "Tontine mensuelle du quartier, clôturée après le dernier tour et le versement du pot final.",
+    beneficiaryId: "m8",
+    description: "Tontine de quartier arrivée au bout de ses huit tours, clôturée normalement.",
+    headerColors: ["#9DB6F5", "#C9D6FF"],
+    invitationCode: null,
+    members: [
+      { id: "self", name: "Précieuse Mavoungou", role: "ADMIN", paidCurrentRound: true },
+      { id: "m2", name: "Mama Nadège", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m3", name: "Alphonse Mabiala", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m4", name: "Léonie Bantsimba", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m5", name: "Serge Makosso", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m6", name: "Sylvie Tchicaya", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m7", name: "David Nkodia", role: "MEMBRE", paidCurrentRound: true },
+      { id: "m8", name: "Clarisse Nzaba", role: "MEMBRE", paidCurrentRound: true },
+    ],
   },
 ];
