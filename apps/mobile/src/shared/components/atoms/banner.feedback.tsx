@@ -28,6 +28,7 @@ export function FeedbackBanner(props: FeedbackBannerProps) {
 
   return (
     <View
+      accessible
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
       className={`rounded-[14px] border px-4 py-3 ${KIND_CLASSES[kind]}`}
