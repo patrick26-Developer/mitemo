@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module.js";
 import { readPort } from "./shared/config/port.js";
 
-const app = await NestFactory.create(AppModule);
+const app = await NestFactory.create(AppModule, { rawBody: true });
 app.enableShutdownHooks();
 if (
   process.env["NODE_ENV"] !== "production" &&

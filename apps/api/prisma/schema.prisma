@@ -123,3 +123,15 @@ model AuthSession {
   @@index([userId])
   @@map("auth_session")
 }
+
+/// Notification de simulation PawaPay, indépendante des écritures du grand livre.
+model PawaPaySandboxReceipt {
+  kind       String
+  id         String   @db.Uuid
+  status     String
+  amount     BigInt
+  receivedAt DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+
+  @@id([kind, id, status, amount])
+  @@map("pawapay_sandbox_receipt")
+}
