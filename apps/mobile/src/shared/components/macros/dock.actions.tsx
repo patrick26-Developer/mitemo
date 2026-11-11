@@ -26,6 +26,8 @@ export interface DockAction {
   readonly onPress: () => void;
   /** Teinte de l'action principale, bleu de marque par défaut. */
   readonly tone?: SheetButtonTone;
+  /** Couleur d'action propre à l'écran ; elle remplace la teinte. */
+  readonly accent?: string;
 }
 
 /** Retour d'opération affiché au-dessus des actions du dock. */
@@ -70,7 +72,26 @@ function DockPrimary(props: DockPrimaryProps) {
       label={action.label}
       onPress={action.onPress}
       {...(action.tone === undefined ? {} : { tone: action.tone })}
+      {...(action.accent === undefined ? {} : { accent: action.accent })}
     />
+  );
+}
+
+/**
+ * Affiche l'action secondaire : bordée par défaut, pleine à la couleur d'action
+ * de l'écran quand il en a une, comme l'action principale.
+ * @param props Action secondaire à rendre.
+ * @returns Le bouton secondaire du dock.
+ */
+function DockSecondary(props: DockPrimaryProps) {
+  const { action } = props;
+
+  if (action.accent === undefined) {
+    return <SheetSecondaryButton label={action.label} onPress={action.onPress} />;
+  }
+
+  return (
+    <SheetPrimaryButton label={action.label} onPress={action.onPress} accent={action.accent} />
   );
 }
 
@@ -88,7 +109,7 @@ function DockActions(props: DockActionsProps) {
 
     return (
       <View className="flex-1">
-        <SheetSecondaryButton label={secondary.label} onPress={secondary.onPress} />
+        <DockSecondary action={secondary} />
       </View>
     );
   }
@@ -98,7 +119,7 @@ function DockActions(props: DockActionsProps) {
   return (
     <View className="flex-row items-stretch gap-2.5">
       <View style={{ width: SECONDARY_WIDTH }}>
-        <SheetSecondaryButton label={secondary.label} onPress={secondary.onPress} />
+        <DockSecondary action={secondary} />
       </View>
       <View className="flex-1">
         <DockPrimary action={primary} />

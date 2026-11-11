@@ -61,6 +61,14 @@ describe("ActionsDock", () => {
     expect(screen.getByText("L'épargne a été retirée.")).toBeOnTheScreen();
   });
 
+  it("donne à l'action principale la couleur d'action de l'écran", async () => {
+    await renderWithSafeArea(
+      <ActionsDock primary={{ label: "Pointer", onPress: jest.fn(), accent: "#F5D7B0" }} />,
+    );
+
+    expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#DF8C20" });
+  });
+
   it("ne rend rien sans action ni retour", async () => {
     await renderWithSafeArea(<ActionsDock primary={null} secondary={null} />);
 
