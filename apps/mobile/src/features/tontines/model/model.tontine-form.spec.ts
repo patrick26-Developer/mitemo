@@ -1,11 +1,19 @@
-import { INITIAL_TONTINE_FORM, parseTontineForm, tontineRecap } from "./model.tontine-form";
+import {
+  INITIAL_TONTINE_FORM,
+  TONTINE_CADENCE_OPTIONS,
+  TONTINE_FORM_STEPS,
+  parseTontineForm,
+  tontineRecap,
+  tontineStepError,
+} from "./model.tontine-form";
+import type { TontineFormState } from "./model.tontine-form";
 
 /** Formulaire complet valide. */
-const VALID_FORM = {
+const VALID_FORM: TontineFormState = {
   ...INITIAL_TONTINE_FORM,
   name: "Tontine du Quartier",
   contribution: "5000",
-  interval: "1",
+  cadence: "semaine-1",
   participants: "6",
   rounds: "10",
 };
@@ -26,7 +34,7 @@ describe("parseTontineForm", () => {
   });
 
   it("accepte un intervalle de plusieurs semaines", () => {
-    const result = parseTontineForm({ ...VALID_FORM, interval: "2" });
+    const result = parseTontineForm({ ...VALID_FORM, cadence: "semaine-2" });
 
     expect(result.ok && result.value.frequency).toEqual({ unit: "semaine", interval: 2 });
     expect(result.ok && result.value.description).toContain("toutes les 2 semaines");
@@ -66,14 +74,10 @@ describe("parseTontineForm", () => {
     });
   });
 
-  it("refuse un intervalle invalide", () => {
-    expect(parseTontineForm({ ...VALID_FORM, interval: "0" })).toEqual({
+  it("refuse une fréquence hors de la liste", () => {
+    expect(parseTontineForm({ ...VALID_FORM, cadence: "semaine-9" as never })).toEqual({
       ok: false,
-      message: "Indiquez un intervalle entre 1 et 12.",
-    });
-    expect(parseTontineForm({ ...VALID_FORM, interval: "13" })).toEqual({
-      ok: false,
-      message: "Indiquez un intervalle entre 1 et 12.",
+      message: "Choisissez une fréquence dans la liste.",
     });
   });
 
@@ -112,7 +116,7 @@ describe("parseTontineForm", () => {
 
 describe("tontineRecap", () => {
   it("résume la cagnotte et la fréquence", () => {
-    expect(tontineRecap({ ...VALID_FORM, interval: "2" })).toEqual({
+    expect(tontineRecap({ ...VALID_FORM, cadence: "semaine-2" })).toEqual({
       pot: 25_000n,
       frequency: { unit: "semaine", interval: 2 },
     });
@@ -123,7 +127,50 @@ describe("tontineRecap", () => {
     expect(tontineRecap({ ...VALID_FORM, participants: "1" }).pot).toBeNull();
   });
 
-  it("ignore une fréquence invalide", () => {
-    expect(tontineRecap({ ...VALID_FORM, interval: "0" }).frequency).toBeNull();
+  it("ignore une fréquence hors de la liste", () => {
+    expect(tontineRecap({ ...VALID_FORM, cadence: "semaine-9" as never }).frequency).toBeNull();
+  });
+});
+
+describe("TONTINE_CADENCE_OPTIONS", () => {
+  it("propose les fréquences en toutes lettres, sans saisie d'intervalle", () => {
+    expect(TONTINE_CADENCE_OPTIONS.map((option) => option.label)).toEqual([
+      "Chaque jour",
+      "Tous les 2 jours",
+      "Tous les 3 jours",
+      "Chaque semaine",
+      "Toutes les 2 semaines",
+      "Chaque mois",
+      "Tous les 2 mois",
+      "Tous les 3 mois",
+    ]);
+  });
+});
+
+describe("tontineStepError", () => {
+  it("découpe le formulaire en trois étapes", () => {
+    expect(TONTINE_FORM_STEPS).toEqual(["L'essentiel", "La fréquence", "Les participants"]);
+  });
+
+  it("ne valide à la première étape que le nom et la cotisation", () => {
+    expect(tontineStepError({ ...VALID_FORM, participants: "1" }, 0)).toBeNull();
+    expect(tontineStepError({ ...VALID_FORM, name: "" }, 0)).toBe("Donnez un nom à la tontine.");
+    expect(tontineStepError({ ...VALID_FORM, contribution: "0" }, 0)).toBe(
+      "Saisissez une cotisation valide en FCFA.",
+    );
+  });
+
+  it("valide la fréquence à la deuxième étape", () => {
+    expect(tontineStepError({ ...VALID_FORM, cadence: "x" as never }, 1)).toBe(
+      "Choisissez une fréquence dans la liste.",
+    );
+    expect(tontineStepError(VALID_FORM, 1)).toBeNull();
+  });
+
+  it("valide tout le formulaire à la dernière étape", () => {
+    expect(tontineStepError({ ...VALID_FORM, rounds: "5" }, 2)).toBe(
+      "Prévoyez au moins un tour par participant.",
+    );
+    expect(tontineStepError(VALID_FORM, 2)).toBeNull();
   });
 });

@@ -1,5 +1,3 @@
-import { CYCLE_FREQUENCY_UNITS } from "@mitemo/contracts";
-import type { CycleFrequencyUnit } from "@mitemo/contracts";
 import { z } from "zod";
 
 import { formatAmount } from "../../../shared/format/format.amount";
@@ -16,14 +14,57 @@ import {
 } from "../../../shared/model/model.form-schema";
 import type { FormResult } from "../../../shared/model/model.form-result";
 import { formOk } from "../../../shared/model/model.form-result";
+import { stepError } from "../../../shared/model/model.form-steps";
+
+/**
+ * Fréquences proposées à la création, du plus court au plus long : le membre
+ * choisit dans une liste au lieu de saisir une unité et un intervalle.
+ */
+export const TONTINE_CADENCES = [
+  { id: "jour-1", unit: "jour", interval: 1 },
+  { id: "jour-2", unit: "jour", interval: 2 },
+  { id: "jour-3", unit: "jour", interval: 3 },
+  { id: "semaine-1", unit: "semaine", interval: 1 },
+  { id: "semaine-2", unit: "semaine", interval: 2 },
+  { id: "mois-1", unit: "mois", interval: 1 },
+  { id: "mois-2", unit: "mois", interval: 2 },
+  { id: "mois-3", unit: "mois", interval: 3 },
+] as const satisfies readonly (TontineFrequency & { readonly id: string })[];
+
+/** Identifiant d'une fréquence proposée. Voir {@link TONTINE_CADENCES}. */
+export type TontineCadenceId = (typeof TONTINE_CADENCES)[number]["id"];
+
+/** Identifiants des fréquences proposées, dans l'ordre de la liste. */
+const CADENCE_IDS = TONTINE_CADENCES.map((cadence) => cadence.id) as [
+  TontineCadenceId,
+  ...TontineCadenceId[],
+];
+
+/**
+ * Met une majuscule au début d'un libellé.
+ * @param label Libellé en minuscules.
+ * @returns Le libellé, première lettre en capitale.
+ */
+function capitalize(label: string): string {
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/** Options de la liste des fréquences, libellées en toutes lettres. */
+export const TONTINE_CADENCE_OPTIONS: readonly { value: TontineCadenceId; label: string }[] =
+  TONTINE_CADENCES.map((cadence) => ({
+    value: cadence.id,
+    label: capitalize(formatFrequency(cadence)),
+  }));
+
+/** Titres des étapes de la création, dans l'ordre. */
+export const TONTINE_FORM_STEPS = ["L'essentiel", "La fréquence", "Les participants"] as const;
 
 /** Champs saisis pour créer une tontine. */
 export interface TontineFormState {
   readonly name: string;
   readonly contribution: string;
-  readonly frequency: CycleFrequencyUnit;
-  /** Nombre d'unités entre deux tours, par exemple 2 pour toutes les deux semaines. */
-  readonly interval: string;
+  /** Fréquence choisie dans la liste. Voir {@link TONTINE_CADENCES}. */
+  readonly cadence: TontineCadenceId;
   readonly participants: string;
   readonly rounds: string;
 }
@@ -43,8 +84,6 @@ const MAX_PARTICIPANTS = 50;
 const MAX_ROUNDS = 100;
 
 /** Nombre maximal d'unités entre deux tours. */
-const MAX_INTERVAL = 12;
-
 /** Message affiché quand les tours ne couvrent pas tous les participants. */
 const ROUNDS_PER_PARTICIPANT_ERROR = "Prévoyez au moins un tour par participant.";
 
@@ -52,8 +91,7 @@ const ROUNDS_PER_PARTICIPANT_ERROR = "Prévoyez au moins un tour par participant
 export const INITIAL_TONTINE_FORM: TontineFormState = {
   name: "",
   contribution: "",
-  frequency: "semaine",
-  interval: "1",
+  cadence: "semaine-1",
   participants: "6",
   rounds: "10",
 };
@@ -63,16 +101,21 @@ export const INITIAL_TONTINE_FORM: TontineFormState = {
  * moins une fois, donc le nombre de tours ne peut pas être inférieur au
  * nombre de participants.
  */
-const tontineFormSchema = z
-  .object({
-    name: nameSchema("Donnez un nom à la tontine."),
-    contribution: amountSchema("Saisissez une cotisation valide en FCFA."),
-    frequency: z.enum(CYCLE_FREQUENCY_UNITS, { error: "Choisissez une fréquence valide." }),
-    interval: countSchema({
-      min: 1,
-      max: MAX_INTERVAL,
-      message: "Indiquez un intervalle entre 1 et 12.",
-    }),
+const essentialsSchema = z.object({
+  name: nameSchema("Donnez un nom à la tontine."),
+  contribution: amountSchema("Saisissez une cotisation valide en FCFA."),
+});
+
+const cadenceSchema = z.object({
+  cadence: z.enum(CADENCE_IDS, { error: "Choisissez une fréquence dans la liste." }),
+});
+
+/** Schémas des étapes intermédiaires ; la dernière valide tout le formulaire. */
+const STEP_SCHEMAS = [essentialsSchema, cadenceSchema] as const;
+
+const tontineFormSchema = essentialsSchema
+  .extend(cadenceSchema.shape)
+  .extend({
     participants: countSchema({
       min: 2,
       max: MAX_PARTICIPANTS,
@@ -99,8 +142,8 @@ export function parseTontineForm(form: TontineFormState): FormResult<CreateTonti
   const parsed = parseWithSchema(tontineFormSchema, form);
   if (!parsed.ok) return parsed;
 
-  const { name, contribution, frequency, interval, participants, rounds } = parsed.value;
-  const cycle: TontineFrequency = { unit: frequency, interval };
+  const { name, contribution, cadence, participants, rounds } = parsed.value;
+  const cycle = cadenceOf(cadence) ?? TONTINE_CADENCES[3];
 
   return formOk({
     name,
@@ -120,12 +163,35 @@ export function parseTontineForm(form: TontineFormState): FormResult<CreateTonti
 export function tontineRecap(form: TontineFormState): TontineRecap {
   const contribution = parseAmountInput(form.contribution);
   const participants = parseCountInput(form.participants, MAX_PARTICIPANTS);
-  const interval = parseCountInput(form.interval, MAX_INTERVAL);
   const pot =
     contribution !== null && participants !== null && participants >= 2
       ? contribution * BigInt(participants - 1)
       : null;
-  const frequency = interval === null ? null : { unit: form.frequency, interval };
+  const cadence = cadenceOf(form.cadence);
+  const frequency =
+    cadence === undefined ? null : { unit: cadence.unit, interval: cadence.interval };
 
   return { pot, frequency };
+}
+
+/**
+ * Retrouve une fréquence de la liste par son identifiant.
+ * @param id Identifiant choisi.
+ * @returns La fréquence, ou `undefined` si l'identifiant est inconnu.
+ */
+function cadenceOf(id: string): TontineFrequency | undefined {
+  const cadence = TONTINE_CADENCES.find((entry) => entry.id === id);
+
+  return cadence === undefined ? undefined : { unit: cadence.unit, interval: cadence.interval };
+}
+
+/**
+ * Valide une étape de la création avant de passer à la suivante. La dernière
+ * étape valide tout le formulaire.
+ * @param form Saisie courante.
+ * @param step Étape à valider, à partir de 0.
+ * @returns Le message de la première erreur, ou `null` si l'étape est valide.
+ */
+export function tontineStepError(form: TontineFormState, step: number): string | null {
+  return stepError(STEP_SCHEMAS[step] ?? tontineFormSchema, form);
 }

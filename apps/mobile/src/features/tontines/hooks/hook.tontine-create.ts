@@ -1,40 +1,28 @@
-import { useState } from "react";
-
+import type { StepForm } from "../../../shared/hooks/hook.step-form";
+import { useStepForm } from "../../../shared/hooks/hook.step-form";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { TontineFormState } from "../model/model.tontine-form";
-import { INITIAL_TONTINE_FORM, parseTontineForm } from "../model/model.tontine-form";
-
-/** Saisie et création d'une tontine depuis une feuille. */
-export interface TontineCreateState {
-  readonly form: TontineFormState;
-  readonly error: string | null;
-  readonly update: (patch: Partial<TontineFormState>) => void;
-  readonly submit: () => void;
-}
+import {
+  INITIAL_TONTINE_FORM,
+  TONTINE_FORM_STEPS,
+  parseTontineForm,
+  tontineStepError,
+} from "../model/model.tontine-form";
 
 /**
- * Gère la saisie et la création d'une tontine depuis une feuille.
- * @param onDone Appelé après la création, pour fermer la feuille.
- * @returns Les champs, l'erreur et l'action de création.
+ * Gère la saisie en trois étapes et la création d'une tontine.
+ * @param onDone Appelé quand la feuille doit se fermer.
+ * @returns La saisie, l'erreur, l'étape courante et les actions.
  */
-export function useTontineCreate(onDone: () => void): TontineCreateState {
-  const [form, setForm] = useState(INITIAL_TONTINE_FORM);
-  const [error, setError] = useState<string | null>(null);
+export function useTontineCreate(onDone: () => void): StepForm<TontineFormState> {
   const createTontine = usePortfolioStore((state) => state.createTontine);
 
-  const update = (patch: Partial<TontineFormState>) => {
-    setForm((current) => ({ ...current, ...patch }));
-  };
-
-  const submit = () => {
-    const result = parseTontineForm(form);
-    if (!result.ok) {
-      setError(result.message);
-      return;
-    }
-    createTontine(result.value);
-    onDone();
-  };
-
-  return { form, error, update, submit };
+  return useStepForm({
+    initial: INITIAL_TONTINE_FORM,
+    total: TONTINE_FORM_STEPS.length,
+    validateStep: tontineStepError,
+    parse: parseTontineForm,
+    onCreate: createTontine,
+    onDone,
+  });
 }

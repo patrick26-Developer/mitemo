@@ -1,10 +1,8 @@
-import type { CycleFrequencyUnit } from "@mitemo/contracts";
-
 import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
-import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
-import { SegmentedControl } from "../../../shared/components/macros/control.segmented";
-import type { SegmentedControlOption } from "../../../shared/components/macros/control.segmented";
+import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
+import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
+import { SheetOptionList } from "../../../shared/components/macros/list.sheet-option";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { SheetSection } from "../../../shared/components/macros/section.sheet";
@@ -13,14 +11,11 @@ import { formatAmount } from "../../../shared/format/format.amount";
 import { formatFrequency } from "../../../shared/member/model.portfolio";
 import { useTontineCreate } from "../hooks/hook.tontine-create";
 import type { TontineFormState, TontineRecap } from "../model/model.tontine-form";
-import { tontineRecap } from "../model/model.tontine-form";
-
-/** Fréquences proposées à la création d'une tontine. */
-const FREQUENCY_OPTIONS: readonly SegmentedControlOption<CycleFrequencyUnit>[] = [
-  { value: "jour", label: "Jour" },
-  { value: "semaine", label: "Semaine" },
-  { value: "mois", label: "Mois" },
-];
+import {
+  TONTINE_CADENCE_OPTIONS,
+  TONTINE_FORM_STEPS,
+  tontineRecap,
+} from "../model/model.tontine-form";
 
 /** Props de la feuille de création d'une tontine. */
 export interface TontineCreateSheetProps {
@@ -35,11 +30,11 @@ interface TontineCreateFieldsProps {
 }
 
 /**
- * Affiche le nom et la cotisation d'une nouvelle tontine.
+ * Première étape : le nom et la cotisation d'une nouvelle tontine.
  * @param props Saisie courante et mise à jour des champs.
  * @returns Les champs d'identité de la tontine.
  */
-function TontineIdentityFields(props: TontineCreateFieldsProps) {
+function TontineEssentialsStep(props: TontineCreateFieldsProps) {
   const { form, onChange } = props;
 
   return (
@@ -63,45 +58,21 @@ function TontineIdentityFields(props: TontineCreateFieldsProps) {
 }
 
 /**
- * Affiche la fréquence, l'intervalle, les participants et les tours d'une
- * nouvelle tontine.
+ * Deuxième étape : la fréquence des tours, choisie dans une liste.
  * @param props Saisie courante et mise à jour des champs.
- * @returns Les champs du cycle de la tontine.
+ * @returns La liste des fréquences proposées.
  */
-function TontineCycleFields(props: TontineCreateFieldsProps) {
+function TontineCadenceStep(props: TontineCreateFieldsProps) {
   const { form, onChange } = props;
 
   return (
-    <>
-      <SheetSection title="Fréquence">
-        <SegmentedControl
-          options={FREQUENCY_OPTIONS}
-          value={form.frequency}
-          onChange={(frequency) => onChange({ frequency })}
-        />
-      </SheetSection>
-      <SheetTextField
-        label="Intervalle"
-        value={form.interval}
-        onChangeText={(interval) => onChange({ interval })}
-        keyboardType="number-pad"
-        hint="1 pour chaque période, 2 pour une période sur deux."
+    <SheetSection title="Fréquence des tours">
+      <SheetOptionList
+        options={TONTINE_CADENCE_OPTIONS}
+        selected={form.cadence}
+        onSelect={(cadence) => onChange({ cadence })}
       />
-      <SheetTextField
-        label="Participants"
-        value={form.participants}
-        onChangeText={(participants) => onChange({ participants })}
-        keyboardType="number-pad"
-        hint="Vous inclus, entre 2 et 50."
-      />
-      <SheetTextField
-        label="Tours"
-        value={form.rounds}
-        onChangeText={(rounds) => onChange({ rounds })}
-        keyboardType="number-pad"
-        hint="Nombre de bénéficiaires sur le cycle."
-      />
-    </>
+    </SheetSection>
   );
 }
 
@@ -123,22 +94,63 @@ function recapRows(recap: TontineRecap): readonly SheetRecapRow[] {
 }
 
 /**
- * Saisit les règles d'une nouvelle tontine et la crée dans le portefeuille.
+ * Dernière étape : les participants, les tours et le récapitulatif.
+ * @param props Saisie courante et mise à jour des champs.
+ * @returns Les champs du cycle et le récapitulatif.
+ */
+function TontineParticipantsStep(props: TontineCreateFieldsProps) {
+  const { form, onChange } = props;
+
+  return (
+    <>
+      <SheetTextField
+        label="Participants"
+        value={form.participants}
+        onChangeText={(participants) => onChange({ participants })}
+        keyboardType="number-pad"
+        hint="Vous inclus, entre 2 et 50."
+      />
+      <SheetTextField
+        label="Tours"
+        value={form.rounds}
+        onChangeText={(rounds) => onChange({ rounds })}
+        keyboardType="number-pad"
+        hint="Nombre de bénéficiaires sur le cycle."
+      />
+      <SheetRecap title="Récapitulatif" rows={recapRows(tontineRecap(form))} />
+    </>
+  );
+}
+
+/** Contenu de chaque étape, dans l'ordre de TONTINE_FORM_STEPS. */
+const STEP_CONTENTS = [TontineEssentialsStep, TontineCadenceStep, TontineParticipantsStep];
+
+/**
+ * Saisit les règles d'une nouvelle tontine en trois étapes et la crée dans le
+ * portefeuille.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle tontine ».
  */
 export function TontineCreateSheet(props: TontineCreateSheetProps) {
-  const { visible, onClose } = props;
-  const { form, error, update, submit } = useTontineCreate(onClose);
-  const recap = tontineRecap(form);
+  const { form, error, steps, update, next, back, close } = useTontineCreate(props.onClose);
+  const StepContent = STEP_CONTENTS[steps.index] ?? TontineEssentialsStep;
 
   return (
-    <BottomSheet visible={visible} title="Nouvelle tontine" onClose={onClose}>
-      <TontineIdentityFields form={form} onChange={update} />
-      <TontineCycleFields form={form} onChange={update} />
-      <SheetRecap title="Récapitulatif" rows={recapRows(recap)} />
+    <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={close}>
+      <StepIndicator
+        index={steps.index}
+        total={steps.total}
+        title={TONTINE_FORM_STEPS[steps.index] ?? ""}
+      />
+      <StepContent form={form} onChange={update} />
       {error === null ? null : <FeedbackBanner kind="error" message={error} />}
-      <SheetPrimaryButton label="Créer la tontine" onPress={submit} />
+      <SheetStepsFooter
+        isFirst={steps.isFirst}
+        isLast={steps.isLast}
+        finalLabel="Créer la tontine"
+        onBack={back}
+        onNext={next}
+      />
     </BottomSheet>
   );
 }
