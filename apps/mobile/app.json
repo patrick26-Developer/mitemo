@@ -15,7 +15,8 @@
           "photosPermission": "Mitemo utilise votre photo pour votre profil.",
           "cameraPermission": "Mitemo utilise l'appareil photo pour votre photo de profil."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }
