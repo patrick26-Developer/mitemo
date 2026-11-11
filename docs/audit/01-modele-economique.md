@@ -1,4 +1,4 @@
-# MODÈLE ÉCONOMIQUE — DIAGNOSTIC ET RECONSTRUCTION
+# MODÈLE ÉCONOMIQUE - DIAGNOSTIC ET RECONSTRUCTION
 
 ---
 
@@ -36,10 +36,10 @@ Si la seule chose qu'on puisse faire du solde Mitemo est de le retirer, tout le 
 
 | Usage | Difficulté | Effet |
 |---|---|---|
-| Achat de crédit téléphonique / forfaits data | Faible — API opérateur, souvent avec commission **reversée** à Mitemo | Usage universel, premier à livrer |
+| Achat de crédit téléphonique / forfaits data | Faible - API opérateur, souvent avec commission **reversée** à Mitemo | Usage universel, premier à livrer |
 | Transfert P2P interne (déjà prévu §2.6) | Déjà au cahier des charges | Garde l'argent dans le réseau |
-| Paiement chez des marchands partenaires du marché | Moyenne — nécessite un recrutement terrain | Le vrai verrou concurrentiel |
-| Paiement de factures (eau, électricité, scolarité) | Moyenne à élevée — conventions | Forte valeur d'usage |
+| Paiement chez des marchands partenaires du marché | Moyenne - nécessite un recrutement terrain | Le vrai verrou concurrentiel |
+| Paiement de factures (eau, électricité, scolarité) | Moyenne à élevée - conventions | Forte valeur d'usage |
 
 Ce n'est pas une fonctionnalité secondaire : **c'est ce qui rend le modèle rentable**, et c'est aussi ce qui le rend difficile à copier. Un opérateur télécom peut baisser ses frais du jour au lendemain ; il ne peut pas vous retirer un réseau de 200 commerçantes qui acceptent votre solde au Marché Total.
 
@@ -47,7 +47,7 @@ Ce n'est pas une fonctionnalité secondaire : **c'est ce qui rend le modèle ren
 
 Le cœur de cible manipule du liquide. Lui demander de passer par MoMo pour alimenter son portefeuille, c'est lui imposer un aller-retour et −4 %. Un réseau d'agents de proximité (une boutique, une commerçante de confiance par zone) qui encaisse du cash et crédite le portefeuille coûte une commission d'agent de l'ordre de 1 %, soit **le quart du coût MoMo**, et résout en même temps le problème d'adoption.
 
-C'est un chantier opérationnel lourd (gestion de la liquidité des agents, risque de fraude, formation) : à planifier en phase 2, mais à inscrire dès maintenant dans l'architecture — un agent est un type de compte avec un solde de flottant, pas une rustine.
+C'est un chantier opérationnel lourd (gestion de la liquidité des agents, risque de fraude, formation) : à planifier en phase 2, mais à inscrire dès maintenant dans l'architecture - un agent est un type de compte avec un solde de flottant, pas une rustine.
 
 ### Effet chiffré
 
@@ -72,7 +72,7 @@ On passe d'une perte de 6,6 % du volume à un équilibre légèrement positif. L
 
 La commission de 1,5 % sur la cagnotte ne doit pas être l'unique source de revenu. Quatre lignes, dans l'ordre de leur marge réelle :
 
-### Ligne 1 — Commission de cycle (volume, marge faible)
+### Ligne 1 - Commission de cycle (volume, marge faible)
 
 Garder le principe, mais :
 
@@ -80,23 +80,23 @@ Garder le principe, mais :
 - **Spécifier l'arrondi** : commission arrondie au multiple de 5 FCFA supérieur, calculée en entiers de FCFA. Jamais de flottant dans le grand livre.
 - **Afficher le montant exact avant validation**, à chaque fois. Dans ce marché, un frais surprise est un article de presse.
 
-### Ligne 2 — Répercussion transparente du coût d'approvisionnement (neutre)
+### Ligne 2 - Répercussion transparente du coût d'approvisionnement (neutre)
 
-Ne plus promettre le dépôt gratuit. Afficher à l'écran, avant confirmation : *« Dépôt de 5 000 FCFA — frais opérateur 100 FCFA — crédité : 4 900 FCFA. Gratuit si vous déposez en espèces chez un agent Mitemo. »*
+Ne plus promettre le dépôt gratuit. Afficher à l'écran, avant confirmation : *« Dépôt de 5 000 FCFA - frais opérateur 100 FCFA - crédité : 4 900 FCFA. Gratuit si vous déposez en espèces chez un agent Mitemo. »*
 
-C'est honnête, c'est défendable devant un régulateur, et cela devient un argument de vente pour le canal agent. La promesse « 0 frais » doit être recentrée sur ce qui est vrai et vérifiable : **à l'intérieur de Mitemo, tout est gratuit** — cotiser, recevoir sa cagnotte, transférer à un autre membre.
+C'est honnête, c'est défendable devant un régulateur, et cela devient un argument de vente pour le canal agent. La promesse « 0 frais » doit être recentrée sur ce qui est vrai et vérifiable : **à l'intérieur de Mitemo, tout est gratuit** - cotiser, recevoir sa cagnotte, transférer à un autre membre.
 
-### Ligne 3 — Pénalités et frais d'incident (faible volume, à cadrer juridiquement)
+### Ligne 3 - Pénalités et frais d'incident (faible volume, à cadrer juridiquement)
 
 La pénalité forfaitaire de 2 % du §3.2 est conservable, mais elle doit être qualifiée de **frais de gestion du risque** et non d'intérêt, sous peine de requalification. Elle doit aussi être plafonnée en valeur absolue, et jamais capitalisée.
 
-### Ligne 4 — Apport d'affaires aux institutions financières (marge forte, à 18-24 mois)
+### Ligne 4 - Apport d'affaires aux institutions financières (marge forte, à 18-24 mois)
 
 C'est là qu'est la vraie rentabilité, et c'est déjà dans la vision. Un établissement de microfinance paie volontiers une commission d'apport de **1 à 3 % du montant du crédit octroyé** pour un dossier pré-qualifié par un historique d'assiduité de douze mois. Un seul crédit de 500 000 FCFA rapporte autant que dix cycles de tontine complets.
 
 Conséquence sur les priorités : **la capture de données doit être parfaite dès le jour 1, même si le scoring n'est livré qu'en phase 3.** Tout événement d'assiduité doit être horodaté, immuable et exportable. C'est un choix d'architecture, pas de produit.
 
-### Ligne non recommandée — le produit du flottant
+### Ligne non recommandée - le produit du flottant
 
 Les soldes dormants placés produisent un rendement. Dans le cadre CEMAC, l'affectation de ce produit pour un émetteur de monnaie électronique est contrainte et, selon le montage retenu, il peut revenir au partenaire agréé et non à Mitemo. À ne pas inscrire au plan d'affaires sans avis juridique.
 
@@ -123,5 +123,5 @@ Les trois KPI du document de vision (rétention de groupe, volume d'épargne sé
 | **Notifications envoyées par utilisateur actif et par mois** | Le poste de coût qui dérape sans bruit | > 10 SMS |
 | **Taux de complétion du 1er cycle** | Seul vrai signal de *product-market fit* | < 70 % |
 | **Écart de réconciliation quotidien** | Doit être strictement nul, toujours | ≠ 0 |
-| **Taux de défaut par rang de passage** | Valide ou invalide l'algorithme du §1.3 | — |
-| **Coût d'acquisition par groupe activé** | L'unité économique réelle | — |
+| **Taux de défaut par rang de passage** | Valide ou invalide l'algorithme du §1.3 | - |
+| **Coût d'acquisition par groupe activé** | L'unité économique réelle | - |

@@ -31,7 +31,7 @@ const fundedWallet = (amount: bigint): Promise<{ wallet: string; clearing: strin
 const entryCount = (accountId: string): Promise<number> =>
   fx.prisma.ledgerPostingLine.count({ where: { accountId } });
 
-describe("PrismaLedgerRepository — enregistrement", () => {
+describe("PrismaLedgerRepository - enregistrement", () => {
   it("enregistre une écriture équilibrée et calcule les soldes exacts", async () => {
     const { wallet, clearing } = await fundedWallet(5_000n);
     await fx.repository.post(command(transfer(clearing, wallet, 2_500n)));
@@ -128,7 +128,7 @@ describe("PrismaLedgerRepository — enregistrement", () => {
   });
 });
 
-describe("PrismaLedgerRepository — idempotence", () => {
+describe("PrismaLedgerRepository - idempotence", () => {
   it("ne produit qu'une écriture pour une demande rejouée", async () => {
     const clearing = await open("CLEARING_SIMULATOR");
     const wallet = await open("WALLET_USER");
@@ -192,7 +192,7 @@ describe("PrismaLedgerRepository — idempotence", () => {
   });
 });
 
-describe("PrismaLedgerRepository — concurrence", () => {
+describe("PrismaLedgerRepository - concurrence", () => {
   it("des débits concurrents ne rendent jamais un portefeuille négatif", async () => {
     const { wallet, clearing } = await fundedWallet(1_000n);
 
