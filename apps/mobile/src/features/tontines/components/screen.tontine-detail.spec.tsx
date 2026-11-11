@@ -27,17 +27,17 @@ describe("TontineDetailScreen", () => {
     expect(screen.getAllByText("Mama Nadège").length).toBeGreaterThan(0);
   });
 
-  it("propose de transférer depuis le dock, sans cotisation déjà réglée", async () => {
+  it("ne propose aucune action quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    expect(screen.getByRole("button", { name: "Transférer" })).toBeOnTheScreen();
-    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Continuer" })).not.toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 
   it("cotise depuis le dock quand la cotisation est due", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="2" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Cotiser 10 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
     expect(await screen.findByText("Cotisation réglée pour ce tour.")).toBeOnTheScreen();
     expect(
@@ -47,7 +47,7 @@ describe("TontineDetailScreen", () => {
     ).toBe(true);
   });
 
-  it("demande confirmation avant de recevoir la cagnotte", async () => {
+  it("demande confirmation avant de distribuer la cagnotte du tour", async () => {
     usePortfolioStore.setState({
       tontines: [
         makeTontine({
@@ -61,21 +61,17 @@ describe("TontineDetailScreen", () => {
     });
     await renderWithSafeArea(<TontineDetailScreen id="t1" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Retirer la cagnotte" }));
-    expect(await screen.findByRole("header", { name: "Recevoir la cagnotte ?" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Confirmer la restourne" }));
+    expect(
+      await screen.findByRole("header", { name: "Confirmer la restourne ?" }),
+    ).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Recevoir" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
 
-    expect(await screen.findByText("Cagnotte versée sur votre solde.")).toBeOnTheScreen();
+    expect(
+      await screen.findByText("Restourne confirmée : la cagnotte est distribuée."),
+    ).toBeOnTheScreen();
     expect(firstOf(usePortfolioStore.getState().tontines).round).toBe(2);
-  });
-
-  it("ouvre la feuille de transfert depuis le dock", async () => {
-    await renderWithSafeArea(<TontineDetailScreen id="1" />);
-
-    await fireEvent.press(screen.getByRole("button", { name: "Transférer" }));
-
-    expect(await screen.findByRole("header", { name: "Transférer à un membre" })).toBeOnTheScreen();
   });
 
   it("crée un code d'invitation pour l'administrateur", async () => {

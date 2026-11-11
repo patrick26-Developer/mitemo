@@ -20,6 +20,12 @@ export interface TontineMember {
   readonly paidCurrentRound: boolean;
 }
 
+/** États d'une tontine : en préparation, en cours, terminée. */
+export const TONTINE_STATES = ["PENDING", "ACTIVE", "COMPLETED"] as const;
+
+/** État d'une tontine. Voir {@link TONTINE_STATES}. */
+export type TontineState = (typeof TONTINE_STATES)[number];
+
 /** Tontine suivie par le membre. */
 export interface Tontine {
   readonly id: string;
@@ -30,7 +36,8 @@ export interface Tontine {
   /** Tour en cours, à partir de 1. */
   readonly round: number;
   readonly totalRounds: number;
-  readonly state: "ACTIVE" | "COMPLETED";
+  /** `PENDING` avant le départ, `ACTIVE` pendant le cycle, `COMPLETED` après. */
+  readonly state: TontineState;
   readonly members: readonly TontineMember[];
   /** Membre qui reçoit la cagnotte du tour en cours. */
   readonly beneficiaryId: string;
@@ -126,6 +133,69 @@ export function canPayContribution(tontine: Tontine): boolean {
  */
 export function paidMemberCount(tontine: Tontine): number {
   return tontine.members.filter((member) => member.paidCurrentRound).length;
+}
+
+/**
+ * Indique si la tontine a réuni tous les participants prévus.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand le nombre de membres atteint le quota de tours.
+ */
+export function hasReachedQuota(tontine: Tontine): boolean {
+  return tontine.members.length >= tontine.totalRounds;
+}
+
+/**
+ * Indique si tous les membres ont réglé la cotisation du tour en cours.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand chaque membre a payé et que la tontine compte des membres.
+ */
+export function allMembersPaid(tontine: Tontine): boolean {
+  return tontine.members.length > 0 && tontine.members.every((member) => member.paidCurrentRound);
+}
+
+/**
+ * Indique si l'administrateur peut lancer la tontine.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand la tontine attend son départ et que le quota est atteint.
+ */
+export function canStartTontine(tontine: Tontine): boolean {
+  return tontine.state === "PENDING" && isTontineAdmin(tontine) && hasReachedQuota(tontine);
+}
+
+/**
+ * Indique si l'administrateur peut confirmer la restourne du tour.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand la tontine est active et que tous les membres ont payé.
+ */
+export function canConfirmRound(tontine: Tontine): boolean {
+  return tontine.state === "ACTIVE" && isTontineAdmin(tontine) && allMembersPaid(tontine);
+}
+
+/** Cotisation d'un membre pour un tour donné, telle qu'affichée dans l'historique. */
+export interface MemberContribution {
+  /** Tour concerné, à partir de 1. */
+  readonly round: number;
+  readonly paid: boolean;
+}
+
+/**
+ * Reconstitue l'historique de cotisation d'un membre : tous les tours déjà
+ * clôturés ont été réglés, le tour en cours dépend de sa cotisation.
+ * @param tontine Tontine concernée.
+ * @param memberId Membre dont on affiche l'historique.
+ * @returns Les tours, du premier au tour en cours.
+ */
+export function memberContributions(
+  tontine: Tontine,
+  memberId: string,
+): readonly MemberContribution[] {
+  const member = tontine.members.find((entry) => entry.id === memberId);
+  if (member === undefined || tontine.state === "PENDING") return [];
+
+  return Array.from({ length: tontine.round }, (_, index) => ({
+    round: index + 1,
+    paid: index + 1 < tontine.round || member.paidCurrentRound,
+  }));
 }
 
 /**

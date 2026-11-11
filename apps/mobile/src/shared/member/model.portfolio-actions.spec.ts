@@ -1,10 +1,6 @@
 import { canPayContribution, SELF_MEMBER_ID } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import {
-  ForbiddenOperationError,
-  InsufficientFundsError,
-  UnknownEntityError,
-} from "./model.portfolio-error";
+import { ForbiddenOperationError, InsufficientFundsError } from "./model.portfolio-error";
 import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   firstOf,
@@ -31,8 +27,10 @@ describe("createTontine", () => {
     expect(created).toBe(state().tontines[0]);
     expect(state().tontines).toHaveLength(2);
     expect(state().tontines[0]?.name).toBe("Nouvelle tontine");
-    expect(state().tontines[0]?.members).toHaveLength(3);
+    expect(state().tontines[0]?.members).toHaveLength(1);
     expect(state().tontines[0]?.members[0]?.role).toBe("ADMIN");
+    expect(state().tontines[0]?.totalRounds).toBe(3);
+    expect(state().tontines[0]?.state).toBe("PENDING");
   });
 });
 
@@ -81,46 +79,6 @@ describe("contributeTontine", () => {
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [paid] });
 
     expect(() => actions.contributeTontine("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
-describe("withdrawTontine", () => {
-  it("verse la cagnotte au bénéficiaire et passe au tour suivant", () => {
-    const beneficiary = makeTontine({ beneficiaryId: SELF_MEMBER_ID });
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [beneficiary] });
-
-    actions.withdrawTontine("t1");
-
-    expect(state().available).toBe(30_000n);
-    expect(state().tontines[0]?.round).toBe(2);
-  });
-
-  it("refuse le retrait à un membre qui n'est pas bénéficiaire", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.withdrawTontine("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
-describe("transferToMember", () => {
-  it("débite le solde disponible", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
-
-    actions.transferToMember("t1", "m2", 3_000n);
-
-    expect(state().available).toBe(17_000n);
-  });
-
-  it("refuse un destinataire inconnu", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.transferToMember("t1", "absent", 1_000n)).toThrow(UnknownEntityError);
-  });
-
-  it("refuse un montant supérieur au solde", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.transferToMember("t1", "m2", 50_000n)).toThrow(InsufficientFundsError);
   });
 });
 

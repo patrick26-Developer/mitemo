@@ -55,26 +55,30 @@ export interface CreateCardInput {
 }
 
 /**
- * Construit la liste des membres d'une nouvelle tontine : le membre connecté
- * en administrateur, puis les participants invités.
- * @param participantCount Nombre total de participants.
- * @returns Les membres, cotisation du tour en cours non réglée.
+ * Construit le membre invité qui prend le rang donné.
+ * @param index Rang de l'invité, à partir de 0.
+ * @returns Le membre, cotisation du tour en cours non réglée.
  */
-function buildMembers(participantCount: number): readonly TontineMember[] {
-  const self: TontineMember = {
+export function buildInvitedMember(index: number): TontineMember {
+  return {
+    id: `member-${index + 1}`,
+    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
+    role: "MEMBRE",
+    paidCurrentRound: false,
+  };
+}
+
+/**
+ * Construit le membre connecté, administrateur d'une nouvelle tontine.
+ * @returns Son adhésion, cotisation du tour en cours non réglée.
+ */
+function buildSelfMember(): TontineMember {
+  return {
     id: SELF_MEMBER_ID,
     name: SELF_NAME,
     role: "ADMIN",
     paidCurrentRound: false,
   };
-  const others = Array.from({ length: Math.max(participantCount - 1, 0) }, (_, index) => ({
-    id: `member-${index + 1}`,
-    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
-    role: "MEMBRE" as const,
-    paidCurrentRound: false,
-  }));
-
-  return [self, ...others];
 }
 
 /**
@@ -84,7 +88,7 @@ function buildMembers(participantCount: number): readonly TontineMember[] {
  * @returns La tontine prête à être ajoutée.
  */
 export function buildTontine(input: CreateTontineInput, index: number): Tontine {
-  const members = buildMembers(input.participantCount);
+  const members = [buildSelfMember()];
 
   return {
     id: createId("tontine"),
@@ -92,10 +96,10 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
     contribution: input.contribution,
     frequency: input.frequency,
     round: 1,
-    totalRounds: members.length,
-    state: "ACTIVE",
+    totalRounds: input.participantCount,
+    state: "PENDING",
     members,
-    beneficiaryId: members[0]?.id ?? SELF_MEMBER_ID,
+    beneficiaryId: SELF_MEMBER_ID,
     description: input.description,
     headerColors: TONTINE_TINTS[index % TONTINE_TINTS.length] ?? ["#2CCA86", "#62F79D"],
     invitationCode: null,

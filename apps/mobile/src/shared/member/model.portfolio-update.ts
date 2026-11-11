@@ -137,6 +137,44 @@ function nextBeneficiaryId(tontine: Tontine): string {
 }
 
 /**
+ * Ajoute un membre à une tontine préparée.
+ * @param tontines Tontines du membre.
+ * @param id Tontine concernée.
+ * @param member Membre à inscrire.
+ * @returns La liste avec le membre ajouté.
+ */
+export function appendTontineMember(
+  tontines: readonly Tontine[],
+  id: string,
+  member: TontineMember,
+): readonly Tontine[] {
+  return tontines.map((tontine) =>
+    tontine.id === id ? { ...tontine, members: [...tontine.members, member] } : tontine,
+  );
+}
+
+/**
+ * Lance une tontine préparée : premier tour ouvert, premier membre bénéficiaire.
+ * @param tontines Tontines du membre.
+ * @param id Tontine concernée.
+ * @returns La liste avec la tontine lancée.
+ */
+export function startTontine(tontines: readonly Tontine[], id: string): readonly Tontine[] {
+  return tontines.map((tontine) => {
+    if (tontine.id !== id) return tontine;
+
+    const members = tontine.members.map((member) => ({ ...member, paidCurrentRound: false }));
+    return {
+      ...tontine,
+      round: 1,
+      state: "ACTIVE",
+      beneficiaryId: members[0]?.id ?? SELF_MEMBER_ID,
+      members,
+    };
+  });
+}
+
+/**
  * Passe au tour suivant et remet les cotisations à zéro, ou clôt la tontine.
  * @param tontines Tontines du membre.
  * @param id Tontine concernée.

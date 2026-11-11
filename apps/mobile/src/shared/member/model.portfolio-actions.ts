@@ -1,7 +1,13 @@
 import type { SavingsCard, Tontine } from "./model.portfolio";
-import { createId, isTontineBeneficiary, SELF_MEMBER_ID, tontinePot } from "./model.portfolio";
+import {
+  allMembersPaid,
+  createId,
+  hasReachedQuota,
+  SELF_MEMBER_ID,
+  tontinePot,
+} from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildTontine } from "./model.portfolio-create";
+import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -11,6 +17,7 @@ import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   addSaved,
   advanceRound,
+  appendTontineMember,
   clearSaved,
   deductSaved,
   markSelfPaid,
@@ -20,11 +27,10 @@ import {
   requireAdmin,
   requireCard,
   requireFunds,
-  requireOtherMember,
-  requirePositive,
   requireSelfCanPay,
   requireTontine,
   setInvitationCode,
+  startTontine as startTontineIn,
 } from "./model.portfolio-update";
 
 /** Mise à jour partielle de l'état du portefeuille. */
@@ -40,14 +46,6 @@ export interface PortfolioContext {
   readonly set: PortfolioSet;
 }
 
-/** Paramètres d'un transfert vers un autre membre d'une tontine. */
-export interface TransferToMemberInput {
-  readonly tontineId: string;
-  readonly memberId: string;
-  /** Montant strictement positif, en plus petite unité de la devise. */
-  readonly amount: bigint;
-}
-
 /** État partagé des tontines, des cartes et du solde disponible. */
 export interface PortfolioState {
   readonly available: bigint;
@@ -55,9 +53,10 @@ export interface PortfolioState {
   readonly cards: readonly SavingsCard[];
   createTontine: (input: CreateTontineInput) => Tontine;
   createCard: (input: CreateCardInput) => void;
+  startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
-  withdrawTontine: (tontineId: string) => void;
-  transferToMember: (tontineId: string, memberId: string, amount: bigint) => void;
+  confirmRound: (tontineId: string) => void;
+  addMember: (tontineId: string) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
   contributeCard: (cardId: string) => void;
@@ -118,33 +117,63 @@ function contributeTontine(context: PortfolioContext, tontineId: string): void {
 }
 
 /**
- * Verse la cagnotte du tour au bénéficiaire et passe au tour suivant.
+ * Lance une tontine préparée, une fois tous ses membres réunis.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
- * @throws {ForbiddenOperationError} si le membre connecté n'est pas le bénéficiaire.
+ * @throws {ForbiddenOperationError} si le membre connecté n'administre pas la tontine.
+ * @throws {ForbiddenOperationError} si la tontine est déjà lancée ou incomplète.
  */
-function withdrawTontine(context: PortfolioContext, tontineId: string): void {
+function startTontine(context: PortfolioContext, tontineId: string): void {
   const tontine = requireTontine(context.get().tontines, tontineId);
-  if (!isTontineBeneficiary(tontine)) {
-    throw new ForbiddenOperationError("Vous ne recevez pas la cagnotte de ce tour.");
+  requireAdmin(tontine);
+  if (tontine.state !== "PENDING") {
+    throw new ForbiddenOperationError("Cette tontine est déjà lancée.");
   }
+  if (!hasReachedQuota(tontine)) {
+    throw new ForbiddenOperationError("La tontine n'a pas encore tous ses membres.");
+  }
+  context.set((state) => ({ tontines: startTontineIn(state.tontines, tontineId) }));
+}
+
+/**
+ * Confirme la restourne : la cagnotte est distribuée au bénéficiaire et le tour
+ * passe au suivant, sans action de retrait ni de transfert.
+ * @param context Accès au store.
+ * @param tontineId Tontine concernée.
+ * @throws {ForbiddenOperationError} si le membre connecté n'administre pas la tontine.
+ * @throws {ForbiddenOperationError} si tous les membres n'ont pas encore versé.
+ */
+function confirmRound(context: PortfolioContext, tontineId: string): void {
+  const tontine = requireTontine(context.get().tontines, tontineId);
+  requireAdmin(tontine);
+  if (tontine.state !== "ACTIVE" || !allMembersPaid(tontine)) {
+    throw new ForbiddenOperationError("Tous les membres n'ont pas encore versé leur cotisation.");
+  }
+  const toSelf = tontine.beneficiaryId === SELF_MEMBER_ID;
+  const pot = tontinePot(tontine);
   context.set((state) => ({
-    available: state.available + tontinePot(tontine),
+    available: toSelf ? state.available + pot : state.available,
     tontines: advanceRound(state.tontines, tontineId),
   }));
 }
 
 /**
- * Transfère un montant du solde disponible vers un autre membre de la tontine.
+ * Ajoute un membre à une tontine préparée, tant que le quota n'est pas atteint.
  * @param context Accès au store.
- * @param input Tontine, destinataire et montant.
+ * @param tontineId Tontine concernée.
+ * @throws {ForbiddenOperationError} si la tontine est lancée ou déjà complète.
  */
-function transferToMember(context: PortfolioContext, input: TransferToMemberInput): void {
-  const tontine = requireTontine(context.get().tontines, input.tontineId);
-  requirePositive(input.amount);
-  requireFunds(context.get().available, input.amount);
-  requireOtherMember(tontine, input.memberId);
-  context.set((state) => ({ available: state.available - input.amount }));
+function addMember(context: PortfolioContext, tontineId: string): void {
+  const tontine = requireTontine(context.get().tontines, tontineId);
+  requireAdmin(tontine);
+  if (tontine.state !== "PENDING") {
+    throw new ForbiddenOperationError("Cette tontine est déjà lancée.");
+  }
+  if (hasReachedQuota(tontine)) {
+    throw new ForbiddenOperationError("La tontine a déjà tous ses membres.");
+  }
+  const member = buildInvitedMember(tontine.members.length - 1);
+  context.set((state) => ({ tontines: appendTontineMember(state.tontines, tontineId, member) }));
 }
 
 /**
@@ -243,10 +272,10 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...INITIAL_PORTFOLIO,
     createTontine: (input) => createTontine(context, input),
     createCard: (input) => createCard(context, input),
+    startTontine: (id) => startTontine(context, id),
     contributeTontine: (id) => contributeTontine(context, id),
-    withdrawTontine: (id) => withdrawTontine(context, id),
-    transferToMember: (tontineId, memberId, amount) =>
-      transferToMember(context, { tontineId, memberId, amount }),
+    confirmRound: (id) => confirmRound(context, id),
+    addMember: (id) => addMember(context, id),
     inviteMember: (id) => inviteMember(context, id),
     removeMember: (tontineId, memberId) => removeMember(context, tontineId, memberId),
     contributeCard: (id) => contributeCard(context, id),

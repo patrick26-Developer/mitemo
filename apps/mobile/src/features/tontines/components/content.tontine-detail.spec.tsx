@@ -8,7 +8,7 @@ import { TontineDetailContent } from "./content.tontine-detail";
 
 describe("TontineDetailContent", () => {
   it("montre les outils d'administration à l'administrateur", async () => {
-    const tontine = makeTontine();
+    const tontine = makeTontine({ state: "PENDING" });
     usePortfolioStore.setState({ available: 20_000n, tontines: [tontine], cards: [] });
     await renderWithSafeArea(<TontineDetailContent item={tontine} />);
 

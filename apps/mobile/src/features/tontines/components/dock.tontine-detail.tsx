@@ -1,21 +1,24 @@
 import { useState } from "react";
 
-import { ActionsDock } from "../../../shared/components/macros/dock.actions";
 import type { DockAction } from "../../../shared/components/macros/dock.actions";
+import { FloatDock } from "../../../shared/components/macros/dock.float";
 import { ConfirmSheet } from "../../../shared/components/macros/sheet.confirm";
 import type { ConfirmSheetContent } from "../../../shared/components/macros/sheet.confirm";
-import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { canPayContribution, isTontineBeneficiary } from "../../../shared/member/model.portfolio";
+import {
+  canConfirmRound,
+  canPayContribution,
+  hasReachedQuota,
+  isTontineAdmin,
+} from "../../../shared/member/model.portfolio";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
-import { TontineTransferSheet } from "./sheet.tontine-transfer";
 
-/** Confirmation affichée avant de recevoir la cagnotte d'un tour. */
-const WITHDRAW_CONFIRM: ConfirmSheetContent = {
-  title: "Recevoir la cagnotte ?",
+/** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
+const CONFIRM_ROUND: ConfirmSheetContent = {
+  title: "Confirmer la restourne ?",
   message:
-    "La cagnotte du tour sera versée sur votre solde disponible et le tour passera au suivant.",
-  confirmLabel: "Recevoir",
+    "La cagnotte sera distribuée automatiquement au membre dont c'est le tour, puis le tour suivant commencera.",
+  confirmLabel: "Confirmer",
 };
 
 /** Props du dock d'une tontine. */
@@ -25,59 +28,54 @@ export interface TontineDetailDockProps {
 }
 
 /**
- * Choisit l'action principale d'une tontine : recevoir la cagnotte quand le
- * membre en est le bénéficiaire, cotiser quand sa part du tour est due.
+ * Choisit l'action flottante d'une tontine : réunir les membres puis lancer la
+ * tontine, confirmer la restourne quand tout le monde a versé, ou cotiser.
  * @param item Tontine affichée.
- * @param onContribute Action de cotisation.
- * @param onWithdraw Ouverture de la confirmation de réception.
- * @returns L'action principale, ou `null` quand aucune n'est possible.
+ * @param actions Actions disponibles.
+ * @param askConfirm Ouverture de la confirmation de restourne.
+ * @returns L'action à proposer, ou `null` quand aucune n'est possible.
  */
 function primaryAction(
   item: Tontine,
-  onContribute: () => void,
-  onWithdraw: () => void,
+  actions: TontineActionsState,
+  askConfirm: () => void,
 ): DockAction | null {
+  if (item.state === "PENDING") {
+    if (!isTontineAdmin(item)) return null;
+    if (!hasReachedQuota(item)) return { label: "Ajouter un membre", onPress: actions.addMember };
+    return { label: "Activer la restourne", onPress: actions.start };
+  }
   if (item.state !== "ACTIVE") return null;
-  if (isTontineBeneficiary(item)) return { label: "Retirer la cagnotte", onPress: onWithdraw };
-  if (!canPayContribution(item)) return null;
+  if (canConfirmRound(item)) return { label: "Confirmer la restourne", onPress: askConfirm };
+  if (canPayContribution(item)) return { label: "Continuer", onPress: actions.contribute };
 
-  return { label: `Cotiser ${formatAmount(item.contribution)} FCFA`, onPress: onContribute };
+  return null;
 }
 
 /**
- * Pose les actions d'une tontine dans le dock de l'écran, avec la confirmation
- * de réception de la cagnotte et la feuille de transfert à un membre.
+ * Pose l'action d'une tontine en bas de l'écran, sans fond, et la confirmation
+ * de restourne. Aucun retrait ni transfert : la distribution est automatique.
  * @param props Tontine affichée et actions disponibles.
- * @returns Le dock et ses feuilles.
+ * @returns Le dock flottant et sa confirmation.
  */
 export function TontineDetailDock(props: TontineDetailDockProps) {
   const { item, actions } = props;
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
-
-  const confirmWithdraw = () => {
-    setConfirmOpen(false);
-    actions.withdraw();
-  };
 
   return (
     <>
-      <ActionsDock
-        primary={primaryAction(item, actions.contribute, () => setConfirmOpen(true))}
-        secondary={{ label: "Transférer", onPress: () => setTransferOpen(true) }}
+      <FloatDock
+        action={primaryAction(item, actions, () => setConfirmOpen(true))}
         notice={actions.feedback}
       />
       <ConfirmSheet
-        content={WITHDRAW_CONFIRM}
+        content={CONFIRM_ROUND}
         visible={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        onConfirm={confirmWithdraw}
-      />
-      <TontineTransferSheet
-        visible={transferOpen}
-        item={item}
-        onClose={() => setTransferOpen(false)}
-        onTransfer={actions.transfer}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          actions.confirm();
+        }}
       />
     </>
   );

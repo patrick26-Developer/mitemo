@@ -6,6 +6,9 @@ import { renderWithSafeArea } from "../../../shared/testing/util.render-with-saf
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontineDetailDock } from "./dock.tontine-detail";
 
+/** Montant de la cotisation de la tontine de test, en FCFA. */
+const CONTRIBUTION = 5_000;
+
 /**
  * Construit les actions d'une tontine pour les tests.
  * @param over Actions à remplacer.
@@ -14,58 +17,86 @@ import { TontineDetailDock } from "./dock.tontine-detail";
 function makeActions(over: Partial<TontineActionsState> = {}): TontineActionsState {
   return {
     feedback: null,
+    addMember: jest.fn(),
+    start: jest.fn(),
     contribute: jest.fn(),
-    withdraw: jest.fn(),
+    confirm: jest.fn(),
     invite: jest.fn(),
     remove: jest.fn(),
-    transfer: jest.fn(() => true),
     ...over,
   };
 }
+
+/** Tous les membres ont réglé leur cotisation du tour. */
+const ALL_PAID = [
+  makeMember(SELF_MEMBER_ID, "ADMIN", true),
+  makeMember("m2", "MEMBRE", true),
+  makeMember("m3", "MEMBRE", true),
+];
 
 describe("TontineDetailDock", () => {
   it("propose de cotiser quand la cotisation est due", async () => {
     const actions = makeActions();
     await renderWithSafeArea(<TontineDetailDock item={makeTontine()} actions={actions} />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Cotiser 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
     expect(actions.contribute).toHaveBeenCalledTimes(1);
   });
 
-  it("ne propose pas de cotiser quand la cotisation est réglée", async () => {
+  it("ne propose rien quand le membre a payé mais que les autres non", async () => {
     await renderWithSafeArea(
       <TontineDetailDock
         item={makeTontine({
-          members: [makeMember(SELF_MEMBER_ID, "ADMIN", true), makeMember("m2", "MEMBRE", true)],
+          members: [makeMember(SELF_MEMBER_ID, "ADMIN", true), makeMember("m2", "MEMBRE")],
         })}
         actions={makeActions()}
       />,
     );
 
-    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Continuer" })).not.toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 
-  it("demande confirmation avant de recevoir la cagnotte", async () => {
+  it("demande confirmation avant de distribuer la cagnotte", async () => {
     const actions = makeActions();
     await renderWithSafeArea(
-      <TontineDetailDock item={makeTontine({ beneficiaryId: SELF_MEMBER_ID })} actions={actions} />,
+      <TontineDetailDock item={makeTontine({ members: ALL_PAID })} actions={actions} />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Retirer la cagnotte" }));
-    expect(await screen.findByRole("header", { name: "Recevoir la cagnotte ?" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Confirmer la restourne" }));
+    expect(
+      await screen.findByRole("header", { name: "Confirmer la restourne ?" }),
+    ).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Recevoir" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
 
-    expect(actions.withdraw).toHaveBeenCalledTimes(1);
+    expect(actions.confirm).toHaveBeenCalledTimes(1);
   });
 
-  it("ouvre la feuille de transfert depuis l'action secondaire", async () => {
-    await renderWithSafeArea(<TontineDetailDock item={makeTontine()} actions={makeActions()} />);
+  it("propose d'ajouter un membre tant que le quota n'est pas atteint", async () => {
+    const actions = makeActions();
+    const pending = makeTontine({
+      state: "PENDING",
+      totalRounds: 3,
+      members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
+    });
+    await renderWithSafeArea(<TontineDetailDock item={pending} actions={actions} />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Transférer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Ajouter un membre" }));
 
-    expect(await screen.findByRole("header", { name: "Transférer à un membre" })).toBeOnTheScreen();
+    expect(actions.addMember).toHaveBeenCalledTimes(1);
+  });
+
+  it("propose d'activer la restourne quand tous les membres sont réunis", async () => {
+    const actions = makeActions();
+    await renderWithSafeArea(
+      <TontineDetailDock item={makeTontine({ state: "PENDING" })} actions={actions} />,
+    );
+
+    await fireEvent.press(screen.getByRole("button", { name: "Activer la restourne" }));
+
+    expect(actions.start).toHaveBeenCalledTimes(1);
   });
 
   it("affiche le retour d'opération au-dessus des actions", async () => {
@@ -73,11 +104,11 @@ describe("TontineDetailDock", () => {
       <TontineDetailDock
         item={makeTontine()}
         actions={makeActions({
-          feedback: { kind: "success", message: "Cotisation réglée pour ce tour." },
+          feedback: { kind: "success", message: `Cotisation de ${CONTRIBUTION} FCFA réglée.` },
         })}
       />,
     );
 
-    expect(screen.getByText("Cotisation réglée pour ce tour.")).toBeOnTheScreen();
+    expect(screen.getByText(`Cotisation de ${CONTRIBUTION} FCFA réglée.`)).toBeOnTheScreen();
   });
 });

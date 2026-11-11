@@ -10,4 +10,12 @@ describe("TontineCycleCard", () => {
     expect(screen.getByText("2 sur 3")).toBeOnTheScreen();
     expect(screen.getByText("Membre m2")).toBeOnTheScreen();
   });
+
+  it("présente une tontine qui attend ses membres", async () => {
+    await render(<TontineCycleCard item={makeTontine({ state: "PENDING", members: [] })} />);
+
+    expect(screen.getByText("En préparation")).toBeOnTheScreen();
+    expect(screen.getByText(/0 sur\s+3/)).toBeOnTheScreen();
+    expect(screen.queryByText("Bénéficiaire")).toBeNull();
+  });
 });

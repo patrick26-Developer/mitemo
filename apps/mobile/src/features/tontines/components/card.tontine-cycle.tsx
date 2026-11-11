@@ -17,6 +17,17 @@ export interface TontineCycleCardProps {
  */
 export function TontineCycleCard(props: TontineCycleCardProps) {
   const { item } = props;
+  if (item.state === "PENDING") {
+    return (
+      <View className="gap-3 rounded-[18px] border border-card-border p-4">
+        <Text className="text-[16px] font-medium text-ink">En préparation</Text>
+        <Text className="text-[13px] leading-5 text-muted">
+          La tontine démarre quand tous les membres sont réunis : {item.members.length} sur{" "}
+          {item.totalRounds} pour l&apos;instant.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="gap-3 rounded-[18px] border border-card-border p-4">
