@@ -26,6 +26,14 @@ describe("SignUpScreen", () => {
     useAuthDraft.setState(INITIAL_AUTH_DRAFT);
   });
 
+  it("indique la première des deux étapes de l'inscription", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 1 sur 2 : Votre identité" }),
+    ).toBeOnTheScreen();
+  });
+
   it("affiche les champs d'identité et de profession", async () => {
     await renderWithSafeArea(<SignUpScreen />);
 

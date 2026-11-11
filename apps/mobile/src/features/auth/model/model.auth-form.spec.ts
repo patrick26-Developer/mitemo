@@ -1,5 +1,6 @@
 import {
   PIN_LENGTH,
+  SIGN_UP_STEPS,
   formatPhoneInput,
   isValidPin,
   isValidPhoneDigits,
@@ -66,5 +67,11 @@ describe("signUpError", () => {
 
   it("accepte une identité complète", () => {
     expect(signUpError(valid)).toBe("");
+  });
+});
+
+describe("SIGN_UP_STEPS", () => {
+  it("découpe l'inscription en deux étapes : l'identité puis le code", () => {
+    expect(SIGN_UP_STEPS).toEqual(["Votre identité", "Votre code PIN"]);
   });
 });

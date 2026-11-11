@@ -116,6 +116,24 @@ describe("PinScreen", () => {
     expect(useSessionStore.getState().signedIn).toBe(false);
   });
 
+  it("indique la deuxième étape de l'inscription", async () => {
+    useAuthDraft
+      .getState()
+      .startSignUp({ firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" }, PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 2 sur 2 : Votre code PIN" }),
+    ).toBeOnTheScreen();
+  });
+
+  it("n'affiche pas d'étape à la connexion", async () => {
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
+
   it("enregistre l'identité à la fin d'une inscription", async () => {
     useAuthDraft
       .getState()

@@ -15,6 +15,9 @@ export const PHONE_DIGITS = 9;
 /** Nombre de chiffres du code PIN. */
 export const PIN_LENGTH = 4;
 
+/** Titres des étapes de l'inscription : l'identité, puis le choix du code PIN. */
+export const SIGN_UP_STEPS = ["Votre identité", "Votre code PIN"] as const;
+
 /** Saisie de la première étape d'inscription. */
 export interface SignUpInput {
   readonly firstName: string;

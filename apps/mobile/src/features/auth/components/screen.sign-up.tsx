@@ -1,7 +1,9 @@
 import { router } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { useSignUpForm } from "../hooks/hook.sign-up-form";
+import { SIGN_UP_STEPS } from "../model/model.auth-form";
 import { AUTH_ENTRANCE_DELAY, AUTH_ENTRANCE_DURATION } from "../model/model.auth-theme";
 import { AuthErrorText } from "./text.auth-error";
 import { AuthFooterLink } from "./link.auth-footer";
@@ -27,6 +29,7 @@ export function SignUpScreen() {
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.body).duration(AUTH_ENTRANCE_DURATION)}
       >
+        <StepIndicator index={0} total={SIGN_UP_STEPS.length} title={SIGN_UP_STEPS[0]} />
         <SignUpFields form={form} />
         <AuthErrorText message={form.message} />
       </Animated.View>

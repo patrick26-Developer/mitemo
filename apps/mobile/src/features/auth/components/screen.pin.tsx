@@ -1,8 +1,10 @@
 import { Alert } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { usePinEntry } from "../hooks/hook.pin-entry";
 import { usePinSession } from "../hooks/hook.pin-session";
+import { SIGN_UP_STEPS } from "../model/model.auth-form";
 import { AUTH_ENTRANCE_DELAY, AUTH_ENTRANCE_DURATION } from "../model/model.auth-theme";
 import { AuthErrorText } from "./text.auth-error";
 import { AuthHeading } from "./heading.auth";
@@ -35,6 +37,9 @@ export function PinScreen() {
   return (
     <AuthLayout>
       <AuthHeading title="Code PIN" subtitle={subtitle} onBack={back} />
+      {isSignUp ? (
+        <StepIndicator index={1} total={SIGN_UP_STEPS.length} title={SIGN_UP_STEPS[1]} />
+      ) : null}
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.body).duration(AUTH_ENTRANCE_DURATION)}
       >
