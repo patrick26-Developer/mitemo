@@ -24,7 +24,12 @@ pnpm --filter mobile android    # émulateur ou appareil Android
 | `pnpm --filter mobile test:ci`   | Tests avec seuils de couverture                         |
 | `pnpm --filter mobile typecheck` | Vérification TypeScript                                 |
 
-Le build natif (EAS) n'est pas encore configuré.
+Les profils de build EAS sont décrits dans `eas.json` (`development`, `preview`, `production`).
+Avant le premier build, il reste deux décisions hors du code : lier le projet à un compte Expo
+(`pnpm dlx eas-cli init`) et fixer les identifiants `ios.bundleIdentifier` et `android.package`
+dans `app.json`.
+
+Variables d'environnement : voir `.env.example`.
 
 ## Organisation
 
@@ -37,10 +42,41 @@ src/
     api/               appels à l'API, typés par @mitemo/contracts
     model/             logique pure, testée sans rendu
     index.ts           seule porte d'entrée de la feature
-  shared/              briques transverses : components/, format/, hooks/, theme/, testing/
+  shared/              briques transverses : components/, format/, hooks/, member/, session/, theme/, testing/
 ```
 
-Feature existante : `home` (écran d'accueil).
+Features : `auth` (inscription, connexion, code PIN), `home` (accueil), `tontines`, `savings`
+(cartes de pointage), `search` (recherche globale) et `profile`.
+
+## Session et code PIN
+
+- La session (`src/shared/session/store.session.ts`) vit en mémoire seulement : chaque ouverture de
+  l'application redemande le code PIN.
+- `app/_layout.tsx` protège les routes avec `Stack.Protected` : sans session, seul `(auth)` est
+  accessible ; avec une session, `(auth)` ne l'est plus. Ouvrir ou fermer la session suffit à
+  changer d'espace.
+- En attendant la route d'authentification de l'API, le code est vérifié sur l'appareil : seule
+  son empreinte SHA-256 salée est conservée, dans le trousseau chiffré du système
+  (`expo-secure-store`, Keychain ou Keystore). Le port `CredentialVault` isole ce stockage pour
+  qu'il soit remplacé par l'API sans toucher aux écrans.
+- Un code à quatre chiffres reste devinable si l'on peut lire le trousseau : la protection repose
+  sur le chiffrement du système, pas sur l'empreinte.
+
+## Données de démonstration
+
+Le portefeuille (solde, tontines, cartes) et les moyens de paiement sont encore des données
+locales de démonstration (`src/shared/demo/`) : aucune route de l'API ne les sert pour l'instant.
+Les règles de solde du client (`model.portfolio-*`) ne valident que la saisie ; quand l'API
+existera, c'est elle qui fera foi.
+
+## Tests de bout en bout (Maestro)
+
+Les parcours critiques sont dans `.maestro/`. Ils demandent un build installé sur un émulateur
+ou un appareil, et l'identifiant de l'application :
+
+```bash
+maestro test -e APP_ID=<identifiant> apps/mobile/.maestro
+```
 
 ## Style (Uniwind)
 
