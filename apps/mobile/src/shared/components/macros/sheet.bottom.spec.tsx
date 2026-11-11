@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react-native";
 import { Dimensions, Platform, Text } from "react-native";
 
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
-import { SHEET_MAX_HEIGHT_RATIO, SHEET_MIN_HEIGHT_RATIO } from "../../model/model.sheet-layout";
+import { SHEET_MAX_HEIGHT_RATIO } from "../../model/model.sheet-layout";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { BottomSheet } from "./sheet.bottom";
 
@@ -71,7 +71,7 @@ describe("BottomSheet", () => {
     );
 
     expect(screen.getByTestId("bottom-sheet")).toHaveStyle({
-      paddingBottom: 340,
+      paddingBottom: 320,
       marginBottom: 8,
     });
   });
@@ -87,12 +87,12 @@ describe("BottomSheet", () => {
     );
 
     expect(screen.getByTestId("bottom-sheet")).toHaveStyle({
-      paddingBottom: 374,
+      paddingBottom: 354,
       marginBottom: 8,
     });
   });
 
-  it("borne la hauteur de la feuille entre un minimum et un maximum", async () => {
+  it("colle la feuille à son contenu et borne seulement sa hauteur maximale", async () => {
     await renderWithSafeArea(
       <BottomSheet visible title="Mes informations" onClose={jest.fn()}>
         <Text>Contenu de la feuille</Text>
@@ -102,7 +102,8 @@ describe("BottomSheet", () => {
     const screenHeight = Dimensions.get("window").height;
 
     expect(screen.getByTestId("bottom-sheet")).toHaveStyle({
-      minHeight: screenHeight * SHEET_MIN_HEIGHT_RATIO,
+      minHeight: 0,
+      paddingBottom: 34,
       maxHeight: screenHeight * SHEET_MAX_HEIGHT_RATIO,
     });
   });

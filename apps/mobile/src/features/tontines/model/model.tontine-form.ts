@@ -9,6 +9,7 @@ import { parseCountInput } from "../../../shared/model/model.count-input";
 import {
   amountSchema,
   countSchema,
+  isValidNameInput,
   nameSchema,
   parseWithSchema,
 } from "../../../shared/model/model.form-schema";
@@ -75,6 +76,14 @@ export interface TontineRecap {
   readonly pot: bigint | null;
   /** Fréquence complète, `null` quand l'intervalle est invalide. */
   readonly frequency: TontineFrequency | null;
+}
+
+/** Champs à signaler en rouge après une validation refusée. */
+export interface TontineInvalidFields {
+  readonly name: boolean;
+  readonly contribution: boolean;
+  readonly participants: boolean;
+  readonly rounds: boolean;
 }
 
 /** Nombre maximal de participants à une tontine créée depuis le mobile. */
@@ -172,6 +181,23 @@ export function tontineRecap(form: TontineFormState): TontineRecap {
     cadence === undefined ? null : { unit: cadence.unit, interval: cadence.interval };
 
   return { pot, frequency };
+}
+
+/**
+ * Repère les champs d'une tontine qui ne respectent pas leur règle.
+ * @param form Champs saisis.
+ * @returns Vrai pour chaque champ à signaler en rouge.
+ */
+export function tontineInvalidFields(form: TontineFormState): TontineInvalidFields {
+  const participants = parseCountInput(form.participants, MAX_PARTICIPANTS);
+  const rounds = parseCountInput(form.rounds, MAX_ROUNDS);
+
+  return {
+    name: !isValidNameInput(form.name),
+    contribution: parseAmountInput(form.contribution) === null,
+    participants: participants === null || participants < 2,
+    rounds: rounds === null || (participants !== null && rounds < participants),
+  };
 }
 
 /**

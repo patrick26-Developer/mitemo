@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { TextInputProps } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
+import { fieldChrome } from "../../../shared/theme/theme.field";
 import { AUTH_COLORS } from "../model/model.auth-theme";
 import type { AuthFieldIconKind } from "./icon.auth-field";
 import { AuthFieldIcon } from "./icon.auth-field";
@@ -55,6 +56,8 @@ export interface AuthTextFieldProps {
   readonly onChangeText: (value: string) => void;
   /** Délai avant le dessin de l'icône, en millisecondes. */
   readonly iconDelay?: number;
+  /** Signale une saisie refusée : bordure et anneau rouges. */
+  readonly invalid?: boolean;
 }
 
 /**
@@ -63,14 +66,14 @@ export interface AuthTextFieldProps {
  * @returns Le champ texte complet.
  */
 export function AuthTextField(props: AuthTextFieldProps) {
-  const { kind, value, onChangeText, iconDelay = 0 } = props;
+  const { kind, value, onChangeText, iconDelay = 0, invalid = false } = props;
   const content = FIELD_CONTENT[kind];
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{content.label}</Text>
-      <View style={[styles.field, focused && styles.fieldFocused]}>
+      <View testID={`auth-field-${kind}`} style={[styles.field, fieldChrome({ focused, invalid })]}>
         <AuthFieldIcon
           kind={content.icon}
           color={focused ? AUTH_COLORS.button : AUTH_COLORS.muted}
@@ -108,11 +111,8 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: AUTH_COLORS.border,
-    backgroundColor: AUTH_COLORS.field,
     paddingLeft: 14,
   },
-  fieldFocused: { borderColor: AUTH_COLORS.button, borderWidth: 1.5 },
   input: {
     flex: 1,
     height: "100%",

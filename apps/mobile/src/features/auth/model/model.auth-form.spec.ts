@@ -6,6 +6,7 @@ import {
   isValidPhoneDigits,
   keepPhoneDigits,
   signUpError,
+  signUpInvalidFields,
   toInternationalPhone,
 } from "./model.auth-form";
 
@@ -67,6 +68,30 @@ describe("signUpError", () => {
 
   it("accepte une identité complète", () => {
     expect(signUpError(valid)).toBe("");
+  });
+});
+
+describe("signUpInvalidFields", () => {
+  it("signale chaque champ qui ne respecte pas sa règle", () => {
+    expect(
+      signUpInvalidFields({
+        firstName: "A",
+        lastName: "Mbemba",
+        occupation: " ",
+        digits: "123",
+      }),
+    ).toEqual({ firstName: true, lastName: false, occupation: true, digits: true });
+  });
+
+  it("ne signale aucun champ d'une saisie complète", () => {
+    expect(
+      signUpInvalidFields({
+        firstName: "Aimée",
+        lastName: "Mbemba",
+        occupation: "Commerçante",
+        digits: "065706622",
+      }),
+    ).toEqual({ firstName: false, lastName: false, occupation: false, digits: false });
   });
 });
 

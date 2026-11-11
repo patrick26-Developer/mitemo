@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
 import { useSheetDrag } from "../../hooks/hook.sheet-drag";
 import type { SheetLayout } from "../../model/model.sheet-layout";
-import { computeSheetLayout } from "../../model/model.sheet-layout";
+import { SHEET_BOTTOM_PADDING, computeSheetLayout } from "../../model/model.sheet-layout";
 import { PALETTE } from "../../theme/theme.palette";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
@@ -54,7 +54,6 @@ export function BottomSheet(props: BottomSheetProps) {
     bottomInset: insets.bottom,
     screenHeight,
   });
-
   useEffect(() => {
     if (!visible) {
       translateY.setValue(SHEET_OPEN_OFFSET);
@@ -123,9 +122,9 @@ function SheetHeader(props: SheetHeaderProps) {
           accessibilityLabel="Fermer"
           hitSlop={8}
           onPress={onClose}
-          className="h-9 w-9 items-center justify-center rounded-full bg-brand-veil"
+          className="h-9 w-9 items-center justify-center rounded-full bg-field"
         >
-          <X size={18} color={PALETTE.brand} />
+          <X size={18} color={PALETTE.muted} />
         </Pressable>
       </View>
     </View>
@@ -142,6 +141,13 @@ function SheetHeader(props: SheetHeaderProps) {
 function SheetSurface(props: SheetSurfaceProps) {
   const { translateY, title, onClose, layout, children } = props;
   const panHandlers = useSheetDrag(translateY, onClose);
+  // Une feuille colle à son contenu : ni hauteur minimale, ni rembourrage bas,
+  // seuls le clavier et la zone sûre réservent de la place.
+  const contentLayout = {
+    ...layout,
+    minHeight: 0,
+    paddingBottom: Math.max(0, layout.paddingBottom - SHEET_BOTTOM_PADDING),
+  };
 
   return (
     <Animated.View
@@ -149,13 +155,17 @@ function SheetSurface(props: SheetSurfaceProps) {
       accessibilityViewIsModal
       importantForAccessibility="yes"
       className="border-card-border"
-      style={[styles.surface, computeSheetCardStyle(layout), { transform: [{ translateY }] }]}
+      style={[
+        styles.surface,
+        computeSheetCardStyle(contentLayout),
+        { transform: [{ translateY }] },
+      ]}
     >
       <SheetHeader title={title} onClose={onClose} dragHandlers={panHandlers} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="gap-4 pb-2"
+        contentContainerClassName="gap-4"
       >
         {children}
       </ScrollView>

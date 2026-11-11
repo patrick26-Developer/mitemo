@@ -12,10 +12,19 @@ describe("StepIndicator", () => {
     expect(screen.getByText("L'essentiel")).toBeOnTheScreen();
   });
 
-  it("dessine un segment par étape, ceux déjà atteints remplis", async () => {
+  it("numérote les étapes et relie les pastilles", async () => {
     await render(<StepIndicator index={1} total={3} title="Le cycle" />);
 
-    expect(screen.getAllByTestId("step-segment-done")).toHaveLength(2);
-    expect(screen.getAllByTestId("step-segment-todo")).toHaveLength(1);
+    expect(screen.getByText("1")).toBeOnTheScreen();
+    expect(screen.getByText("2")).toBeOnTheScreen();
+    expect(screen.getByText("3")).toBeOnTheScreen();
+    expect(screen.getAllByTestId("step-connector")).toHaveLength(2);
+  });
+
+  it("remplit les pastilles déjà atteintes", async () => {
+    await render(<StepIndicator index={1} total={3} title="Le cycle" />);
+
+    expect(screen.getAllByTestId("step-marker-done")).toHaveLength(2);
+    expect(screen.getAllByTestId("step-marker-todo")).toHaveLength(1);
   });
 });

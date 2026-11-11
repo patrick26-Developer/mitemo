@@ -53,6 +53,8 @@ export function TontineTransferSheet(props: TontineTransferSheetProps) {
   const { form, error, update, submit } = useTontineTransfer({ onTransfer, onClose });
   const recipients = item.members.filter((member) => member.id !== SELF_MEMBER_ID);
   const recipient = item.members.find((member) => member.id === form.memberId);
+  const recap = transferRecap(form);
+  const invalidAmount = error !== null && form.memberId !== "" && recap.amount === null;
 
   return (
     <BottomSheet visible={visible} title="Transférer à un membre" onClose={onClose}>
@@ -67,8 +69,9 @@ export function TontineTransferSheet(props: TontineTransferSheetProps) {
         onChangeText={(amount) => update({ amount })}
         keyboardType="number-pad"
         placeholder="5000"
+        invalid={invalidAmount}
       />
-      <SheetRecap title="Transfert" rows={recapRows(recipient, transferRecap(form))} />
+      <SheetRecap title="Transfert" rows={recapRows(recipient, recap)} />
       {error === null ? null : <FeedbackBanner kind="error" message={error} />}
       <SheetPrimaryButton label="Transférer" onPress={submit} />
     </BottomSheet>

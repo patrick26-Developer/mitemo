@@ -9,6 +9,7 @@ import { parseFrenchDateInput } from "../../../shared/model/model.date-input";
 import {
   amountSchema,
   countSchema,
+  isValidNameInput,
   nameSchema,
   parseWithSchema,
 } from "../../../shared/model/model.form-schema";
@@ -33,6 +34,14 @@ export interface SavingsRecap {
   readonly goal: bigint | null;
   /** Échéance au format ISO, `null` quand la date saisie est invalide. */
   readonly deadline: string | null;
+}
+
+/** Champs à signaler en rouge après une validation refusée. */
+export interface SavingsInvalidFields {
+  readonly name: boolean;
+  readonly markerAmount: boolean;
+  readonly markersTotal: boolean;
+  readonly deadline: boolean;
 }
 
 /** Nombre maximal de marqueurs d'une carte créée depuis le mobile. */
@@ -137,6 +146,20 @@ export function parseSavingsForm(form: SavingsFormState, now: Date): FormResult<
     tontineId,
     description: `${name} : ${markersTotal} marqueurs de ${formatAmount(markerAmount)} FCFA, échéance le ${formatLongDate(deadline)}.`,
   });
+}
+
+/**
+ * Repère les champs d'une carte qui ne respectent pas leur règle.
+ * @param form Champs saisis.
+ * @returns Vrai pour chaque champ à signaler en rouge.
+ */
+export function savingsInvalidFields(form: SavingsFormState): SavingsInvalidFields {
+  return {
+    name: !isValidNameInput(form.name),
+    markerAmount: parseAmountInput(form.markerAmount) === null,
+    markersTotal: parseCountInput(form.markersTotal, MAX_MARKERS) === null,
+    deadline: parseFrenchDateInput(form.deadline) === null,
+  };
 }
 
 /**

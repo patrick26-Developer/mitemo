@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Text, View } from "react-native";
 
 /** Props de l'indicateur d'étape. */
@@ -9,16 +10,59 @@ export interface StepIndicatorProps {
   readonly title: string;
 }
 
+/** Props des pastilles numérotées d'un formulaire. */
+interface StepMarkersProps {
+  readonly index: number;
+  readonly total: number;
+}
+
 /**
- * Indique où en est le membre dans un formulaire en plusieurs étapes : un
- * segment par étape, le numéro et le titre de l'étape courante.
+ * Dessine une pastille numérotée par étape, reliées par un filet : [1]---[2].
+ * @param props Étape courante et nombre d'étapes.
+ * @returns La ligne des étapes.
+ */
+function StepMarkers(props: StepMarkersProps) {
+  const { index, total } = props;
+  const steps = Array.from({ length: total }, (_, step) => step);
+
+  return (
+    <View className="flex-row items-center">
+      {steps.map((step) => (
+        <Fragment key={`step-${step}`}>
+          {step > 0 ? (
+            <View
+              className={`h-px flex-1 ${step <= index ? "bg-brand" : "bg-hairline"}`}
+              testID="step-connector"
+            />
+          ) : null}
+          <View
+            testID={step <= index ? "step-marker-done" : "step-marker-todo"}
+            className={`h-7 w-7 items-center justify-center rounded-full ${
+              step <= index ? "bg-brand" : "bg-field"
+            }`}
+          >
+            <Text
+              className={`text-[12px] font-semibold ${step <= index ? "text-white" : "text-muted"}`}
+            >
+              {step + 1}
+            </Text>
+          </View>
+        </Fragment>
+      ))}
+    </View>
+  );
+}
+
+/**
+ * Indique où en est le membre dans un formulaire en plusieurs étapes : une
+ * pastille numérotée par étape, reliée par un filet, puis le titre et la
+ * position de l'étape courante.
  * @param props Étape courante, nombre d'étapes et titre.
  * @returns L'indicateur d'étape.
  */
 export function StepIndicator(props: StepIndicatorProps) {
   const { index, total, title } = props;
   const position = `Étape ${index + 1} sur ${total}`;
-  const segments = Array.from({ length: total }, (_, step) => step <= index);
 
   return (
     <View
@@ -28,15 +72,7 @@ export function StepIndicator(props: StepIndicatorProps) {
       accessibilityValue={{ min: 1, max: total, now: index + 1 }}
       className="gap-2"
     >
-      <View className="flex-row gap-1.5">
-        {segments.map((done, step) => (
-          <View
-            key={`step-${step}`}
-            testID={done ? "step-segment-done" : "step-segment-todo"}
-            className={`h-1.5 flex-1 rounded-full ${done ? "bg-brand" : "bg-brand-veil"}`}
-          />
-        ))}
-      </View>
+      <StepMarkers index={index} total={total} />
       <View className="flex-row items-baseline justify-between">
         <Text className="text-[16px] font-semibold text-ink">{title}</Text>
         <Text className="text-[12px] text-muted">{position}</Text>

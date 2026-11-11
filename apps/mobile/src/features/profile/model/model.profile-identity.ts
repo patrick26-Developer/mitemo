@@ -7,6 +7,28 @@ export interface ProfileIdentityInput {
   readonly occupation: string;
 }
 
+/** Champs d'identité à signaler après un enregistrement refusé. */
+export interface ProfileIdentityInvalidFields {
+  readonly firstName: boolean;
+  readonly lastName: boolean;
+  readonly occupation: boolean;
+}
+
+/**
+ * Repère les champs d'identité à signaler en rouge après un refus.
+ * @param input Prénom, nom et profession.
+ * @returns Vrai pour chaque champ qui ne respecte pas sa règle.
+ */
+export function profileIdentityInvalidFields(
+  input: ProfileIdentityInput,
+): ProfileIdentityInvalidFields {
+  return {
+    firstName: !isValidPersonName(input.firstName),
+    lastName: !isValidPersonName(input.lastName),
+    occupation: !isValidPersonName(input.occupation),
+  };
+}
+
 /**
  * Valide l'identité saisie dans le profil.
  * @param input Prénom, nom et profession.

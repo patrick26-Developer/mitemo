@@ -10,10 +10,15 @@ import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatFrequency } from "../../../shared/member/model.portfolio";
 import { useTontineCreate } from "../hooks/hook.tontine-create";
-import type { TontineFormState, TontineRecap } from "../model/model.tontine-form";
+import type {
+  TontineFormState,
+  TontineInvalidFields,
+  TontineRecap,
+} from "../model/model.tontine-form";
 import {
   TONTINE_CADENCE_OPTIONS,
   TONTINE_FORM_STEPS,
+  tontineInvalidFields,
   tontineRecap,
 } from "../model/model.tontine-form";
 
@@ -26,6 +31,7 @@ export interface TontineCreateSheetProps {
 /** Props des champs de la tontine en cours de saisie. */
 interface TontineCreateFieldsProps {
   readonly form: TontineFormState;
+  readonly invalid: TontineInvalidFields;
   readonly onChange: (patch: Partial<TontineFormState>) => void;
 }
 
@@ -35,7 +41,7 @@ interface TontineCreateFieldsProps {
  * @returns Les champs d'identité de la tontine.
  */
 function TontineEssentialsStep(props: TontineCreateFieldsProps) {
-  const { form, onChange } = props;
+  const { form, invalid, onChange } = props;
 
   return (
     <>
@@ -44,6 +50,7 @@ function TontineEssentialsStep(props: TontineCreateFieldsProps) {
         value={form.name}
         onChangeText={(name) => onChange({ name })}
         hint="Le nom que verront les membres."
+        invalid={invalid.name}
       />
       <SheetTextField
         label="Cotisation par tour (FCFA)"
@@ -52,6 +59,7 @@ function TontineEssentialsStep(props: TontineCreateFieldsProps) {
         keyboardType="number-pad"
         placeholder="5000"
         hint="Montant versé par chaque membre à chaque tour."
+        invalid={invalid.contribution}
       />
     </>
   );
@@ -99,7 +107,7 @@ function recapRows(recap: TontineRecap): readonly SheetRecapRow[] {
  * @returns Les champs du cycle et le récapitulatif.
  */
 function TontineParticipantsStep(props: TontineCreateFieldsProps) {
-  const { form, onChange } = props;
+  const { form, invalid, onChange } = props;
 
   return (
     <>
@@ -109,6 +117,7 @@ function TontineParticipantsStep(props: TontineCreateFieldsProps) {
         onChangeText={(participants) => onChange({ participants })}
         keyboardType="number-pad"
         hint="Vous inclus, entre 2 et 50."
+        invalid={invalid.participants}
       />
       <SheetTextField
         label="Tours"
@@ -116,6 +125,7 @@ function TontineParticipantsStep(props: TontineCreateFieldsProps) {
         onChangeText={(rounds) => onChange({ rounds })}
         keyboardType="number-pad"
         hint="Nombre de bénéficiaires sur le cycle."
+        invalid={invalid.rounds}
       />
       <SheetRecap title="Récapitulatif" rows={recapRows(tontineRecap(form))} />
     </>
@@ -134,6 +144,13 @@ const STEP_CONTENTS = [TontineEssentialsStep, TontineCadenceStep, TontinePartici
 export function TontineCreateSheet(props: TontineCreateSheetProps) {
   const { form, error, steps, update, next, back, close } = useTontineCreate(props.onClose);
   const StepContent = STEP_CONTENTS[steps.index] ?? TontineEssentialsStep;
+  const flags = tontineInvalidFields(form);
+  const invalid: TontineInvalidFields = {
+    name: error !== null && flags.name,
+    contribution: error !== null && flags.contribution,
+    participants: error !== null && flags.participants,
+    rounds: error !== null && flags.rounds,
+  };
 
   return (
     <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={close}>
@@ -142,7 +159,7 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
         total={steps.total}
         title={TONTINE_FORM_STEPS[steps.index] ?? ""}
       />
-      <StepContent form={form} onChange={update} />
+      <StepContent form={form} invalid={invalid} onChange={update} />
       {error === null ? null : <FeedbackBanner kind="error" message={error} />}
       <SheetStepsFooter
         isFirst={steps.isFirst}

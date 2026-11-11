@@ -3,6 +3,7 @@ import {
   TONTINE_CADENCE_OPTIONS,
   TONTINE_FORM_STEPS,
   parseTontineForm,
+  tontineInvalidFields,
   tontineRecap,
   tontineStepError,
 } from "./model.tontine-form";
@@ -144,6 +145,38 @@ describe("TONTINE_CADENCE_OPTIONS", () => {
       "Tous les 2 mois",
       "Tous les 3 mois",
     ]);
+  });
+});
+
+describe("tontineInvalidFields", () => {
+  it("ne signale aucun champ d'un formulaire valide", () => {
+    expect(tontineInvalidFields(VALID_FORM)).toEqual({
+      name: false,
+      contribution: false,
+      participants: false,
+      rounds: false,
+    });
+  });
+
+  it("signale les champs vides, mal saisis ou incohérents", () => {
+    expect(
+      tontineInvalidFields({
+        ...VALID_FORM,
+        name: "T",
+        contribution: "0",
+        participants: "1",
+        rounds: "0",
+      }),
+    ).toEqual({ name: true, contribution: true, participants: true, rounds: true });
+  });
+
+  it("signale des tours insuffisants pour les participants", () => {
+    expect(tontineInvalidFields({ ...VALID_FORM, rounds: "5" })).toEqual({
+      name: false,
+      contribution: false,
+      participants: false,
+      rounds: true,
+    });
   });
 });
 

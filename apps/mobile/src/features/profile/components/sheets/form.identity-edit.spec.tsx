@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../../shared/member/store.member";
 import { renderWithSafeArea } from "../../../../shared/testing/util.render-with-safe-area";
+import { FIELD_CHROME } from "../../../../shared/theme/theme.field";
 import { IdentityEditForm } from "./form.identity-edit";
 
 describe("IdentityEditForm", () => {
@@ -26,6 +27,10 @@ describe("IdentityEditForm", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
 
     expect(screen.getByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Prénom")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
     expect(onDone).not.toHaveBeenCalled();
   });
 

@@ -25,6 +25,17 @@ export interface CountRule {
 }
 
 /**
+ * Indique si un nom saisi respecte la longueur attendue, espaces retirés.
+ * @param text Nom saisi.
+ * @returns Vrai si le nom contient entre 3 et 60 caractères utiles.
+ */
+export function isValidNameInput(text: string): boolean {
+  const length = text.trim().length;
+
+  return length >= NAME_MIN_LENGTH && length <= NAME_MAX_LENGTH;
+}
+
+/**
  * Construit le schéma d'un nom obligatoire : espaces retirés, longueur bornée
  * entre 3 et 60 caractères.
  * @param emptyMessage Message affiché quand le nom est vide.

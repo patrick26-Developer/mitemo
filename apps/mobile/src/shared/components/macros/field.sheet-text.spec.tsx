@@ -1,6 +1,7 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen } from "@testing-library/react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
+import { FIELD_CHROME } from "../../theme/theme.field";
 import { SheetTextField } from "./field.sheet-text";
 
 describe("SheetTextField", () => {
@@ -17,5 +18,30 @@ describe("SheetTextField", () => {
     expect(screen.getByLabelText("Cotisation")).toBeOnTheScreen();
     expect(screen.getByDisplayValue("5000")).toBeOnTheScreen();
     expect(screen.getByText("Montant versé à chaque tour.")).toBeOnTheScreen();
+  });
+
+  it("dessine un anneau bleu au focus", async () => {
+    await renderWithSafeArea(
+      <SheetTextField label="Cotisation" value="" onChangeText={jest.fn()} />,
+    );
+
+    await fireEvent(screen.getByLabelText("Cotisation"), "focus");
+
+    expect(screen.getByLabelText("Cotisation")).toHaveStyle({
+      outlineWidth: 3,
+      outlineColor: FIELD_CHROME.focusRing,
+    });
+  });
+
+  it("dessine une bordure et un anneau rouges sur une saisie refusée", async () => {
+    await renderWithSafeArea(
+      <SheetTextField label="Cotisation" value="" onChangeText={jest.fn()} invalid />,
+    );
+
+    expect(screen.getByLabelText("Cotisation")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineWidth: 3,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
   });
 });

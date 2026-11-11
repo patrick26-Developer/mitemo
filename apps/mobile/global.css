@@ -26,6 +26,8 @@
   --color-danger: #b42318;
   /* Filet de séparation de la barre d'onglets. */
   --color-hairline: #e5e5e5;
+  /* Fond gris clair d'un champ ou d'une pastille neutre. */
+  --color-field: #f4f5f8;
   /* Texte atténué sur fond sombre. */
   --color-on-dark-muted: rgba(255, 255, 255, 0.75);
   /* Texte le plus discret sur fond sombre. */

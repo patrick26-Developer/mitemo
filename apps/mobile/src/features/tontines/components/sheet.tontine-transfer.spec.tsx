@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { makeTontine } from "../../../shared/testing/fixtures.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
+import { FIELD_CHROME } from "../../../shared/theme/theme.field";
 import { TontineTransferSheet } from "./sheet.tontine-transfer";
 
 /**
@@ -32,6 +33,18 @@ describe("TontineTransferSheet", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Transférer" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Choisissez un destinataire.");
+  });
+
+  it("entoure de rouge un montant manquant", async () => {
+    await renderSheet(jest.fn());
+
+    await fireEvent.press(screen.getByRole("button", { name: "Membre m2" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Transférer" }));
+
+    expect(screen.getByLabelText("Montant (FCFA)")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
   });
 
   it("résume le destinataire et le montant avant de transférer", async () => {

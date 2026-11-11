@@ -27,6 +27,14 @@ export interface SignUpInput {
   readonly digits: string;
 }
 
+/** Champs refusés d'une inscription, une fois la saisie soumise. */
+export interface SignUpInvalidFields {
+  readonly firstName: boolean;
+  readonly lastName: boolean;
+  readonly occupation: boolean;
+  readonly digits: boolean;
+}
+
 /** Groupes de chiffres du numéro local : 2-3-2-2. */
 const PHONE_GROUPS = [2, 5, 7, 9] as const;
 
@@ -128,6 +136,20 @@ export function isValidPhoneDigits(digits: string): boolean {
  */
 export function isValidPin(pin: string): boolean {
   return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(pin);
+}
+
+/**
+ * Repère les champs d'inscription à signaler en rouge après un refus.
+ * @param input Prénom, nom, profession et chiffres du numéro.
+ * @returns Vrai pour chaque champ qui ne respecte pas sa règle.
+ */
+export function signUpInvalidFields(input: SignUpInput): SignUpInvalidFields {
+  return {
+    firstName: !isValidPersonName(input.firstName),
+    lastName: !isValidPersonName(input.lastName),
+    occupation: !isValidPersonName(input.occupation),
+    digits: !isValidPhoneDigits(input.digits),
+  };
 }
 
 /**
