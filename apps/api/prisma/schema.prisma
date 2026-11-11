@@ -89,6 +89,7 @@ model AppUser {
   createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   challenges      AuthChallenge[]
   sessions        AuthSession[]
+  savingsGoals    SavingsGoal[]
 
   walletAccountId String @unique @map("wallet_account_id")
   walletAccount LedgerAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
@@ -134,4 +135,21 @@ model PawaPaySandboxReceipt {
 
   @@id([kind, id, status, amount])
   @@map("pawapay_sandbox_receipt")
+}
+
+/// Calendrier prévisionnel d’un objectif individuel, sans mouvement financier.
+model SavingsGoal {
+  id                   String   @id @db.Uuid
+  userId               String   @map("user_id") @db.Uuid
+  user                 AppUser  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  name                 String
+  installmentAmount    BigInt   @map("installment_amount")
+  frequency            String
+  installmentsPerCycle Int      @map("installments_per_cycle")
+  cycleCount           Int      @map("cycle_count")
+  startsAt             DateTime @map("starts_at") @db.Timestamptz(3)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, createdAt, id])
+  @@map("savings_goal")
 }
