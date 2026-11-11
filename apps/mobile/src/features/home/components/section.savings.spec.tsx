@@ -8,17 +8,18 @@ import { SavingsSection } from "./section.savings";
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 
 describe("SavingsSection", () => {
-  it("ne compte que les cartes actives", async () => {
+  it("garde toute carte pas encore retirée, même remplie, et écarte les retirées", async () => {
     usePortfolioStore.setState({
       cards: [
         makeCard({ name: "Rentrée scolaire" }),
-        makeCard({ id: "c2", name: "Ancienne carte", state: "COMPLETED" }),
+        makeCard({ id: "c2", name: "Carte remplie", state: "COMPLETED" }),
+        makeCard({ id: "c3", name: "Ancienne carte", state: "ARCHIVED" }),
       ],
     });
     await render(<SavingsSection />);
 
-    expect(screen.getByRole("button", { name: "1 Carte de pointage" })).toBeOnTheScreen();
-    expect(screen.getByText("Rentrée scolaire")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "2 Cartes de pointage" })).toBeOnTheScreen();
+    expect(screen.getByText("Carte remplie")).toBeOnTheScreen();
     expect(screen.queryByText("Ancienne carte")).toBeNull();
   });
 

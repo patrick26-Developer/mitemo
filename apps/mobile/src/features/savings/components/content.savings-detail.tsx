@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
+import { useDockInset } from "../../../shared/hooks/hook.dock-inset";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { useSavingsActions } from "../hooks/hook.savings-actions";
@@ -22,6 +23,7 @@ export interface SavingsDetailContentProps {
  */
 export function SavingsDetailContent(props: SavingsDetailContentProps) {
   const { item } = props;
+  const inset = useDockInset();
   const actions = useSavingsActions(item);
   const tontine = usePortfolioStore((state) =>
     state.tontines.find((entry) => entry.id === item.tontineId),
@@ -29,7 +31,11 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
 
   return (
     <View className="flex-1">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-5 px-4 pb-32">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="gap-5 px-4"
+        contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
+      >
         <SavingsSummaryCard item={item} />
         <SavingsFactsCard item={item} tontineName={tontine?.name ?? null} />
         {tontine === undefined ? null : (
@@ -37,7 +43,7 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
         )}
         <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
       </ScrollView>
-      <SavingsDetailDock item={item} actions={actions} />
+      <SavingsDetailDock item={item} actions={actions} onLayout={inset.onDockLayout} />
     </View>
   );
 }

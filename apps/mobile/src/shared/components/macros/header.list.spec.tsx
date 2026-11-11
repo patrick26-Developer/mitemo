@@ -6,7 +6,7 @@ import { ListHeader } from "./header.list";
 describe("ListHeader", () => {
   it("affiche le filtre et les actions rapides", async () => {
     await renderWithSafeArea(
-      <ListHeader topInset={0} filter="active" onFilterChange={jest.fn()} />,
+      <ListHeader topInset={0} filter={{ value: "active", onChange: jest.fn() }} />,
     );
 
     expect(screen.getByRole("tab", { name: "Actives" })).toBeSelected();
@@ -18,8 +18,7 @@ describe("ListHeader", () => {
     await renderWithSafeArea(
       <ListHeader
         topInset={0}
-        filter="active"
-        onFilterChange={jest.fn()}
+        filter={{ value: "active", onChange: jest.fn() }}
         search={{ query: "", onChange: jest.fn(), placeholder: "Rechercher une tontine" }}
       />,
     );
@@ -32,10 +31,10 @@ describe("ListHeader", () => {
   it("remonte le filtre choisi", async () => {
     const onFilterChange = jest.fn();
     await renderWithSafeArea(
-      <ListHeader topInset={0} filter="active" onFilterChange={onFilterChange} />,
+      <ListHeader topInset={0} filter={{ value: "active", onChange: onFilterChange }} />,
     );
 
-    fireEvent.press(screen.getByRole("tab", { name: "Terminées" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Archivées" }));
 
     expect(onFilterChange).toHaveBeenCalledWith("completed");
   });

@@ -7,11 +7,28 @@ import { SearchField } from "./field.search";
 import type { SegmentedControlOption } from "./control.segmented";
 import { SegmentedControl } from "./control.segmented";
 
-/** Options affichées par le filtre d'état. */
-const FILTER_OPTIONS = [
-  { value: "active", label: "Actives" },
-  { value: "completed", label: "Terminées" },
-] as const satisfies readonly SegmentedControlOption<ListFilter>[];
+/** Libellé par défaut de l'onglet des éléments terminés. */
+const DEFAULT_ARCHIVED_LABEL = "Archivées";
+
+/** Filtre d'état d'une liste : valeur, changement et libellé des terminés. */
+export interface ListFilterControl {
+  readonly value: ListFilter;
+  readonly onChange: (filter: ListFilter) => void;
+  /** Libellé de l'onglet des éléments terminés, « Archivées » par défaut. */
+  readonly archivedLabel?: string;
+}
+
+/**
+ * Construit les deux onglets du filtre d'état.
+ * @param archivedLabel Libellé de l'onglet des éléments terminés.
+ * @returns Les options du filtre.
+ */
+function filterOptions(archivedLabel: string): readonly SegmentedControlOption<ListFilter>[] {
+  return [
+    { value: "active", label: "Actives" },
+    { value: "completed", label: archivedLabel },
+  ];
+}
 
 /** Espace entre la zone sûre de l'écran et la barre, en points. */
 const TOP_GAP = 12;
@@ -27,8 +44,7 @@ export interface ListSearchOptions {
 export interface ListHeaderProps {
   /** Marge haute de la zone sûre de l'écran, en points. */
   readonly topInset: number;
-  readonly filter: ListFilter;
-  readonly onFilterChange: (filter: ListFilter) => void;
+  readonly filter: ListFilterControl;
   readonly onAdd?: () => void;
   readonly search?: ListSearchOptions;
 }
@@ -40,7 +56,7 @@ export interface ListHeaderProps {
  * @returns L'en-tête de liste.
  */
 export function ListHeader(props: ListHeaderProps) {
-  const { topInset, filter, onFilterChange, onAdd, search } = props;
+  const { topInset, filter, onAdd, search } = props;
   const [searchOpen, setSearchOpen] = useState(false);
   const [localQuery, setLocalQuery] = useState("");
   const query = search?.query ?? localQuery;
@@ -69,14 +85,35 @@ export function ListHeader(props: ListHeaderProps) {
           clear={{ label: "Annuler la recherche", onPress: cancelSearch, alwaysVisible: true }}
         />
       ) : (
-        <>
-          <SegmentedControl options={FILTER_OPTIONS} value={filter} onChange={onFilterChange} />
-          <ListActions
-            onSearch={() => setSearchOpen(true)}
-            {...(onAdd === undefined ? {} : { onAdd })}
-          />
-        </>
+        <ListToolbar filter={filter} onSearch={() => setSearchOpen(true)} onAdd={onAdd} />
       )}
     </View>
+  );
+}
+
+/** Props de la barre d'outils de la liste. */
+interface ListToolbarProps {
+  readonly filter: ListFilterControl;
+  readonly onSearch: () => void;
+  readonly onAdd: (() => void) | undefined;
+}
+
+/**
+ * Pose le filtre d'état et les actions rapides, quand la recherche est fermée.
+ * @param props Filtre, ouverture de la recherche et création.
+ * @returns Le filtre et les actions.
+ */
+function ListToolbar(props: ListToolbarProps) {
+  const { filter, onSearch, onAdd } = props;
+
+  return (
+    <>
+      <SegmentedControl
+        options={filterOptions(filter.archivedLabel ?? DEFAULT_ARCHIVED_LABEL)}
+        value={filter.value}
+        onChange={filter.onChange}
+      />
+      <ListActions onSearch={onSearch} {...(onAdd === undefined ? {} : { onAdd })} />
+    </>
   );
 }

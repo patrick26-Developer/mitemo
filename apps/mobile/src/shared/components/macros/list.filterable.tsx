@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { LucideIcon } from "lucide-react-native";
 import type { ReactElement } from "react";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,11 +17,16 @@ export interface FilterableListConfig<Item> {
   readonly keyOf: (item: Item) => string;
   /** Libellé sur lequel porte la recherche. */
   readonly labelOf: (item: Item) => string;
+  /** Vrai quand l'élément va dans l'onglet des terminés. */
   readonly isCompleted: (item: Item) => boolean;
+  /** Libellé de l'onglet des terminés, « Archivées » par défaut. */
+  readonly archivedLabel?: string;
   readonly searchPlaceholder: string;
   /** Nom de l'élément recherché, au singulier et au féminin. */
   readonly searchSubject: string;
   readonly emptyStates: Readonly<Record<ListFilter, EmptyStateContent>>;
+  /** Icône de l'onglet, rappelée par l'état vide. */
+  readonly emptyIcon: LucideIcon;
   readonly renderItem: (item: Item, index: number) => ReactElement;
 }
 
@@ -57,14 +63,19 @@ export function FilterableList<Item>(props: FilterableListProps<Item>) {
         ListHeaderComponent={
           <ListHeader
             topInset={insets.top}
-            filter={filter}
-            onFilterChange={setFilter}
+            filter={{
+              value: filter,
+              onChange: setFilter,
+              ...(config.archivedLabel === undefined
+                ? {}
+                : { archivedLabel: config.archivedLabel }),
+            }}
             onAdd={onAdd}
             search={{ query, onChange: setQuery, placeholder: config.searchPlaceholder }}
           />
         }
         stickyHeaderIndices={[0]}
-        ListEmptyComponent={<EmptyState {...empty} />}
+        ListEmptyComponent={<EmptyState {...empty} icon={config.emptyIcon} />}
         contentContainerClassName="grow gap-3 px-4 pb-6"
         renderItem={({ item, index }) => config.renderItem(item, index)}
       />

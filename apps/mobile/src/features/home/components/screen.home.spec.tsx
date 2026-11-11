@@ -48,7 +48,7 @@ describe("HomeScreen", () => {
 
     expect(screen.getByText("Solde disponible")).toBeOnTheScreen();
     expect(screen.getByText(/12 500/)).toBeOnTheScreen();
-    expect(screen.getByText("78 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("28 000 FCFA")).toBeOnTheScreen();
   });
 
   it("liste les tontines du membre", async () => {
