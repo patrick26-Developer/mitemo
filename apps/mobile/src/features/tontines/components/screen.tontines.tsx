@@ -2,19 +2,19 @@ import { useState } from "react";
 
 import { FilterableList } from "../../../shared/components/macros/list.filterable";
 import type { FilterableListConfig } from "../../../shared/components/macros/list.filterable";
-import type { DemoTontine } from "../../../shared/demo/demo.tontines";
-import { DEMO_TONTINES } from "../../../shared/demo/demo.tontines";
+import type { Tontine } from "../../../shared/member/model.portfolio";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { EmptyStateContent } from "../../../shared/model/model.list-empty-state";
 import type { ListFilter } from "../../../shared/model/model.list-filter";
 import { FULL_CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
-import { TontineAddSheet } from "./sheet.tontine-add";
 import { TontineCard } from "./card.tontine";
+import { TontineCreateSheet } from "./sheet.tontine-create";
 
 /** Message affiché quand le filtre ne retient aucune tontine. */
 const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
   active: {
     title: "Aucune tontine active",
-    message: "Rejoignez une tontine pour la voir apparaître ici.",
+    message: "Créez une tontine pour la voir apparaître ici.",
   },
   completed: {
     title: "Aucune tontine terminée",
@@ -22,9 +22,8 @@ const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
   },
 };
 
-/** Réglages de la liste des tontines. */
-const TONTINE_LIST: FilterableListConfig<DemoTontine> = {
-  items: DEMO_TONTINES,
+/** Réglages de la liste, sans les tontines qui viennent du portefeuille. */
+const TONTINE_LIST: Omit<FilterableListConfig<Tontine>, "items"> = {
   keyOf: (item) => item.id,
   labelOf: (item) => item.name,
   isCompleted: (item) => item.state === "COMPLETED",
@@ -40,11 +39,15 @@ const TONTINE_LIST: FilterableListConfig<DemoTontine> = {
  */
 export function TontinesScreen() {
   const [addOpen, setAddOpen] = useState(false);
+  const tontines = usePortfolioStore((state) => state.tontines);
 
   return (
     <>
-      <FilterableList config={TONTINE_LIST} onAdd={() => setAddOpen(true)} />
-      <TontineAddSheet visible={addOpen} onClose={() => setAddOpen(false)} />
+      <FilterableList
+        config={{ ...TONTINE_LIST, items: tontines }}
+        onAdd={() => setAddOpen(true)}
+      />
+      <TontineCreateSheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </>
   );
 }

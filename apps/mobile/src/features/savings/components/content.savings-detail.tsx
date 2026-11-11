@@ -1,41 +1,43 @@
 import { ScrollView, Text, View } from "react-native";
 
-import { DetailRow } from "../../../shared/components/atoms/row.detail";
-import { formatAmount } from "../../../shared/format/format.amount";
-import type { DemoSavings } from "../../../shared/demo/demo.savings";
+import type { SavingsCard } from "../../../shared/member/model.portfolio";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { useSavingsActions } from "../hooks/hook.savings-actions";
+import { SavingsFactsCard } from "./card.savings-facts";
 import { SavingsSummaryCard } from "./card.savings-summary";
+import { SavingsDetailDock } from "./dock.savings-detail";
+import { SavingsTontinePanel } from "./panel.savings-tontine";
 
 /** Props du contenu d'une carte trouvée. */
 export interface SavingsDetailContentProps {
-  readonly item: DemoSavings;
+  readonly item: SavingsCard;
 }
 
 /**
- * Calcule le montant restant à épargner pour atteindre l'objectif.
- * @param item Carte concernée.
- * @returns Le reste à épargner, jamais négatif.
- */
-function remainingToSave(item: DemoSavings): bigint {
-  return item.goal > item.current ? item.goal - item.current : 0n;
-}
-
-/**
- * Affiche la synthèse, les échéances et la description d'une carte.
+ * Affiche la synthèse, les échéances et la tontine rattachée d'une carte de
+ * pointage. Les actions vivent dans le dock, qui reste visible pendant le
+ * défilement.
  * @param props Carte à afficher.
  * @returns Le contenu détaillé de la carte.
  */
 export function SavingsDetailContent(props: SavingsDetailContentProps) {
   const { item } = props;
+  const actions = useSavingsActions(item);
+  const tontine = usePortfolioStore((state) =>
+    state.tontines.find((entry) => entry.id === item.tontineId),
+  );
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-5 px-4 pb-8">
-      <SavingsSummaryCard item={item} />
-      <View className="gap-3 rounded-[18px] border border-card-border p-4">
-        <DetailRow label="Objectif" value={`${formatAmount(item.goal)} FCFA`} />
-        <DetailRow label="Échéance" value={item.until} />
-        <DetailRow label="Reste à épargner" value={`${formatAmount(remainingToSave(item))} FCFA`} />
-      </View>
-      <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
-    </ScrollView>
+    <View className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-5 px-4 pb-32">
+        <SavingsSummaryCard item={item} />
+        <SavingsFactsCard item={item} tontineName={tontine?.name ?? null} />
+        {tontine === undefined ? null : (
+          <SavingsTontinePanel item={item} tontine={tontine} onTransfer={actions.transfer} />
+        )}
+        <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
+      </ScrollView>
+      <SavingsDetailDock item={item} actions={actions} />
+    </View>
   );
 }

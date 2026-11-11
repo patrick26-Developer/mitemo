@@ -6,6 +6,14 @@ const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "UTC",
 });
 
+/** Format français long : jour, mois en toutes lettres et année. */
+const LONG_DATE = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 /**
  * Formate une date au format JJ/MM/AAAA, sans décalage de fuseau.
  * @param isoDate Date ISO 8601 en UTC, par exemple « 2026-03-12 ».
@@ -13,4 +21,13 @@ const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
  */
 export function formatDate(isoDate: string): string {
   return SHORT_DATE.format(new Date(isoDate));
+}
+
+/**
+ * Formate une date en toutes lettres, sans décalage de fuseau.
+ * @param isoDate Date ISO 8601 en UTC, par exemple « 2026-12-31 ».
+ * @returns La date lisible, par exemple « 31 décembre 2026 ».
+ */
+export function formatLongDate(isoDate: string): string {
+  return LONG_DATE.format(new Date(isoDate));
 }

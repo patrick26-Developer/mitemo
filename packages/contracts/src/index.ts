@@ -37,14 +37,21 @@ export type {
   CycleFrequency,
   CycleFrequencyUnit,
   TontineState,
+  TransferToMemberRequest,
+  TransferToMemberResponse,
+  WithdrawTontineRequest,
+  WithdrawTontineResponse,
 } from "./tontine.ts";
-export { MEMBERSHIP_STATES } from "./membership.ts";
+export { MEMBERSHIP_STATES, TONTINE_MEMBER_ROLES } from "./membership.ts";
 export type {
   CreateInvitationRequest,
   CreateInvitationResponse,
   JoinTontineRequest,
   JoinTontineResponse,
   MembershipState,
+  TontineMember,
+  TontineMemberRole,
+  TontineMembersResponse,
 } from "./membership.ts";
 export { ARBITRATION_DECISIONS, ROUND_STATES } from "./round.ts";
 export type {
@@ -88,4 +95,12 @@ export type {
   SavingsCardState,
   SavingsCardTerms,
   ScheduleFrequency,
+  TransferSavingsToTontineRequest,
+  TransferSavingsToTontineResponse,
 } from "./savings-card.ts";
+export { PUSH_PLATFORMS } from "./notification.ts";
+export type {
+  PushPlatform,
+  RegisterPushTokenRequest,
+  RegisterPushTokenResponse,
+} from "./notification.ts";

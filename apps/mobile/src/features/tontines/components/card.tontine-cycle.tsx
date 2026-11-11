@@ -1,12 +1,13 @@
 import { Text, View } from "react-native";
 
-import { DetailRow } from "../../../shared/components/atoms/row.detail";
 import { ProgressBar } from "../../../shared/components/atoms/bar.progress";
-import type { DemoTontine } from "../../../shared/demo/demo.tontines";
+import { DetailRow } from "../../../shared/components/atoms/row.detail";
+import type { Tontine } from "../../../shared/member/model.portfolio";
+import { beneficiaryName } from "../../../shared/member/model.portfolio";
 
 /** Props de la carte d'avancement d'une tontine. */
 export interface TontineCycleCardProps {
-  readonly item: DemoTontine;
+  readonly item: Tontine;
 }
 
 /**
@@ -22,7 +23,7 @@ export function TontineCycleCard(props: TontineCycleCardProps) {
       <Text className="text-[16px] font-medium text-ink">Cycle en cours</Text>
       <ProgressBar value={item.round / item.totalRounds} />
       <DetailRow label="Tour actuel" value={`${item.round} sur ${item.totalRounds}`} />
-      <DetailRow label="Bénéficiaire" value={item.currentBeneficiary} />
+      <DetailRow label="Bénéficiaire" value={beneficiaryName(item)} />
     </View>
   );
 }

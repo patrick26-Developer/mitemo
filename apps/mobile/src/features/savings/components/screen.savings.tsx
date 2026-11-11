@@ -2,13 +2,13 @@ import { useState } from "react";
 
 import { FilterableList } from "../../../shared/components/macros/list.filterable";
 import type { FilterableListConfig } from "../../../shared/components/macros/list.filterable";
-import type { DemoSavings } from "../../../shared/demo/demo.savings";
-import { DEMO_SAVINGS } from "../../../shared/demo/demo.savings";
+import type { SavingsCard as SavingsCardModel } from "../../../shared/member/model.portfolio";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { EmptyStateContent } from "../../../shared/model/model.list-empty-state";
 import type { ListFilter } from "../../../shared/model/model.list-filter";
 import { FULL_CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
-import { SavingsAddSheet } from "./sheet.savings-add";
 import { SavingsCard } from "./card.savings";
+import { SavingsCreateSheet } from "./sheet.savings-create";
 
 /** Message affiché quand le filtre ne retient aucune carte. */
 const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
@@ -22,11 +22,10 @@ const EMPTY_STATES: Readonly<Record<ListFilter, EmptyStateContent>> = {
   },
 };
 
-/** Réglages de la liste des cartes de pointage. */
-const SAVINGS_LIST: FilterableListConfig<DemoSavings> = {
-  items: DEMO_SAVINGS,
+/** Réglages de la liste, sans les cartes qui viennent du portefeuille. */
+const SAVINGS_LIST: Omit<FilterableListConfig<SavingsCardModel>, "items"> = {
   keyOf: (item) => item.id,
-  labelOf: (item) => item.title,
+  labelOf: (item) => item.name,
   isCompleted: (item) => item.state === "COMPLETED",
   searchPlaceholder: "Rechercher une carte",
   searchSubject: "carte",
@@ -40,11 +39,12 @@ const SAVINGS_LIST: FilterableListConfig<DemoSavings> = {
  */
 export function SavingsScreen() {
   const [addOpen, setAddOpen] = useState(false);
+  const cards = usePortfolioStore((state) => state.cards);
 
   return (
     <>
-      <FilterableList config={SAVINGS_LIST} onAdd={() => setAddOpen(true)} />
-      <SavingsAddSheet visible={addOpen} onClose={() => setAddOpen(false)} />
+      <FilterableList config={{ ...SAVINGS_LIST, items: cards }} onAdd={() => setAddOpen(true)} />
+      <SavingsCreateSheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </>
   );
 }

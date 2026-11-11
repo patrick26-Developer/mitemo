@@ -1,0 +1,118 @@
+import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./model.portfolio";
+import { createId, SELF_MEMBER_ID } from "./model.portfolio";
+
+/** Noms proposés aux membres invités lors d'une création locale. */
+const MEMBER_NAME_POOL = [
+  "Mama Nadège",
+  "Jean-Baptiste Okemba",
+  "Clarisse Nzaba",
+  "Serge Makosso",
+  "Pauline Elenga",
+  "Alphonse Mabiala",
+  "Léonie Bantsimba",
+  "David Nkodia",
+  "Sylvie Tchicaya",
+] as const;
+
+/** Dégradés des nouvelles tontines, du centre vers le bord. */
+const TONTINE_TINTS: readonly (readonly [string, string])[] = [
+  ["#2CCA86", "#62F79D"],
+  ["#F5B94A", "#FAD98C"],
+  ["#9DB6F5", "#C9D6FF"],
+  ["#F2A0B5", "#FBD0DA"],
+];
+
+/** Teintes des nouvelles cartes de pointage. */
+const CARD_TINTS = ["#CFD8FF", "#CDF5DD", "#F5D7B0", "#F2C9E4"] as const;
+
+/** Nom du membre connecté, tant que l'authentification n'est pas branchée. */
+const SELF_NAME = "Précieuse Mavoungou";
+
+/** Paramètres saisis pour créer une tontine. */
+export interface CreateTontineInput {
+  readonly name: string;
+  readonly contribution: bigint;
+  readonly frequency: TontineFrequency;
+  readonly totalRounds: number;
+  readonly participantCount: number;
+  readonly description: string;
+}
+
+/** Paramètres saisis pour créer une carte de pointage. */
+export interface CreateCardInput {
+  readonly name: string;
+  readonly markerAmount: bigint;
+  readonly markersTotal: number;
+  readonly deadline: string;
+  readonly tontineId: string | null;
+  readonly description: string;
+}
+
+/**
+ * Construit la liste des membres d'une nouvelle tontine : le membre connecté
+ * en administrateur, puis les participants invités.
+ * @param participantCount Nombre total de participants.
+ * @returns Les membres, cotisation du tour en cours non réglée.
+ */
+function buildMembers(participantCount: number): readonly TontineMember[] {
+  const self: TontineMember = {
+    id: SELF_MEMBER_ID,
+    name: SELF_NAME,
+    role: "ADMIN",
+    paidCurrentRound: false,
+  };
+  const others = Array.from({ length: Math.max(participantCount - 1, 0) }, (_, index) => ({
+    id: `member-${index + 1}`,
+    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
+    role: "MEMBRE" as const,
+    paidCurrentRound: false,
+  }));
+
+  return [self, ...others];
+}
+
+/**
+ * Construit une tontine à partir du formulaire de création.
+ * @param input Paramètres saisis.
+ * @param index Rang de la tontine, pour choisir son dégradé.
+ * @returns La tontine prête à être ajoutée.
+ */
+export function buildTontine(input: CreateTontineInput, index: number): Tontine {
+  const members = buildMembers(input.participantCount);
+
+  return {
+    id: createId("tontine"),
+    name: input.name,
+    contribution: input.contribution,
+    frequency: input.frequency,
+    round: 1,
+    totalRounds: input.totalRounds,
+    state: "ACTIVE",
+    members,
+    beneficiaryId: members[0]?.id ?? SELF_MEMBER_ID,
+    description: input.description,
+    headerColors: TONTINE_TINTS[index % TONTINE_TINTS.length] ?? ["#2CCA86", "#62F79D"],
+    invitationCode: null,
+  };
+}
+
+/**
+ * Construit une carte à partir du formulaire de création.
+ * @param input Paramètres saisis.
+ * @param index Rang de la carte, pour choisir sa teinte.
+ * @returns La carte prête à être ajoutée.
+ */
+export function buildCard(input: CreateCardInput, index: number): SavingsCard {
+  return {
+    id: createId("card"),
+    name: input.name,
+    markerAmount: input.markerAmount,
+    markersTotal: input.markersTotal,
+    saved: 0n,
+    deadline: input.deadline,
+    tint: CARD_TINTS[index % CARD_TINTS.length] ?? "#CFD8FF",
+    state: "ACTIVE",
+    description: input.description,
+    tontineId: input.tontineId,
+  };
+}

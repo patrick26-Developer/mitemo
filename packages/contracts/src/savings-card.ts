@@ -1,5 +1,5 @@
 import type { IsoDateTime } from "./datetime.ts";
-import type { SavingsCardId } from "./identifiers.ts";
+import type { SavingsCardId, TontineId } from "./identifiers.ts";
 import type { MoneyDto } from "./money.ts";
 
 /** Périodicités des échéances d'un programme : quotidienne, hebdomadaire, mensuelle. */
@@ -74,6 +74,11 @@ export interface CreateSavingsCardRequest {
   readonly name: string;
   readonly terms: SavingsCardTerms;
   readonly acceptedFeePolicyVersion: string;
+  /**
+   * Tontine à laquelle rattacher la carte, pour y verser directement ses
+   * cotisations. Absent : la carte reste indépendante.
+   */
+  readonly linkedTontineId?: TontineId;
 }
 
 /** Échéance du calendrier d'une carte. */
@@ -98,6 +103,28 @@ export interface SavingsCardResponse {
   readonly caisseBalance: MoneyDto;
   readonly installments: readonly Installment[];
   readonly createdAt: IsoDateTime;
+  /** Tontine rattachée à la carte, absente quand la carte est indépendante. */
+  readonly linkedTontineId?: TontineId;
+}
+
+/**
+ * Versement d'une cotisation de tontine depuis la caisse d'une carte
+ * rattachée. La requête porte l'en-tête `Idempotency-Key`.
+ */
+export interface TransferSavingsToTontineRequest {
+  readonly savingsCardId: SavingsCardId;
+  readonly tontineId: TontineId;
+  /** Montant strictement positif, en FCFA entiers. */
+  readonly amount: MoneyDto;
+}
+
+/** Résultat d'un versement de la caisse d'une carte vers sa tontine. */
+export interface TransferSavingsToTontineResponse {
+  readonly savingsCardId: SavingsCardId;
+  readonly tontineId: TontineId;
+  readonly amount: MoneyDto;
+  readonly caisseBalance: MoneyDto;
+  readonly transferredAt: IsoDateTime;
 }
 
 /**

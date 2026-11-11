@@ -3,32 +3,36 @@ import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
 import { PressableScale } from "../../../shared/components/atoms/scale.pressable";
-import type { DemoSavings } from "../../../shared/demo/demo.savings";
+import type { SavingsCard as SavingsCardModel } from "../../../shared/member/model.portfolio";
 import { CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
 import { SavingsPanel } from "./panel.savings";
 
 /** Props de la carte de pointage. */
 export interface SavingsCardProps {
-  readonly item: DemoSavings;
+  readonly item: SavingsCardModel;
   /** Rang de la carte dans la liste, pour décaler l'apparition. */
   readonly index: number;
   /** Largeur totale de la carte, en points ; largeur de la home par défaut. */
   readonly width?: number;
 }
 
+/** Props du corps d'une carte de pointage. */
+interface SavingsCardBodyProps {
+  readonly item: SavingsCardModel;
+}
+
 /**
  * Affiche le contenu de la carte de pointage.
- * @param props Props du corps.
- * @param props.item Données de la carte.
+ * @param props Carte à afficher.
  * @returns Le contenu de la carte.
  */
-function SavingsCardBody(props: { readonly item: DemoSavings }) {
+function SavingsCardBody(props: SavingsCardBodyProps) {
   const { item } = props;
 
   return (
     <View className="rounded-[20px] p-0.5" style={{ backgroundColor: item.tint }}>
       <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
-        {item.title}
+        {item.name}
       </Text>
       <SavingsPanel item={item} />
     </View>
@@ -46,7 +50,7 @@ export function SavingsCard(props: SavingsCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(200 + index * 120).duration(500)} style={{ width }}>
       <PressableScale
-        accessibilityLabel={`Ouvrir ${item.title}`}
+        accessibilityLabel={`Ouvrir ${item.name}`}
         onPress={() => router.push(`/savings-detail/${item.id}`)}
       >
         <SavingsCardBody item={item} />

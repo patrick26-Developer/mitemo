@@ -14,9 +14,6 @@ import {
 } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 
-import { DEMO_SAVINGS } from "../demo/demo.savings";
-import { DEMO_TONTINES } from "../demo/demo.tontines";
-
 /**
  * Identifiants des actions du profil, chacun ouvrant sa feuille.
  *
@@ -56,24 +53,19 @@ export interface ProfileGroupContent {
   readonly actions: readonly ProfileActionContent[];
 }
 
-/** Nombre de tontines actives du membre de démonstration. */
-const ACTIVE_TONTINE_COUNT = DEMO_TONTINES.filter((item) => item.state === "ACTIVE").length;
-
-/** Nombre de cartes de pointage actives du membre de démonstration. */
-const ACTIVE_CARD_COUNT = DEMO_SAVINGS.filter((item) => item.state === "ACTIVE").length;
+/** Nombre de tontines et de cartes actives, affiché dans « Mes espaces ». */
+export interface ProfileCounts {
+  readonly tontines: number;
+  readonly cards: number;
+}
 
 /** Groupes d'actions du profil. */
 export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
   {
     title: "Mes espaces",
     actions: [
-      {
-        id: "tontines",
-        label: "Mes tontines",
-        icon: UsersRound,
-        value: String(ACTIVE_TONTINE_COUNT),
-      },
-      { id: "cards", label: "Mes cartes", icon: PiggyBank, value: String(ACTIVE_CARD_COUNT) },
+      { id: "tontines", label: "Mes tontines", icon: UsersRound },
+      { id: "cards", label: "Mes cartes", icon: PiggyBank },
     ],
   },
   {

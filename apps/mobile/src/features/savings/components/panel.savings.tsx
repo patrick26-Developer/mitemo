@@ -1,19 +1,22 @@
 import { CalendarDays, ShieldCheck } from "lucide-react-native";
 import { Text, View } from "react-native";
 
+import { MarkerProgress } from "../../../shared/components/atoms/markers.progress";
 import { BarcodeStrip } from "../../../shared/components/atoms/strip.barcode";
 import { formatAmount } from "../../../shared/format/format.amount";
+import { formatLongDate } from "../../../shared/format/format.date";
+import type { SavingsCard } from "../../../shared/member/model.portfolio";
+import { cardGoal, markersDone } from "../../../shared/member/model.portfolio";
 import { HAIRLINE_WIDTH } from "../../../shared/theme/theme.hairline-width";
 import { PALETTE } from "../../../shared/theme/theme.palette";
-import type { DemoSavings } from "../../../shared/demo/demo.savings";
 
 /** Props du panneau de carte. */
 export interface SavingsPanelProps {
-  readonly item: DemoSavings;
+  readonly item: SavingsCard;
 }
 
 /**
- * Affiche le montant épargné, l'objectif et l'échéance d'une carte.
+ * Affiche le montant épargné, l'objectif, les marqueurs et l'échéance d'une carte.
  * @param props Carte à afficher.
  * @returns Le panneau sombre de la carte.
  */
@@ -29,21 +32,31 @@ export function SavingsPanel(props: SavingsPanelProps) {
       </View>
 
       <Text className="my-3 text-[32px] font-medium text-white">
-        {formatAmount(item.current)} <Text className="font-light text-on-dark-soft">FCFA</Text>
+        {formatAmount(item.saved)} <Text className="font-light text-on-dark-soft">FCFA</Text>
       </Text>
 
       <View className="mb-3 bg-on-dark-divider" style={HAIRLINE} />
 
       <View className="flex-row items-center justify-between pb-2">
         <Text className="text-[13px] text-white">Objectif</Text>
-        <Text className="text-[13px] text-white">{formatAmount(item.goal)} FCFA</Text>
+        <Text className="text-[13px] text-white">{formatAmount(cardGoal(item))} FCFA</Text>
       </View>
 
+      <View className="flex-row items-center justify-between">
+        <Text className="text-[13px] text-white">Marqueurs</Text>
+        <Text className="text-[13px] text-white">
+          {markersDone(item)} / {item.markersTotal}
+        </Text>
+      </View>
+
+      <MarkerProgress done={markersDone(item)} total={item.markersTotal} />
       <BarcodeStrip color={PALETTE.barcodeOnSavings} />
 
       <View className="mt-2.5 flex-row items-center gap-1.5">
         <CalendarDays size={13} color={PALETTE.onDarkFaint} />
-        <Text className="text-[12px] text-on-dark-faint">Jusqu&apos;au {item.until}</Text>
+        <Text className="text-[12px] text-on-dark-faint">
+          Jusqu&apos;au {formatLongDate(item.deadline)}
+        </Text>
       </View>
     </View>
   );

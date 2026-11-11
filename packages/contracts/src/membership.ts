@@ -52,3 +52,34 @@ export interface JoinTontineResponse {
   readonly state: MembershipState;
   readonly joinedAt: IsoDateTime;
 }
+
+/**
+ * Rôles d'un membre dans une tontine. L'administrateur ouvre les invitations,
+ * retire des membres et lance les tours ; un membre consulte le groupe et
+ * règle sa cotisation.
+ */
+export const TONTINE_MEMBER_ROLES = ["ADMIN", "MEMBRE"] as const;
+
+/** Rôle d'un membre dans une tontine. Voir {@link TONTINE_MEMBER_ROLES}. */
+export type TontineMemberRole = (typeof TONTINE_MEMBER_ROLES)[number];
+
+/** Membre d'une tontine, tel qu'affiché dans la liste du groupe. */
+export interface TontineMember {
+  readonly memberId: MemberId;
+  readonly displayName: string;
+  readonly role: TontineMemberRole;
+  readonly state: MembershipState;
+  /** `true` quand la cotisation du tour en cours est réglée. */
+  readonly paidCurrentRound: boolean;
+  readonly joinedAt: IsoDateTime;
+}
+
+/**
+ * Liste des membres d'une tontine. `viewerRole` permet au client d'adapter
+ * l'écran : un administrateur voit les actions de gestion, un membre non.
+ */
+export interface TontineMembersResponse {
+  readonly tontineId: TontineId;
+  readonly viewerRole: TontineMemberRole;
+  readonly members: readonly TontineMember[];
+}

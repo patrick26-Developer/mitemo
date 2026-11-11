@@ -1,26 +1,22 @@
 import { Tabs } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 
 import { AnimatedTabBar } from "../../src/shared/components/macros/bar.tab";
 
 /**
- * Navigation par onglets.
- * @returns Les onglets et la barre d'état.
+ * Navigation par onglets. La barre d'état est portée par les écrans : chaque
+ * onglet choisit la couleur d'icônes qui convient à son fond.
+ * @returns Les onglets.
  */
 export default function TabsLayout() {
   return (
-    <>
-      <StatusBar style="auto" />
-
-      <Tabs
-        tabBar={(props) => <AnimatedTabBar {...props} />}
-        screenOptions={{ headerShown: false, animation: "shift" }}
-      >
-        <Tabs.Screen name="index" />
-        <Tabs.Screen name="profile" />
-        <Tabs.Screen name="savings" />
-        <Tabs.Screen name="tontines" />
-      </Tabs>
-    </>
+    <Tabs
+      tabBar={(props) => <AnimatedTabBar {...props} />}
+      screenOptions={{ headerShown: false, animation: "shift" }}
+    >
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="profile" />
+      <Tabs.Screen name="savings" />
+      <Tabs.Screen name="tontines" />
+    </Tabs>
   );
 }
