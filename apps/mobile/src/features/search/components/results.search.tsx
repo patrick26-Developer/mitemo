@@ -1,5 +1,6 @@
 import { EmptyState } from "../../../shared/components/macros/state.empty";
-import { groupSearchResults, searchEntries } from "../model/model.search-content";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { groupSearchResults, isSearchPending, searchEntries } from "../model/model.search-content";
 import { SearchGroup } from "./group.search";
 import { SearchSkeleton } from "./skeleton.search";
 import { SearchSuggestions } from "./suggestions.search";
@@ -19,13 +20,14 @@ export interface SearchResultsProps {
  */
 export function SearchResults(props: SearchResultsProps) {
   const { query, debouncedQuery, onSuggestion } = props;
+  const tontines = usePortfolioStore((state) => state.tontines);
+  const cards = usePortfolioStore((state) => state.cards);
   const trimmedQuery = debouncedQuery.trim();
-  const isDebouncing = query.trim() !== trimmedQuery && query.trim() !== "";
 
-  if (isDebouncing) return <SearchSkeleton />;
+  if (isSearchPending(query, debouncedQuery)) return <SearchSkeleton />;
   if (trimmedQuery === "") return <SearchSuggestions onSelect={onSuggestion} />;
 
-  const groups = groupSearchResults(searchEntries(trimmedQuery));
+  const groups = groupSearchResults(searchEntries(trimmedQuery, tontines, cards));
 
   if (groups.length === 0) {
     return (

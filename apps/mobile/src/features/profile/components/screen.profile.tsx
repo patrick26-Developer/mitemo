@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DottedBackground } from "../../../shared/components/atoms/background.dotted";
 import { useMemberStore } from "../../../shared/member/store.member";
 import { useProfileActions } from "../hooks/hook.profile-actions";
+import { useProfileCounts } from "../hooks/hook.profile-counts";
 import { useProfilePhotoSheet } from "../hooks/hook.profile-photo-sheet";
 import { profileGroupsFor } from "../model/model.profile-content";
 import { useProfilePreferences } from "../model/model.profile-preferences";
@@ -26,6 +27,7 @@ export function ProfileScreen() {
   const { selectedAction, selectAction, closeAction } = useProfileActions();
   const [signOutOpen, setSignOutOpen] = useState(false);
   const { theme, language } = useProfilePreferences();
+  const counts = useProfileCounts();
   const { name, avatarInitial: initial, phone, createdAt } = useMemberStore();
 
   return (
@@ -38,7 +40,7 @@ export function ProfileScreen() {
       >
         <View className="gap-6 pb-10">
           <ProfileHeader name={name} initial={initial} phone={phone} {...photo.headerProps} />
-          {profileGroupsFor(theme, language).map((group) => (
+          {profileGroupsFor(theme, language, counts).map((group) => (
             <ProfileGroup key={group.title} group={group} onSelect={selectAction} />
           ))}
           <ProfileSignOut createdAt={createdAt} onPress={() => setSignOutOpen(true)} />

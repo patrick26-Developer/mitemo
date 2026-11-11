@@ -1,5 +1,6 @@
-import { DEMO_SAVINGS } from "../../../shared/demo/demo.savings";
-import { DEMO_TONTINES } from "../../../shared/demo/demo.tontines";
+import { formatDate } from "../../../shared/format/format.date";
+import type { SavingsCard, Tontine } from "../../../shared/member/model.portfolio";
+import { formatFrequency } from "../../../shared/member/model.portfolio";
 import { matchesSearch } from "../../../shared/model/model.list-filter";
 import { PROFILE_GROUPS } from "../../../shared/model/model.profile-actions";
 
@@ -65,25 +66,48 @@ const PROFILE_ENTRIES: readonly SearchEntry[] = PROFILE_GROUPS.flatMap((group) =
   })),
 );
 
-/** Index complet de la recherche : tontines, cartes, profil et pages. */
-export const SEARCH_ENTRIES: readonly SearchEntry[] = [
-  ...DEMO_TONTINES.map((tontine) => ({
+/**
+ * Construit les résultats des tontines du membre.
+ * @param tontines Tontines du membre.
+ * @returns Une entrée par tontine.
+ */
+function tontineEntries(tontines: readonly Tontine[]): readonly SearchEntry[] {
+  return tontines.map((tontine) => ({
     id: `tontine-${tontine.id}`,
     title: tontine.name,
-    subtitle: `${tontine.members} membres · ${tontine.frequency}`,
+    subtitle: `${tontine.members.length} membres · ${formatFrequency(tontine.frequency)}`,
     kind: "tontine" as const,
     href: `/tontine/${tontine.id}`,
-  })),
-  ...DEMO_SAVINGS.map((savings) => ({
-    id: `savings-${savings.id}`,
-    title: savings.title,
-    subtitle: `Carte de pointage · jusqu'au ${savings.until}`,
+  }));
+}
+
+/**
+ * Construit les résultats des cartes de pointage du membre.
+ * @param cards Cartes du membre.
+ * @returns Une entrée par carte.
+ */
+function cardEntries(cards: readonly SavingsCard[]): readonly SearchEntry[] {
+  return cards.map((card) => ({
+    id: `savings-${card.id}`,
+    title: card.name,
+    subtitle: `Carte de pointage · jusqu'au ${formatDate(card.deadline)}`,
     kind: "savings" as const,
-    href: `/savings-detail/${savings.id}`,
-  })),
-  ...PROFILE_ENTRIES,
-  ...PAGE_ENTRIES,
-];
+    href: `/savings-detail/${card.id}`,
+  }));
+}
+
+/**
+ * Construit l'index de recherche à partir du portefeuille du membre.
+ * @param tontines Tontines du membre.
+ * @param cards Cartes de pointage du membre.
+ * @returns L'index complet : tontines, cartes, profil et pages.
+ */
+function buildSearchEntries(
+  tontines: readonly Tontine[],
+  cards: readonly SavingsCard[],
+): readonly SearchEntry[] {
+  return [...tontineEntries(tontines), ...cardEntries(cards), ...PROFILE_ENTRIES, ...PAGE_ENTRIES];
+}
 
 /** Titres des groupes de résultats, dans l'ordre d'affichage. */
 const GROUP_TITLES: Readonly<Record<SearchResultKind, string>> = {
@@ -94,14 +118,32 @@ const GROUP_TITLES: Readonly<Record<SearchResultKind, string>> = {
 };
 
 /**
+ * Indique si la saisie attend encore sa version stabilisée.
+ * @param query Saisie courante.
+ * @param debouncedQuery Saisie stabilisée.
+ * @returns `true` quand l'écran doit afficher le squelette de chargement.
+ */
+export function isSearchPending(query: string, debouncedQuery: string): boolean {
+  return query.trim() !== debouncedQuery.trim() && query.trim() !== "";
+}
+
+/**
  * Filtre l'index par la recherche saisie.
  * @param query Texte recherché, casse et accents ignorés.
+ * @param tontines Tontines du membre.
+ * @param cards Cartes de pointage du membre.
  * @returns Les résultats correspondants, dans l'ordre de l'index.
  */
-export function searchEntries(query: string): readonly SearchEntry[] {
+export function searchEntries(
+  query: string,
+  tontines: readonly Tontine[],
+  cards: readonly SavingsCard[],
+): readonly SearchEntry[] {
   if (query.trim() === "") return [];
 
-  return SEARCH_ENTRIES.filter((entry) => matchesSearch(`${entry.title} ${entry.subtitle}`, query));
+  return buildSearchEntries(tontines, cards).filter((entry) =>
+    matchesSearch(`${entry.title} ${entry.subtitle}`, query),
+  );
 }
 
 /**

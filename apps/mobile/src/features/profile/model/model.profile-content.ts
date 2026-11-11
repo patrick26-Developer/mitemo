@@ -1,5 +1,6 @@
 import type {
   ProfileActionContent,
+  ProfileCounts,
   ProfileGroupContent,
 } from "../../../shared/model/model.profile-actions";
 import { PROFILE_GROUPS } from "../../../shared/model/model.profile-actions";
@@ -17,52 +18,57 @@ export const PROFILE_LANGUAGES = ["Français", "Lingala", "Anglais"] as const;
 export type ProfileLanguage = (typeof PROFILE_LANGUAGES)[number];
 
 /**
+ * Préférences et compteurs qui déterminent les valeurs affichées.
+ */
+interface ProfileDisplay {
+  readonly theme: ProfileTheme;
+  readonly language: ProfileLanguage;
+  readonly counts: ProfileCounts;
+}
+
+/**
  * Valeur affichée à droite d'une action, selon les préférences courantes.
  * @param action Action dont la valeur est demandée.
- * @param theme Thème sélectionné.
- * @param language Langue sélectionnée.
+ * @param display Thème, langue et compteurs courants.
  * @returns La valeur de la ligne, ou `undefined` si elle n'en porte pas.
  */
-function valueFor(
-  action: ProfileActionContent,
-  theme: ProfileTheme,
-  language: ProfileLanguage,
-): string | undefined {
-  if (action.id === "theme") return theme;
-  if (action.id === "language") return language;
+function valueFor(action: ProfileActionContent, display: ProfileDisplay): string | undefined {
+  if (action.id === "theme") return display.theme;
+  if (action.id === "language") return display.language;
+  if (action.id === "tontines") return String(display.counts.tontines);
+  if (action.id === "cards") return String(display.counts.cards);
   return action.value;
 }
 
 /**
- * Reconstruit les groupes du profil avec le thème et la langue réellement
- * choisis, pour que les lignes ne montrent jamais une valeur périmée.
+ * Reconstruit les groupes du profil avec le thème, la langue et les compteurs
+ * réellement choisis, pour que les lignes ne montrent jamais une valeur périmée.
  * @param theme Thème sélectionné.
  * @param language Langue sélectionnée.
+ * @param counts Nombres de tontines et de cartes actives.
  * @returns Les groupes d'actions à afficher.
  */
 export function profileGroupsFor(
   theme: ProfileTheme,
   language: ProfileLanguage,
+  counts: ProfileCounts,
 ): readonly ProfileGroupContent[] {
+  const display: ProfileDisplay = { theme, language, counts };
+
   return PROFILE_GROUPS.map((group) => ({
     ...group,
-    actions: group.actions.map((action) => withValue(action, theme, language)),
+    actions: group.actions.map((action) => withValue(action, display)),
   }));
 }
 
 /**
  * Ajoute la valeur courante à une action, sans créer de propriété vide.
  * @param action Action d'origine.
- * @param theme Thème sélectionné.
- * @param language Langue sélectionnée.
+ * @param display Thème, langue et compteurs courants.
  * @returns L'action, avec sa valeur si elle en porte une.
  */
-function withValue(
-  action: ProfileActionContent,
-  theme: ProfileTheme,
-  language: ProfileLanguage,
-): ProfileActionContent {
-  const value = valueFor(action, theme, language);
+function withValue(action: ProfileActionContent, display: ProfileDisplay): ProfileActionContent {
+  const value = valueFor(action, display);
 
   return value === undefined ? action : { ...action, value };
 }
