@@ -13,6 +13,8 @@ export interface SheetRowAction {
 /** Action principale d'une feuille, éventuellement destructive. */
 export interface SheetRowPrimaryAction extends SheetRowAction {
   readonly tone?: SheetButtonTone;
+  /** Couleur d'action de l'écran ; elle remplace la teinte. */
+  readonly accent?: string;
 }
 
 /** Props de la ligne d'actions. */
@@ -40,6 +42,7 @@ export function SheetActionRow(props: SheetActionRowProps) {
           label={primary.label}
           onPress={primary.onPress}
           {...(primary.tone === undefined ? {} : { tone: primary.tone })}
+          {...(primary.accent === undefined ? {} : { accent: primary.accent })}
         />
       </View>
     </View>

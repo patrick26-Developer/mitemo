@@ -63,4 +63,21 @@ describe("SheetSelect", () => {
       outlineColor: FIELD_CHROME.errorRing,
     });
   });
+
+  it("déplie la liste sous le champ, dans la feuille, et la replie au second toucher", async () => {
+    await renderWithSafeArea(
+      <SheetSelect label="Fréquence" groups={GROUPS} value="jour-1" onChange={jest.fn()} />,
+    );
+
+    const trigger = screen.getByTestId("sheet-select-trigger");
+    await fireEvent.press(trigger);
+
+    expect(trigger).toBeExpanded();
+    expect(screen.getByTestId("sheet-select-menu")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Chaque jour")).toBeSelected();
+
+    await fireEvent.press(trigger);
+
+    expect(screen.queryByTestId("sheet-select-menu")).not.toBeOnTheScreen();
+  });
 });

@@ -107,4 +107,33 @@ describe("BottomSheet", () => {
       maxHeight: screenHeight * SHEET_MAX_HEIGHT_RATIO,
     });
   });
+
+  it("pose le pied hors du défilement, toujours visible sous le contenu", async () => {
+    await renderWithSafeArea(
+      <BottomSheet
+        visible
+        title="Nouvelle carte"
+        onClose={jest.fn()}
+        footer={<Text>Continuer</Text>}
+      >
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>,
+    );
+
+    const footer = screen.getByTestId("bottom-sheet-footer");
+    const scroll = screen.getByTestId("bottom-sheet-scroll");
+
+    expect(footer).toHaveTextContent("Continuer");
+    expect(scroll).not.toContainElement(footer);
+  });
+
+  it("ne pose aucun pied quand la feuille n'en a pas", async () => {
+    await renderWithSafeArea(
+      <BottomSheet visible title="Mes informations" onClose={jest.fn()}>
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>,
+    );
+
+    expect(screen.queryByTestId("bottom-sheet-footer")).not.toBeOnTheScreen();
+  });
 });

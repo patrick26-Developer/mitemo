@@ -4,7 +4,7 @@ import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { FloatDock } from "./dock.float";
 
 describe("FloatDock", () => {
-  it("ne rend rien sans action ni retour", async () => {
+  it("ne rend rien sans action", async () => {
     await renderWithSafeArea(<FloatDock action={null} />);
 
     expect(screen.queryByTestId("float-dock")).toBeNull();
@@ -19,14 +19,22 @@ describe("FloatDock", () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it("affiche le retour d'opération au-dessus de l'action", async () => {
+  it("laisse passer les touchers autour de l'action vers le contenu", async () => {
+    await renderWithSafeArea(<FloatDock action={{ label: "Continuer", onPress: jest.fn() }} />);
+
+    expect(screen.getByTestId("float-dock")).toHaveProp("pointerEvents", "box-none");
+  });
+
+  it("transmet sa hauteur pour que le contenu réserve sa place", async () => {
+    const onLayout = jest.fn();
     await renderWithSafeArea(
-      <FloatDock
-        action={null}
-        notice={{ kind: "error", message: "Action impossible pour l'instant." }}
-      />,
+      <FloatDock action={{ label: "Continuer", onPress: jest.fn() }} onLayout={onLayout} />,
     );
 
-    expect(screen.getByText("Action impossible pour l'instant.")).toBeOnTheScreen();
+    await fireEvent(screen.getByTestId("float-dock"), "layout", {
+      nativeEvent: { layout: { height: 90 } },
+    });
+
+    expect(onLayout).toHaveBeenCalledTimes(1);
   });
 });

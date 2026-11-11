@@ -1,4 +1,4 @@
-import { FIELD_CHROME, fieldChrome } from "./theme.field";
+import { FIELD_CHROME, FOCUS_RING_ROOM, FOCUS_RING_SCROLL, fieldChrome } from "./theme.field";
 
 describe("fieldChrome", () => {
   it("pose un fond et une bordure gris au repos", () => {
@@ -31,5 +31,16 @@ describe("fieldChrome", () => {
 
     expect(fieldChrome({ focused: false, invalid: true })).toEqual(error);
     expect(fieldChrome({ focused: true, invalid: true })).toEqual(error);
+  });
+});
+
+describe("FOCUS_RING_SCROLL", () => {
+  it("laisse autour du contenu plus de place que l'anneau n'en occupe, sans décaler la mise en page", () => {
+    const ring = fieldChrome({ focused: true, invalid: false });
+    const ringExtent = Number(ring.outlineWidth) + Number(ring.outlineOffset);
+
+    expect(FOCUS_RING_ROOM).toBeGreaterThan(ringExtent);
+    expect(FOCUS_RING_SCROLL.content.padding).toBe(FOCUS_RING_ROOM);
+    expect(FOCUS_RING_SCROLL.scroll.marginHorizontal).toBe(-FOCUS_RING_ROOM);
   });
 });

@@ -1,6 +1,6 @@
 import { X } from "lucide-react-native";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Modal,
@@ -12,17 +12,20 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import type { GestureResponderHandlers } from "react-native";
+import type { GestureResponderHandlers, ScrollViewInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useFocusedFieldReveal } from "../../hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
 import { useSheetDrag } from "../../hooks/hook.sheet-drag";
 import type { SheetLayout } from "../../model/model.sheet-layout";
 import { SHEET_BOTTOM_PADDING, computeSheetLayout } from "../../model/model.sheet-layout";
+import { FOCUS_RING_SCROLL } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
+import { ToastHost } from "./host.toast";
 
 /** Props d'une feuille modale ancrée en bas de l'écran. */
 export interface BottomSheetProps {
@@ -30,6 +33,45 @@ export interface BottomSheetProps {
   readonly title: string;
   readonly onClose: () => void;
   readonly children: ReactNode;
+  /**
+   * Actions posées sous le contenu, hors du défilement : elles restent visibles
+   * au-dessus du clavier, même quand le contenu dépasse.
+   */
+  readonly footer?: ReactNode;
+}
+
+/**
+ * Garde une fermeture stable d'un rendu à l'autre : le geste de glissement
+ * n'est pas recréé en plein mouvement quand la feuille se redessine.
+ * @param translateY Translation animée de la feuille.
+ * @param onClose Fermeture demandée par le propriétaire.
+ * @returns La fermeture animée, stable.
+ */
+function useStableClose(translateY: Animated.Value, onClose: () => void): () => void {
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  return useCallback(() => closeSheet(translateY, () => onCloseRef.current()), [translateY]);
+}
+
+/**
+ * Suit le clavier, la zone sûre et la hauteur d'écran pour borner la feuille.
+ * @returns La hauteur du clavier et les dimensions de la feuille.
+ */
+function useSheetLayout(): { readonly keyboardHeight: number; readonly layout: SheetLayout } {
+  const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const { height: screenHeight } = useWindowDimensions();
+  const layout = computeSheetLayout({
+    platform: Platform.OS === "android" ? "android" : "ios",
+    keyboardHeight,
+    bottomInset: insets.bottom,
+    screenHeight,
+  });
+
+  return { keyboardHeight, layout };
 }
 
 /**
@@ -43,17 +85,9 @@ export interface BottomSheetProps {
  * @returns La feuille modale.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { visible, title, onClose, children } = props;
-  const insets = useSafeAreaInsets();
-  const keyboardHeight = useKeyboardHeight();
-  const { height: screenHeight } = useWindowDimensions();
+  const { visible, title, onClose, children, footer } = props;
+  const { keyboardHeight, layout } = useSheetLayout();
   const [translateY] = useState(() => new Animated.Value(SHEET_OPEN_OFFSET));
-  const layout = computeSheetLayout({
-    platform: Platform.OS === "android" ? "android" : "ios",
-    keyboardHeight,
-    bottomInset: insets.bottom,
-    screenHeight,
-  });
   useEffect(() => {
     if (!visible) {
       translateY.setValue(SHEET_OPEN_OFFSET);
@@ -63,7 +97,7 @@ export function BottomSheet(props: BottomSheetProps) {
     openSheet(translateY);
   }, [visible, translateY]);
 
-  const close = () => closeSheet(translateY, onClose);
+  const close = useStableClose(translateY, onClose);
 
   return (
     <Modal
@@ -74,11 +108,18 @@ export function BottomSheet(props: BottomSheetProps) {
       navigationBarTranslucent
       onRequestClose={close}
     >
-      <View className="flex-1 justify-end">
+      <View accessibilityViewIsModal importantForAccessibility="yes" className="flex-1 justify-end">
         <SheetBackdrop onPress={close} />
-        <SheetSurface translateY={translateY} title={title} onClose={close} layout={layout}>
+        <SheetSurface
+          translateY={translateY}
+          header={{ title, onClose: close }}
+          layout={layout}
+          keyboardHeight={keyboardHeight}
+          footer={footer}
+        >
           {children}
         </SheetSurface>
+        <ToastHost />
       </View>
     </Modal>
   );
@@ -87,10 +128,11 @@ export function BottomSheet(props: BottomSheetProps) {
 /** Props de la surface animée d'une feuille. */
 interface SheetSurfaceProps {
   readonly translateY: Animated.Value;
-  readonly title: string;
-  readonly onClose: () => void;
+  readonly header: { readonly title: string; readonly onClose: () => void };
   readonly layout: SheetLayout;
+  readonly keyboardHeight: number;
   readonly children: ReactNode;
+  readonly footer?: ReactNode;
 }
 
 /** Props de l'en-tête glissable d'une feuille. */
@@ -139,8 +181,10 @@ function SheetHeader(props: SheetHeaderProps) {
  * @returns La surface animée.
  */
 function SheetSurface(props: SheetSurfaceProps) {
-  const { translateY, title, onClose, layout, children } = props;
-  const panHandlers = useSheetDrag(translateY, onClose);
+  const { translateY, header, layout, keyboardHeight, children, footer } = props;
+  const panHandlers = useSheetDrag(translateY, header.onClose);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  useFocusedFieldReveal(scrollRef, keyboardHeight);
   // Une feuille colle à son contenu : ni hauteur minimale, ni rembourrage bas,
   // seuls le clavier et la zone sûre réservent de la place.
   const contentLayout = {
@@ -152,8 +196,6 @@ function SheetSurface(props: SheetSurfaceProps) {
   return (
     <Animated.View
       testID="bottom-sheet"
-      accessibilityViewIsModal
-      importantForAccessibility="yes"
       className="border-card-border"
       style={[
         styles.surface,
@@ -161,14 +203,23 @@ function SheetSurface(props: SheetSurfaceProps) {
         { transform: [{ translateY }] },
       ]}
     >
-      <SheetHeader title={title} onClose={onClose} dragHandlers={panHandlers} />
+      <SheetHeader title={header.title} onClose={header.onClose} dragHandlers={panHandlers} />
       <ScrollView
+        ref={scrollRef}
+        testID="bottom-sheet-scroll"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        style={FOCUS_RING_SCROLL.scroll}
         contentContainerClassName="gap-4"
+        contentContainerStyle={FOCUS_RING_SCROLL.content}
       >
         {children}
       </ScrollView>
+      {footer === undefined ? null : (
+        <View testID="bottom-sheet-footer" className="pt-4">
+          {footer}
+        </View>
+      )}
     </Animated.View>
   );
 }

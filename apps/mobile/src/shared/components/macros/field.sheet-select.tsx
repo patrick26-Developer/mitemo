@@ -1,6 +1,6 @@
-import { Check, ChevronDown } from "lucide-react-native";
+import { Check, ChevronDown, ChevronUp } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
@@ -44,9 +44,13 @@ function selectedLabel<Value extends string>(
   return option?.label ?? value;
 }
 
+/** Hauteur maximale de la liste dépliée, au-delà de laquelle elle défile. */
+const MENU_MAX_HEIGHT = 264;
+
 /**
- * Affiche un champ qui ouvre une liste d'options groupées, comme un `select`
- * de formulaire : la valeur choisie reste visible dans le champ.
+ * Affiche un champ qui déplie une liste d'options groupées juste sous lui,
+ * comme un `select` de formulaire : la valeur choisie reste visible dans le
+ * champ, et la liste reste dans la feuille au lieu d'en ouvrir une seconde.
  * @template Value Type de la valeur portée par chaque option.
  * @param props Libellé, groupes, valeur, choix et aide.
  * @returns Le sélecteur et sa liste.
@@ -55,6 +59,7 @@ export function SheetSelect<Value extends string>(props: SheetSelectProps<Value>
   const { label, groups, value, onChange, hint, invalid = false } = props;
   const [open, setOpen] = useState(false);
   const current = selectedLabel(groups, value);
+  const Chevron = open ? ChevronUp : ChevronDown;
 
   return (
     <View className="gap-1.5">
@@ -64,78 +69,62 @@ export function SheetSelect<Value extends string>(props: SheetSelectProps<Value>
         accessibilityLabel={`${label} : ${current}`}
         accessibilityState={{ expanded: open }}
         testID="sheet-select-trigger"
-        onPress={() => setOpen(true)}
+        onPress={() => setOpen(!open)}
         className="h-12 flex-row items-center justify-between rounded-[14px] border px-4"
         style={fieldChrome({ focused: open, invalid })}
       >
         <Text className="text-[15px] text-ink">{current}</Text>
-        <ChevronDown size={16} color={PALETTE.muted} />
+        <Chevron size={16} color={open ? PALETTE.brand : PALETTE.muted} />
       </Pressable>
+      {open ? (
+        <SelectMenu
+          groups={groups}
+          value={value}
+          onSelect={(next) => {
+            onChange(next);
+            setOpen(false);
+          }}
+        />
+      ) : null}
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
-      <SelectMenu
-        label={label}
-        groups={groups}
-        value={value}
-        visible={open}
-        onClose={() => setOpen(false)}
-        onSelect={(next) => {
-          onChange(next);
-          setOpen(false);
-        }}
-      />
     </View>
   );
 }
 
-/** Props de la liste ouverte d'un sélecteur. */
+/** Props de la liste dépliée d'un sélecteur. */
 interface SelectMenuProps<Value extends string> {
-  readonly label: string;
   readonly groups: readonly SheetSelectGroup<Value>[];
   readonly value: Value;
-  readonly visible: boolean;
-  readonly onClose: () => void;
   readonly onSelect: (value: Value) => void;
 }
 
 /**
- * Affiche la liste des options dans une feuille montante, groupée par unité.
+ * Affiche la liste des options sous le champ, groupée par unité. Elle défile
+ * d'elle-même quand elle dépasse, sans bloquer le défilement de la feuille.
  * @template Value Type de la valeur portée par chaque option.
- * @param props Libellé, groupes, valeur, visibilité et choix.
- * @returns La liste ouverte.
+ * @param props Groupes, valeur courante et choix.
+ * @returns La liste dépliée.
  */
 function SelectMenu<Value extends string>(props: SelectMenuProps<Value>) {
-  const { label, groups, value, visible, onClose, onSelect } = props;
+  const { groups, value, onSelect } = props;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onRequestClose={onClose}
+    <View
+      testID="sheet-select-menu"
+      className="rounded-[14px] border border-card-border bg-white"
+      style={styles.menu}
     >
-      <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Fermer la liste"
-          className="absolute inset-0 bg-ink/60"
-          onPress={onClose}
-        />
-        <View
-          testID="sheet-select-menu"
-          className="max-h-[70%] gap-3 rounded-t-[26px] border border-card-border bg-white px-5 pb-6 pt-4"
-        >
-          <Text accessibilityRole="header" className="text-[17px] font-bold text-ink">
-            {label}
-          </Text>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4">
-            {groups.map((group) => (
-              <SelectGroup key={group.title} group={group} value={value} onSelect={onSelect} />
-            ))}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
+      <ScrollView
+        nestedScrollEnabled
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator
+        contentContainerClassName="gap-3 p-2"
+      >
+        {groups.map((group) => (
+          <SelectGroup key={group.title} group={group} value={value} onSelect={onSelect} />
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -156,8 +145,10 @@ function SelectGroup<Value extends string>(props: SelectGroupProps<Value>) {
   const { group, value, onSelect } = props;
 
   return (
-    <View className="gap-2">
-      <Text className="text-[12px] font-semibold uppercase text-muted">{group.title}</Text>
+    <View className="gap-1">
+      <Text className="px-2 pt-1 text-[12px] font-semibold uppercase text-muted">
+        {group.title}
+      </Text>
       {group.options.map((option) => (
         <SelectOption
           key={option.value}
@@ -192,8 +183,8 @@ function SelectOption<Value extends string>(props: SelectOptionProps<Value>) {
       accessibilityState={{ selected }}
       testID={`sheet-select-option-${option.value}`}
       onPress={onSelect}
-      className={`min-h-11 flex-row items-center justify-between rounded-[14px] border px-4 py-2.5 ${
-        selected ? "border-brand bg-brand-veil" : "border-card-border bg-white"
+      className={`min-h-11 flex-row items-center justify-between rounded-[10px] px-3 py-2.5 ${
+        selected ? "bg-brand-veil" : "bg-white"
       }`}
     >
       <Text className="text-[15px] text-ink">{option.label}</Text>
@@ -201,3 +192,16 @@ function SelectOption<Value extends string>(props: SelectOptionProps<Value>) {
     </Pressable>
   );
 }
+
+/** Ombre et hauteur de la liste dépliée, que Tailwind n'exprime pas côté natif. */
+const styles = StyleSheet.create({
+  menu: {
+    maxHeight: MENU_MAX_HEIGHT,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+});

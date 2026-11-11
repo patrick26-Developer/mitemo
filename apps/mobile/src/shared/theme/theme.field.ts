@@ -22,6 +22,23 @@ const RING_WIDTH = 3;
 /** Écart entre l'anneau et la bordure, en points. */
 const RING_OFFSET = 1;
 
+/**
+ * Place réservée autour du contenu défilant d'une feuille, en points, pour
+ * que l'anneau de focus, dessiné hors de la bordure, ne soit pas coupé par le
+ * bord de la zone de défilement.
+ */
+export const FOCUS_RING_ROOM = RING_WIDTH + RING_OFFSET + 1;
+
+/**
+ * Styles d'une zone de défilement qui contient des champs : le contenu gagne
+ * une marge intérieure pour l'anneau, que la zone reprend par une marge
+ * négative, si bien que la mise en page ne bouge pas.
+ */
+export const FOCUS_RING_SCROLL = {
+  scroll: { marginHorizontal: -FOCUS_RING_ROOM, marginVertical: -FOCUS_RING_ROOM },
+  content: { padding: FOCUS_RING_ROOM },
+} as const;
+
 /** État visuel d'un champ. */
 export interface FieldChromeState {
   readonly focused: boolean;

@@ -1,12 +1,12 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { CalendarDays } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 import { formatDate } from "../../format/format.date";
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
-import { SheetActionRow } from "./row.sheet-actions";
 
 /** Props d'un champ de date de feuille. */
 export interface SheetDateFieldProps {
@@ -32,149 +32,132 @@ function isoDay(date: Date): string {
 }
 
 /**
- * Ouvre le calendrier à la date choisie, ou à la première date permise.
- * @param value Date actuelle, éventuellement vide.
- * @param minimum Première date proposée.
- * @returns La date affichée par le calendrier.
+ * Convertit un jour ISO 8601 en date, à minuit UTC.
+ * @param day Jour au format `AAAA-MM-JJ`.
+ * @returns La date correspondante.
  */
-function initialDate(value: string, minimum: string): Date {
-  return new Date(`${value === "" ? minimum : value}T00:00:00.000Z`);
+function utcDate(day: string): Date {
+  return new Date(`${day}T00:00:00.000Z`);
 }
 
 /**
- * Affiche la date choisie et ouvre le calendrier natif au toucher, pour éviter
- * toute saisie de date au clavier.
+ * Transmet le jour choisi quand le calendrier a été validé, et rien quand il a
+ * été fermé sans choix.
+ * @param onChange Réception du jour choisi.
+ * @returns Le gestionnaire du calendrier natif.
+ */
+function pickHandler(onChange: (isoDate: string) => void) {
+  return (event: DateTimePickerEvent, date?: Date) => {
+    if (event.type === "set" && date !== undefined) onChange(isoDay(date));
+  };
+}
+
+/**
+ * Affiche la date choisie dans un champ et ouvre le calendrier natif au
+ * toucher, pour éviter toute saisie de date au clavier. Sur iOS, le calendrier
+ * se déplie sous le champ, dans la feuille ; sur Android, le dialogue natif
+ * s'ouvre une seule fois.
  * @param props Libellé, date, minimum, aide et changement.
  * @returns Le champ de date et son calendrier.
  */
 export function SheetDateField(props: SheetDateFieldProps) {
   const { label, value, minimum, onChange, hint, invalid = false } = props;
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState<Date>(() => initialDate(value, minimum));
-  const show = () => {
-    setPending(initialDate(value, minimum));
-    setOpen(true);
+  const shown = utcDate(value === "" ? minimum : value);
+  const pick = (isoDate: string) => {
+    setOpen(false);
+    onChange(isoDate);
+  };
+  const toggle = () => {
+    if (Platform.OS !== "android") {
+      setOpen(!open);
+      return;
+    }
+    DateTimePickerAndroid.open({
+      value: shown,
+      mode: "date",
+      minimumDate: utcDate(minimum),
+      onChange: pickHandler(onChange),
+    });
   };
 
   return (
     <View className="gap-1.5">
       <Text className="text-[12px] font-semibold uppercase text-muted">{label}</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${label} : ${value === "" ? "aucune date" : formatDate(value)}`}
-        testID="sheet-date-trigger"
-        onPress={show}
-        className="h-12 flex-row items-center justify-between rounded-[14px] border px-4"
-        style={fieldChrome({ focused: open, invalid })}
-      >
-        <Text className={`text-[15px] ${value === "" ? "text-muted" : "text-ink"}`}>
-          {value === "" ? "Choisir une date" : formatDate(value)}
-        </Text>
-        <CalendarDays size={16} color={PALETTE.muted} />
-      </Pressable>
+      <DateTrigger label={label} value={value} open={open} invalid={invalid} onPress={toggle} />
+      {open ? <DateCalendar shown={shown} minimum={minimum} onPick={pick} /> : null}
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
-      <DateMenu
-        label={label}
-        visible={open}
-        pending={pending}
-        minimum={minimum}
-        onPending={setPending}
-        onCancel={() => setOpen(false)}
-        onConfirm={() => {
-          onChange(isoDay(pending));
-          setOpen(false);
-        }}
-      />
     </View>
   );
 }
 
-/** Props de la carte du calendrier. */
-interface DateCardProps {
+/** Props du champ qui affiche la date choisie. */
+interface DateTriggerProps {
   readonly label: string;
-  readonly pending: Date;
-  readonly minimum: string;
-  readonly onPending: (date: Date) => void;
-  readonly onCancel: () => void;
-  readonly onConfirm: () => void;
+  readonly value: string;
+  readonly open: boolean;
+  readonly invalid: boolean;
+  readonly onPress: () => void;
 }
 
 /**
- * Affiche le calendrier natif, la date choisie et les actions de validation.
- * @param props Libellé, date en cours, minimum et actions.
- * @returns La carte du calendrier.
+ * Affiche la date choisie dans un cadre de champ, ou l'invitation à choisir.
+ * @param props Libellé, date, ouverture, erreur et toucher.
+ * @returns Le champ touchable.
  */
-function DateCard(props: DateCardProps) {
-  const { label, pending, minimum, onPending, onCancel, onConfirm } = props;
+function DateTrigger(props: DateTriggerProps) {
+  const { label, value, open, invalid, onPress } = props;
+  const empty = value === "";
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${label} : ${empty ? "aucune date" : formatDate(value)}`}
+      accessibilityState={{ expanded: open }}
+      testID="sheet-date-trigger"
+      onPress={onPress}
+      className="h-12 flex-row items-center justify-between rounded-[14px] border px-4"
+      style={fieldChrome({ focused: open, invalid })}
+    >
+      <Text className={`text-[15px] ${empty ? "text-muted" : "text-ink"}`}>
+        {empty ? "Choisir une date" : formatDate(value)}
+      </Text>
+      <CalendarDays size={16} color={open ? PALETTE.brand : PALETTE.muted} />
+    </Pressable>
+  );
+}
+
+/** Props du calendrier déplié sous le champ. */
+interface DateCalendarProps {
+  readonly shown: Date;
+  readonly minimum: string;
+  readonly onPick: (isoDate: string) => void;
+}
+
+/**
+ * Déplie le calendrier natif d'iOS sous le champ : toucher un jour le retient
+ * et replie le calendrier, sans bouton de validation à part.
+ * @param props Date affichée, minimum et choix.
+ * @returns Le calendrier déplié.
+ */
+function DateCalendar(props: DateCalendarProps) {
+  const { shown, minimum, onPick } = props;
 
   return (
     <View
       testID="sheet-date-menu"
-      className="gap-4 rounded-t-[26px] border border-card-border bg-white px-5 pb-6 pt-4"
+      className="overflow-hidden rounded-[14px] border border-card-border bg-white px-2"
     >
-      <Text accessibilityRole="header" className="text-[17px] font-bold text-ink">
-        {label}
-      </Text>
       <DateTimePicker
-        value={pending}
+        value={shown}
         mode="date"
-        display="spinner"
+        display="inline"
         locale="fr-FR"
-        minimumDate={new Date(`${minimum}T00:00:00.000Z`)}
-        onChange={(_event, date) => {
-          if (date !== undefined) onPending(date);
-        }}
-      />
-      <SheetActionRow
-        secondary={{ label: "Annuler", onPress: onCancel }}
-        primary={{ label: "Valider", onPress: onConfirm }}
+        themeVariant="light"
+        accentColor={PALETTE.brand}
+        minimumDate={utcDate(minimum)}
+        onChange={pickHandler(onPick)}
       />
     </View>
-  );
-}
-/** Props du calendrier ouvert d'un champ de date. */
-interface DateMenuProps {
-  readonly label: string;
-  readonly visible: boolean;
-  readonly pending: Date;
-  readonly minimum: string;
-  readonly onPending: (date: Date) => void;
-  readonly onCancel: () => void;
-  readonly onConfirm: () => void;
-}
-
-/**
- * Affiche le calendrier natif dans une feuille montante, avec validation.
- * @param props Libellé, visibilité, date en cours et actions.
- * @returns Le calendrier ouvert.
- */
-function DateMenu(props: DateMenuProps) {
-  const { label, visible, pending, minimum, onPending, onCancel, onConfirm } = props;
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onRequestClose={onCancel}
-    >
-      <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Fermer le calendrier"
-          className="absolute inset-0 bg-ink/60"
-          onPress={onCancel}
-        />
-        <DateCard
-          label={label}
-          pending={pending}
-          minimum={minimum}
-          onPending={onPending}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-        />
-      </View>
-    </Modal>
   );
 }
