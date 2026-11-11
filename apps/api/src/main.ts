@@ -1,18 +1,10 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { setupOpenApi } from "./shared/config/openapi.js";
 import { AppModule } from "./app.module.js";
 import { readPort } from "./shared/config/port.js";
 
 const app = await NestFactory.create(AppModule, { rawBody: true });
 app.enableShutdownHooks();
-if (
-  process.env["NODE_ENV"] !== "production" &&
-  process.env["RENDER"] !== "true" &&
-  process.env["MITEMO_DEPLOYMENT"] === undefined &&
-  process.env["MITEMO_DEMO_AUTH"] === "true"
-) {
-  const config = new DocumentBuilder().setTitle("Mitemo — Démonstration").addBearerAuth().build();
-  SwaggerModule.setup("docs", app, SwaggerModule.createDocument(app, config));
-}
+setupOpenApi(app);
 await app.listen(readPort(process.env["PORT"]), "0.0.0.0");
