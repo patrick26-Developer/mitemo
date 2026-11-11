@@ -1,4 +1,5 @@
-import type { TontineId } from "./identifiers.ts";
+import type { IsoDateTime } from "./datetime.ts";
+import type { MemberId, RoundId, TontineId } from "./identifiers.ts";
 import type { MoneyDto } from "./money.ts";
 
 /**
@@ -60,4 +61,47 @@ export interface CreateTontineResponse {
   readonly contributionAmount: MoneyDto;
   readonly participantCount: number;
   readonly frequency: CycleFrequency;
+}
+
+/**
+ * Retrait de la cagnotte d'un tour par son bénéficiaire. La commission est
+ * calculée par l'API, jamais par le client. La requête porte l'en-tête
+ * `Idempotency-Key`.
+ */
+export interface WithdrawTontineRequest {
+  readonly tontineId: TontineId;
+  readonly roundId: RoundId;
+}
+
+/** Résultat d'un retrait de cagnotte, une fois le tour distribué. */
+export interface WithdrawTontineResponse {
+  readonly tontineId: TontineId;
+  readonly memberId: MemberId;
+  /** Cagnotte brute : cotisation unitaire × (participants − 1). */
+  readonly grossAmount: MoneyDto;
+  readonly commission: MoneyDto;
+  /** Montant effectivement crédité sur le solde disponible. */
+  readonly netAmount: MoneyDto;
+  /** Rang du tour suivant, `null` quand la tontine est terminée. */
+  readonly nextRound: number | null;
+  readonly withdrawnAt: IsoDateTime;
+}
+
+/**
+ * Transfert d'un montant du solde disponible vers un autre membre de la
+ * tontine. La requête porte l'en-tête `Idempotency-Key`.
+ */
+export interface TransferToMemberRequest {
+  readonly tontineId: TontineId;
+  readonly recipientId: MemberId;
+  /** Montant strictement positif, en FCFA entiers. */
+  readonly amount: MoneyDto;
+}
+
+/** Résultat d'un transfert vers un membre de la tontine. */
+export interface TransferToMemberResponse {
+  readonly tontineId: TontineId;
+  readonly recipientId: MemberId;
+  readonly amount: MoneyDto;
+  readonly transferredAt: IsoDateTime;
 }
