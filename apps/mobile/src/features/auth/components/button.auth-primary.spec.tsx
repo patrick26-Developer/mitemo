@@ -21,4 +21,13 @@ describe("AuthPrimaryButton", () => {
     expect(onPress).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Se connecter" })).toBeDisabled();
   });
+
+  it("reprend le dessin des boutons pleins, bordure de la couleur du fond", async () => {
+    await render(<AuthPrimaryButton label="Se connecter" onPress={jest.fn()} />);
+
+    expect(screen.getByTestId("auth-primary-face")).toHaveStyle({
+      backgroundColor: "#0A3BE0",
+      borderColor: "#0A3BE0",
+    });
+  });
 });

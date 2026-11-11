@@ -23,4 +23,13 @@ describe("MarkerProgress", () => {
 
     expect(screen.getByText("+4")).toBeOnTheScreen();
   });
+
+  it("prend la nuance vive de la teinte de la carte", async () => {
+    await render(<MarkerProgress done={2} total={4} accent="#CFD8FF" />);
+
+    expect(screen.getAllByTestId("marker-filled")[0]).toHaveStyle({ backgroundColor: "#2044DF" });
+    expect(screen.getAllByTestId("marker-empty")[0]).toHaveStyle({
+      backgroundColor: "#2044DF4D",
+    });
+  });
 });
