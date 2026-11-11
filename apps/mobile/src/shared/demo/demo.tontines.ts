@@ -16,7 +16,7 @@ export const INITIAL_TONTINES: readonly Tontine[] = [
     state: "ACTIVE",
     beneficiaryId: "m2",
     description:
-      "Tontine hebdomadaire du marché Tolal. Chaque membre cotise 5 000 FCFA par semaine et reçoit la cagnotte à son tour.",
+      "Tontine hebdomadaire du marché Tolal. Chaque membre cotise 5 000 FCFA par semaine et reçoit la restourne à son tour.",
     headerColors: ["#2CCA86", "#62F79D"],
     invitationCode: null,
     members: [
@@ -42,7 +42,7 @@ export const INITIAL_TONTINES: readonly Tontine[] = [
     state: "ACTIVE",
     beneficiaryId: "m5",
     description:
-      "Tontine mensuelle du groupe d'amis. La cagnotte est remise à un membre différent chaque mois.",
+      "Tontine mensuelle du groupe d'amis. La restourne est remise à un membre différent chaque mois.",
     headerColors: ["#F5B94A", "#FAD98C"],
     invitationCode: null,
     members: [

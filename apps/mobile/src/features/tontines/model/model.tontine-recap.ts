@@ -108,7 +108,7 @@ function roundsLeft(tontine: Tontine): number {
 export function tontineFactRows(tontine: Tontine): readonly TontineFactRow[] {
   const pot: TontineFactRow = {
     kind: "pot",
-    label: "Cagnotte du tour",
+    label: "Restourne du tour",
     value: fcfa(tontinePot(tontine)),
   };
   const remaining: TontineFactRow = {

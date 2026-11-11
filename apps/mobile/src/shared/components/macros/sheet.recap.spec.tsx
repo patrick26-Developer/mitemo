@@ -8,12 +8,12 @@ describe("SheetRecap", () => {
     await renderWithSafeArea(
       <SheetRecap
         title="Récapitulatif"
-        rows={[{ label: "Cagnotte par tour", value: "25 000 FCFA" }]}
+        rows={[{ label: "Restourne par tour", value: "25 000 FCFA" }]}
       />,
     );
 
     expect(screen.getByText("Récapitulatif")).toBeOnTheScreen();
-    expect(screen.getByText("Cagnotte par tour")).toBeOnTheScreen();
+    expect(screen.getByText("Restourne par tour")).toBeOnTheScreen();
     expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
   });
 

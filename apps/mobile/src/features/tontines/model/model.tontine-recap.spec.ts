@@ -56,7 +56,7 @@ describe("tontineFactRows", () => {
     });
 
     expect(tontineFactRows(tontine)).toEqual([
-      { kind: "pot", label: "Cagnotte du tour", value: "10 000 FCFA" },
+      { kind: "pot", label: "Restourne du tour", value: "10 000 FCFA" },
       { kind: "beneficiary", label: "Bénéficiaire", value: "Membre m2" },
       { kind: "paid", label: "Cotisations reçues", value: "1 sur 3" },
       { kind: "remaining", label: "Tours restants", value: "2" },
