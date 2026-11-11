@@ -5,6 +5,7 @@ import {
   cardCapabilities,
   cardGoal,
   cardProgress,
+  createId,
   formatFrequency,
   isTontineAdmin,
   isTontineBeneficiary,
@@ -204,5 +205,18 @@ describe("formatFrequency", () => {
 
   it("garde « mois » invariable", () => {
     expect(formatFrequency({ unit: "mois", interval: 3 })).toBe("toutes les 3 mois");
+  });
+});
+
+describe("createId", () => {
+  it("préfixe l'identifiant tiré par le générateur", () => {
+    expect(createId("tontine", () => "uuid-1")).toBe("tontine-uuid-1");
+  });
+
+  it("tire par défaut un UUID différent à chaque appel", () => {
+    const first = createId("card");
+
+    expect(first).toMatch(/^card-[0-9a-f-]{36}$/);
+    expect(createId("card")).not.toBe(first);
   });
 });

@@ -1,3 +1,4 @@
+import { randomUUID } from "expo-crypto";
 import type { CycleFrequencyUnit, TontineMemberRole } from "@mitemo/contracts";
 
 /** Identifiant du membre connecté dans les données locales. */
@@ -224,10 +225,12 @@ export function beneficiaryName(tontine: Tontine): string {
 }
 
 /**
- * Construit un identifiant local unique, stable pour une session.
+ * Construit un identifiant local unique, tiré du générateur cryptographique
+ * du système plutôt que de l'heure.
  * @param prefix Préfixe qui rattache l'identifiant à son type d'entité.
- * @returns L'identifiant, par exemple « tontine-m3k2-1 ».
+ * @param generate Générateur d'UUID, injecté pour les tests.
+ * @returns L'identifiant, par exemple « tontine-6f1c…-9b2e ».
  */
-export function createId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+export function createId(prefix: string, generate: () => string = randomUUID): string {
+  return `${prefix}-${generate()}`;
 }

@@ -5,6 +5,7 @@ import type {
   RegisterPushTokenResponse,
 } from "@mitemo/contracts";
 import { IDEMPOTENCY_KEY_HEADER } from "@mitemo/contracts";
+import { randomUUID } from "expo-crypto";
 
 /** URL de base de l'API, fixée à la compilation par Expo. */
 const API_BASE_URL = process.env["EXPO_PUBLIC_API_URL"] ?? "";
@@ -123,11 +124,12 @@ export async function apiRequest<ResponseBody>(options: ApiRequestOptions): Prom
 }
 
 /**
- * Construit une clé d'idempotence unique pour une écriture.
- * @returns La clé, courte et sans caractère réservé.
+ * Construit une clé d'idempotence unique pour une écriture. Un UUID v4 tiré du
+ * générateur cryptographique ne peut pas entrer en collision entre deux appareils.
+ * @returns La clé, préfixée par son origine.
  */
 function createIdempotencyKey(): string {
-  return `mobile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `mobile-${randomUUID()}`;
 }
 
 /** Points d'entrée de l'API consommés par le mobile. */
