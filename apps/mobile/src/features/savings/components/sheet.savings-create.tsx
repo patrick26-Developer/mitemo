@@ -1,4 +1,3 @@
-import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
@@ -168,7 +167,6 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
       ) : (
         <SavingsRhythmStep form={form} invalid={invalid} tontines={tontines} onChange={update} />
       )}
-      {error === null ? null : <FeedbackBanner kind="error" message={error} />}
       <SheetStepsFooter
         isFirst={steps.isFirst}
         isLast={steps.isLast}

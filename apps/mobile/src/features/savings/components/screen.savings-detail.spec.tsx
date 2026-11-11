@@ -1,5 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 
+import { useToastStore } from "../../../shared/feedback/store.toast";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import {
   firstOf,
@@ -14,6 +15,7 @@ import { SavingsDetailScreen } from "./screen.savings-detail";
 describe("SavingsDetailScreen", () => {
   beforeEach(() => {
     usePortfolioStore.getState().reset();
+    useToastStore.getState().dismiss();
   });
 
   it("affiche la carte demandée", async () => {
@@ -38,12 +40,12 @@ describe("SavingsDetailScreen", () => {
     expect(screen.getByRole("button", { name: "Retirer" })).toBeOnTheScreen();
   });
 
-  it("ajoute un marqueur et confirme l'opération dans le dock", async () => {
+  it("ajoute un marqueur et l'annonce en toast", async () => {
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 000 FCFA" }));
 
-    expect(await screen.findByText("Un marqueur a été ajouté.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Un marqueur a été ajouté.");
     expect(firstOf(usePortfolioStore.getState().cards).saved).toBe(25_000n);
   });
 
@@ -55,9 +57,9 @@ describe("SavingsDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Retirer l'épargne" }));
 
-    expect(
-      await screen.findByText("L'épargne a rejoint votre solde disponible."),
-    ).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe(
+      "L'épargne a rejoint votre solde disponible.",
+    );
     expect(firstOf(usePortfolioStore.getState().cards).saved).toBe(0n);
   });
 
@@ -81,7 +83,7 @@ describe("SavingsDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Régler la cotisation" }));
 
-    expect(await screen.findByText("Cotisation de la tontine réglée.")).toBeOnTheScreen();
+    expect(useToastStore.getState().toast?.message).toBe("Cotisation de la tontine réglée.");
     expect(firstOf(usePortfolioStore.getState().tontines).members[0]?.paidCurrentRound).toBe(true);
   });
 

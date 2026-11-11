@@ -12,7 +12,6 @@ import { SavingsDetailDock } from "./dock.savings-detail";
  */
 function makeActions(over: Partial<SavingsActionsState> = {}): SavingsActionsState {
   return {
-    feedback: null,
     contribute: jest.fn(),
     withdraw: jest.fn(),
     transfer: jest.fn(),
@@ -56,18 +55,5 @@ describe("SavingsDetailDock", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Retirer" })).not.toBeOnTheScreen();
-  });
-
-  it("affiche le retour d'opération au-dessus des actions", async () => {
-    await renderWithSafeArea(
-      <SavingsDetailDock
-        item={makeCard()}
-        actions={makeActions({
-          feedback: { kind: "success", message: "Un marqueur a été ajouté." },
-        })}
-      />,
-    );
-
-    expect(screen.getByText("Un marqueur a été ajouté.")).toBeOnTheScreen();
   });
 });

@@ -6,9 +6,6 @@ import { renderWithSafeArea } from "../../../shared/testing/util.render-with-saf
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontineDetailDock } from "./dock.tontine-detail";
 
-/** Montant de la cotisation de la tontine de test, en FCFA. */
-const CONTRIBUTION = 5_000;
-
 /**
  * Construit les actions d'une tontine pour les tests.
  * @param over Actions à remplacer.
@@ -16,7 +13,6 @@ const CONTRIBUTION = 5_000;
  */
 function makeActions(over: Partial<TontineActionsState> = {}): TontineActionsState {
   return {
-    feedback: null,
     addMember: jest.fn(),
     start: jest.fn(),
     contribute: jest.fn(),
@@ -97,18 +93,5 @@ describe("TontineDetailDock", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Activer la restourne" }));
 
     expect(actions.start).toHaveBeenCalledTimes(1);
-  });
-
-  it("affiche le retour d'opération au-dessus des actions", async () => {
-    await renderWithSafeArea(
-      <TontineDetailDock
-        item={makeTontine()}
-        actions={makeActions({
-          feedback: { kind: "success", message: `Cotisation de ${CONTRIBUTION} FCFA réglée.` },
-        })}
-      />,
-    );
-
-    expect(screen.getByText(`Cotisation de ${CONTRIBUTION} FCFA réglée.`)).toBeOnTheScreen();
   });
 });

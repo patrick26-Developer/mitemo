@@ -25,6 +25,7 @@ import { PALETTE } from "../../theme/theme.palette";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
+import { ToastHost } from "./host.toast";
 
 /** Props d'une feuille modale ancrée en bas de l'écran. */
 export interface BottomSheetProps {
@@ -118,6 +119,7 @@ export function BottomSheet(props: BottomSheetProps) {
         >
           {children}
         </SheetSurface>
+        <ToastHost />
       </View>
     </Modal>
   );

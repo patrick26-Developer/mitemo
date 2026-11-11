@@ -2,8 +2,6 @@ import { StyleSheet, View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { FeedbackBanner } from "../atoms/banner.feedback";
-import type { FeedbackKind } from "../atoms/banner.feedback";
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import type { SheetButtonTone } from "../atoms/button.sheet-primary";
 import { SheetSecondaryButton } from "../atoms/button.sheet-secondary";
@@ -30,20 +28,12 @@ export interface DockAction {
   readonly accent?: string;
 }
 
-/** Retour d'opération affiché au-dessus des actions du dock. */
-export interface DockNotice {
-  readonly kind: FeedbackKind;
-  readonly message: string;
-}
-
 /** Props du dock d'actions flottant d'un écran de détail. */
 export interface ActionsDockProps {
   /** Action principale, absente quand aucune opération n'est possible. */
   readonly primary: DockAction | null;
   /** Action secondaire, affichée à gauche de l'action principale. */
   readonly secondary?: DockAction | null;
-  /** Dernier retour d'opération, affiché au-dessus des actions. */
-  readonly notice?: DockNotice | null;
   /** Mesure du dock, pour que le contenu réserve sa hauteur réelle. */
   readonly onLayout?: (event: LayoutChangeEvent) => void;
 }
@@ -131,16 +121,16 @@ function DockActions(props: DockActionsProps) {
 /**
  * Pose les actions principales d'un écran de détail en bas, au-dessus de la
  * zone sûre, sans fond ni barre : seuls les boutons flottent sur le contenu,
- * qui reste touchable entre eux. Le dock reste visible quand le contenu défile
- * et affiche le dernier retour d'opération.
- * @param props Action principale, action secondaire, retour d'opération et mesure.
+ * qui reste touchable entre eux. Le dock reste visible quand le contenu défile ;
+ * les retours d'opération sortent en toast.
+ * @param props Action principale, action secondaire et mesure.
  * @returns Le dock d'actions, ou rien quand aucune action n'est possible.
  */
 export function ActionsDock(props: ActionsDockProps) {
-  const { primary, secondary = null, notice = null, onLayout } = props;
+  const { primary, secondary = null, onLayout } = props;
   const insets = useSafeAreaInsets();
 
-  if (primary === null && secondary === null && notice === null) return null;
+  if (primary === null && secondary === null) return null;
 
   return (
     <View
@@ -150,7 +140,6 @@ export function ActionsDock(props: ActionsDockProps) {
       className="gap-2.5"
       style={[styles.dock, { paddingBottom: Math.max(insets.bottom, MIN_BOTTOM_PADDING) }]}
     >
-      {notice === null ? null : <FeedbackBanner kind={notice.kind} message={notice.message} />}
       <DockActions primary={primary} secondary={secondary} />
     </View>
   );
