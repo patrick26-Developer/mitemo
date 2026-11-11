@@ -66,6 +66,12 @@ describe("HomeScreen", () => {
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
   });
 
+  it("coupe l'effet de bord natif avec une vue de garde placée avant le défilement", async () => {
+    await renderWithSafeArea(<HomeScreen />);
+
+    expect(screen.getByTestId("home-scroll-guard")).toHaveStyle({ height: 0 });
+  });
+
   it("affiche des icônes claires quand l'accueil a le focus", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
