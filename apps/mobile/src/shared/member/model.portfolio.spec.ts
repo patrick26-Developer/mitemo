@@ -203,8 +203,9 @@ describe("formatFrequency", () => {
     expect(formatFrequency({ unit: "semaine", interval: 2 })).toBe("toutes les 2 semaines");
   });
 
-  it("garde « mois » invariable", () => {
-    expect(formatFrequency({ unit: "mois", interval: 3 })).toBe("toutes les 3 mois");
+  it("accorde au masculin les jours et garde « mois » invariable", () => {
+    expect(formatFrequency({ unit: "jour", interval: 2 })).toBe("tous les 2 jours");
+    expect(formatFrequency({ unit: "mois", interval: 3 })).toBe("tous les 3 mois");
   });
 });
 

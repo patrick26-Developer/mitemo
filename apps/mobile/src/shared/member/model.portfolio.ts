@@ -69,11 +69,11 @@ export interface CardCapabilities {
   readonly canTransfer: boolean;
 }
 
-/** Pluriel de chaque unité de fréquence, pour les libellés. */
+/** Pluriel de chaque unité de fréquence, précédé de son déterminant accordé. */
 const FREQUENCY_PLURALS: Readonly<Record<CycleFrequencyUnit, string>> = {
-  jour: "jours",
-  semaine: "semaines",
-  mois: "mois",
+  jour: "tous les {n} jours",
+  semaine: "toutes les {n} semaines",
+  mois: "tous les {n} mois",
 };
 
 /**
@@ -202,7 +202,7 @@ export function totalSaved(cards: readonly SavingsCard[]): bigint {
 export function formatFrequency(frequency: TontineFrequency): string {
   if (frequency.interval === 1) return `chaque ${frequency.unit}`;
 
-  return `toutes les ${frequency.interval} ${FREQUENCY_PLURALS[frequency.unit]}`;
+  return FREQUENCY_PLURALS[frequency.unit].replace("{n}", String(frequency.interval));
 }
 
 /**
