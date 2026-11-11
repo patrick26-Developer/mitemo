@@ -23,16 +23,15 @@ export function TontineDetailScreen(props: TontineDetailScreenProps) {
 
   return (
     <ScreenFrame>
-      <DetailHeader
-        title={tontine?.name ?? "Tontine"}
-        {...(tontine === undefined ? {} : { accent: tontine.headerColors[0] })}
-      />
       {tontine === undefined ? (
-        <EmptyState
-          icon={TAB_ICONS.tontines}
-          title="Tontine introuvable"
-          message="Cette tontine n'existe pas ou a été supprimée."
-        />
+        <>
+          <DetailHeader title="Tontine" />
+          <EmptyState
+            icon={TAB_ICONS.tontines}
+            title="Tontine introuvable"
+            message="Cette tontine n'existe pas ou a été supprimée."
+          />
+        </>
       ) : (
         <TontineDetailContent item={tontine} />
       )}

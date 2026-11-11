@@ -78,4 +78,15 @@ describe("usePortfolioFeedback", () => {
 
     expect(shownToast()).toEqual({ kind: "success", message: "Second versement." });
   });
+
+  it("reste silencieux quand l'opération réussie n'a pas de message", async () => {
+    useToastStore.getState().dismiss();
+    const { result } = await renderHook(() => usePortfolioFeedback());
+
+    await act(() => {
+      result.current.run(() => undefined, null);
+    });
+
+    expect(shownToast()).toBeNull();
+  });
 });

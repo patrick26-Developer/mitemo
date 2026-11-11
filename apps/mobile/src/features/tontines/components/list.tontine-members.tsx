@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
 
-import type { Tontine } from "../../../shared/member/model.portfolio";
+import { ConfirmSheet } from "../../../shared/components/macros/sheet.confirm";
+import type { Tontine, TontineMember } from "../../../shared/member/model.portfolio";
 import {
   isTontineAdmin,
   paidMemberCount,
   SELF_MEMBER_ID,
 } from "../../../shared/member/model.portfolio";
+import { accentColors } from "../../../shared/model/model.accent-color";
+import { memberTurns } from "../model/model.member-turns";
 import { TontineMemberSheet } from "./sheet.tontine-member";
 import { TontineMemberRow } from "./row.tontine-member";
 
@@ -17,42 +20,66 @@ export interface TontineMemberListProps {
 }
 
 /**
- * Affiche les membres de la tontine, met en avant celui dont c'est le tour et
- * ouvre son historique de cotisation au clic. Un administrateur peut retirer
- * les autres membres ; un simple membre voit la même liste sans gestion.
+ * Affiche les membres dans l'ordre de passage, celui dont c'est le tour en
+ * tête, et ouvre l'historique de cotisation d'un membre au clic. Un
+ * administrateur peut retirer les autres membres avant le départ, après
+ * confirmation ; un simple membre voit la même liste sans gestion.
  * @param props Tontine affichée et action de retrait.
- * @returns La liste des membres et la feuille d'historique.
+ * @returns La liste des membres, la feuille d'historique et la confirmation de retrait.
  */
 export function TontineMemberList(props: TontineMemberListProps) {
   const { item, onRemove } = props;
-  const admin = isTontineAdmin(item);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = item.members.find((member) => member.id === selectedId) ?? null;
+  const [selected, setSelected] = useState<TontineMember | null>(null);
+  const [removing, setRemoving] = useState<TontineMember | null>(null);
 
   return (
     <View className="gap-2">
-      <View className="flex-row items-center justify-between pb-1">
-        <Text accessibilityRole="header" className="text-[16px] font-medium text-ink">
-          Membres
-        </Text>
-        <Text className="text-[13px] text-muted">{membersCount(item)}</Text>
-      </View>
-      {item.members.map((member) => (
+      <MembersHeader item={item} />
+      {memberTurns(item).map((entry) => (
         <TontineMemberRow
-          key={member.id}
-          member={member}
-          canRemove={admin && member.id !== SELF_MEMBER_ID && item.state === "PENDING"}
-          onRemove={() => onRemove(member.id)}
-          focused={item.state === "ACTIVE" && member.id === item.beneficiaryId}
-          onPress={() => setSelectedId(member.id)}
+          key={entry.member.id}
+          entry={entry}
+          {...focusOf(item, entry.member)}
+          {...(canRemove(item, entry.member) ? { onRemove: () => setRemoving(entry.member) } : {})}
+          onPress={() => setSelected(entry.member)}
         />
       ))}
       <TontineMemberSheet
         visible={selected !== null}
         item={item}
         member={selected}
-        onClose={() => setSelectedId(null)}
+        onClose={() => setSelected(null)}
       />
+      <ConfirmSheet
+        content={removalContent(item, removing)}
+        visible={removing !== null}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => {
+          if (removing !== null) onRemove(removing.id);
+          setRemoving(null);
+        }}
+      />
+    </View>
+  );
+}
+
+/** Props de l'en-tête de la liste. */
+interface MembersHeaderProps {
+  readonly item: Tontine;
+}
+
+/**
+ * Titre de la liste et compte des inscrits ou des cotisations reçues.
+ * @param props Tontine affichée.
+ * @returns L'en-tête de la liste.
+ */
+function MembersHeader(props: MembersHeaderProps) {
+  return (
+    <View className="flex-row items-center justify-between pb-1">
+      <Text accessibilityRole="header" className="text-[16px] font-medium text-ink">
+        Membres
+      </Text>
+      <Text className="text-[13px] text-muted">{membersCount(props.item)}</Text>
     </View>
   );
 }
@@ -67,4 +94,43 @@ function membersCount(item: Tontine): string {
   const total = item.members.length;
   if (item.state === "PENDING") return `${total} sur ${item.totalRounds} inscrits`;
   return `${paidMemberCount(item)} sur ${total} ont cotisé`;
+}
+
+/**
+ * Couleur de mise en avant d'un membre : celle de la tontine, seulement pour
+ * le bénéficiaire du tour en cours.
+ * @param item Tontine affichée.
+ * @param member Membre de la ligne.
+ * @returns La prop de mise en avant, vide pour les autres membres.
+ */
+function focusOf(item: Tontine, member: TontineMember): { focusAccent?: string } {
+  const focused = item.state === "ACTIVE" && member.id === item.beneficiaryId;
+  return focused ? { focusAccent: accentColors(item.headerColors[0]).background } : {};
+}
+
+/**
+ * Indique si l'administrateur peut retirer ce membre : jamais lui-même, et
+ * seulement avant le départ de la tontine.
+ * @param item Tontine affichée.
+ * @param member Membre de la ligne.
+ * @returns `true` quand le retrait est permis.
+ */
+function canRemove(item: Tontine, member: TontineMember): boolean {
+  return isTontineAdmin(item) && member.id !== SELF_MEMBER_ID && item.state === "PENDING";
+}
+
+/**
+ * Texte de la confirmation de retrait d'un membre.
+ * @param item Tontine affichée.
+ * @param member Membre à retirer, `null` quand la feuille est fermée.
+ * @returns Le titre, le message et l'action de la confirmation.
+ */
+function removalContent(item: Tontine, member: TontineMember | null) {
+  const name = member?.name ?? "ce membre";
+  return {
+    title: `Retirer ${name} ?`,
+    message: `${name} ne fera plus partie de « ${item.name} ». Vous pourrez l'inviter de nouveau.`,
+    confirmLabel: "Retirer de la tontine",
+    tone: "danger" as const,
+  };
 }

@@ -1,4 +1,10 @@
-import { FIELD_CHROME, FOCUS_RING_ROOM, FOCUS_RING_SCROLL, fieldChrome } from "./theme.field";
+import {
+  FIELD_CHROME,
+  FOCUS_RING_ROOM,
+  FOCUS_RING_SCROLL,
+  accentRing,
+  fieldChrome,
+} from "./theme.field";
 
 describe("fieldChrome", () => {
   it("pose un fond et une bordure gris au repos", () => {
@@ -42,5 +48,17 @@ describe("FOCUS_RING_SCROLL", () => {
     expect(FOCUS_RING_ROOM).toBeGreaterThan(ringExtent);
     expect(FOCUS_RING_SCROLL.content.padding).toBe(FOCUS_RING_ROOM);
     expect(FOCUS_RING_SCROLL.scroll.marginHorizontal).toBe(-FOCUS_RING_ROOM);
+  });
+});
+
+describe("accentRing", () => {
+  it("cercle un élément de la couleur de l'écran, anneau à mi-opacité comme shadcn/ui", () => {
+    expect(accentRing("#2044DF")).toEqual({
+      borderColor: "#2044DF",
+      outlineColor: "#2044DF80",
+      outlineOffset: 1,
+      outlineStyle: "solid",
+      outlineWidth: 3,
+    });
   });
 });

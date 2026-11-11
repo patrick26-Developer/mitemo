@@ -1,4 +1,5 @@
 import { act, fireEvent, screen } from "@testing-library/react-native";
+import { Share } from "react-native";
 
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -66,7 +67,7 @@ describe("TontineDetailScreen", () => {
     ).toBe(true);
   });
 
-  it("demande confirmation avant de distribuer la cagnotte du tour", async () => {
+  it("demande confirmation avant de verser la restourne du tour", async () => {
     usePortfolioStore.setState({
       tontines: [
         makeTontine({
@@ -88,21 +89,25 @@ describe("TontineDetailScreen", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Confirmer" }));
 
     expect(useToastStore.getState().toast?.message).toBe(
-      "Restourne confirmée : la cagnotte est distribuée.",
+      "Restourne confirmée : elle est versée au membre dont c'est le tour.",
     );
     expect(firstOf(usePortfolioStore.getState().tontines).round).toBe(2);
   });
 
-  it("crée un code d'invitation pour l'administrateur", async () => {
+  it("partage l'invitation depuis l'en-tête, sans panneau de code à créer", async () => {
+    const share = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Créer un code d'invitation" }));
+    expect(screen.queryByText("Administration")).not.toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
 
-    expect(useToastStore.getState().toast?.message).toBe("Code d'invitation prêt à partager.");
-    expect(screen.queryByText("Régénérer le code")).not.toBeOnTheScreen();
-    expect(
-      screen.queryByRole("button", { name: "Créer un code d'invitation" }),
-    ).not.toBeOnTheScreen();
+    const code = firstOf(usePortfolioStore.getState().tontines).invitationCode;
+    expect(code).not.toBeNull();
+    expect(share).toHaveBeenCalledWith({
+      message: expect.stringContaining(`Code d'invitation : ${code ?? ""}`) as string,
+    });
   });
 
   it("affiche un état vide quand la tontine n'existe pas", async () => {

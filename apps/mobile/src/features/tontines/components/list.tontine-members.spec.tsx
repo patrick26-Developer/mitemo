@@ -16,14 +16,21 @@ describe("TontineMemberList", () => {
     expect(screen.queryByRole("button", { name: "Retirer Membre self" })).toBeNull();
 
     await fireEvent.press(screen.getByRole("button", { name: "Retirer Membre m3" }));
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(await screen.findByRole("header", { name: "Retirer Membre m3 ?" })).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer de la tontine" }));
 
     expect(onRemove).toHaveBeenCalledWith("m3");
   });
 
-  it("met en avant le bénéficiaire du tour", async () => {
+  it("place en tête le bénéficiaire du tour, avec son rang de passage", async () => {
     await renderWithSafeArea(<TontineMemberList item={makeTontine()} onRemove={jest.fn()} />);
 
+    const rows = screen.getAllByRole("button", { name: /^Historique de/ });
+    expect(rows[0]).toHaveAccessibleName("Historique de Membre m2");
     expect(screen.getByText("Membre · En attente · À son tour")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Tour 2")).toBeOnTheScreen();
   });
 
   it("ouvre l'historique de cotisation d'un membre", async () => {

@@ -1,35 +1,33 @@
 import { Trash2 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
-import type { TontineMember } from "../../../shared/member/model.portfolio";
 import { PALETTE } from "../../../shared/theme/theme.palette";
-
-/** Grossissement léger du membre dont c'est le tour. */
-const FOCUSED_SCALE = 1.02;
+import { accentRing } from "../../../shared/theme/theme.field";
+import type { MemberTurn } from "../model/model.member-turns";
 
 /** Props d'une ligne de membre d'une tontine. */
 export interface TontineMemberRowProps {
-  readonly member: TontineMember;
-  /** `true` quand l'administrateur peut retirer ce membre. */
-  readonly canRemove: boolean;
-  readonly onRemove: () => void;
-  /** `true` quand c'est le tour de ce membre : la ligne ressort. */
-  readonly focused?: boolean;
+  /** Membre et son rang de passage. */
+  readonly entry: MemberTurn;
+  /** Couleur de la tontine, présente quand c'est le tour de ce membre : la ligne est cerclée. */
+  readonly focusAccent?: string;
+  /** Retrait du membre, présent seulement quand l'administrateur peut le retirer. */
+  readonly onRemove?: () => void;
   /** Ouvre l'historique de cotisation du membre. */
   readonly onPress?: () => void;
 }
 
 /**
- * Affiche un membre, son rôle et l'état de sa cotisation du tour en cours.
- * La ligne du bénéficiaire du tour est légèrement agrandie et cerclée.
- * @param props Membre, droit de retrait, retrait, focus et ouverture de l'historique.
+ * Affiche un membre avec son rang de passage, son rôle et l'état de sa
+ * cotisation du tour en cours. La ligne du bénéficiaire du tour est cerclée de
+ * la couleur de la tontine, comme un champ au focus de shadcn/ui.
+ * @param props Membre et rang, couleur de mise en avant, retrait et ouverture de l'historique.
  * @returns La ligne de membre.
  */
 export function TontineMemberRow(props: TontineMemberRowProps) {
-  const { member, canRemove, onRemove, focused = false, onPress } = props;
-  const role = member.role === "ADMIN" ? "Administrateur" : "Membre";
-  const payment = member.paidCurrentRound ? "À jour" : "En attente";
-  const border = focused ? "border-brand" : "border-card-border";
+  const { entry, focusAccent, onRemove, onPress } = props;
+  const { member, turn } = entry;
+  const focused = focusAccent !== undefined;
 
   return (
     <Pressable
@@ -38,22 +36,22 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
       accessibilityState={{ selected: focused }}
       disabled={onPress === undefined}
       onPress={onPress}
-      style={{ transform: [{ scale: focused ? FOCUSED_SCALE : 1 }] }}
-      className={`flex-row items-center gap-3 rounded-[14px] border ${border} px-4 py-3`}
+      style={focused ? accentRing(focusAccent) : undefined}
+      className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >
-      <View className="h-9 w-9 items-center justify-center rounded-full bg-avatar">
-        <Text className="text-[14px] font-bold text-white">{member.name.slice(0, 1)}</Text>
+      <View
+        accessibilityLabel={`Tour ${turn}`}
+        className="h-9 w-9 items-center justify-center rounded-full bg-tab-active"
+      >
+        <Text className="text-[14px] font-bold text-tab-ink">{turn}</Text>
       </View>
       <View className="flex-1 gap-0.5">
         <Text className="text-[15px] text-ink" numberOfLines={1}>
           {member.name}
         </Text>
-        <Text className="text-[12px] text-muted">
-          {role} · {payment}
-          {focused ? " · À son tour" : ""}
-        </Text>
+        <Text className="text-[12px] text-muted">{memberDetail(entry, focused)}</Text>
       </View>
-      {canRemove ? (
+      {onRemove === undefined ? null : (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Retirer ${member.name}`}
@@ -62,7 +60,19 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
         >
           <Trash2 size={18} color={PALETTE.danger} />
         </Pressable>
-      ) : null}
+      )}
     </Pressable>
   );
+}
+
+/**
+ * Rédige la ligne d'état d'un membre : rôle, cotisation et tour éventuel.
+ * @param entry Membre et rang de passage.
+ * @param focused Vrai quand c'est son tour.
+ * @returns La ligne, par exemple « Membre · En attente · À son tour ».
+ */
+function memberDetail(entry: MemberTurn, focused: boolean): string {
+  const role = entry.member.role === "ADMIN" ? "Administrateur" : "Membre";
+  const payment = entry.member.paidCurrentRound ? "À jour" : "En attente";
+  return `${role} · ${payment}${focused ? " · À son tour" : ""}`;
 }

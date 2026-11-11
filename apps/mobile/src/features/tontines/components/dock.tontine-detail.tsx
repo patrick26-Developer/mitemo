@@ -20,7 +20,7 @@ import { TontinePaySheet } from "./sheet.tontine-pay";
 const CONFIRM_ROUND: ConfirmSheetContent = {
   title: "Confirmer la restourne ?",
   message:
-    "La cagnotte sera distribuée automatiquement au membre dont c'est le tour, puis le tour suivant commencera.",
+    "La restourne sera versée automatiquement au membre dont c'est le tour, puis le tour suivant commencera.",
   confirmLabel: "Confirmer",
 };
 
@@ -40,8 +40,9 @@ interface DockHandlers {
 }
 
 /**
- * Choisit l'action flottante d'une tontine : réunir les membres puis lancer la
- * tontine, confirmer la restourne quand tout le monde a versé, ou cotiser.
+ * Choisit l'action flottante d'une tontine : lancer la tontine une fois les
+ * membres réunis (l'ajout se fait depuis l'en-tête), confirmer la restourne
+ * quand tout le monde a versé, ou cotiser.
  * @param item Tontine affichée.
  * @param handlers Actions disponibles et ouverture des feuilles.
  * @returns L'action à proposer, ou `null` quand aucune n'est possible.
@@ -49,8 +50,7 @@ interface DockHandlers {
 function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null {
   const { actions, askConfirm, askPay } = handlers;
   if (item.state === "PENDING") {
-    if (!isTontineAdmin(item)) return null;
-    if (!hasReachedQuota(item)) return { label: "Ajouter un membre", onPress: actions.addMember };
+    if (!isTontineAdmin(item) || !hasReachedQuota(item)) return null;
     return { label: "Activer la restourne", onPress: actions.start };
   }
   if (item.state !== "ACTIVE") return null;
