@@ -7,7 +7,6 @@ import { useProfileActions } from "../hooks/hook.profile-actions";
 import { useProfileCounts } from "../hooks/hook.profile-counts";
 import { useProfilePhotoSheet } from "../hooks/hook.profile-photo-sheet";
 import { profileGroupsFor } from "../model/model.profile-content";
-import { useProfilePreferences } from "../model/model.profile-preferences";
 import { PhotoSheet } from "./sheet.photo";
 import { ProfileActionSheet } from "./sheet.profile-action";
 import { ProfileFooter } from "./footer.profile";
@@ -25,7 +24,6 @@ export function ProfileScreen() {
   const photo = useProfilePhotoSheet();
   const { selectedAction, selectAction, closeAction } = useProfileActions();
   const [signOutOpen, setSignOutOpen] = useState(false);
-  const { theme, language } = useProfilePreferences();
   const counts = useProfileCounts();
   const { name, avatarInitial: initial, phone, createdAt } = useMemberStore();
 
@@ -38,7 +36,7 @@ export function ProfileScreen() {
       >
         <View className="gap-6 pb-10">
           <ProfileHeader name={name} initial={initial} phone={phone} {...photo.headerProps} />
-          {profileGroupsFor(theme, language, counts).map((group) => (
+          {profileGroupsFor(counts).map((group) => (
             <ProfileGroup key={group.title} group={group} onSelect={selectAction} />
           ))}
           <ProfileSignOut createdAt={createdAt} onPress={() => setSignOutOpen(true)} />

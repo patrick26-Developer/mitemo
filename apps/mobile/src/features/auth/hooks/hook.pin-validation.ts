@@ -7,12 +7,18 @@ import { PIN_LENGTH } from "../model/model.auth-form";
 /** Délai avant de vérifier un code complet, en millisecondes. */
 const VERIFY_DELAY = 250;
 
+/** Message d'un code refusé. */
+export const PIN_REJECTED_MESSAGE = "Code incorrect. Réessayez.";
+
+/** Message affiché quand la vérification elle-même échoue. */
+export const PIN_UNAVAILABLE_MESSAGE = "Vérification impossible pour le moment. Réessayez.";
+
 /** Options de la vérification du PIN. */
 interface PinValidationOptions {
   readonly pin: string;
-  readonly validate: (pin: string) => boolean;
+  readonly verify: (pin: string) => Promise<boolean>;
   readonly onComplete: () => void;
-  readonly onError: () => void;
+  readonly onError: (message: string) => void;
   readonly shake: SharedValue<number>;
 }
 
@@ -31,26 +37,65 @@ function shakePin(shake: SharedValue<number>): void {
   );
 }
 
+/** Réaction à un code refusé. */
+interface PinRejection {
+  readonly message: string;
+  readonly onError: (message: string) => void;
+  readonly shake: SharedValue<number>;
+}
+
 /**
- * Vérifie le code une fois les quatre chiffres saisis.
- * @param options Code courant, validation et réactions.
+ * Affiche le message du refus et secoue les cases.
+ * @param rejection Message, affichage et animation.
+ */
+function rejectPin(rejection: PinRejection): void {
+  rejection.onError(rejection.message);
+  shakePin(rejection.shake);
+}
+
+/** Vérification à lancer, et réactions tant que la saisie n'a pas changé. */
+interface PinVerification {
+  readonly pin: string;
+  readonly verify: (pin: string) => Promise<boolean>;
+  readonly onAccept: () => void;
+  readonly onReject: (message: string) => void;
+}
+
+/**
+ * Lance la vérification et transmet son issue : accepté, refusé ou impossible.
+ * @param verification Code, vérification et réactions.
+ */
+function runVerification(verification: PinVerification): void {
+  const { pin, verify, onAccept, onReject } = verification;
+
+  verify(pin).then(
+    (accepted) => (accepted ? onAccept() : onReject(PIN_REJECTED_MESSAGE)),
+    () => onReject(PIN_UNAVAILABLE_MESSAGE),
+  );
+}
+
+/**
+ * Vérifie le code une fois les quatre chiffres saisis. Une réponse arrivée
+ * après un changement de saisie est ignorée.
+ * @param options Code courant, vérification et réactions.
  */
 export function usePinValidation(options: PinValidationOptions): void {
-  const { pin, validate, onComplete, onError, shake } = options;
+  const { pin, verify, onComplete, onError, shake } = options;
 
   useEffect(() => {
     if (pin.length !== PIN_LENGTH) return;
 
-    const timer = setTimeout(() => {
-      if (validate(pin)) {
-        onComplete();
-        return;
-      }
+    let active = true;
+    const onAccept = () => active && onComplete();
+    const onReject = (message: string) => active && rejectPin({ message, onError, shake });
+    const timer = setTimeout(
+      () => runVerification({ pin, verify, onAccept, onReject }),
+      VERIFY_DELAY,
+    );
 
-      onError();
-      shakePin(shake);
-    }, VERIFY_DELAY);
-
-    return () => clearTimeout(timer);
-  }, [pin, validate, onComplete, onError, shake]);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [pin, verify, onComplete, onError, shake]);
 }

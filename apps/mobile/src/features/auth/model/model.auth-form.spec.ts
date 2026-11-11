@@ -1,8 +1,6 @@
 import {
-  DEMO_PIN,
   PIN_LENGTH,
   formatPhoneInput,
-  isValidDemoPin,
   isValidPin,
   isValidPhoneDigits,
   keepPhoneDigits,
@@ -48,13 +46,6 @@ describe("isValidPin", () => {
     expect(isValidPin("123")).toBe(false);
     expect(isValidPin("12345")).toBe(false);
     expect(isValidPin("abcd")).toBe(false);
-  });
-});
-
-describe("isValidDemoPin", () => {
-  it("accepte uniquement le code de démonstration", () => {
-    expect(isValidDemoPin(DEMO_PIN)).toBe(true);
-    expect(isValidDemoPin("0000")).toBe(false);
   });
 });
 

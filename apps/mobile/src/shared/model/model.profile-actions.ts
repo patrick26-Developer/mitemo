@@ -3,12 +3,10 @@ import {
   CircleHelp,
   CreditCard,
   FileText,
-  Globe,
   History,
   Lock,
   PiggyBank,
   ShieldCheck,
-  SunMoon,
   UserRound,
   UsersRound,
 } from "lucide-react-native";
@@ -26,8 +24,6 @@ export const PROFILE_ACTION_IDS = [
   "identity",
   "payment",
   "history",
-  "language",
-  "theme",
   "notifications",
   "security",
   "help",
@@ -79,11 +75,7 @@ export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
   },
   {
     title: "Préférences",
-    actions: [
-      { id: "language", label: "Langue", icon: Globe, value: "Français" },
-      { id: "theme", label: "Thème", icon: SunMoon, value: "Système" },
-      { id: "notifications", label: "Notifications", icon: Bell },
-    ],
+    actions: [{ id: "notifications", label: "Notifications", icon: Bell }],
   },
   {
     title: "Aide",

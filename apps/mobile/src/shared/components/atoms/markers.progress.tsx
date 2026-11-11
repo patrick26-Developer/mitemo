@@ -25,6 +25,7 @@ export function MarkerProgress(props: MarkerProgressProps) {
 
   return (
     <View
+      accessible
       accessibilityRole="progressbar"
       accessibilityLabel={`${done} marqueurs validés sur ${total}`}
       accessibilityValue={{ min: 0, max: total, now: Math.min(done, total) }}

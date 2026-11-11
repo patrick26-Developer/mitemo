@@ -7,13 +7,11 @@ import type {
 } from "../../../shared/model/model.profile-actions";
 import { HelpSheet } from "./sheets/sheet.help";
 import { IdentitySheet } from "./sheets/sheet.identity";
-import { LanguageSheet } from "./sheets/sheet.language";
 import { NotificationsSheet } from "./sheets/sheet.notifications";
 import { PaymentSheet } from "./sheets/sheet.payment";
 import { PrivacySheet } from "./sheets/sheet.privacy";
 import { SecuritySheet } from "./sheets/sheet.security";
 import { TermsSheet } from "./sheets/sheet.terms";
-import { ThemeSheet } from "./sheets/sheet.theme";
 
 /** Contenu affiché pour chaque action ; l'historique a sa propre page. */
 const ACTION_SHEETS: Readonly<Record<ProfileActionId, ComponentType | null>> = {
@@ -22,8 +20,6 @@ const ACTION_SHEETS: Readonly<Record<ProfileActionId, ComponentType | null>> = {
   identity: IdentitySheet,
   payment: PaymentSheet,
   history: null,
-  language: LanguageSheet,
-  theme: ThemeSheet,
   notifications: NotificationsSheet,
   security: SecuritySheet,
   help: HelpSheet,

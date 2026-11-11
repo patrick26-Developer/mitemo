@@ -164,7 +164,7 @@ describe("apiClient", () => {
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual(payload);
     const headers = init.headers as Record<string, string>;
-    expect(headers[IDEMPOTENCY_KEY_HEADER]).toMatch(/^mobile-/);
+    expect(headers[IDEMPOTENCY_KEY_HEADER]).toMatch(/^mobile-[0-9a-f-]{36}$/);
   });
 
   it("tire une nouvelle clé d'idempotence à chaque appel", async () => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
 import { PIN_LENGTH } from "../model/model.auth-form";
@@ -7,7 +7,7 @@ import { usePinValidation } from "./hook.pin-validation";
 /** Options de la saisie du PIN. */
 export interface PinEntryOptions {
   /** Vérifie le code une fois les quatre chiffres saisis. */
-  readonly validate: (pin: string) => boolean;
+  readonly verify: (pin: string) => Promise<boolean>;
   /** Appelé quand le code est accepté. */
   readonly onComplete: () => void;
 }
@@ -15,11 +15,11 @@ export interface PinEntryOptions {
 /**
  * Gère la saisie d'un code PIN, sa vérification et l'animation d'erreur.
  * @param options Options de la saisie.
- * @param options.validate Vérifie le code une fois les quatre chiffres saisis.
+ * @param options.verify Vérifie le code une fois les quatre chiffres saisis.
  * @param options.onComplete Appelé quand le code est accepté.
  * @returns Le code, l'erreur, l'animation et les actions du clavier.
  */
-export function usePinEntry({ validate, onComplete }: PinEntryOptions) {
+export function usePinEntry({ verify, onComplete }: PinEntryOptions) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const shake = useSharedValue(0);
@@ -33,11 +33,11 @@ export function usePinEntry({ validate, onComplete }: PinEntryOptions) {
     setError("");
     setPin((current) => current.slice(0, -1));
   };
-  const reject = () => {
-    setError("Code incorrect. Réessayez.");
+  const reject = useCallback((message: string) => {
+    setError(message);
     setPin("");
-  };
-  usePinValidation({ pin, validate, onComplete, onError: reject, shake });
+  }, []);
+  usePinValidation({ pin, verify, onComplete, onError: reject, shake });
 
   return { pin, error, shakeStyle, pressDigit, erase };
 }

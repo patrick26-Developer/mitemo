@@ -1,0 +1,42 @@
+import { fireEvent, screen } from "@testing-library/react-native";
+
+import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../../shared/member/store.member";
+import { renderWithSafeArea } from "../../../../shared/testing/util.render-with-safe-area";
+import { IdentityEditForm } from "./form.identity-edit";
+
+describe("IdentityEditForm", () => {
+  beforeEach(() => useMemberStore.setState(INITIAL_MEMBER_PROFILE));
+
+  it("enregistre l'identité modifiée puis se ferme", async () => {
+    const onDone = jest.fn();
+    await renderWithSafeArea(<IdentityEditForm onDone={onDone} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Prénom"), "Aimée");
+    await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(useMemberStore.getState().firstName).toBe("Aimée");
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it("signale une saisie invalide sans fermer", async () => {
+    const onDone = jest.fn();
+    await renderWithSafeArea(<IdentityEditForm onDone={onDone} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Prénom"), "A");
+    await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(screen.getByRole("alert")).toBeOnTheScreen();
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it("se ferme sans rien changer à l'annulation", async () => {
+    const onDone = jest.fn();
+    await renderWithSafeArea(<IdentityEditForm onDone={onDone} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Prénom"), "Aimée");
+    await fireEvent.press(screen.getByRole("button", { name: "Annuler la modification" }));
+
+    expect(useMemberStore.getState().firstName).toBe("Précieuse");
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+});

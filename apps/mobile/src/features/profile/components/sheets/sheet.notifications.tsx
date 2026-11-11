@@ -1,7 +1,7 @@
 import { SheetSection } from "../../../../shared/components/macros/section.sheet";
 import { SheetSwitchRow } from "../../../../shared/components/macros/row.sheet-switch";
 import { SheetText } from "../../../../shared/components/atoms/text.sheet";
-import { NOTIFICATION_OPTIONS, useProfilePreferences } from "../../model/model.profile-preferences";
+import { NOTIFICATION_OPTIONS, useProfilePreferences } from "../../hooks/store.profile-preferences";
 
 /**
  * Affiche les catégories de notifications et leurs commutateurs.

@@ -15,9 +15,6 @@ export const PHONE_DIGITS = 9;
 /** Nombre de chiffres du code PIN. */
 export const PIN_LENGTH = 4;
 
-/** Code PIN de démonstration, en attendant la vérification par l'API. */
-export const DEMO_PIN = "1234";
-
 /** Saisie de la première étape d'inscription. */
 export interface SignUpInput {
   readonly firstName: string;
@@ -128,15 +125,6 @@ export function isValidPhoneDigits(digits: string): boolean {
  */
 export function isValidPin(pin: string): boolean {
   return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(pin);
-}
-
-/**
- * Indique si le code correspond au PIN de démonstration.
- * @param pin PIN saisi.
- * @returns Vrai si le code ouvre la session.
- */
-export function isValidDemoPin(pin: string): boolean {
-  return pin === DEMO_PIN;
 }
 
 /**
