@@ -52,6 +52,6 @@ describe("SavingsScreen", () => {
   it("affiche l'échéance de chaque carte", async () => {
     await renderWithSafeArea(<SavingsScreen />);
 
-    expect(screen.getByText("Jusqu'au 31 Décembre 2026")).toBeOnTheScreen();
+    expect(screen.getByText("Jusqu'au 31 décembre 2026")).toBeOnTheScreen();
   });
 });
