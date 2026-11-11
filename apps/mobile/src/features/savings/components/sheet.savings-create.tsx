@@ -1,6 +1,7 @@
 import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
-import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
+import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
+import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
@@ -10,7 +11,7 @@ import type { Tontine } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { useSavingsCreate } from "../hooks/hook.savings-create";
 import type { SavingsFormState, SavingsRecap } from "../model/model.savings-form";
-import { savingsRecap } from "../model/model.savings-form";
+import { SAVINGS_FORM_STEPS, savingsRecap } from "../model/model.savings-form";
 import { TontinePicker } from "./section.tontine-picker";
 
 /** Props de la feuille de création d'une carte de pointage. */
@@ -26,18 +27,18 @@ interface SavingsCreateFieldsProps {
   readonly onChange: (patch: Partial<SavingsFormState>) => void;
 }
 
-/** Props des champs d'identité d'une carte en cours de saisie. */
-interface SavingsIdentityFieldsProps {
+/** Props des champs de la première étape d'une carte en cours de saisie. */
+interface SavingsCardStepProps {
   readonly form: SavingsFormState;
   readonly onChange: (patch: Partial<SavingsFormState>) => void;
 }
 
 /**
- * Affiche le nom et le montant d'un marqueur d'une nouvelle carte.
+ * Première étape : le nom, le montant et le nombre de marqueurs de la carte.
  * @param props Saisie courante et mise à jour des champs.
- * @returns Les champs d'identité de la carte.
+ * @returns Les champs de la carte.
  */
-function SavingsIdentityFields(props: SavingsIdentityFieldsProps) {
+function SavingsCardStep(props: SavingsCardStepProps) {
   const { form, onChange } = props;
 
   return (
@@ -56,39 +57,12 @@ function SavingsIdentityFields(props: SavingsIdentityFieldsProps) {
         placeholder="5000"
         hint="Chaque marqueur ajoute ce montant à l'épargne."
       />
-    </>
-  );
-}
-
-/**
- * Affiche l'objectif, l'échéance et la tontine rattachée d'une nouvelle carte.
- * @param props Saisie courante, tontines disponibles et mise à jour des champs.
- * @returns Les champs de l'objectif de la carte.
- */
-function SavingsTargetFields(props: SavingsCreateFieldsProps) {
-  const { form, tontines, onChange } = props;
-
-  return (
-    <>
       <SheetTextField
         label="Nombre de marqueurs"
         value={form.markersTotal}
         onChangeText={(markersTotal) => onChange({ markersTotal })}
         keyboardType="number-pad"
         hint="Entre 1 et 100."
-      />
-      <SheetTextField
-        label="Échéance (JJ/MM/AAAA)"
-        value={form.deadline}
-        onChangeText={(deadline) => onChange({ deadline })}
-        keyboardType="numbers-and-punctuation"
-        placeholder="31/12/2026"
-        hint="Dernier jour pour atteindre l'objectif."
-      />
-      <TontinePicker
-        tontines={tontines}
-        selected={form.tontineId}
-        onSelect={(tontineId) => onChange({ tontineId })}
       />
     </>
   );
@@ -112,24 +86,63 @@ function recapRows(recap: SavingsRecap): readonly SheetRecapRow[] {
 }
 
 /**
- * Saisit les règles d'une nouvelle carte et la crée dans le portefeuille, en la
- * rattachant éventuellement à une tontine.
+ * Dernière étape : l'échéance, la tontine rattachée et le récapitulatif.
+ * @param props Saisie courante, tontines disponibles et mise à jour des champs.
+ * @returns Les champs de l'échéance de la carte.
+ */
+function SavingsDeadlineStep(props: SavingsCreateFieldsProps) {
+  const { form, tontines, onChange } = props;
+
+  return (
+    <>
+      <SheetTextField
+        label="Échéance (JJ/MM/AAAA)"
+        value={form.deadline}
+        onChangeText={(deadline) => onChange({ deadline })}
+        keyboardType="numbers-and-punctuation"
+        placeholder="31/12/2026"
+        hint="Dernier jour pour atteindre l'objectif."
+      />
+      <TontinePicker
+        tontines={tontines}
+        selected={form.tontineId}
+        onSelect={(tontineId) => onChange({ tontineId })}
+      />
+      <SheetRecap title="Récapitulatif" rows={recapRows(savingsRecap(form))} />
+    </>
+  );
+}
+
+/**
+ * Saisit les règles d'une nouvelle carte en deux étapes et la crée dans le
+ * portefeuille, en la rattachant éventuellement à une tontine.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle carte ».
  */
 export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
-  const { visible, onClose } = props;
-  const { form, error, update, submit } = useSavingsCreate(onClose);
+  const { form, error, steps, update, next, back, close } = useSavingsCreate(props.onClose);
   const tontines = usePortfolioStore((state) => state.tontines);
-  const recap = savingsRecap(form);
 
   return (
-    <BottomSheet visible={visible} title="Nouvelle carte" onClose={onClose}>
-      <SavingsIdentityFields form={form} onChange={update} />
-      <SavingsTargetFields form={form} tontines={tontines} onChange={update} />
-      <SheetRecap title="Récapitulatif" rows={recapRows(recap)} />
+    <BottomSheet visible={props.visible} title="Nouvelle carte" onClose={close}>
+      <StepIndicator
+        index={steps.index}
+        total={steps.total}
+        title={SAVINGS_FORM_STEPS[steps.index] ?? ""}
+      />
+      {steps.isFirst ? (
+        <SavingsCardStep form={form} onChange={update} />
+      ) : (
+        <SavingsDeadlineStep form={form} tontines={tontines} onChange={update} />
+      )}
       {error === null ? null : <FeedbackBanner kind="error" message={error} />}
-      <SheetPrimaryButton label="Créer la carte" onPress={submit} />
+      <SheetStepsFooter
+        isFirst={steps.isFirst}
+        isLast={steps.isLast}
+        finalLabel="Créer la carte"
+        onBack={back}
+        onNext={next}
+      />
     </BottomSheet>
   );
 }

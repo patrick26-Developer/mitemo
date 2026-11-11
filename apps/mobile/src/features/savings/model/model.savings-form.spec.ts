@@ -1,4 +1,10 @@
-import { INITIAL_SAVINGS_FORM, parseSavingsForm, savingsRecap } from "./model.savings-form";
+import {
+  INITIAL_SAVINGS_FORM,
+  SAVINGS_FORM_STEPS,
+  parseSavingsForm,
+  savingsRecap,
+  savingsStepError,
+} from "./model.savings-form";
 
 /** Instant de référence, fixé pour que les tests ne dépendent pas de l'horloge. */
 const NOW = new Date("2026-11-11T09:30:00.000Z");
@@ -107,5 +113,32 @@ describe("savingsRecap", () => {
 
   it("ignore une échéance invalide", () => {
     expect(savingsRecap({ ...VALID_FORM, deadline: "30/02/2027" }).deadline).toBeNull();
+  });
+});
+
+describe("savingsStepError", () => {
+  it("découpe la saisie en deux étapes", () => {
+    expect(SAVINGS_FORM_STEPS).toEqual(["La carte", "L'échéance"]);
+  });
+
+  it("valide la première étape sans attendre l'échéance", () => {
+    expect(savingsStepError({ ...VALID_FORM, deadline: "" }, 0, NOW)).toBeNull();
+  });
+
+  it("bloque la première étape tant que le nom manque", () => {
+    expect(savingsStepError({ ...VALID_FORM, name: "" }, 0, NOW)).toBe("Donnez un nom à la carte.");
+  });
+
+  it("bloque la première étape sur un nombre de marqueurs invalide", () => {
+    expect(savingsStepError({ ...VALID_FORM, markersTotal: "0" }, 0, NOW)).toBe(
+      "Indiquez entre 1 et 100 marqueurs.",
+    );
+  });
+
+  it("valide l'échéance à la dernière étape", () => {
+    expect(savingsStepError({ ...VALID_FORM, deadline: "01/01/2026" }, 1, NOW)).toBe(
+      "Choisissez une échéance postérieure à aujourd'hui.",
+    );
+    expect(savingsStepError(VALID_FORM, 1, NOW)).toBeNull();
   });
 });

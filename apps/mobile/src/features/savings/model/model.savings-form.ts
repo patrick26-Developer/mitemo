@@ -14,6 +14,7 @@ import {
 } from "../../../shared/model/model.form-schema";
 import type { FormResult } from "../../../shared/model/model.form-result";
 import { formOk } from "../../../shared/model/model.form-result";
+import { stepError } from "../../../shared/model/model.form-steps";
 
 /** Champs saisis pour créer une carte de pointage. */
 export interface SavingsFormState {
@@ -42,6 +43,20 @@ const DEADLINE_FORMAT_ERROR = "Saisissez une échéance au format JJ/MM/AAAA.";
 
 /** Message affiché quand l'échéance n'est pas postérieure au jour courant. */
 const DEADLINE_PAST_ERROR = "Choisissez une échéance postérieure à aujourd'hui.";
+
+/** Titres des étapes de la création d'une carte, dans l'ordre de saisie. */
+export const SAVINGS_FORM_STEPS = ["La carte", "L'échéance"] as const;
+
+/** Schéma de la première étape : le nom et les marqueurs de la carte. */
+const cardSchema = z.object({
+  name: nameSchema("Donnez un nom à la carte."),
+  markerAmount: amountSchema("Saisissez le montant d'un marqueur en FCFA."),
+  markersTotal: countSchema({
+    min: 1,
+    max: MAX_MARKERS,
+    message: "Indiquez entre 1 et 100 marqueurs.",
+  }),
+});
 
 /** Formulaire proposé à l'ouverture de la feuille de création. */
 export const INITIAL_SAVINGS_FORM: SavingsFormState = {
@@ -84,17 +99,22 @@ function deadlineSchema(now: Date) {
  * @returns Le schéma du formulaire.
  */
 function savingsFormSchema(now: Date) {
-  return z.object({
-    name: nameSchema("Donnez un nom à la carte."),
-    markerAmount: amountSchema("Saisissez le montant d'un marqueur en FCFA."),
-    markersTotal: countSchema({
-      min: 1,
-      max: MAX_MARKERS,
-      message: "Indiquez entre 1 et 100 marqueurs.",
-    }),
+  return cardSchema.extend({
     deadline: deadlineSchema(now),
     tontineId: z.string().nullable(),
   });
+}
+
+/**
+ * Valide une étape de la saisie : la première ne contrôle que la carte, la
+ * dernière contrôle tout le formulaire.
+ * @param form Champs saisis.
+ * @param step Indice de l'étape, à partir de 0.
+ * @param now Instant de référence de la règle d'échéance.
+ * @returns Le message à corriger, ou `null` si l'étape est valide.
+ */
+export function savingsStepError(form: SavingsFormState, step: number, now: Date): string | null {
+  return stepError(step === 0 ? cardSchema : savingsFormSchema(now), form);
 }
 
 /**
