@@ -1,5 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
+import { useNetworkState } from "expo-network";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { AnimatedTabBar } from "./bar.tab";
@@ -29,6 +30,8 @@ function buildProps(index: number) {
   } as unknown as BottomTabBarProps;
   return { props, navigateToTab, emit };
 }
+
+jest.mock("expo-network", () => ({ useNetworkState: jest.fn(() => ({ isConnected: true })) }));
 
 describe("AnimatedTabBar", () => {
   it("affiche les quatre onglets dans l'ordre voulu, quel que soit l'ordre des routes", async () => {
@@ -67,5 +70,13 @@ describe("AnimatedTabBar", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Accueil" }));
 
     expect(navigateToTab).not.toHaveBeenCalled();
+  });
+
+  it("prévient juste au-dessus des onglets quand l'appareil n'a plus de réseau", async () => {
+    jest.mocked(useNetworkState).mockReturnValue({ isConnected: false });
+    const { props } = buildProps(0);
+    await renderWithSafeArea(<AnimatedTabBar {...props} />);
+
+    expect(screen.getByText("Vous n'êtes pas connecté à Internet")).toBeOnTheScreen();
   });
 });

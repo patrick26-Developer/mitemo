@@ -7,12 +7,17 @@ import { saveProfilePhoto } from "../model/model.profile-photo-file";
 /**
  * Photo carrée, gardée en pleine qualité par le sélecteur : le redimensionnement
  * et la compression se font ensuite, une seule fois, dans `saveProfilePhoto`.
+ * Une qualité de 1 évite sur Android une seconde compression de l'image pleine
+ * taille (`RawImageExporter`). Sur iOS, la représentation courante évite la
+ * conversion HEIC vers JPEG de l'original, longue sur les photos récentes.
  */
-const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
+export const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
   mediaTypes: ["images"],
   allowsEditing: true,
   aspect: [1, 1],
   quality: 1,
+  preferredAssetRepresentationMode:
+    ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Current,
 };
 
 /** Messages affichés au membre quand un changement de photo échoue. */

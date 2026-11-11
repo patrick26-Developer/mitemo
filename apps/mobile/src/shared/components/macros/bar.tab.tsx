@@ -1,10 +1,12 @@
 import type { LucideIcon } from "lucide-react-native";
-import { House, UserRound, UsersRoundCollaboration, Wallet } from "lucide-react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HAIRLINE_WIDTH } from "../../theme/theme.hairline-width";
+import { TAB_ICONS } from "../../theme/theme.tab-icons";
+import { useConnectionStatus } from "../../hooks/hook.connection-status";
+import { ConnectionBar } from "../atoms/bar.connection";
 import { TabItem } from "../atoms/item.tab";
 
 /** Onglets de l'application, dans l'ordre où ils sont affichés. */
@@ -13,21 +15,36 @@ const TABS: readonly {
   readonly label: string;
   readonly icon: LucideIcon;
 }[] = [
-  { name: "index", label: "Accueil", icon: House },
-  { name: "tontines", label: "Tontines", icon: UsersRoundCollaboration },
-  { name: "savings", label: "Cartes", icon: Wallet },
-  { name: "profile", label: "Profil", icon: UserRound },
+  { name: "index", label: "Accueil", icon: TAB_ICONS.home },
+  { name: "tontines", label: "Tontines", icon: TAB_ICONS.tontines },
+  { name: "savings", label: "Cartes", icon: TAB_ICONS.savings },
+  { name: "profile", label: "Profil", icon: TAB_ICONS.profile },
 ];
 
 /** Marge basse minimale de la barre, en points, au-dessus de la zone sûre. */
 const MIN_BOTTOM_INSET = 16;
 
 /**
- * Barre d'onglets commune aux quatre sections de l'application.
+ * Barre d'onglets commune aux quatre sections de l'application, surmontée de
+ * la barre de connexion quand le réseau est coupé ou vient de revenir.
  * @param props État, émetteur d'événements et navigation fournis par Expo Router.
- * @returns La barre d'onglets animée.
+ * @returns La barre d'onglets et l'état de la connexion.
  */
 export function AnimatedTabBar(props: BottomTabBarProps) {
+  return (
+    <View>
+      <ConnectionBar status={useConnectionStatus()} />
+      <TabShell {...props} />
+    </View>
+  );
+}
+
+/**
+ * Rend les quatre onglets sur la barre blanche arrondie.
+ * @param props État, émetteur d'événements et navigation fournis par Expo Router.
+ * @returns La barre d'onglets.
+ */
+function TabShell(props: BottomTabBarProps) {
   const { state, emitter, navigateToTab } = props;
   const insets = useSafeAreaInsets();
   const focusedKey = state.routes[state.index]?.key;

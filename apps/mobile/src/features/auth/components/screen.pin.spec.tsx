@@ -159,4 +159,14 @@ describe("PinScreen", () => {
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/(auth)/sign-in"));
   });
+
+  it("explique le code oublié dans une feuille, pas dans une alerte", async () => {
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Code PIN oublié" }));
+
+    expect(screen.getByRole("header", { name: "Code PIN oublié" })).toBeOnTheScreen();
+    expect(screen.getByText(/réinitialisation par SMS/)).toBeOnTheScreen();
+  });
 });

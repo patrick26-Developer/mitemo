@@ -14,6 +14,7 @@ jest.mock("expo-router", () => ({
 }));
 
 jest.mock("expo-image-picker", () => ({
+  UIImagePickerPreferredAssetRepresentationMode: { Current: "current" },
   launchImageLibraryAsync: jest.fn(),
   launchCameraAsync: jest.fn(),
   requestCameraPermissionsAsync: jest.fn(),

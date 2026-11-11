@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { Alert } from "react-native";
 
 import type { PhotoChangeOutcome } from "./hook.profile-photo";
 import { useProfilePhoto } from "./hook.profile-photo";
-
-/** Titre de l'alerte quand la photo choisie n'a pas pu être enregistrée. */
-const SAVE_FAILED_TITLE = "Photo non modifiée";
 
 /** Props de l'en-tête reliées à la photo de profil. */
 interface PhotoHeaderProps {
@@ -52,25 +48,23 @@ function closeSheet(clearError: () => void, setVisible: (visible: boolean) => vo
 /**
  * Ferme la feuille dès que le sélecteur a rendu la main, pour ne pas faire
  * attendre la compression. Un échec d'enregistrement survient après la
- * fermeture : il est alors annoncé par une alerte. Un sélecteur qui ne s'ouvre
- * pas, lui, laisse la feuille ouverte avec son message intégré.
+ * fermeture : la feuille se rouvre alors avec son message intégré, jamais une
+ * alerte. Un sélecteur qui ne s'ouvre pas laisse la feuille ouverte.
  * @param change Changement de photo à mener.
- * @param close Fermeture de la feuille.
+ * @param setVisible Mise à jour de la visibilité de la feuille.
  */
 function choosePhoto(
   change: (onPickerClosed: () => void) => Promise<PhotoChangeOutcome>,
-  close: () => void,
+  setVisible: (visible: boolean) => void,
 ): void {
   let pickerClosed = false;
   const onPickerClosed = () => {
     pickerClosed = true;
-    close();
+    setVisible(false);
   };
 
   void change(onPickerClosed).then((outcome) => {
-    if (outcome.status === "failed" && pickerClosed) {
-      Alert.alert(SAVE_FAILED_TITLE, outcome.message);
-    }
+    if (outcome.status === "failed" && pickerClosed) setVisible(true);
   });
 }
 
@@ -85,7 +79,6 @@ function choosePhoto(
 export function useProfilePhotoSheet(): ProfilePhotoSheet {
   const { photoUri, isSaving, errorMessage, clearError, pickPhoto, takePhoto } = useProfilePhoto();
   const [visible, setVisible] = useState(false);
-  const close = () => setVisible(false);
 
   return {
     headerProps: {
@@ -97,8 +90,8 @@ export function useProfilePhotoSheet(): ProfilePhotoSheet {
       visible,
       errorMessage,
       onClose: () => closeSheet(clearError, setVisible),
-      onPickFromLibrary: () => choosePhoto(pickPhoto, close),
-      onTakePhoto: () => choosePhoto(takePhoto, close),
+      onPickFromLibrary: () => choosePhoto(pickPhoto, setVisible),
+      onTakePhoto: () => choosePhoto(takePhoto, setVisible),
     },
   };
 }

@@ -1,12 +1,4 @@
-import { useState } from "react";
-
-import type { FeedbackKind } from "../components/atoms/banner.feedback";
-
-/** Message de retour d'une opération sur le portefeuille. */
-export interface PortfolioFeedback {
-  readonly kind: FeedbackKind;
-  readonly message: string;
-}
+import { useToastStore } from "../feedback/store.toast";
 
 /** Message affiché quand une erreur inconnue remonte d'une opération. */
 const UNKNOWN_ERROR = "L'opération n'a pas pu aboutir. Réessayez.";
@@ -21,23 +13,24 @@ function describeError(error: unknown): string {
 }
 
 /**
- * Exécute une opération du portefeuille et garde son retour à l'écran. Une
- * opération refusée par le modèle ne modifie pas l'état et affiche sa raison.
- * @returns Le retour courant et la fonction d'exécution, qui indique si l'opération a réussi.
+ * Exécute une opération du portefeuille et annonce son résultat dans un toast.
+ * Une opération refusée par le modèle ne modifie pas l'état et affiche sa
+ * raison, par exemple un solde insuffisant.
+ * @returns La fonction d'exécution, qui indique si l'opération a réussi.
  */
 export function usePortfolioFeedback() {
-  const [feedback, setFeedback] = useState<PortfolioFeedback | null>(null);
+  const show = useToastStore((state) => state.show);
 
   const run = (action: () => void, success: string): boolean => {
     try {
       action();
-      setFeedback({ kind: "success", message: success });
+      show("success", success);
       return true;
     } catch (error) {
-      setFeedback({ kind: "error", message: describeError(error) });
+      show("error", describeError(error));
       return false;
     }
   };
 
-  return { feedback, run };
+  return { run };
 }

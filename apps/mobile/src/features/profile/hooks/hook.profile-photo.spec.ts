@@ -7,6 +7,7 @@ import { saveProfilePhoto } from "../model/model.profile-photo-file";
 import { PHOTO_ERRORS, useProfilePhoto } from "./hook.profile-photo";
 
 jest.mock("expo-image-picker", () => ({
+  UIImagePickerPreferredAssetRepresentationMode: { Current: "current" },
   launchImageLibraryAsync: jest.fn(),
   launchCameraAsync: jest.fn(),
   requestCameraPermissionsAsync: jest.fn(),
@@ -79,6 +80,17 @@ describe("useProfilePhoto", () => {
     expect(outcome).toEqual({ status: "saved" });
     expect(savePhoto).toHaveBeenCalledWith("file:///gallery/avatar.jpg");
     expect(result.current.photoUri).toBe("file:///documents/profile-photo.jpg");
+  });
+
+  it("ouvre la galerie sans conversion inutile de l'original sur iOS", async () => {
+    launchLibrary.mockResolvedValue({ canceled: true, assets: null });
+    const { result } = await renderHook(() => useProfilePhoto());
+
+    await act(() => result.current.pickPhoto(jest.fn()));
+
+    expect(launchLibrary).toHaveBeenCalledWith(
+      expect.objectContaining({ preferredAssetRepresentationMode: "current", quality: 1 }),
+    );
   });
 
   it("affiche la photo choisie avant la fin de la compression", async () => {

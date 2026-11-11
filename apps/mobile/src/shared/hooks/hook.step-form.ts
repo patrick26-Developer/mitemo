@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useToastStore } from "../feedback/store.toast";
 import type { FormResult } from "../model/model.form-result";
 import type { FormSteps } from "./hook.form-steps";
 import { useFormSteps } from "./hook.form-steps";
@@ -61,14 +62,19 @@ interface AdvanceDeps<Form, Output> {
 }
 
 /**
- * Gère l'étape courante et le message d'erreur : revenir ou fermer efface
- * l'erreur, fermer repart de la première étape.
+ * Gère l'étape courante et le message d'erreur, annoncé dans un toast :
+ * revenir ou fermer efface l'erreur, fermer repart de la première étape.
  * @param total Nombre d'étapes.
  * @param onDone Appelé à la fermeture.
  * @returns L'étape, l'erreur et les déplacements.
  */
 function useStepFeedback(total: number, onDone: () => void): StepFeedback {
-  const [error, report] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const show = useToastStore((state) => state.show);
+  const report = (message: string | null) => {
+    setError(message);
+    if (message !== null) show("error", message);
+  };
   const steps = useFormSteps(total);
   const back = () => {
     report(null);
