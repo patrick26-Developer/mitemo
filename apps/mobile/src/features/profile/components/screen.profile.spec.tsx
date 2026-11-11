@@ -6,7 +6,7 @@ import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/s
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { PHOTO_ERRORS } from "../hooks/hook.profile-photo";
 import { saveProfilePhoto } from "../model/model.profile-photo-file";
-import { useProfilePreferences } from "../model/model.profile-preferences";
+import { useProfilePreferences } from "../hooks/store.profile-preferences";
 import { ProfileScreen } from "./screen.profile";
 
 jest.mock("expo-router", () => ({
@@ -89,12 +89,6 @@ describe("ProfileScreen", () => {
 
     expect(router.push).toHaveBeenCalledWith("/history");
     expect(screen.queryByText("Dernières opérations")).not.toBeOnTheScreen();
-  });
-
-  it("affiche le nom du thème courant", async () => {
-    await renderWithSafeArea(<ProfileScreen />);
-
-    expect(screen.getByText("Système")).toBeOnTheScreen();
   });
 
   it("affiche les documents légaux", async () => {
@@ -207,27 +201,25 @@ describe("ProfileScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: "Informations personnelles" }));
 
     expect(await screen.findByText("Profession ou formation")).toBeOnTheScreen();
-    expect(screen.getByText("Compte vérifié")).toBeOnTheScreen();
+    expect(screen.queryByText("Compte vérifié")).toBeNull();
   });
 
-  it("enregistre le thème choisi dans la feuille", async () => {
+  it("ne propose ni thème ni langue tant qu'ils ne sont pas pris en charge", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Thème" }));
-    fireEvent.press(await screen.findByRole("button", { name: "Sombre" }));
-
-    expect(useProfilePreferences.getState().theme).toBe("Sombre");
-    expect(screen.getAllByText("Sombre").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Thème" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Langue" })).toBeNull();
   });
 
-  it("active la biométrie depuis la feuille de sécurité", async () => {
+  it("n'affiche dans la sécurité que des informations réelles", async () => {
     await renderWithSafeArea(<ProfileScreen />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Sécurité" }));
-    const toggle = await screen.findByLabelText("Déverrouillage biométrique");
-    await fireEvent(toggle, "valueChange", true);
 
-    expect(useProfilePreferences.getState().biometrics).toBe(true);
+    expect(await screen.findByText(/seule son empreinte est conservée/)).toBeOnTheScreen();
+    expect(screen.queryByLabelText("Déverrouillage biométrique")).toBeNull();
+    expect(screen.queryByText("Aucune session suspecte")).toBeNull();
+    expect(screen.queryByText(/Modifié il y a/)).toBeNull();
   });
 
   it("coupe une catégorie de notifications", async () => {
@@ -238,15 +230,6 @@ describe("ProfileScreen", () => {
     await fireEvent(toggle, "valueChange", false);
 
     expect(useProfilePreferences.getState().notifications.contributions).toBe(false);
-  });
-
-  it("change la langue depuis la feuille", async () => {
-    await renderWithSafeArea(<ProfileScreen />);
-
-    await fireEvent.press(screen.getByRole("button", { name: "Langue" }));
-    await fireEvent.press(await screen.findByRole("button", { name: "Anglais" }));
-
-    expect(useProfilePreferences.getState().language).toBe("Anglais");
   });
 
   it("affiche les questions fréquentes dans l'aide", async () => {

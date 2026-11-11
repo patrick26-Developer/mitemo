@@ -5,7 +5,7 @@
     "scheme": "mitemo",
     "version": "0.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
       "expo-status-bar",

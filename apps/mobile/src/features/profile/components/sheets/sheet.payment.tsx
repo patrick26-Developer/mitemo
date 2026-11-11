@@ -2,7 +2,7 @@ import { SheetOptionList } from "../../../../shared/components/macros/list.sheet
 import { SheetSection } from "../../../../shared/components/macros/section.sheet";
 import { SheetText } from "../../../../shared/components/atoms/text.sheet";
 import { PROFILE_PAYMENT_METHODS } from "../../model/model.profile-payments";
-import { useProfilePreferences } from "../../model/model.profile-preferences";
+import { useProfilePreferences } from "../../hooks/store.profile-preferences";
 
 /** Moyens de paiement, sous la forme attendue par la liste d'options. */
 const PAYMENT_OPTIONS = PROFILE_PAYMENT_METHODS.map((method) => ({

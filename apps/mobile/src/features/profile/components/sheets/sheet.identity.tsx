@@ -1,9 +1,7 @@
-import { BadgeCheck } from "lucide-react-native";
 import { useState } from "react";
 
 import { DetailCard } from "../../../../shared/components/macros/card.detail";
 import { DetailRow } from "../../../../shared/components/atoms/row.detail";
-import { SheetBadge } from "../../../../shared/components/atoms/badge.sheet";
 import { SheetSecondaryButton } from "../../../../shared/components/atoms/button.sheet-secondary";
 import { SheetSection } from "../../../../shared/components/macros/section.sheet";
 import { SheetText } from "../../../../shared/components/atoms/text.sheet";
@@ -52,7 +50,6 @@ function IdentitySummary(props: IdentitySummaryProps) {
           <DetailRow label="Téléphone" value={phone} />
           <DetailRow label="Compte créé le" value={formatDate(createdAt)} />
         </DetailCard>
-        <SheetBadge icon={BadgeCheck} label="Compte vérifié" />
       </SheetSection>
       <SheetSecondaryButton label="Modifier mes informations" onPress={onEdit} />
       <SheetText>
