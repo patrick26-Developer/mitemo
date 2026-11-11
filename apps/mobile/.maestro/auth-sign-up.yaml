@@ -1,0 +1,26 @@
+# Parcours critique : création d'un compte, choix du code PIN et arrivée sur l'accueil.
+# Lancement : maestro test -e APP_ID=<identifiant de l'application> apps/mobile/.maestro
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- assertVisible: "Bon retour !"
+- tapOn: "Créer un compte"
+- tapOn: "Prénom"
+- inputText: "Aimée"
+- tapOn: "Nom"
+- inputText: "Mbemba"
+- tapOn: "Profession ou formation"
+- inputText: "Commerçante"
+- tapOn: "Numéro de téléphone"
+- inputText: "065706622"
+- hideKeyboard
+- tapOn: "Continuer"
+- assertVisible: "Code PIN"
+- tapOn: "4"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "1"
+- assertVisible: "Bonjour"
+- assertVisible: "Aimée Mbemba"

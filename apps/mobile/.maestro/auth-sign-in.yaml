@@ -1,0 +1,26 @@
+# Parcours critique : déconnexion, refus d'un mauvais code, puis reconnexion.
+# Suppose le compte créé par auth-sign-up.yaml (code 4821) : Maestro exécute les
+# fichiers du dossier par ordre alphabétique.
+appId: ${APP_ID}
+---
+- launchApp
+- assertVisible: "Bon retour !"
+- tapOn: "Numéro de téléphone"
+- inputText: "065706622"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Code PIN"
+- tapOn: "0"
+- tapOn: "0"
+- tapOn: "0"
+- tapOn: "0"
+- assertVisible: "Code incorrect. Réessayez."
+- tapOn: "4"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "1"
+- assertVisible: "Bonjour"
+- tapOn: "Profil"
+- tapOn: "Se déconnecter"
+- tapOn: "Confirmer la déconnexion"
+- assertVisible: "Bon retour !"
