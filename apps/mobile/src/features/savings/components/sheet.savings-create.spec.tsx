@@ -17,11 +17,16 @@ async function fillProject(name = "Loyer de Février"): Promise<void> {
 }
 
 /**
- * Choisit une échéance au calendrier, en validant la date proposée.
+ * Choisit une échéance au calendrier, en touchant le premier jour proposé.
  */
 async function chooseDeadline(): Promise<void> {
   await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
-  await fireEvent.press(screen.getByRole("button", { name: "Valider" }));
+  await fireEvent(
+    screen.getByTestId("native-date-picker"),
+    "change",
+    { type: "set" },
+    new Date(`${tomorrowUtc()}T00:00:00.000Z`),
+  );
 }
 
 describe("SavingsCreateSheet", () => {

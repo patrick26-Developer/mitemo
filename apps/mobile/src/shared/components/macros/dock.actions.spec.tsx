@@ -38,15 +38,30 @@ describe("ActionsDock", () => {
     expect(dock.props["pointerEvents"]).toBe("box-none");
   });
 
-  it("donne à l'action principale la couleur d'action de l'écran", async () => {
+  it("affiche le retour d'opération au-dessus des actions", async () => {
     await renderWithSafeArea(
-      <ActionsDock primary={{ label: "Pointer", onPress: jest.fn(), accent: "#F5D7B0" }} />,
+      <ActionsDock
+        primary={{ label: "Pointer", onPress: jest.fn() }}
+        notice={{ kind: "success", message: "Pointage ajouté." }}
+      />,
     );
 
-    expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#DF8C20" });
+    expect(screen.getByText("Pointage ajouté.")).toBeOnTheScreen();
   });
 
-  it("ne rend rien sans action", async () => {
+  it("affiche le retour même quand plus aucune action n'est possible", async () => {
+    await renderWithSafeArea(
+      <ActionsDock
+        primary={null}
+        secondary={null}
+        notice={{ kind: "success", message: "L'épargne a été retirée." }}
+      />,
+    );
+
+    expect(screen.getByText("L'épargne a été retirée.")).toBeOnTheScreen();
+  });
+
+  it("ne rend rien sans action ni retour", async () => {
     await renderWithSafeArea(<ActionsDock primary={null} secondary={null} />);
 
     expect(screen.queryByTestId("actions-dock")).not.toBeOnTheScreen();
