@@ -53,7 +53,7 @@ export interface PortfolioState {
   readonly available: bigint;
   readonly tontines: readonly Tontine[];
   readonly cards: readonly SavingsCard[];
-  createTontine: (input: CreateTontineInput) => void;
+  createTontine: (input: CreateTontineInput) => Tontine;
   createCard: (input: CreateCardInput) => void;
   contributeTontine: (tontineId: string) => void;
   withdrawTontine: (tontineId: string) => void;
@@ -81,10 +81,13 @@ function createInvitationCode(): string {
  * Crée une tontine et l'ajoute en tête de liste.
  * @param context Accès au store.
  * @param input Paramètres saisis.
+ * @returns La tontine créée, telle qu'elle est conservée.
  */
-function createTontine(context: PortfolioContext, input: CreateTontineInput): void {
+function createTontine(context: PortfolioContext, input: CreateTontineInput): Tontine {
   const tontine = buildTontine(input, context.get().tontines.length);
   context.set((state) => ({ tontines: prependTontine(state.tontines, tontine) }));
+
+  return tontine;
 }
 
 /**

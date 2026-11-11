@@ -65,6 +65,47 @@ describe("useStepForm", () => {
     expect(result.current.steps.index).toBe(0);
   });
 
+  it("garde la feuille ouverte après la création quand elle doit rester ouverte", async () => {
+    const config = { ...demoConfig(), keepOpenAfterCreate: true };
+    const { result } = await renderHook(() => useStepForm(config));
+
+    await act(() => result.current.update({ name: "Grâce", age: "30" }));
+    await act(() => result.current.next());
+    await act(() => result.current.next());
+
+    expect(config.onCreate).toHaveBeenCalledWith("Grâce:30");
+    expect(config.onDone).not.toHaveBeenCalled();
+    expect(result.current).toMatchObject({ created: true, error: null });
+
+    await act(() => result.current.finish());
+
+    expect(config.onDone).toHaveBeenCalledTimes(1);
+    expect(result.current).toMatchObject({ created: false, form: { name: "", age: "" } });
+  });
+
+  it("signale une création refusée et laisse réessayer", async () => {
+    const onCreate = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error("La caisse est fermée.");
+      })
+      .mockImplementation(() => undefined);
+    const config = demoConfig();
+    const { result } = await renderHook(() => useStepForm({ ...config, onCreate }));
+
+    await act(() => result.current.update({ name: "Grâce", age: "30" }));
+    await act(() => result.current.next());
+    await act(() => result.current.next());
+
+    expect(result.current.error).toBe("La caisse est fermée. Réessayez.");
+    expect(config.onDone).not.toHaveBeenCalled();
+
+    await act(() => result.current.next());
+
+    expect(onCreate).toHaveBeenCalledTimes(2);
+    expect(config.onDone).toHaveBeenCalledTimes(1);
+  });
+
   it("garde la saisie à la fermeture mais repart de la première étape", async () => {
     const config = demoConfig();
     const { result } = await renderHook(() => useStepForm(config));

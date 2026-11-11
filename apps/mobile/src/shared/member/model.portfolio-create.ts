@@ -33,7 +33,6 @@ export interface CreateTontineInput {
   readonly name: string;
   readonly contribution: bigint;
   readonly frequency: TontineFrequency;
-  readonly totalRounds: number;
   readonly participantCount: number;
   readonly description: string;
 }
@@ -86,7 +85,7 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
     contribution: input.contribution,
     frequency: input.frequency,
     round: 1,
-    totalRounds: input.totalRounds,
+    totalRounds: members.length,
     state: "ACTIVE",
     members,
     beneficiaryId: members[0]?.id ?? SELF_MEMBER_ID,

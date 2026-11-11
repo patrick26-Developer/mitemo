@@ -16,6 +16,11 @@ export interface StepFormConfig<Form, Output> {
   readonly onCreate: (value: Output) => void;
   /** Appelé quand la feuille doit se fermer, après création ou abandon. */
   readonly onDone: () => void;
+  /**
+   * Laisse la feuille ouverte après la création, pour afficher la confirmation
+   * et les suites possibles (inviter des membres, partager un code).
+   */
+  readonly keepOpenAfterCreate?: boolean;
 }
 
 /** Saisie, erreur, étape courante et actions d'un formulaire en plusieurs étapes. */
@@ -29,6 +34,10 @@ export interface StepForm<Form> {
   readonly back: () => void;
   /** Ferme : la saisie est gardée, l'étape repart de la première. */
   readonly close: () => void;
+  /** Vrai après une création réussie, tant que la confirmation est affichée. */
+  readonly created: boolean;
+  /** Ferme la confirmation : vide la saisie et repart de la première étape. */
+  readonly finish: () => void;
 }
 
 /** Étape courante, erreur affichée et déplacements d'un formulaire en étapes. */
@@ -47,6 +56,8 @@ interface AdvanceDeps<Form, Output> {
   readonly feedback: StepFeedback;
   /** Vide la saisie et ferme, une fois la création faite. */
   readonly finish: () => void;
+  /** Garde la feuille ouverte sur une confirmation de création. */
+  readonly stayOpen: () => void;
 }
 
 /**
@@ -73,6 +84,29 @@ function useStepFeedback(total: number, onDone: () => void): StepFeedback {
 }
 
 /**
+ * Crée à partir de la valeur validée, ou signale l'échec avec la possibilité
+ * de réessayer.
+ * @param config Règles du formulaire.
+ * @param value Valeur validée.
+ * @param feedback Erreur affichée dans la feuille.
+ * @returns Vrai si la création a abouti.
+ */
+function tryCreate<Form, Output>(
+  config: StepFormConfig<Form, Output>,
+  value: Output,
+  feedback: StepFeedback,
+): boolean {
+  try {
+    config.onCreate(value);
+    return true;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "La création a échoué.";
+    feedback.report(`${reason} Réessayez.`);
+    return false;
+  }
+}
+
+/**
  * Valide tout le formulaire à la dernière étape, puis crée ou signale le
  * message à corriger.
  * @param deps Configuration, saisie, erreur et suite après création.
@@ -83,7 +117,11 @@ function completeStepForm<Form, Output>(deps: AdvanceDeps<Form, Output>): void {
     deps.feedback.report(result.message);
     return;
   }
-  deps.config.onCreate(result.value);
+  if (!tryCreate(deps.config, result.value, deps.feedback)) return;
+  if (deps.config.keepOpenAfterCreate === true) {
+    deps.stayOpen();
+    return;
+  }
   deps.finish();
 }
 
@@ -114,14 +152,20 @@ export function useStepForm<Form extends object, Output>(
   config: StepFormConfig<Form, Output>,
 ): StepForm<Form> {
   const [form, setForm] = useState(config.initial);
+  const [created, setCreated] = useState(false);
   const feedback = useStepFeedback(config.total, config.onDone);
-  const { error, steps, back, close } = feedback;
+  const { error, steps, back, close, report } = feedback;
   const finish = () => {
+    setCreated(false);
     setForm(config.initial);
     close();
   };
-  const next = () => advanceStepForm({ config, form, feedback, finish });
+  const stayOpen = () => {
+    report(null);
+    setCreated(true);
+  };
+  const next = () => advanceStepForm({ config, form, feedback, finish, stayOpen });
   const update = (patch: Partial<Form>) => setForm((current) => ({ ...current, ...patch }));
 
-  return { form, error, steps, update, next, back, close };
+  return { form, error, steps, update, next, back, close, created, finish };
 }

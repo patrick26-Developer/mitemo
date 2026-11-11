@@ -22,13 +22,13 @@ describe("createTontine", () => {
       name: "Nouvelle tontine",
       contribution: 10_000n,
       frequency: { unit: "mois", interval: 1 },
-      totalRounds: 6,
       participantCount: 3,
       description: "Créée depuis les tests.",
     };
 
-    actions.createTontine(input);
+    const created = actions.createTontine(input);
 
+    expect(created).toBe(state().tontines[0]);
     expect(state().tontines).toHaveLength(2);
     expect(state().tontines[0]?.name).toBe("Nouvelle tontine");
     expect(state().tontines[0]?.members).toHaveLength(3);

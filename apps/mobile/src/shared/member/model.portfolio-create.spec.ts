@@ -7,7 +7,6 @@ const TONTINE_INPUT: CreateTontineInput = {
   name: "Tontine des tests",
   contribution: 5_000n,
   frequency: { unit: "semaine", interval: 1 },
-  totalRounds: 10,
   participantCount: 4,
   description: "Une tontine créée en test.",
 };
@@ -29,7 +28,7 @@ describe("buildTontine", () => {
     expect(created.round).toBe(1);
     expect(created.state).toBe("ACTIVE");
     expect(created.invitationCode).toBeNull();
-    expect(created.totalRounds).toBe(10);
+    expect(created.totalRounds).toBe(4);
   });
 
   it("inscrit le membre connecté en administrateur puis les invités", () => {
