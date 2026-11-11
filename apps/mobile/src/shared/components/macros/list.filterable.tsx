@@ -7,7 +7,6 @@ import type { EmptyStateContent } from "../../model/model.list-empty-state";
 import { searchEmptyState } from "../../model/model.list-empty-state";
 import { matchesFilter, matchesSearch } from "../../model/model.list-filter";
 import type { ListFilter } from "../../model/model.list-filter";
-import { DottedBackground } from "../atoms/background.dotted";
 import { EmptyState } from "./state.empty";
 import { ListHeader } from "./header.list";
 
@@ -50,7 +49,6 @@ export function FilterableList<Item>(props: FilterableListProps<Item>) {
 
   return (
     <View className="flex-1 bg-white">
-      <DottedBackground />
       <FlatList
         data={items}
         keyExtractor={config.keyOf}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DottedBackground } from "../../../shared/components/atoms/background.dotted";
 import { useMemberStore } from "../../../shared/member/store.member";
 import { useProfileActions } from "../hooks/hook.profile-actions";
 import { useProfileCounts } from "../hooks/hook.profile-counts";
@@ -32,7 +31,6 @@ export function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <DottedBackground />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingTop: insets.top + 12 }}
