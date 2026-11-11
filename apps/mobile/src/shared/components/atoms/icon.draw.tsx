@@ -52,6 +52,12 @@ interface DrawPathProps {
   readonly strokeWidth: number;
   readonly delay: number;
   readonly duration: number;
+  /**
+   * `true` une fois l'icône posée et mesurée par le moteur natif. Avant cela,
+   * appeler `getTotalLength()` renvoie `null` sous Fabric iOS et déclenche
+   * « Invalid svg returned from registry ».
+   */
+  readonly laidOut: boolean;
 }
 
 /** Props des traits d'une icône. */
@@ -62,6 +68,7 @@ interface DrawPathsProps {
   readonly delay: number;
   readonly stagger: number;
   readonly duration: number;
+  readonly laidOut: boolean;
 }
 
 /**
@@ -87,15 +94,17 @@ function measureLength(node: Path | null): number {
  * @returns Le trait animé.
  */
 function DrawPath(props: DrawPathProps) {
-  const { d, color, strokeWidth, delay, duration } = props;
+  const { d, color, strokeWidth, delay, duration, laidOut } = props;
   const ref = useRef<Path | null>(null);
   const [length, setLength] = useState<number | null>(null);
   const progress = useSharedValue(0);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (!laidOut) return;
+
     setLength(measureLength(ref.current));
-  }, []);
+  }, [laidOut]);
 
   useEffect(() => {
     if (length === null) return;
@@ -131,7 +140,7 @@ function DrawPath(props: DrawPathProps) {
  * @returns Les traits animés.
  */
 function DrawPaths(props: DrawPathsProps) {
-  const { paths, color, strokeWidth, delay, stagger, duration } = props;
+  const { paths, color, strokeWidth, delay, stagger, duration, laidOut } = props;
 
   return (
     <>
@@ -143,9 +152,53 @@ function DrawPaths(props: DrawPathsProps) {
           strokeWidth={strokeWidth}
           delay={delay + index * stagger}
           duration={duration}
+          laidOut={laidOut}
         />
       ))}
     </>
+  );
+}
+
+/** Props du canevas SVG d'une icône. */
+interface DrawIconCanvasProps {
+  readonly paths: readonly string[];
+  readonly color: string;
+  readonly size: number;
+  readonly strokeWidth: number;
+  readonly delay: number;
+  readonly stagger: number;
+  readonly duration: number;
+  readonly laidOut: boolean;
+}
+
+/**
+ * Rend le canevas SVG qui porte les traits d'une icône.
+ * @param props Traits, couleur, taille et minutage de l'icône.
+ * @returns Le canevas de l'icône.
+ */
+function DrawIconCanvas(props: DrawIconCanvasProps) {
+  const { paths, color, size, strokeWidth, delay, stagger, duration, laidOut } = props;
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+      fill="none"
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <DrawPaths
+        paths={paths}
+        color={color}
+        strokeWidth={strokeWidth}
+        delay={delay}
+        stagger={stagger}
+        duration={duration}
+        laidOut={laidOut}
+      />
+    </Svg>
   );
 }
 
@@ -166,6 +219,7 @@ export function DrawIcon(props: DrawIconProps) {
     duration = DEFAULT_DURATION,
     testID,
   } = props;
+  const [laidOut, setLaidOut] = useState(false);
 
   return (
     <View
@@ -173,25 +227,18 @@ export function DrawIcon(props: DrawIconProps) {
       style={{ width: size, height: size }}
       pointerEvents="none"
       accessible={false}
+      onLayout={() => setLaidOut(true)}
     >
-      <Svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
-        fill="none"
-        accessible={false}
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      >
-        <DrawPaths
-          paths={paths}
-          color={color}
-          strokeWidth={strokeWidth}
-          delay={delay}
-          stagger={stagger}
-          duration={duration}
-        />
-      </Svg>
+      <DrawIconCanvas
+        paths={paths}
+        color={color}
+        size={size}
+        strokeWidth={strokeWidth}
+        delay={delay}
+        stagger={stagger}
+        duration={duration}
+        laidOut={laidOut}
+      />
     </View>
   );
 }
