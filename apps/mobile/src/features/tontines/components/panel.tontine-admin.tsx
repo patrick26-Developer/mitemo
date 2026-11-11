@@ -11,7 +11,8 @@ export interface TontineAdminPanelProps {
 
 /**
  * Affiche le code d'invitation et le bouton qui le crée, réservés à
- * l'administrateur de la tontine.
+ * l'administrateur de la tontine. Un code existant n'est jamais régénéré : il
+ * reste affiché, et le bouton disparaît.
  * @param props Tontine administrée et action d'invitation.
  * @returns Le panneau d'administration.
  */
@@ -25,13 +26,11 @@ export function TontineAdminPanel(props: TontineAdminPanelProps) {
       <Text className="text-[13px] leading-5 text-muted">
         Partagez le code d&apos;invitation pour faire entrer un nouveau membre dans la tontine.
       </Text>
-      {code === null ? null : (
+      {code === null ? (
+        <SheetSecondaryButton label="Créer un code d'invitation" onPress={onInvite} />
+      ) : (
         <Text className="text-[24px] font-bold tracking-widest text-ink">{code}</Text>
       )}
-      <SheetSecondaryButton
-        label={code === null ? "Créer un code d'invitation" : "Régénérer le code"}
-        onPress={onInvite}
-      />
     </View>
   );
 }
