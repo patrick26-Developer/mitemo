@@ -72,7 +72,7 @@ jobs:
       - name: Tests e2e
         # Appel direct (pas `pnpm test:e2e` via turbo) : turbo ne transmet que les
         # variables déclarées dans globalEnv/env de turbo.json (seul NODE_ENV l'est),
-        # et filtre DATABASE_URL par défaut — confirmé en reproduisant localement.
+        # et filtre DATABASE_URL par défaut - confirmé en reproduisant localement.
         run: pnpm --filter api test:e2e
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mitemo_test

@@ -25,7 +25,7 @@ Le gain de latence du Cap par rapport à Paris (30 à 40 ms) est réel mais marg
 
 1. **Principal : Scaleway Paris.** Deux petites machines (application, travailleur) plus PostgreSQL managé avec sauvegardes et restauration à un instant donné. Coût prévisible, support en français, assez d'abstraction pour une petite équipe.
 2. **Copie de conformité en zone CEMAC.** Une réplique en lecture ou une sauvegarde chiffrée hébergée localement, documentée dans le registre des traitements. Cela répond à la préférence des autorités pour un hébergement en zone CEMAC sans payer le prix d'une exploitation locale complète (voir `02-conformite-reglementaire.md`).
-3. **Documenter la base légale du transfert** vers l'Union européenne, qui offre un niveau de protection reconnu — c'est précisément l'argument qui rend le montage défendable.
+3. **Documenter la base légale du transfert** vers l'Union européenne, qui offre un niveau de protection reconnu - c'est précisément l'argument qui rend le montage défendable.
 4. **Ne pas faire de multi-région active.** À cette échelle c'est une complexité pure.
 
 ### Ce qu'il faut budgéter en plus et qu'on oublie toujours
@@ -51,7 +51,7 @@ Le gain de latence du Cap par rapport à Paris (30 à 40 ms) est réel mais marg
 
 **À faire aujourd'hui, avant toute publicité liée au concours :** réserver les trois premiers domaines et les identifiants sociaux (Facebook, Instagram, TikTok, LinkedIn, X, WhatsApp Business). Une couverture presse sur un projet primé déclenche systématiquement du squatting de nom. Coût total : moins de 50 €. Ne pas le faire est une erreur qui coûte cher et qu'on ne peut plus réparer.
 
-Et en parallèle : **déposer la marque à l'OAPI** — un seul dépôt couvre les 17 États membres dont le Congo.
+Et en parallèle : **déposer la marque à l'OAPI** - un seul dépôt couvre les 17 États membres dont le Congo.
 
 ---
 
@@ -91,7 +91,7 @@ C'est le poste qui décide de la rentabilité (voir P2 dans `00-synthese-et-poin
 
 Règles à inscrire au cahier des charges, en remplacement du moteur d'alertes des §2.1 et §2.3 :
 
-1. **Plafond dur de notifications par utilisateur et par jour** — 1 SMS maximum, 3 *push* maximum.
+1. **Plafond dur de notifications par utilisateur et par jour** - 1 SMS maximum, 3 *push* maximum.
 2. **Le conseil budgétaire du §2.3 passe en *push* ou en consultation dans l'application, jamais en SMS.** C'est un service agréable, pas une information critique : il ne justifie pas 20 FCFA par envoi.
 3. **Le « rappel matinal de flux continu » des cycles ultra-courts doit être un *push*.** En SMS quotidien, c'est le poste de coût qui tue le produit.
 4. **Groupement des messages** : un seul SMS récapitulant trois tontines plutôt que trois SMS.
@@ -105,7 +105,7 @@ Positionnement : **canal intermédiaire** entre le *push* et le SMS, et excellen
 
 ### Le code court USSD : à lancer maintenant
 
-C'est **l'élément au plus long délai d'obtention de tout le projet** — comptez des mois de négociation avec MTN Congo puis Airtel Congo, séparément. Structure de coût typique : frais de mise en service, loyer mensuel du code court, et parfois un partage de revenu.
+C'est **l'élément au plus long délai d'obtention de tout le projet** - comptez des mois de négociation avec MTN Congo puis Airtel Congo, séparément. Structure de coût typique : frais de mise en service, loyer mensuel du code court, et parfois un partage de revenu.
 
 **[DEVIS]** à demander dès cette semaine. Même si le produit n'est pas prêt, la négociation doit être commencée : un code court obtenu est aussi une barrière à l'entrée, et c'est un élément très concret à montrer à un jury ou à un partenaire.
 
@@ -121,16 +121,16 @@ Le §4.2 a l'intuition juste sur l'iconographie. Il faut aller plus loin : pour 
 |---|---|---|---|
 | Notifications push | Firebase Cloud Messaging | Gratuit | Aucune alternative pertinente |
 | Suivi d'erreurs | Sentry | Gratuit puis ~26 €/mois | Mobile et dorsal |
-| Supervision | Grafana Cloud (offre gratuite) + UptimeRobot | 0-10 €/mois | — |
+| Supervision | Grafana Cloud (offre gratuite) + UptimeRobot | 0-10 €/mois | - |
 | Tableaux de bord métier | Metabase auto-hébergé | ~10 €/mois (une machine) | Moins cher que les offres SaaS |
 | Emails transactionnels | Brevo ou Resend | Gratuit au départ | Usage marginal, le canal est le téléphone |
 | Stockage objet (justificatifs KYC, sauvegardes) | Scaleway Object Storage | ~5 €/mois | Chiffré, accès restreint |
 | Gestion des secrets | Infisical ou SOPS/age | Gratuit à ~10 €/mois | Jamais de secret dans le dépôt Git |
 | Compte développeur Google Play | Google | 25 USD une fois | Prévoir la revue renforcée des applications financières |
 | Compte Apple | Apple | 99 USD/an | **À reporter.** iOS non pertinent en v1. |
-| Certificats TLS | Let's Encrypt | Gratuit | — |
+| Certificats TLS | Let's Encrypt | Gratuit | - |
 | Dépôt de code et intégration continue | GitHub | Gratuit | Dépôt privé |
-| Signalétique et support terrain | — | Variable | Ne pas oublier : numéro vert ou ligne de support, et visuels pour les agents |
+| Signalétique et support terrain | - | Variable | Ne pas oublier : numéro vert ou ligne de support, et visuels pour les agents |
 
 ---
 
@@ -146,7 +146,7 @@ Non négociable avant de manipuler de l'argent réel, et absent des deux documen
 | 4 | **Test d'intrusion externe** par un cabinet reconnu | 3 000-8 000 € | Avant l'ouverture au public |
 | 5 | Audit de conformité par un auditeur financier | **[DEVIS]** | Exigé par le partenaire agréé |
 
-Le test d'intrusion n'est pas une dépense de confort : c'est ce que le partenaire bancaire exigera, et c'est ce qui vous protège le jour où un incident survient. À inscrire au plan de financement du concours comme un poste explicite — un jury y verra un signe de sérieux rare.
+Le test d'intrusion n'est pas une dépense de confort : c'est ce que le partenaire bancaire exigera, et c'est ce qui vous protège le jour où un incident survient. À inscrire au plan de financement du concours comme un poste explicite - un jury y verra un signe de sérieux rare.
 
 Priorités de test spécifiques à ce produit : le parcours de ré-enrôlement après changement d'appareil, le rejeu des rappels opérateur, les conditions de concurrence sur les écritures du grand livre, l'élévation de privilège de membre vers administrateur de groupe, et l'injection dans les passerelles SMS et USSD.
 
@@ -154,7 +154,7 @@ Priorités de test spécifiques à ce produit : le parcours de ré-enrôlement a
 
 ## 6. Budget récapitulatif
 
-### Phase 0 — Concours et prototype (maintenant)
+### Phase 0 - Concours et prototype (maintenant)
 
 | Poste | Coût |
 |---|---|
@@ -165,7 +165,7 @@ Priorités de test spécifiques à ce produit : le parcours de ré-enrôlement a
 | SMS de démonstration (crédit de test) | ~20 € |
 | **Total** | **~150 € + ~400 € de marque + 20 €/mois** |
 
-### Phase 1 — Pilote réel, 1 marché, 20 groupes, ~200 utilisateurs
+### Phase 1 - Pilote réel, 1 marché, 20 groupes, ~200 utilisateurs
 
 | Poste | Coût mensuel |
 |---|---|
@@ -190,9 +190,9 @@ Soit de l'ordre de **110 000 à 140 000 FCFA par mois** en exploitation pour le 
 ---
 
 **Sources**
-- [.cg Domain Name — Netim](https://www.netim.com/en/domain-name/cg-domain)
-- [.cg Domain Registration — 101domain](https://www.101domain.com/cg.htm)
-- [CG Domain Name Registration — Africa Registry](https://www.africaregistry.com/domain-names/republic-of-the-congo/cg-domain-registration)
-- [SMS Pricing in Republic of the Congo — Twilio](https://www.twilio.com/en-us/sms/pricing/cg)
-- [SMS Pricing comparison — sent.dm](https://www.sent.dm/resources/categories/sms-pricing)
-- [Fees & Pricing by Country — PawaPay](https://www.pawapay.io/fees)
+- [.cg Domain Name - Netim](https://www.netim.com/en/domain-name/cg-domain)
+- [.cg Domain Registration - 101domain](https://www.101domain.com/cg.htm)
+- [CG Domain Name Registration - Africa Registry](https://www.africaregistry.com/domain-names/republic-of-the-congo/cg-domain-registration)
+- [SMS Pricing in Republic of the Congo - Twilio](https://www.twilio.com/en-us/sms/pricing/cg)
+- [SMS Pricing comparison - sent.dm](https://www.sent.dm/resources/categories/sms-pricing)
+- [Fees & Pricing by Country - PawaPay](https://www.pawapay.io/fees)

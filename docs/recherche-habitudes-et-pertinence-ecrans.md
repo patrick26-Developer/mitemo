@@ -66,10 +66,10 @@ Verdicts : **Garder** (l'écran répond à un besoin observé), **Simplifier** (
 | Écran | Besoin réel servi | Verdict | Pourquoi | À vérifier en entretien |
 | ----- | ----------------- | ------- | -------- | ----------------------- |
 | Bienvenue | Se rassurer avant de s'engager | Simplifier | La promesse et la mention du partenaire agréé répondent à la crainte d'arnaque (H15). Ajouter le numéro d'un humain (support), qui rassure plus qu'un texte (`user-journey.md`, étape Décision). | Qu'est-ce qui convaincrait de confier son argent : un nom de banque, une personne, une autre présidente ? |
-| Mon numéro | S'identifier sans papiers | Garder | Tout le monde a un numéro (H6). Préciser MTN ou Airtel sans demander l'opérateur. | — |
+| Mon numéro | S'identifier sans papiers | Garder | Tout le monde a un numéro (H6). Préciser MTN ou Airtel sans demander l'opérateur. | - |
 | Code reçu par SMS | Prouver que le numéro est à soi | Simplifier | Lire le code automatiquement sur Android quand c'est possible, pour éviter la saisie. Garder le renvoi et le verrouillage. | Le SMS arrive-t-il vite sur MTN et Airtel ? |
 | Créer mon code secret | Protéger son argent | Repenser | Le partage du code est courant (H14) et l'inscription sera souvent assistée. Prévoir que la présidente rende le téléphone au membre à cette étape, avec une consigne illustrée. | Qui tient le téléphone pendant l'inscription d'un membre peu à l'aise ? |
-| Confirmer, codes différents | Éviter une faute de frappe | Garder | Message court, sans appel réseau, comme prévu. | — |
+| Confirmer, codes différents | Éviter une faute de frappe | Garder | Message court, sans appel réseau, comme prévu. | - |
 
 ### 3.2 Accueil et coffre (#22, #27)
 
@@ -78,8 +78,8 @@ Verdicts : **Garder** (l'écran répond à un besoin observé), **Simplifier** (
 | Accueil, action attendue | Savoir où est son argent et ce qu'on doit faire | Garder | C'est le besoin premier de Grâce (`user-journey.md`) et le cœur de la confiance. Réduire les phrases : statut, montant, bouton. | « Mis de côté » est-il compris sans explication ? |
 | Accueil, sans tontine | Démarrer | Tester | Dans une tontine dirigée par une présidente, la plupart des membres arrivent par un lien d'invitation, pas par cet écran. Il sert surtout aux présidentes. | Une membre ouvrirait-elle l'application sans y être invitée ? |
 | Mettre de l'argent, montant | Alimenter son coffre | Tester | Le cœur de cible manipule du liquide ; passer par Mobile Money coûte environ 4 % ([`audit/01`](audit/01-modele-economique.md)). Le dépôt d'espèces chez un agent ou chez la présidente est peut-être la vraie pratique. En phase 0, l'opérateur est simulé. | Comment chaque membre paie-t-elle aujourd'hui : espèces à la présidente, Mobile Money, autre ? |
-| En attente de l'opérateur | Ne pas croire l'argent perdu | Garder | Séparer « en attente » du disponible est la règle qui évite la panique et les doubles paiements. | — |
-| Résultat (confirmé, refusé, expiré) | Savoir si c'est fait | Garder | Trois issues claires, avec le support pour le cas expiré. | — |
+| En attente de l'opérateur | Ne pas croire l'argent perdu | Garder | Séparer « en attente » du disponible est la règle qui évite la panique et les doubles paiements. | - |
+| Résultat (confirmé, refusé, expiré) | Savoir si c'est fait | Garder | Trois issues claires, avec le support pour le cas expiré. | - |
 
 ### 3.3 Créer et rejoindre une tontine (#24, #25)
 
@@ -88,7 +88,7 @@ Verdicts : **Garder** (l'écran répond à un besoin observé), **Simplifier** (
 | Créer, formulaire | Recopier les règles de son cahier | Garder | Les paramètres correspondent à ceux d'un cahier (H4). Il manque peut-être le choix de l'ordre de passage (H5). | Les règles du cahier tiennent-elles en ces quatre champs ? |
 | Récapitulatif | Savoir combien on reçoit et combien ça coûte | Garder | Indispensable pour la sensibilité aux frais (H16). Frais affichés comme hypothèse tant que #69 n'est pas tranchée. | Les frais affichés sont-ils acceptables ? |
 | Inviter et suivre | Remplacer le cahier de la présidente | Garder, et promouvoir | C'est l'écran principal de la présidente (section 2, point 3). Le partage par WhatsApp ne touche pas les membres à téléphone simple (H8) : prévoir l'invitation par SMS. | Comment la présidente relance-t-elle aujourd'hui un membre en retard ? |
-| Invitation reçue | Savoir dans quoi on s'engage | Simplifier | Le nom de la présidente est le premier signe de confiance : le garder en tête. Raccourcir le texte du tirage. | — |
+| Invitation reçue | Savoir dans quoi on s'engage | Simplifier | Le nom de la présidente est le premier signe de confiance : le garder en tête. Raccourcir le texte du tirage. | - |
 | Bloquer ma garantie | Couvrir un défaut | Repenser | `audit/01` désigne la garantie de 2 500 FCFA comme le premier frein à l'adoption et propose trois alternatives (constitution progressive, garantie choisie par le groupe, caution sociale). | Demander d'avance la moitié d'une cotisation est-il acceptable ? Quelle alternative le groupe préfère-t-il ? |
 
 ### 3.4 Tirage, échéance, incident (#26, #28, #49)
@@ -96,9 +96,9 @@ Verdicts : **Garder** (l'écran répond à un besoin observé), **Simplifier** (
 | Écran | Besoin réel servi | Verdict | Pourquoi | À vérifier en entretien |
 | ----- | ----------------- | ------- | -------- | ----------------------- |
 | Tirage, avant | Croire que l'ordre n'est pas truqué | Tester | Le code de contrôle est la démonstration clé de la phase 0 (`audit/07`), mais un code hexadécimal ne parle pas à l'utilisatrice (H13). Montrer la date et l'heure, et cacher le code derrière « Voir la preuve ». Dépend surtout de la pratique réelle de l'ordre de passage (H5). | Comment l'ordre est-il fixé aujourd'hui ? Un tirage serait-il vu comme plus juste ou comme une perte d'autorité ? |
-| Tirage, vérifié | Connaître son tour | Garder | La liste des tours avec sa propre ligne en évidence répond à « quand est-ce mon tour ? ». La vérification peut être automatique et silencieuse, avec une alerte seulement en cas d'échec. | — |
+| Tirage, vérifié | Connaître son tour | Garder | La liste des tours avec sa propre ligne en évidence répond à « quand est-ce mon tour ? ». La vérification peut être automatique et silencieuse, avec une alerte seulement en cas d'échec. | - |
 | Échéance | Payer à l'heure, ou reporter sans être puni | Garder | « Plus tard » répond au risque de punir un retard légitime (H16). Libellés à tester. | « Payer maintenant » et « Plus tard » sont-ils compris ? |
-| Échéance, bénéficiaire | Savoir que c'est son tour | Garder | Moment positif, net reçu affiché. | — |
+| Échéance, bénéficiaire | Savoir que c'est son tour | Garder | Moment positif, net reçu affiché. | - |
 | Régulariser un incident | Comprendre ce qui s'est passé et revenir dans le groupe | Garder | C'est le « moment de vérité » de `user-journey.md`. Le détail chiffré est juste (5 000 + 100 + 2 500 = 7 600 FCFA) ; la phrase d'explication est à raccourcir. | La membre comprend-elle pourquoi on lui demande aussi de reconstituer sa garantie ? |
 
 ### 3.5 Écrans qui manquent

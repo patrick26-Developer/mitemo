@@ -20,7 +20,7 @@ export type TransactionId = Brand<string, "TransactionId">;
 
 /**
  * Jeton d'invitation cryptographique à usage unique, requis pour rejoindre une
- * tontine (aucune intégration spontanée — voir `docs/cahier_des_charges_fonctionnel_mitemo.md`,
+ * tontine (aucune intégration spontanée - voir `docs/cahier_des_charges_fonctionnel_mitemo.md`,
  * section 1.2). Ce n'est pas un identifiant de ressource : il est consommé à l'adhésion.
  */
 export type InvitationToken = Brand<string, "InvitationToken">;

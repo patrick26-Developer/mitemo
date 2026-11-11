@@ -25,7 +25,7 @@ export type MembershipState = (typeof MEMBERSHIP_STATES)[number];
 
 /**
  * Demande de création d'un jeton d'invitation pour une tontine
- * (aucune intégration spontanée — `docs/cahier_des_charges_fonctionnel_mitemo.md`, §1.2).
+ * (aucune intégration spontanée - `docs/cahier_des_charges_fonctionnel_mitemo.md`, §1.2).
  */
 export interface CreateInvitationRequest {
   readonly tontineId: TontineId;
