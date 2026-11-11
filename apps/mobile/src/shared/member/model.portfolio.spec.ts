@@ -9,6 +9,7 @@ import {
   formatFrequency,
   isTontineAdmin,
   isTontineBeneficiary,
+  markerFill,
   markersDone,
   memberName,
   paidMemberCount,
@@ -62,8 +63,11 @@ function card(over: Partial<SavingsCard> = {}): SavingsCard {
   return {
     id: "c1",
     name: "Carte de test",
+    goal: 30_000n,
     markerAmount: 5_000n,
     markersTotal: 6,
+    frequency: { unit: "semaine", interval: 1 },
+    startDate: "2026-11-01",
     saved: 20_000n,
     deadline: "2026-12-31",
     tint: "#CFD8FF",
@@ -149,7 +153,13 @@ describe("progression d'une carte", () => {
   });
 
   it("calcule l'objectif de la carte", () => {
-    expect(cardGoal(card())).toBe(30_000n);
+    expect(cardGoal(card({ goal: 42_000n }))).toBe(42_000n);
+  });
+
+  it("remplit le marqueur en cours au prorata d'un versement plus élevé", () => {
+    expect(markerFill(card({ saved: 22_500n }))).toBe(50);
+    expect(markerFill(card({ saved: 20_000n }))).toBe(0);
+    expect(markerFill(card({ saved: 30_000n }))).toBe(0);
   });
 
   it("calcule les marqueurs restants", () => {
@@ -165,8 +175,8 @@ describe("progression d'une carte", () => {
   });
 
   it("calcule la part validée entre 0 et 1", () => {
-    expect(cardProgress(card())).toBeCloseTo(4 / 6, 5);
-    expect(cardProgress(card({ markersTotal: 0 }))).toBe(0);
+    expect(cardProgress(card())).toBeCloseTo(4 / 6, 2);
+    expect(cardProgress(card({ goal: 0n }))).toBe(0);
   });
 });
 

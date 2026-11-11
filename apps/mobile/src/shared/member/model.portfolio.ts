@@ -45,9 +45,15 @@ export interface Tontine {
 export interface SavingsCard {
   readonly id: string;
   readonly name: string;
-  /** Montant d'un marqueur, en plus petite unité de la devise (franc CFA). */
+  /** Objectif d'épargne, en plus petite unité de la devise (franc CFA). */
+  readonly goal: bigint;
+  /** Montant proposé à chaque pointage, en plus petite unité de la devise. */
   readonly markerAmount: bigint;
   readonly markersTotal: number;
+  /** Rythme des pointages, déduit de l'échéance à la création. */
+  readonly frequency: TontineFrequency;
+  /** Date de création du plan, en ISO 8601 UTC (`AAAA-MM-JJ`). */
+  readonly startDate: string;
   /** Montant déjà épargné, en plus petite unité de la devise (franc CFA). */
   readonly saved: bigint;
   /** Date limite, au format ISO 8601 UTC (`AAAA-MM-JJ`). */
@@ -134,12 +140,27 @@ export function markersDone(card: SavingsCard): number {
 }
 
 /**
- * Calcule l'objectif total d'une carte : montant d'un marqueur × marqueurs.
+ * Donne l'objectif d'épargne d'une carte.
  * @param card Carte concernée.
  * @returns L'objectif, en plus petite unité de la devise.
  */
 export function cardGoal(card: SavingsCard): bigint {
-  return card.markerAmount * BigInt(card.markersTotal);
+  return card.goal;
+}
+
+/**
+ * Calcule la part remplie du marqueur en cours, quand un versement plus élevé
+ * que le montant proposé entame le carré suivant.
+ * @param card Carte concernée.
+ * @returns Le pourcentage rempli du prochain marqueur, entre 0 et 100.
+ */
+export function markerFill(card: SavingsCard): number {
+  const done = markersDone(card);
+  if (card.markerAmount <= 0n || done >= card.markersTotal) return 0;
+
+  const remainder = card.saved - card.markerAmount * BigInt(done);
+
+  return Number((remainder * 100n) / card.markerAmount);
 }
 
 /**
@@ -180,9 +201,9 @@ export function cardCapabilities(card: SavingsCard): CardCapabilities {
  * @returns La part validée, entre 0 et 1.
  */
 export function cardProgress(card: SavingsCard): number {
-  if (card.markersTotal <= 0) return 0;
+  if (card.goal <= 0n) return 0;
 
-  return Math.min(markersDone(card) / card.markersTotal, 1);
+  return Math.min(Number((card.saved * 1_000n) / card.goal) / 1_000, 1);
 }
 
 /**

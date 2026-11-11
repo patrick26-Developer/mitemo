@@ -40,8 +40,15 @@ export interface CreateTontineInput {
 /** Paramètres saisis pour créer une carte de pointage. */
 export interface CreateCardInput {
   readonly name: string;
+  /** Objectif d'épargne, en plus petite unité de la devise. */
+  readonly goal: bigint;
+  /** Montant proposé à chaque pointage, en plus petite unité de la devise. */
   readonly markerAmount: bigint;
+  /** Nombre de marqueurs déduit du rythme et de l'échéance. */
   readonly markersTotal: number;
+  readonly frequency: TontineFrequency;
+  /** Date de création du plan, en ISO 8601 UTC (`AAAA-MM-JJ`). */
+  readonly startDate: string;
   readonly deadline: string;
   readonly tontineId: string | null;
   readonly description: string;
@@ -105,8 +112,11 @@ export function buildCard(input: CreateCardInput, index: number): SavingsCard {
   return {
     id: createId("card"),
     name: input.name,
+    goal: input.goal,
     markerAmount: input.markerAmount,
     markersTotal: input.markersTotal,
+    frequency: input.frequency,
+    startDate: input.startDate,
     saved: 0n,
     deadline: input.deadline,
     tint: CARD_TINTS[index % CARD_TINTS.length] ?? "#CFD8FF",

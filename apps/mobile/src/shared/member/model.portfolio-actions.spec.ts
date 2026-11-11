@@ -41,8 +41,11 @@ describe("createCard", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
     const input: CreateCardInput = {
       name: "Nouvelle carte",
+      goal: 10_000n,
       markerAmount: 2_000n,
       markersTotal: 5,
+      frequency: { unit: "mois", interval: 1 },
+      startDate: "2026-11-01",
       deadline: "2027-01-31",
       tontineId: "t1",
       description: "Créée depuis les tests.",

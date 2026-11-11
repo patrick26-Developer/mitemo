@@ -1,18 +1,27 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { tomorrowUtc } from "../../../shared/model/model.clock";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { SavingsCreateSheet } from "./sheet.savings-create";
 
 /**
- * Remplit la première étape et passe à l'échéance.
+ * Remplit la première étape et passe au rythme.
  * @param name Nom de la carte.
  */
-async function fillCard(name = "Loyer de Février"): Promise<void> {
+async function fillProject(name = "Loyer de Février"): Promise<void> {
   await fireEvent.changeText(screen.getByLabelText("Nom"), name);
-  await fireEvent.changeText(screen.getByLabelText("Montant d'un marqueur (FCFA)"), "5000");
-  await fireEvent.changeText(screen.getByLabelText("Nombre de marqueurs"), "6");
+  await fireEvent.changeText(screen.getByLabelText("Objectif (FCFA)"), "60000");
+  await fireEvent.changeText(screen.getByLabelText("Montant par pointage (FCFA)"), "5000");
   await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+}
+
+/**
+ * Choisit une échéance au calendrier, en validant la date proposée.
+ */
+async function chooseDeadline(): Promise<void> {
+  await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
+  await fireEvent.press(screen.getByRole("button", { name: "Valider" }));
 }
 
 describe("SavingsCreateSheet", () => {
@@ -20,15 +29,17 @@ describe("SavingsCreateSheet", () => {
     usePortfolioStore.getState().reset();
   });
 
-  it("commence à l'étape 1 sur 2, sans échéance ni bouton Annuler", async () => {
+  it("commence à l'étape 1 sur 2, sans rythme ni bouton Annuler", async () => {
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
 
-    expect(screen.getByRole("progressbar", { name: "Étape 1 sur 2 : La carte" })).toBeOnTheScreen();
-    expect(screen.queryByLabelText("Échéance (JJ/MM/AAAA)")).toBeNull();
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 1 sur 2 : Le projet" }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByLabelText("Échéance : aucune date")).toBeNull();
     expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
   });
 
-  it("reste à la première étape tant que le nom manque", async () => {
+  it("reste à la première étape tant que l'objectif manque", async () => {
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
@@ -37,54 +48,57 @@ describe("SavingsCreateSheet", () => {
     expect(screen.getByRole("progressbar", { name: /Étape 1 sur 2/ })).toBeOnTheScreen();
   });
 
-  it("résume l'objectif et l'échéance à la deuxième étape", async () => {
+  it("choisit le rythme et l'échéance, puis résume les pointages", async () => {
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
-    await fillCard();
-
-    await fireEvent.changeText(screen.getByLabelText("Échéance (JJ/MM/AAAA)"), "31/12/2027");
+    await fillProject();
 
     expect(
-      screen.getByRole("progressbar", { name: "Étape 2 sur 2 : L'échéance" }),
+      screen.getByRole("progressbar", { name: "Étape 2 sur 2 : Le rythme" }),
     ).toBeOnTheScreen();
-    expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
-    expect(screen.getByText("31 décembre 2027")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Fréquence des pointages : Chaque semaine")).toBeOnTheScreen();
+
+    await chooseDeadline();
+
+    expect(screen.getByText("60 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("5 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("chaque semaine")).toBeOnTheScreen();
     expect(screen.getByTestId("sheet-action-row")).toBeOnTheScreen();
   });
 
   it("revient à la première étape en gardant la saisie", async () => {
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
-    await fillCard();
+    await fillProject();
 
     await fireEvent.press(screen.getByRole("button", { name: "Retour" }));
 
     expect(screen.getByDisplayValue("Loyer de Février")).toBeOnTheScreen();
   });
 
-  it("crée la carte et convertit l'échéance en date ISO", async () => {
+  it("crée la carte avec les pointages déduits du rythme", async () => {
     const onClose = jest.fn();
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={onClose} />);
-    await fillCard();
+    await fillProject();
+    await chooseDeadline();
 
-    await fireEvent.changeText(screen.getByLabelText("Échéance (JJ/MM/AAAA)"), "28/02/2027");
     await fireEvent.press(screen.getByRole("button", { name: "Créer la carte" }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
     const created = usePortfolioStore
       .getState()
       .cards.find((item) => item.name === "Loyer de Février");
-    expect(created?.deadline).toBe("2027-02-28");
-    expect(created?.markersTotal).toBe(6);
+    expect(created?.goal).toBe(60_000n);
+    expect(created?.deadline).toBe(tomorrowUtc());
+    expect(created?.markersTotal).toBeGreaterThan(0);
   });
 
-  it("refuse une échéance invalide", async () => {
+  it("refuse de créer une carte sans échéance", async () => {
     const onClose = jest.fn();
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={onClose} />);
-    await fillCard("Assurance");
+    await fillProject("Assurance");
 
-    await fireEvent.changeText(screen.getByLabelText("Échéance (JJ/MM/AAAA)"), "30/02/2027");
     await fireEvent.press(screen.getByRole("button", { name: "Créer la carte" }));
 
-    expect(screen.getByText("Saisissez une échéance au format JJ/MM/AAAA.")).toBeOnTheScreen();
+    expect(screen.getByText("Choisissez une date d'échéance.")).toBeOnTheScreen();
     expect(onClose).not.toHaveBeenCalled();
   });
 });

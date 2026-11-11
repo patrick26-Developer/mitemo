@@ -14,6 +14,7 @@ module.exports = {
       "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
     "^react-native-reanimated$": "<rootDir>/jest/mocks/react-native-reanimated.js",
     "^expo-crypto$": "<rootDir>/jest/mocks/expo-crypto.js",
+    "^@react-native-community/datetimepicker$": "<rootDir>/jest/mocks/datetime-picker.js",
     "^@react-native-async-storage/async-storage$":
       "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
   },

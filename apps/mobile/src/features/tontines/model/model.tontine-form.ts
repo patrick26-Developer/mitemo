@@ -14,16 +14,13 @@ import {
   nameSchema,
   parseWithSchema,
 } from "../../../shared/model/model.form-schema";
-import { FREQUENCY_GROUPS, frequencyById } from "../../../shared/model/model.frequency";
+import { FREQUENCY_SELECT_GROUPS, frequencyById } from "../../../shared/model/model.frequency";
 
 /**
  * Fréquences proposées à la création, groupées par unité : le membre choisit
  * « tous les 2 jours » au lieu de saisir une unité et un intervalle.
  */
-export const TONTINE_CADENCE_GROUPS = FREQUENCY_GROUPS.map((group) => ({
-  title: group.title,
-  options: group.options.map((option) => ({ value: option.id, label: option.label })),
-}));
+export const TONTINE_CADENCE_GROUPS = FREQUENCY_SELECT_GROUPS;
 
 /** Identifiant d'une fréquence proposée, par exemple « semaine-2 ». */
 export type TontineCadenceId = string;

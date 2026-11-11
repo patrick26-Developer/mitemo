@@ -56,6 +56,12 @@ export const FREQUENCY_GROUPS: readonly FrequencyGroup[] = UNITS.map((entry) => 
   options: unitOptions(entry.unit, entry.max),
 }));
 
+/** Fréquences proposées pour un sélecteur de feuille, groupées par unité. */
+export const FREQUENCY_SELECT_GROUPS = FREQUENCY_GROUPS.map((group) => ({
+  title: group.title,
+  options: group.options.map((option) => ({ value: option.id, label: option.label })),
+}));
+
 /** Fréquences proposées, à plat, dans l'ordre des groupes. */
 export const FREQUENCY_OPTIONS: readonly FrequencyOption[] = FREQUENCY_GROUPS.flatMap(
   (group) => group.options,

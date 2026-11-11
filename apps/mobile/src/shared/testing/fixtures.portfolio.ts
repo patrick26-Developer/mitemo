@@ -53,8 +53,11 @@ export function makeCard(over: Partial<SavingsCard> = {}): SavingsCard {
   return {
     id: "c1",
     name: "Carte de test",
+    goal: 30_000n,
     markerAmount: 5_000n,
     markersTotal: 6,
+    frequency: { unit: "semaine", interval: 1 },
+    startDate: "2026-11-01",
     saved: 20_000n,
     deadline: "2026-12-31",
     tint: "#CFD8FF",

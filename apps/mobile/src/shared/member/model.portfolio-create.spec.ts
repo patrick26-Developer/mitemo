@@ -14,8 +14,11 @@ const TONTINE_INPUT: CreateTontineInput = {
 /** Entrée de création de carte utilisée par les tests. */
 const CARD_INPUT: CreateCardInput = {
   name: "Carte des tests",
+  goal: 10_000n,
   markerAmount: 2_000n,
   markersTotal: 5,
+  frequency: { unit: "mois", interval: 1 },
+  startDate: "2026-11-01",
   deadline: "2027-01-31",
   tontineId: null,
   description: "Une carte créée en test.",

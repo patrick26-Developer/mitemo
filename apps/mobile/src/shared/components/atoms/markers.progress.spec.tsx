@@ -11,6 +11,13 @@ describe("MarkerProgress", () => {
     expect(screen.queryByText(/^\+/)).toBeNull();
   });
 
+  it("remplit le marqueur en cours au prorata", async () => {
+    await render(<MarkerProgress done={3} total={6} partial={40} />);
+
+    expect(screen.getByRole("progressbar", { name: /40 % du suivant/ })).toBeOnTheScreen();
+    expect(screen.getByTestId("marker-partial")).toHaveStyle({ width: "40%" });
+  });
+
   it("résume les marqueurs au-delà de dix", async () => {
     await render(<MarkerProgress done={2} total={14} />);
 
