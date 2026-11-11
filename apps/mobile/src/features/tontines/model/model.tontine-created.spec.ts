@@ -14,7 +14,7 @@ const FRESH = makeTontine({
 describe("tontineCreatedSummary", () => {
   it("annonce les participants prévus, ceux qui restent à inviter et la cagnotte promise", () => {
     expect(tontineCreatedSummary(FRESH)).toBe(
-      "« Les Amis » est prévue pour 6 participants, chaque semaine. Invitez les 5 autres membres. Cagnotte de 25 000 FCFA par tour.",
+      "« Les Amis » est prévue pour 6 participants, chaque semaine. Invitez les 5 autres membres. Restourne de 25 000 FCFA par tour.",
     );
   });
 
@@ -26,9 +26,9 @@ describe("tontineCreatedSummary", () => {
 });
 
 describe("invitationMessage", () => {
-  it("invite à rejoindre la tontine avec son code", () => {
-    expect(invitationMessage(FRESH, "K7P2QX")).toBe(
-      "Rejoignez ma tontine « Les Amis » sur Mitemo : 5 000 FCFA chaque semaine. Code d'invitation : K7P2QX",
+  it("invite à rejoindre la tontine avec son code et son lien", () => {
+    expect(invitationMessage(FRESH, { code: "K7P2QX", link: "mitemo://invitation/K7P2QX" })).toBe(
+      "Rejoignez ma tontine « Les Amis » sur Mitemo : 5 000 FCFA chaque semaine. Code d'invitation : K7P2QX. Lien : mitemo://invitation/K7P2QX",
     );
   });
 });

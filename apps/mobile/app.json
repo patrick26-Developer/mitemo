@@ -18,7 +18,13 @@
       ],
       "expo-secure-store",
       "@react-native-community/datetimepicker",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Mitemo lit vos contacts pour retrouver ceux qui ont déjà un compte et les ajouter à vos tontines."
+        }
+      ]
     ]
   }
 }

@@ -18,6 +18,8 @@ export interface TontineMember {
   readonly id: string;
   readonly name: string;
   readonly role: TontineMemberRole;
+  /** Numéro au format international E.164, connu quand le membre vient du répertoire. */
+  readonly phone?: string;
   /** `true` quand la cotisation du tour en cours est réglée. */
   readonly paidCurrentRound: boolean;
 }

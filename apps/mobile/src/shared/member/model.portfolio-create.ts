@@ -2,19 +2,6 @@ import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./mo
 import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
 
-/** Noms proposés aux membres invités lors d'une création locale. */
-const MEMBER_NAME_POOL = [
-  "Mama Nadège",
-  "Jean-Baptiste Okemba",
-  "Clarisse Nzaba",
-  "Serge Makosso",
-  "Pauline Elenga",
-  "Alphonse Mabiala",
-  "Léonie Bantsimba",
-  "David Nkodia",
-  "Sylvie Tchicaya",
-] as const;
-
 /** Dégradés des nouvelles tontines, du centre vers le bord. */
 const TONTINE_TINTS: readonly (readonly [string, string])[] = [
   ["#2CCA86", "#62F79D"],
@@ -55,15 +42,24 @@ export interface CreateCardInput {
   readonly description: string;
 }
 
+/** Contact du répertoire, titulaire d'un compte Mitemo, à inscrire dans une tontine. */
+export interface MemberContact {
+  readonly name: string;
+  /** Numéro au format international E.164. */
+  readonly phone: string;
+}
+
 /**
- * Construit le membre invité qui prend le rang donné.
- * @param index Rang de l'invité, à partir de 0.
+ * Construit le membre inscrit à partir d'un contact du répertoire.
+ * @param contact Nom et numéro du contact.
+ * @param generate Source d'identifiant, injectée pour les tests.
  * @returns Le membre, cotisation du tour en cours non réglée.
  */
-export function buildInvitedMember(index: number): TontineMember {
+export function buildContactMember(contact: MemberContact, generate?: () => string): TontineMember {
   return {
-    id: `member-${index + 1}`,
-    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
+    id: generate === undefined ? createId("member") : createId("member", generate),
+    name: contact.name,
+    phone: contact.phone,
     role: "MEMBRE",
     paidCurrentRound: false,
   };

@@ -21,17 +21,24 @@ export function tontineCreatedSummary(tontine: Tontine): string {
   const missing = Math.max(tontine.totalRounds - tontine.members.length, 0);
   const pot = formatAmount(tontinePot(tontine));
 
-  return `« ${tontine.name} » est prévue pour ${tontine.totalRounds} participants, ${formatFrequency(tontine.frequency)}. ${inviteSentence(missing)} Cagnotte de ${pot} FCFA par tour.`;
+  return `« ${tontine.name} » est prévue pour ${tontine.totalRounds} participants, ${formatFrequency(tontine.frequency)}. ${inviteSentence(missing)} Restourne de ${pot} FCFA par tour.`;
+}
+
+/** Ce qui permet de rejoindre une tontine : son code et le lien qui l'ouvre. */
+export interface InvitationAccess {
+  readonly code: string;
+  readonly link: string;
 }
 
 /**
  * Rédige le message partagé pour inviter des membres : le nom de la tontine,
- * la cotisation, le rythme et le code à saisir dans Mitemo.
+ * la cotisation, le rythme, le code à saisir dans Mitemo et le lien qui
+ * ouvre l'invitation.
  * @param tontine Tontine à rejoindre.
- * @param code Code d'invitation.
+ * @param access Code et lien d'invitation.
  * @returns Le message prêt à partager.
  */
-export function invitationMessage(tontine: Tontine, code: string): string {
+export function invitationMessage(tontine: Tontine, access: InvitationAccess): string {
   const contribution = `${formatAmount(tontine.contribution)} FCFA ${formatFrequency(tontine.frequency)}`;
-  return `Rejoignez ma tontine « ${tontine.name} » sur Mitemo : ${contribution}. Code d'invitation : ${code}`;
+  return `Rejoignez ma tontine « ${tontine.name} » sur Mitemo : ${contribution}. Code d'invitation : ${access.code}. Lien : ${access.link}`;
 }

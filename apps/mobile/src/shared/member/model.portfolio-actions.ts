@@ -7,8 +7,8 @@ import {
   SELF_MEMBER_ID,
   tontinePot,
 } from "./model.portfolio";
-import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
+import type { CreateCardInput, CreateTontineInput, MemberContact } from "./model.portfolio-create";
+import { buildCard, buildContactMember, buildTontine } from "./model.portfolio-create";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -57,7 +57,8 @@ export interface PortfolioState {
   startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
   confirmRound: (tontineId: string) => void;
-  addMember: (tontineId: string) => void;
+  /** Inscrit un contact du répertoire qui a un compte Mitemo. */
+  addMember: (tontineId: string, contact: MemberContact) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
   /** Pointe un marqueur, payé par l'opérateur choisi. */
@@ -156,12 +157,13 @@ function confirmRound(context: PortfolioContext, tontineId: string): void {
 }
 
 /**
- * Ajoute un membre à une tontine préparée, tant que le quota n'est pas atteint.
+ * Inscrit un contact dans une tontine préparée, tant que le quota n'est pas atteint.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
- * @throws {ForbiddenOperationError} si la tontine est lancée ou déjà complète.
+ * @param contact Nom et numéro du contact, titulaire d'un compte Mitemo.
+ * @throws {ForbiddenOperationError} si la tontine est lancée, complète, ou si le contact en fait déjà partie.
  */
-function addMember(context: PortfolioContext, tontineId: string): void {
+function addMember(context: PortfolioContext, tontineId: string, contact: MemberContact): void {
   const tontine = requireTontine(context.get().tontines, tontineId);
   requireAdmin(tontine);
   if (tontine.state !== "PENDING") {
@@ -170,7 +172,10 @@ function addMember(context: PortfolioContext, tontineId: string): void {
   if (hasReachedQuota(tontine)) {
     throw new ForbiddenOperationError("La tontine a déjà tous ses membres.");
   }
-  const member = buildInvitedMember(tontine.members.length - 1);
+  if (tontine.members.some((member) => member.phone === contact.phone)) {
+    throw new ForbiddenOperationError(`${contact.name} fait déjà partie de la tontine.`);
+  }
+  const member = buildContactMember(contact);
   context.set((state) => ({ tontines: appendTontineMember(state.tontines, tontineId, member) }));
 }
 
@@ -280,7 +285,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     startTontine: (id) => startTontine(context, id),
     contributeTontine: (id) => contributeTontine(context, id),
     confirmRound: (id) => confirmRound(context, id),
-    addMember: (id) => addMember(context, id),
+    addMember: (id, contact) => addMember(context, id, contact),
     inviteMember: (id) => inviteMember(context, id),
     removeMember: (tontineId, memberId) => removeMember(context, tontineId, memberId),
     contributeCard: (id, payment) => contributeCard(context, id, payment),
