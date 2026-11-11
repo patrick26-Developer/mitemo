@@ -1,4 +1,4 @@
-import type { SavingsCard, Tontine, TontineMember } from "./model.portfolio";
+import type { CardEntry, SavingsCard, Tontine, TontineMember } from "./model.portfolio";
 import { cardGoal, SELF_MEMBER_ID } from "./model.portfolio";
 import {
   ForbiddenOperationError,
@@ -247,22 +247,24 @@ export function prependTontine(tontines: readonly Tontine[], tontine: Tontine): 
 }
 
 /**
- * Ajoute un montant à l'épargne d'une carte et la clôt si l'objectif est atteint.
+ * Ajoute un pointage à l'épargne d'une carte et l'inscrit dans son historique ;
+ * la carte se clôt quand l'objectif est atteint.
  * @param cards Cartes du membre.
  * @param id Carte concernée.
- * @param amount Montant à ajouter.
- * @returns La liste avec l'épargne mise à jour.
+ * @param entry Pointage à inscrire, avec son instant et son montant.
+ * @returns Les cartes à jour.
  */
 export function addSaved(
   cards: readonly SavingsCard[],
   id: string,
-  amount: bigint,
+  entry: CardEntry,
 ): readonly SavingsCard[] {
   return cards.map((card) => {
     if (card.id !== id) return card;
 
-    const saved = card.saved + amount;
-    return { ...card, saved, state: saved >= cardGoal(card) ? "COMPLETED" : card.state };
+    const saved = card.saved + entry.amount;
+    const state = saved >= cardGoal(card) ? "COMPLETED" : card.state;
+    return { ...card, saved, state, entries: [...card.entries, entry] };
   });
 }
 
@@ -282,13 +284,14 @@ export function deductSaved(
 }
 
 /**
- * Vide l'épargne d'une carte et la clôt.
+ * Archive une carte dont l'épargne vient d'être retirée. Le montant épargné
+ * reste inscrit pour l'historique, mais ne compte plus dans le total.
  * @param cards Cartes du membre.
  * @param id Carte concernée.
- * @returns La liste avec la carte clôturée.
+ * @returns La liste avec la carte archivée.
  */
 export function clearSaved(cards: readonly SavingsCard[], id: string): readonly SavingsCard[] {
-  return cards.map((card) => (card.id === id ? { ...card, saved: 0n, state: "COMPLETED" } : card));
+  return cards.map((card) => (card.id === id ? { ...card, state: "ARCHIVED" } : card));
 }
 
 /**

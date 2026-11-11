@@ -21,6 +21,13 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     description:
       "Mise de côté pour le loyer de janvier. Chaque marqueur vaut 5 000 FCFA et l'échéance se règle depuis la carte.",
     tontineId: "1",
+    fee: 3_000n,
+    entries: [
+      { at: "2026-11-01T08:12:00.000Z", amount: 5_000n, method: "MTN_MOMO" },
+      { at: "2026-11-04T17:45:00.000Z", amount: 5_000n, method: "MTN_MOMO" },
+      { at: "2026-11-07T09:30:00.000Z", amount: 5_000n, method: "AIRTEL_MONEY" },
+      { at: "2026-11-10T18:05:00.000Z", amount: 5_000n, method: "MTN_MOMO" },
+    ],
   },
   {
     id: "2",
@@ -37,6 +44,11 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     description:
       "Réserve pour la prime d'assurance santé de la famille, à régler avant l'échéance.",
     tontineId: null,
+    fee: 2_500n,
+    entries: [
+      { at: "2026-10-15T10:20:00.000Z", amount: 5_000n, method: "MTN_MOMO" },
+      { at: "2026-11-05T16:10:00.000Z", amount: 3_000n, method: "AIRTEL_MONEY" },
+    ],
   },
   {
     id: "3",
@@ -49,8 +61,16 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     saved: 50_000n,
     deadline: "2026-06-30",
     tint: "#F5D7B0",
-    state: "COMPLETED",
-    description: "Réserve de précaution entièrement constituée, clôturée à l'échéance.",
+    state: "ARCHIVED",
+    description: "Réserve de précaution entièrement constituée, puis retirée sur le solde.",
     tontineId: null,
+    fee: 5_000n,
+    entries: [
+      { at: "2026-01-30T09:00:00.000Z", amount: 10_000n, method: "MTN_MOMO" },
+      { at: "2026-02-27T09:40:00.000Z", amount: 10_000n, method: "MTN_MOMO" },
+      { at: "2026-03-30T08:55:00.000Z", amount: 10_000n, method: "AIRTEL_MONEY" },
+      { at: "2026-04-30T12:15:00.000Z", amount: 10_000n, method: "MTN_MOMO" },
+      { at: "2026-05-29T17:30:00.000Z", amount: 10_000n, method: "MTN_MOMO" },
+    ],
   },
 ];

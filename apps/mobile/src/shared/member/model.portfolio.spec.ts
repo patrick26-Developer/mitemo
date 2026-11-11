@@ -74,6 +74,8 @@ function card(over: Partial<SavingsCard> = {}): SavingsCard {
     state: "ACTIVE",
     description: "Une carte de test.",
     tontineId: null,
+    fee: 3_000n,
+    entries: [],
     ...over,
   };
 }
@@ -85,6 +87,16 @@ describe("tontinePot", () => {
 
   it("renvoie zéro pour une tontine sans autre membre", () => {
     expect(tontinePot(tontine({ members: [member(SELF_MEMBER_ID, "ADMIN")] }))).toBe(0n);
+  });
+
+  it("annonce la cagnotte prévue d'une tontine en préparation, avant l'arrivée des membres", () => {
+    const pending = tontine({
+      state: "PENDING",
+      totalRounds: 6,
+      members: [member(SELF_MEMBER_ID, "ADMIN")],
+    });
+
+    expect(tontinePot(pending)).toBe(25_000n);
   });
 });
 
@@ -181,12 +193,18 @@ describe("progression d'une carte", () => {
 });
 
 describe("cardCapabilities", () => {
-  it("autorise versement, retrait et transfert sur une carte active rattachée", () => {
+  it("autorise versement et transfert sur une carte active rattachée, sans retrait avant l'objectif", () => {
     expect(cardCapabilities(card({ tontineId: "t1" }))).toEqual({
       canContribute: true,
-      canWithdraw: true,
+      canWithdraw: false,
       canTransfer: true,
     });
+  });
+
+  it("n'autorise le retrait qu'une fois l'objectif atteint", () => {
+    expect(cardCapabilities(card({ saved: 29_999n })).canWithdraw).toBe(false);
+    expect(cardCapabilities(card({ saved: 30_000n, state: "COMPLETED" })).canWithdraw).toBe(true);
+    expect(cardCapabilities(card({ saved: 30_000n, state: "ARCHIVED" })).canWithdraw).toBe(false);
   });
 
   it("interdit le transfert sans tontine rattachée", () => {
@@ -201,6 +219,12 @@ describe("cardCapabilities", () => {
 describe("totalSaved", () => {
   it("additionne l'épargne de toutes les cartes", () => {
     expect(totalSaved([card(), card({ id: "c2", saved: 1_000n })])).toBe(21_000n);
+  });
+
+  it("ne compte plus l'épargne déjà retirée d'une carte archivée", () => {
+    expect(totalSaved([card(), card({ id: "c2", saved: 50_000n, state: "ARCHIVED" })])).toBe(
+      20_000n,
+    );
   });
 });
 

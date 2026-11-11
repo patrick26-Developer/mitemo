@@ -1,6 +1,8 @@
 import { randomUUID } from "expo-crypto";
 import type { CycleFrequencyUnit, TontineMemberRole } from "@mitemo/contracts";
 
+import type { PaymentMethod } from "../model/model.payment-method";
+
 /** Identifiant du membre connecté dans les données locales. */
 export const SELF_MEMBER_ID = "self";
 
@@ -66,17 +68,41 @@ export interface SavingsCard {
   /** Date limite, au format ISO 8601 UTC (`AAAA-MM-JJ`). */
   readonly deadline: string;
   readonly tint: string;
-  readonly state: "ACTIVE" | "COMPLETED";
+  /**
+   * `ACTIVE` tant que l'objectif n'est pas atteint, `COMPLETED` une fois rempli,
+   * `ARCHIVED` une fois l'épargne retirée : la carte reste consultable.
+   */
+  readonly state: "ACTIVE" | "COMPLETED" | "ARCHIVED";
   readonly description: string;
   /** Tontine rattachée, `null` quand la carte est indépendante. */
   readonly tontineId: string | null;
+  /**
+   * Frais Mitemo dus à la création, 10 % de l'objectif, en plus petite unité
+   * de la devise.
+   */
+  readonly fee: bigint;
+  /** Pointages faits, du plus ancien au plus récent. */
+  readonly entries: readonly CardEntry[];
 }
+
+/** Pointage fait sur une carte. */
+export interface CardEntry {
+  /** Instant du pointage, en ISO 8601 UTC. */
+  readonly at: string;
+  /** Montant pointé, en plus petite unité de la devise. */
+  readonly amount: bigint;
+  /** Opérateur mobile qui a réglé le pointage. */
+  readonly method: PaymentMethod;
+}
+
+/** Règlement d'un pointage : son instant et l'opérateur choisi, sans le montant fixé par la carte. */
+export type CardPayment = Omit<CardEntry, "amount">;
 
 /** Opérations possibles sur une carte de pointage. */
 export interface CardCapabilities {
   /** `true` quand un marqueur peut encore être ajouté. */
   readonly canContribute: boolean;
-  /** `true` quand l'épargne peut être retirée. */
+  /** `true` quand l'épargne peut être retirée : seulement une fois l'objectif atteint. */
   readonly canWithdraw: boolean;
   /** `true` quand l'épargne peut régler la cotisation de la tontine rattachée. */
   readonly canTransfer: boolean;
@@ -90,12 +116,16 @@ const FREQUENCY_PLURALS: Readonly<Record<CycleFrequencyUnit, string>> = {
 };
 
 /**
- * Calcule la cagnotte brute d'un tour : cotisation × (participants − 1).
+ * Calcule la cagnotte brute d'un tour : cotisation × (participants − 1). Une
+ * tontine en préparation compte les participants prévus, pas seulement ceux
+ * déjà inscrits, pour annoncer la cagnotte que le récapitulatif a promise.
  * @param tontine Tontine concernée.
  * @returns Le montant brut du pot, en plus petite unité de la devise.
  */
 export function tontinePot(tontine: Tontine): bigint {
-  return tontine.contribution * BigInt(Math.max(tontine.members.length - 1, 0));
+  const participants = tontine.state === "PENDING" ? tontine.totalRounds : tontine.members.length;
+
+  return tontine.contribution * BigInt(Math.max(participants - 1, 0));
 }
 
 /**
@@ -260,7 +290,7 @@ export function remainingToSave(card: SavingsCard): bigint {
 export function cardCapabilities(card: SavingsCard): CardCapabilities {
   return {
     canContribute: card.state === "ACTIVE" && card.saved < cardGoal(card),
-    canWithdraw: card.saved > 0n,
+    canWithdraw: card.state !== "ARCHIVED" && card.saved > 0n && card.saved >= cardGoal(card),
     canTransfer: card.tontineId !== null && card.state === "ACTIVE",
   };
 }
@@ -282,7 +312,10 @@ export function cardProgress(card: SavingsCard): number {
  * @returns Le total mis de côté, en plus petite unité de la devise.
  */
 export function totalSaved(cards: readonly SavingsCard[]): bigint {
-  return cards.reduce((total, card) => total + card.saved, 0n);
+  return cards.reduce(
+    (total, card) => (card.state === "ARCHIVED" ? total : total + card.saved),
+    0n,
+  );
 }
 
 /**

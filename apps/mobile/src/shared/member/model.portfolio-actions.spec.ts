@@ -54,24 +54,27 @@ describe("createCard", () => {
     expect(state().cards[0]?.name).toBe("Nouvelle carte");
     expect(state().cards[0]?.tontineId).toBe("t1");
     expect(state().cards[0]?.saved).toBe(0n);
+    expect(state().cards[0]?.fee).toBe(1_000n);
+    expect(state().cards[0]?.entries).toEqual([]);
   });
 });
 
 describe("contributeTontine", () => {
-  it("débite le solde et marque la cotisation réglée", () => {
+  it("marque la cotisation réglée, payée par l'opérateur, sans toucher au solde de l'app", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
     actions.contributeTontine("t1");
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(TEST_PORTFOLIO.available);
     expect(canPayContribution(firstOf(state().tontines))).toBe(false);
   });
 
-  it("refuse une cotisation au-delà du solde sans rien modifier", () => {
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, available: 1_000n });
+  it("accepte une cotisation même avec un solde vide", () => {
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, available: 0n });
 
-    expect(() => actions.contributeTontine("t1")).toThrow(InsufficientFundsError);
-    expect(state().available).toBe(1_000n);
+    actions.contributeTontine("t1");
+
+    expect(canPayContribution(firstOf(state().tontines))).toBe(false);
   });
 
   it("refuse une cotisation déjà réglée", () => {
@@ -119,38 +122,68 @@ describe("removeMember", () => {
 });
 
 describe("contributeCard", () => {
-  it("débite un marqueur et l'ajoute à l'épargne", () => {
+  /** Pointage payé par Airtel Money. */
+  const PAYMENT = { at: "2026-11-11T09:15:00.000Z", method: "AIRTEL_MONEY" } as const;
+
+  it("ajoute un marqueur payé par Mobile Money sans toucher au solde Mitemo", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
-    actions.contributeCard("c1");
+    actions.contributeCard("c1", PAYMENT);
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(20_000n);
     expect(state().cards[0]?.saved).toBe(25_000n);
+    expect(state().cards[0]?.entries).toEqual([
+      { at: "2026-11-11T09:15:00.000Z", amount: 5_000n, method: "AIRTEL_MONEY" },
+    ]);
   });
 
   it("refuse une carte clôturée", () => {
     const completed = makeCard({ state: "COMPLETED" });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [completed] });
 
-    expect(() => actions.contributeCard("c1")).toThrow(ForbiddenOperationError);
+    expect(() => actions.contributeCard("c1", PAYMENT)).toThrow(ForbiddenOperationError);
   });
 
-  it("refuse un versement au-delà du solde", () => {
+  it("débite le solde quand le marqueur est payé depuis Mitemo", () => {
+    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
+
+    actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" });
+
+    expect(state().available).toBe(15_000n);
+    expect(state().cards[0]?.entries.at(-1)?.method).toBe("MITEMO");
+  });
+
+  it("refuse un paiement depuis Mitemo au-delà du solde", () => {
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, available: 1_000n });
 
-    expect(() => actions.contributeCard("c1")).toThrow(InsufficientFundsError);
+    expect(() => actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" })).toThrow(
+      InsufficientFundsError,
+    );
   });
 });
 
 describe("withdrawCard", () => {
-  it("verse l'épargne sur le solde et vide la carte", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
+  it("verse l'épargne d'une carte remplie sur le solde et l'archive", () => {
+    const full = makeCard({ saved: 30_000n, state: "COMPLETED" });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, cards: [full] });
 
     actions.withdrawCard("c1");
 
-    expect(state().available).toBe(40_000n);
-    expect(state().cards[0]?.saved).toBe(0n);
-    expect(state().cards[0]?.state).toBe("COMPLETED");
+    expect(state().available).toBe(50_000n);
+    expect(state().cards[0]?.state).toBe("ARCHIVED");
+  });
+
+  it("refuse de retirer une carte dont l'objectif n'est pas atteint", () => {
+    const { actions } = makePortfolio(TEST_PORTFOLIO);
+
+    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
+  });
+
+  it("refuse de retirer deux fois une carte archivée", () => {
+    const archived = makeCard({ saved: 30_000n, state: "ARCHIVED" });
+    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [archived] });
+
+    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
   });
 
   it("refuse le retrait d'une carte vide", () => {

@@ -1,6 +1,7 @@
-import type { SavingsCard, Tontine } from "./model.portfolio";
+import type { CardPayment, SavingsCard, Tontine } from "./model.portfolio";
 import {
   allMembersPaid,
+  cardCapabilities,
   createId,
   hasReachedQuota,
   SELF_MEMBER_ID,
@@ -59,7 +60,8 @@ export interface PortfolioState {
   addMember: (tontineId: string) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
-  contributeCard: (cardId: string) => void;
+  /** Pointe un marqueur, payé par l'opérateur choisi. */
+  contributeCard: (cardId: string, payment: CardPayment) => void;
   withdrawCard: (cardId: string) => void;
   transferCardToTontine: (cardId: string) => void;
   reset: () => void;
@@ -100,20 +102,16 @@ function createCard(context: PortfolioContext, input: CreateCardInput): void {
 }
 
 /**
- * Règle la cotisation du membre connecté pour le tour en cours.
+ * Règle la cotisation du membre connecté pour le tour en cours, payée par son
+ * opérateur mobile : l'argent vient de Mobile Money ou d'Airtel Money, le solde
+ * de l'app n'est pas touché.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
  * @throws {ForbiddenOperationError} si la cotisation est déjà réglée ou interdite.
- * @throws {InsufficientFundsError} si le solde disponible ne couvre pas la cotisation.
  */
 function contributeTontine(context: PortfolioContext, tontineId: string): void {
-  const tontine = requireTontine(context.get().tontines, tontineId);
-  requireSelfCanPay(tontine);
-  requireFunds(context.get().available, tontine.contribution);
-  context.set((state) => ({
-    available: state.available - tontine.contribution,
-    tontines: markSelfPaid(state.tontines, tontineId),
-  }));
+  requireSelfCanPay(requireTontine(context.get().tontines, tontineId));
+  context.set((state) => ({ tontines: markSelfPaid(state.tontines, tontineId) }));
 }
 
 /**
@@ -206,33 +204,40 @@ function removeMember(context: PortfolioContext, tontineId: string, memberId: st
 }
 
 /**
- * Ajoute un marqueur d'épargne à une carte.
+ * Ajoute un marqueur d'épargne à une carte et l'inscrit dans son historique.
  * @param context Accès au store.
  * @param cardId Carte concernée.
+ * @param payment Instant du pointage et opérateur qui l'a réglé.
  * @throws {ForbiddenOperationError} si la carte est clôturée.
- * @throws {InsufficientFundsError} si le solde disponible ne couvre pas le marqueur.
+ * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur.
  */
-function contributeCard(context: PortfolioContext, cardId: string): void {
+function contributeCard(context: PortfolioContext, cardId: string, payment: CardPayment): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.state !== "ACTIVE") {
     throw new ForbiddenOperationError("Cette carte est clôturée.");
   }
-  requireFunds(context.get().available, card.markerAmount);
+  const debit = payment.method === "MITEMO" ? card.markerAmount : 0n;
+  requireFunds(context.get().available, debit);
   context.set((state) => ({
-    available: state.available - card.markerAmount,
-    cards: addSaved(state.cards, cardId, card.markerAmount),
+    available: state.available - debit,
+    cards: addSaved(state.cards, cardId, { ...payment, amount: card.markerAmount }),
   }));
 }
 
 /**
- * Verse l'épargne d'une carte sur le solde disponible et clôt la carte.
+ * Verse l'épargne d'une carte remplie sur le solde disponible et archive la
+ * carte : une carte archivée est terminée et retirée.
  * @param context Accès au store.
  * @param cardId Carte concernée.
  * @throws {InvalidAmountError} si la carte n'a aucune épargne.
+ * @throws {ForbiddenOperationError} si l'objectif n'est pas atteint ou la carte déjà archivée.
  */
 function withdrawCard(context: PortfolioContext, cardId: string): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.saved <= 0n) throw new InvalidAmountError("Cette carte n'a rien à retirer.");
+  if (!cardCapabilities(card).canWithdraw) {
+    throw new ForbiddenOperationError("Le retrait n'est possible qu'une fois l'objectif atteint.");
+  }
   context.set((state) => ({
     available: state.available + card.saved,
     cards: clearSaved(state.cards, cardId),
@@ -278,7 +283,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     addMember: (id) => addMember(context, id),
     inviteMember: (id) => inviteMember(context, id),
     removeMember: (tontineId, memberId) => removeMember(context, tontineId, memberId),
-    contributeCard: (id) => contributeCard(context, id),
+    contributeCard: (id, payment) => contributeCard(context, id, payment),
     withdrawCard: (id) => withdrawCard(context, id),
     transferCardToTontine: (id) => transferCardToTontine(context, id),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),

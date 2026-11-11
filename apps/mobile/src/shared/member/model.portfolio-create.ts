@@ -1,4 +1,5 @@
 import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./model.portfolio";
+import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
 
 /** Noms proposés aux membres invités lors d'une création locale. */
@@ -127,5 +128,7 @@ export function buildCard(input: CreateCardInput, index: number): SavingsCard {
     state: "ACTIVE",
     description: input.description,
     tontineId: input.tontineId,
+    fee: cardCreationFee(input.goal),
+    entries: [],
   };
 }

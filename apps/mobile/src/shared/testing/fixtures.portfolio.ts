@@ -64,6 +64,8 @@ export function makeCard(over: Partial<SavingsCard> = {}): SavingsCard {
     state: "ACTIVE",
     description: "Une carte de test.",
     tontineId: null,
+    fee: 3_000n,
+    entries: [],
     ...over,
   };
 }
