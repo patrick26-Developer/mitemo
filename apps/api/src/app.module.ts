@@ -1,10 +1,8 @@
 import { Module } from "@nestjs/common";
-
 import { HealthModule } from "./features/health/health.module.js";
+import { IdentityModule } from "./features/identity/identity.module.js";
 import { PrismaModule } from "./shared/database/prisma.module.js";
 
-/** Module racine : assemble les features, sans logique propre. */
-@Module({
-  imports: [PrismaModule, HealthModule],
-})
+/** Assembles the API features. */
+@Module({ imports: [PrismaModule, HealthModule, IdentityModule] })
 export class AppModule {}

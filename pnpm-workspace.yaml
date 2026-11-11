@@ -10,6 +10,10 @@ strictPeerDependencies: false
 # Scripts d'installation : true = autorisé, false = refusé en connaissance de cause.
 # Tout paquet absent de cette liste et doté d'un script fait échouer l'installation.
 allowBuilds:
+  # Argon2 charge son binaire natif pour hacher les PIN.
+  argon2: true
+  # La télémétrie de Swagger UI n'est pas requise.
+  "@scarf/scarf": false
   "@prisma/engines": true
   "@swc/core": true
   prisma: true

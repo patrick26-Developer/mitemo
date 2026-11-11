@@ -34,6 +34,8 @@ export interface StartLoginResponse {
 export interface VerifyLoginRequest {
   readonly challengeId: LoginChallengeId;
   readonly otp: string;
+  /** Optional display label for the session device. */
+  readonly deviceLabel?: string;
 }
 
 /** Utilisateur connecté, tel que l'API le connaît. */
@@ -53,4 +55,23 @@ export interface SessionResponse {
   readonly accessToken: string;
   readonly expiresAt: IsoDateTime;
   readonly user: CurrentUser;
+}
+
+/** Creates a demonstration account with an international phone number and server PIN. */
+export interface RegisterDemoUserRequest extends StartLoginRequest {
+  readonly displayName: string;
+}
+
+/** Changes the public display name of the authenticated user. */
+export interface UpdateCurrentUserRequest {
+  readonly displayName: string;
+}
+
+/** Describes an active session without exposing its bearer credential. */
+export interface ActiveSession {
+  readonly id: string;
+  readonly deviceLabel: string | null;
+  readonly createdAt: IsoDateTime;
+  readonly expiresAt: IsoDateTime;
+  readonly current: boolean;
 }
