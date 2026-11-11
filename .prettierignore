@@ -12,3 +12,4 @@ docs/
 
 # Généré par release-please
 **/CHANGELOG.md
+**/coverage-e2e/**

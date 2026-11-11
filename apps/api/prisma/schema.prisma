@@ -74,3 +74,47 @@ model LedgerPostingLine {
   @@index([accountId])
   @@map("ledger_posting_line")
 }
+
+/// Compte de démonstration, avec justificatif haché et rôle attribué côté serveur.
+model AppUser {
+  id              String          @id @db.Uuid
+  phoneNumber     String          @unique @map("phone_number")
+  displayName     String          @map("display_name")
+  pinHash         String          @map("pin_hash")
+  isDemo          Boolean         @default(false) @map("is_demo")
+  role            String          @default("USER")
+  phoneVerifiedAt DateTime?       @map("phone_verified_at") @db.Timestamptz(3)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  challenges      AuthChallenge[]
+  sessions        AuthSession[]
+
+  @@map("app_user")
+}
+
+/// Défi de connexion temporaire et à usage unique.
+model AuthChallenge {
+  id         String    @id @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  user       AppUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash    String    @map("otp_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  attempts   Int       @default(0)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+
+  @@index([userId])
+  @@map("auth_challenge")
+}
+
+/// Session révocable, identifiée par le condensat du jeton.
+model AuthSession {
+  id          String   @id @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  user        AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique @map("token_hash")
+  deviceLabel String?  @map("device_label")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
+
+  @@index([userId])
+  @@map("auth_session")
+}
