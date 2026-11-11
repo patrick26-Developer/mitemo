@@ -19,17 +19,21 @@ cd apps/api && node --env-file-if-exists=.env dist/main.js
 | NODE_VERSION | `26.13.0` |
 | NODE_ENV | `production` |
 | SKIP_INSTALL_DEPS | `true` |
-| DATABASE_URL | Secret. URL directe de la base PostgreSQL dédiée, nommée `mitemo_preview`. |
+| DATABASE_URL | Secret. URL directe de Neon Preview avec `sslmode=verify-full`. |
+| MITEMO_PREVIEW_DB_HOST | Hôte direct relevé sur la branche Neon Preview, sans identifiants ni port. |
+| MITEMO_PREVIEW_DB_NAME | Base sélectionnée sur cette branche, par exemple `neondb`. |
 | MITEMO_DEPLOYMENT | `preview` |
 | MITEMO_DEMO_AUTH | `true` |
 | MITEMO_PREVIEW_KEY | Secret. Générer une valeur aléatoire de 32 octets et la conserver dans Render. |
 | PORT | Fourni par Render. |
 
-Toutes les routes d’identité exigent l’en-tête `X-Mitemo-Preview-Key`. Distribuer le secret aux seuls testeurs via un canal privé. La clé ne doit figurer ni dans Git ni dans un bundle Expo. Le profil et la gestion des sessions exigent aussi le jeton de session. Render fournit les variables `RENDER` et `RENDER_SERVICE_NAME`. Le service doit s’appeler exactement `mitemo-api-dev` et la base `mitemo_preview`. Les comptes préexistants et les comptes sans marqueur de démonstration sont exclus du parcours simulé. Swagger reste disponible en local. Le mode production conserve le parcours simulé désactivé lorsque `MITEMO_DEPLOYMENT` est absent ou vaut `production`.
+Toutes les routes d’identité exigent l’en-tête `X-Mitemo-Preview-Key`. Distribuer le secret aux seuls testeurs via un canal privé. La clé ne doit figurer ni dans Git ni dans un bundle Expo. Le profil et la gestion des sessions exigent aussi le jeton de session. Render fournit les variables `RENDER` et `RENDER_SERVICE_NAME`. Le service doit s’appeler exactement `mitemo-api-dev` et la cible PostgreSQL doit correspondre à l’endpoint et à la base autorisés. Les comptes préexistants et les comptes sans marqueur de démonstration sont exclus du parcours simulé. Swagger reste disponible en local. Le mode production conserve le parcours simulé désactivé lorsque `MITEMO_DEPLOYMENT` est absent ou vaut `production`.
+
+Dans la console Neon, sélectionner la branche Preview du projet MITEMO et relever son identifiant de branche et son endpoint de lecture-écriture direct dans les détails de connexion. Vérifier que cet endpoint est distinct de celui de production. Reporter l’hôte direct dans `MITEMO_PREVIEW_DB_HOST` et le nom de la base dans `MITEMO_PREVIEW_DB_NAME`. Renseigner séparément `DATABASE_URL` avec l’URL directe de cette branche, sans `-pooler`, avec `sslmode=verify-full`. Conserver `channel_binding=require` si Neon le fournit. Le PostgreSQL local dédié reste accessible sur loopback avec la base `mitemo_preview`.
 
 ## Migration de la base distante
 
-Après autorisation de création de la base, réserver une base et un rôle à la prévisualisation, avec TLS sur l’accès externe. Utiliser un environnement de livraison qui accède à son URL directe. Contrôler le fournisseur, l’hôte et le nom de la base avant toute écriture. Utiliser le SHA exact du déploiement. Après autorisation de migration, exécuter depuis la racine, avec `DATABASE_URL` injectée comme secret.
+Après autorisation de création de la base, réserver une base et un rôle à la prévisualisation, avec TLS sur l’accès externe. Utiliser un environnement de livraison qui accède à son URL directe. Contrôler le fournisseur, l’hôte et le nom de la base avant toute écriture. Utiliser le SHA exact du déploiement. Après autorisation de migration, exécuter depuis la racine, avec `DATABASE_URL` injectée comme secret, `MITEMO_DEPLOYMENT=preview` et les deux variables d’identité. Prisma vérifie la cible avant toute connexion.
 
 ```sh
 pnpm --filter api exec prisma migrate status
