@@ -9,9 +9,11 @@ import {
   SELF_MEMBER_ID,
 } from "../../../shared/member/model.portfolio";
 import { accentColors } from "../../../shared/model/model.accent-color";
+import type { MemberTurn } from "../model/model.member-turns";
 import { memberTurns } from "../model/model.member-turns";
 import { TontineMemberSheet } from "./sheet.tontine-member";
 import { TontineMemberRow } from "./row.tontine-member";
+import { TurnStep } from "./step.turn";
 
 /** Props de la liste des membres d'une tontine. */
 export interface TontineMemberListProps {
@@ -36,15 +38,17 @@ export function TontineMemberList(props: TontineMemberListProps) {
   return (
     <View className="gap-2">
       <MembersHeader item={item} />
-      {memberTurns(item).map((entry) => (
-        <TontineMemberRow
-          key={entry.member.id}
-          entry={entry}
-          {...focusOf(item, entry.member)}
-          {...(canRemove(item, entry.member) ? { onRemove: () => setRemoving(entry.member) } : {})}
-          onPress={() => setSelected(entry.member)}
-        />
-      ))}
+      <View>
+        {memberTurns(item).map((entry) => (
+          <MemberTimelineItem
+            key={entry.member.id}
+            item={item}
+            entry={entry}
+            onSelect={setSelected}
+            onAskRemove={setRemoving}
+          />
+        ))}
+      </View>
       <TontineMemberSheet
         visible={selected !== null}
         item={item}
@@ -60,6 +64,45 @@ export function TontineMemberList(props: TontineMemberListProps) {
           setRemoving(null);
         }}
       />
+    </View>
+  );
+}
+
+/** Props d'un membre dans la frise de passage. */
+interface MemberTimelineItemProps {
+  readonly item: Tontine;
+  readonly entry: MemberTurn;
+  /** Ouvre l'historique du membre. */
+  readonly onSelect: (member: TontineMember) => void;
+  /** Demande la confirmation du retrait du membre. */
+  readonly onAskRemove: (member: TontineMember) => void;
+}
+
+/**
+ * Pose un membre dans la frise verticale : son rang à gauche, relié au
+ * suivant, et sa ligne à droite.
+ * @param props Tontine, membre et rang, ouverture de l'historique et retrait.
+ * @returns L'élément de la frise.
+ */
+function MemberTimelineItem(props: MemberTimelineItemProps) {
+  const { item, entry, onSelect, onAskRemove } = props;
+  const { member } = entry;
+
+  return (
+    <View className="flex-row gap-3">
+      <TurnStep
+        turn={entry.turn}
+        last={entry.turn === item.members.length}
+        {...stepAccentOf(item, member)}
+      />
+      <View className="flex-1 pb-2">
+        <TontineMemberRow
+          entry={entry}
+          {...focusOf(item, member)}
+          {...(canRemove(item, member) ? { onRemove: () => onAskRemove(member) } : {})}
+          onPress={() => onSelect(member)}
+        />
+      </View>
     </View>
   );
 }
@@ -107,6 +150,17 @@ function membersCount(item: Tontine): string {
 function focusOf(item: Tontine, member: TontineMember): { focusAccent?: string } {
   const focused = item.state === "ACTIVE" && member.id === item.beneficiaryId;
   return focused ? { focusAccent: accentColors(item.headerColors[0]).background } : {};
+}
+
+/**
+ * Couleur du rang du tour en cours dans la frise : celle de la tontine.
+ * @param item Tontine affichée.
+ * @param member Membre de la ligne.
+ * @returns La prop de couleur, vide pour les autres rangs.
+ */
+function stepAccentOf(item: Tontine, member: TontineMember): { accent?: string } {
+  const current = item.state === "ACTIVE" && member.id === item.beneficiaryId;
+  return current ? { accent: accentColors(item.headerColors[0]).background } : {};
 }
 
 /**

@@ -21,15 +21,15 @@ export interface TontineMemberRowProps {
 }
 
 /**
- * Affiche un membre avec son rang de passage, son rôle et l'état de sa
- * cotisation du tour en cours. La ligne du bénéficiaire du tour est cerclée de
+ * Affiche un membre avec son avatar, son rôle et l'état de sa cotisation du
+ * tour en cours ; son rang de passage est porté par la frise à sa gauche. La ligne du bénéficiaire du tour est cerclée de
  * la couleur de la tontine, comme un champ au focus de shadcn/ui.
  * @param props Membre et rang, couleur de mise en avant, retrait et ouverture de l'historique.
  * @returns La ligne de membre.
  */
 export function TontineMemberRow(props: TontineMemberRowProps) {
   const { entry, focusAccent, onRemove, onPress } = props;
-  const { member, turn } = entry;
+  const { member } = entry;
   const focused = focusAccent !== undefined;
 
   return (
@@ -42,11 +42,8 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
       style={focused ? accentRing(focusAccent) : undefined}
       className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >
-      <View
-        accessibilityLabel={`Tour ${turn}`}
-        className="h-9 w-9 items-center justify-center rounded-full bg-tab-active"
-      >
-        <Text className="text-[14px] font-bold text-tab-ink">{turn}</Text>
+      <View className="h-9 w-9 items-center justify-center rounded-full bg-avatar">
+        <Text className="text-[14px] font-bold text-white">{member.name.slice(0, 1)}</Text>
       </View>
       <View className="flex-1 gap-0.5">
         <Text className="text-[15px] text-ink" numberOfLines={1}>

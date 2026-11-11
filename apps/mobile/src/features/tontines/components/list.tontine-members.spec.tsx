@@ -32,6 +32,7 @@ describe("TontineMemberList", () => {
     expect(rows[1]).toBeSelected();
     expect(screen.getByText("Membre · En attente · À son tour")).toBeOnTheScreen();
     expect(screen.getByLabelText("Tour 2")).toBeOnTheScreen();
+    expect(screen.getAllByTestId("turn-connector")).toHaveLength(2);
   });
 
   it("ouvre l'historique de cotisation d'un membre", async () => {

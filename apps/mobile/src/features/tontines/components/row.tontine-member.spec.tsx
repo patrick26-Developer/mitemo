@@ -4,10 +4,10 @@ import { makeMember } from "../../../shared/testing/fixtures.portfolio";
 import { TontineMemberRow } from "./row.tontine-member";
 
 describe("TontineMemberRow", () => {
-  it("affiche le rang de passage, le rôle et un paiement à jour", async () => {
+  it("affiche l'avatar du membre, son rôle et un paiement à jour", async () => {
     await render(<TontineMemberRow entry={{ member: makeMember("m2", "ADMIN", true), turn: 3 }} />);
 
-    expect(screen.getByLabelText("Tour 3")).toBeOnTheScreen();
+    expect(screen.getByText("M")).toBeOnTheScreen();
     expect(screen.getByText("Administrateur · À jour")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: /Retirer/ })).toBeNull();
   });
