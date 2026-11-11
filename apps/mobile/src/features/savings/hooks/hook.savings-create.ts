@@ -27,7 +27,7 @@ export function useSavingsCreate(onDone: () => void): SavingsCreateState {
   };
 
   const submit = () => {
-    const result = parseSavingsForm(form);
+    const result = parseSavingsForm(form, new Date());
     if (!result.ok) {
       setError(result.message);
       return;

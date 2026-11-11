@@ -1,4 +1,6 @@
+import { CYCLE_FREQUENCY_UNITS } from "@mitemo/contracts";
 import type { CycleFrequencyUnit } from "@mitemo/contracts";
+import { z } from "zod";
 
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineFrequency } from "../../../shared/member/model.portfolio";
@@ -6,8 +8,14 @@ import { formatFrequency } from "../../../shared/member/model.portfolio";
 import type { CreateTontineInput } from "../../../shared/member/model.portfolio-create";
 import { parseAmountInput } from "../../../shared/model/model.amount-input";
 import { parseCountInput } from "../../../shared/model/model.count-input";
+import {
+  amountSchema,
+  countSchema,
+  nameSchema,
+  parseWithSchema,
+} from "../../../shared/model/model.form-schema";
 import type { FormResult } from "../../../shared/model/model.form-result";
-import { formError, formOk } from "../../../shared/model/model.form-result";
+import { formOk } from "../../../shared/model/model.form-result";
 
 /** Champs saisis pour créer une tontine. */
 export interface TontineFormState {
@@ -37,6 +45,9 @@ const MAX_ROUNDS = 100;
 /** Nombre maximal d'unités entre deux tours. */
 const MAX_INTERVAL = 12;
 
+/** Message affiché quand les tours ne couvrent pas tous les participants. */
+const ROUNDS_PER_PARTICIPANT_ERROR = "Prévoyez au moins un tour par participant.";
+
 /** Formulaire proposé à l'ouverture de la feuille de création. */
 export const INITIAL_TONTINE_FORM: TontineFormState = {
   name: "",
@@ -47,34 +58,37 @@ export const INITIAL_TONTINE_FORM: TontineFormState = {
   rounds: "10",
 };
 
-/** Valeurs numériques validées du formulaire de tontine. */
-interface TontineNumbers {
-  readonly contribution: bigint;
-  readonly interval: number;
-  readonly participants: number;
-  readonly totalRounds: number;
-}
-
 /**
- * Lit et valide les nombres saisis dans le formulaire de tontine.
- * @param form Champs saisis.
- * @returns Les valeurs acceptées, ou le message à corriger.
+ * Schéma de saisie d'une tontine : chaque participant reçoit la cagnotte au
+ * moins une fois, donc le nombre de tours ne peut pas être inférieur au
+ * nombre de participants.
  */
-function readTontineNumbers(form: TontineFormState): FormResult<TontineNumbers> {
-  const contribution = parseAmountInput(form.contribution);
-  const interval = parseCountInput(form.interval, MAX_INTERVAL);
-  const participants = parseCountInput(form.participants, MAX_PARTICIPANTS);
-  const totalRounds = parseCountInput(form.rounds, MAX_ROUNDS);
-
-  if (contribution === null) return formError("Saisissez une cotisation valide en FCFA.");
-  if (interval === null) return formError("Indiquez un intervalle entre 1 et 12.");
-  if (participants === null || participants < 2) {
-    return formError("Indiquez entre 2 et 50 participants.");
-  }
-  if (totalRounds === null) return formError("Indiquez entre 1 et 100 tours.");
-
-  return formOk({ contribution, interval, participants, totalRounds });
-}
+const tontineFormSchema = z
+  .object({
+    name: nameSchema("Donnez un nom à la tontine."),
+    contribution: amountSchema("Saisissez une cotisation valide en FCFA."),
+    frequency: z.enum(CYCLE_FREQUENCY_UNITS, { error: "Choisissez une fréquence valide." }),
+    interval: countSchema({
+      min: 1,
+      max: MAX_INTERVAL,
+      message: "Indiquez un intervalle entre 1 et 12.",
+    }),
+    participants: countSchema({
+      min: 2,
+      max: MAX_PARTICIPANTS,
+      message: "Indiquez entre 2 et 50 participants.",
+    }),
+    rounds: countSchema({
+      min: 1,
+      max: MAX_ROUNDS,
+      message: "Indiquez entre 1 et 100 tours.",
+    }),
+  })
+  .superRefine((form, ctx) => {
+    if (form.rounds < form.participants) {
+      ctx.addIssue({ code: "custom", message: ROUNDS_PER_PARTICIPANT_ERROR });
+    }
+  });
 
 /**
  * Valide la saisie et construit la tontine correspondante.
@@ -82,21 +96,19 @@ function readTontineNumbers(form: TontineFormState): FormResult<TontineNumbers> 
  * @returns L'entrée acceptée, ou le message à corriger.
  */
 export function parseTontineForm(form: TontineFormState): FormResult<CreateTontineInput> {
-  const name = form.name.trim();
-  if (name === "") return formError("Donnez un nom à la tontine.");
-  const numbers = readTontineNumbers(form);
-  if (!numbers.ok) return numbers;
+  const parsed = parseWithSchema(tontineFormSchema, form);
+  if (!parsed.ok) return parsed;
 
-  const { contribution, interval, participants, totalRounds } = numbers.value;
-  const frequency: TontineFrequency = { unit: form.frequency, interval };
+  const { name, contribution, frequency, interval, participants, rounds } = parsed.value;
+  const cycle: TontineFrequency = { unit: frequency, interval };
 
   return formOk({
     name,
     contribution,
-    frequency,
-    totalRounds,
+    frequency: cycle,
+    totalRounds: rounds,
     participantCount: participants,
-    description: `${name} : cotisation de ${formatAmount(contribution)} FCFA, ${formatFrequency(frequency)}.`,
+    description: `${name} : cotisation de ${formatAmount(contribution)} FCFA, ${formatFrequency(cycle)}.`,
   });
 }
 

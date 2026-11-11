@@ -1,6 +1,14 @@
-import { parseAmountInput } from "../../../shared/model/model.amount-input";
+import { z } from "zod";
+
+import { amountSchema, parseWithSchema } from "../../../shared/model/model.form-schema";
 import type { FormResult } from "../../../shared/model/model.form-result";
-import { formError, formOk } from "../../../shared/model/model.form-result";
+import { formOk } from "../../../shared/model/model.form-result";
+
+/** Schéma d'un transfert : destinataire obligatoire et montant strictement positif. */
+const transferSchema = z.object({
+  memberId: z.string().min(1, "Choisissez un destinataire."),
+  amount: amountSchema("Saisissez un montant valide en FCFA."),
+});
 
 /**
  * Valide le destinataire et le montant d'un transfert vers un membre.
@@ -9,10 +17,8 @@ import { formError, formOk } from "../../../shared/model/model.form-result";
  * @returns Le montant accepté, ou le message à corriger.
  */
 export function parseTransfer(memberId: string, amount: string): FormResult<bigint> {
-  if (memberId === "") return formError("Choisissez un destinataire.");
+  const parsed = parseWithSchema(transferSchema, { memberId, amount });
+  if (!parsed.ok) return parsed;
 
-  const parsed = parseAmountInput(amount);
-  if (parsed === null) return formError("Saisissez un montant valide en FCFA.");
-
-  return formOk(parsed);
+  return formOk(parsed.value.amount);
 }

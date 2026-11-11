@@ -39,6 +39,26 @@ describe("parseTontineForm", () => {
     });
   });
 
+  it("refuse un nom trop court", () => {
+    expect(parseTontineForm({ ...VALID_FORM, name: "ab" })).toEqual({
+      ok: false,
+      message: "Le nom doit contenir au moins 3 caractères.",
+    });
+  });
+
+  it("refuse un nom trop long", () => {
+    expect(parseTontineForm({ ...VALID_FORM, name: "a".repeat(61) })).toEqual({
+      ok: false,
+      message: "Le nom ne peut pas dépasser 60 caractères.",
+    });
+  });
+
+  it("nettoie les espaces autour du nom", () => {
+    const result = parseTontineForm({ ...VALID_FORM, name: "  Tontine du Marché  " });
+
+    expect(result.ok && result.value.name).toBe("Tontine du Marché");
+  });
+
   it("refuse une cotisation invalide", () => {
     expect(parseTontineForm({ ...VALID_FORM, contribution: "0" })).toEqual({
       ok: false,
@@ -76,6 +96,17 @@ describe("parseTontineForm", () => {
       ok: false,
       message: "Indiquez entre 1 et 100 tours.",
     });
+  });
+
+  it("exige au moins un tour par participant", () => {
+    expect(parseTontineForm({ ...VALID_FORM, participants: "6", rounds: "5" })).toEqual({
+      ok: false,
+      message: "Prévoyez au moins un tour par participant.",
+    });
+  });
+
+  it("accepte autant de tours que de participants", () => {
+    expect(parseTontineForm({ ...VALID_FORM, participants: "6", rounds: "6" }).ok).toBe(true);
   });
 });
 
