@@ -1,7 +1,5 @@
 import { View } from "react-native";
 
-import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
-import { SheetSecondaryButton } from "../../../shared/components/atoms/button.sheet-secondary";
 import { SheetText } from "../../../shared/components/atoms/text.sheet";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
@@ -16,6 +14,7 @@ import {
 import { PinConfirm } from "../../auth";
 import { useMobilePay } from "../hooks/hook.mobile-pay";
 import { pendingInstructions } from "../model/model.pay-flow";
+import { PayMethodButton } from "./button.pay-method";
 import { DEFAULT_PENDING_ACCENT, PayPendingStep } from "./step.pay-pending";
 
 /** Ce qui est payé : titre de la feuille, récapitulatif et montant. */
@@ -45,31 +44,6 @@ interface PayChoiceProps {
   readonly onChoose: (method: PaymentMethod) => void;
 }
 
-/** Props du bouton d'un moyen de paiement. */
-interface PayMethodButtonProps {
-  readonly method: PaymentMethod;
-  readonly accent: string | undefined;
-  readonly onChoose: (method: PaymentMethod) => void;
-}
-
-/**
- * Bouton « Payer avec … » : plein à la couleur d'action pour Mitemo, le moyen
- * mis en avant, en contour seulement pour les opérateurs mobiles.
- * @param props Moyen, couleur d'action et choix.
- * @returns Le bouton du moyen de paiement.
- */
-function PayMethodButton(props: PayMethodButtonProps) {
-  const { method, onChoose } = props;
-  const label = `Payer avec ${paymentMethodName(method)}`;
-  const accent = props.accent === undefined ? {} : { accent: props.accent };
-
-  if (isMobileMoney(method)) {
-    return <SheetSecondaryButton label={label} onPress={() => onChoose(method)} {...accent} />;
-  }
-
-  return <SheetPrimaryButton label={label} onPress={() => onChoose(method)} {...accent} />;
-}
-
 /**
  * Récapitule le paiement et propose un bouton par moyen : « Payer avec MTN
  * MoMo », « Payer avec Airtel Money », « Payer avec Mitemo ».
@@ -86,9 +60,10 @@ function PayChoice(props: PayChoiceProps) {
         {PAYMENT_METHODS.map((method) => (
           <PayMethodButton
             key={method}
-            method={method}
+            label={`Payer avec ${paymentMethodName(method)}`}
+            filled={!isMobileMoney(method)}
             accent={request.accent}
-            onChoose={onChoose}
+            onPress={() => onChoose(method)}
           />
         ))}
       </View>

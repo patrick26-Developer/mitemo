@@ -48,6 +48,17 @@ describe("WithdrawSheet", () => {
     expect(usePortfolioStore.getState().available).toBe(20_000n);
   });
 
+  it("remplit « Retirer vers MTN MoMo » et laisse Airtel Money en contour", async () => {
+    await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
+
+    const filled = screen.getAllByTestId("sheet-primary-fill");
+    expect(filled).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Retirer vers MTN MoMo" })).toContainElement(
+      filled[0] ?? null,
+    );
+    expect(screen.getByRole("button", { name: "Retirer vers Airtel Money" })).toBeOnTheScreen();
+  });
+
   it("refuse un montant supérieur au solde sans demander le code", async () => {
     await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
 

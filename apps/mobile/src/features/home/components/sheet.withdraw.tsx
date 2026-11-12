@@ -1,6 +1,5 @@
 import { View } from "react-native";
 
-import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
 import { SheetText } from "../../../shared/components/atoms/text.sheet";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
@@ -8,6 +7,7 @@ import { formatAmount } from "../../../shared/format/format.amount";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { paymentMethodName } from "../../../shared/model/model.payment-method";
 import { PinConfirm } from "../../auth";
+import { PayMethodButton } from "../../payments";
 import type { WithdrawState } from "../hooks/hook.withdraw";
 import { useWithdraw } from "../hooks/hook.withdraw";
 import { WITHDRAW_METHODS } from "../model/model.withdraw";
@@ -42,9 +42,11 @@ function WithdrawForm(props: WithdrawFormProps) {
         hint={`Disponible : ${formatAmount(available)} FCFA`}
       />
       {WITHDRAW_METHODS.map((method) => (
-        <SheetPrimaryButton
+        <PayMethodButton
           key={method}
           label={`Retirer vers ${paymentMethodName(method)}`}
+          filled={method === "MTN_MOMO"}
+          accent={undefined}
           onPress={() => choose(method)}
         />
       ))}

@@ -41,6 +41,7 @@ import { adminActions } from "./model.portfolio-admin";
 import { walletActions } from "./model.portfolio-wallet";
 import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
 import { transferAndRenew } from "./model.card-renewal";
+import type { PaymentMethod } from "../model/model.payment-method";
 
 /** Mise à jour partielle de l'état du portefeuille. */
 export type PortfolioUpdate =
@@ -80,7 +81,8 @@ export interface PortfolioState {
   updateTontineSettings: (tontineId: string, settings: TontineSettings) => void;
   /** Pointe un marqueur, payé par l'opérateur choisi. */
   contributeCard: (cardId: string, payment: CardPayment) => void;
-  withdrawCard: (cardId: string) => void;
+  /** Retire l'épargne d'une carte remplie vers le moyen choisi. */
+  withdrawCard: (cardId: string, method: PaymentMethod) => void;
   /** Retire une partie du solde disponible vers l'opérateur mobile du membre. */
   withdrawAvailable: (amount: bigint) => void;
   /** Verse la carte à sa tontine et la fait repartir sur une copie neuve, datée de `today` (UTC). */
@@ -194,21 +196,24 @@ function contributeCard(context: PortfolioContext, cardId: string, payment: Card
 }
 
 /**
- * Verse l'épargne d'une carte remplie sur le solde disponible et archive la
- * carte : une carte archivée est terminée et retirée.
+ * Retire l'épargne d'une carte remplie et archive la carte : vers le solde
+ * disponible avec Mitemo, hors de l'application avec un opérateur mobile.
+ * Une carte archivée est terminée et retirée.
  * @param context Accès au store.
  * @param cardId Carte concernée.
+ * @param method Destination de l'épargne.
  * @throws {InvalidAmountError} si la carte n'a aucune épargne.
  * @throws {ForbiddenOperationError} si l'objectif n'est pas atteint ou la carte déjà archivée.
  */
-function withdrawCard(context: PortfolioContext, cardId: string): void {
+function withdrawCard(context: PortfolioContext, cardId: string, method: PaymentMethod): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.saved <= 0n) throw new InvalidAmountError("Cette carte n'a rien à retirer.");
   if (!cardCapabilities(card).canWithdraw) {
     throw new ForbiddenOperationError("Le retrait n'est possible qu'une fois l'objectif atteint.");
   }
+  const toBalance = method === "MITEMO" ? card.saved : 0n;
   context.set((state) => ({
-    available: state.available + card.saved,
+    available: state.available + toBalance,
     cards: clearSaved(state.cards, cardId),
   }));
 }
@@ -259,7 +264,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...adminActions(context),
     ...walletActions(context),
     contributeCard: (id, payment) => contributeCard(context, id, payment),
-    withdrawCard: (id) => withdrawCard(context, id),
+    withdrawCard: (id, method) => withdrawCard(context, id, method),
     transferCardToTontine: (id, today) => transferCardToTontine(context, id, today),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),
   };
