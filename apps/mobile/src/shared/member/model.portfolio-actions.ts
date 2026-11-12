@@ -63,7 +63,8 @@ export interface PortfolioState {
   /** Invitations reçues par le membre connecté, en attente de sa réponse. */
   readonly invitations: readonly ReceivedInvitation[];
   createTontine: (input: CreateTontineInput) => Tontine;
-  createCard: (input: CreateCardInput) => void;
+  /** Crée une carte de pointage et la renvoie, pour ouvrir sa page. */
+  createCard: (input: CreateCardInput) => SavingsCard;
   startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
   confirmRound: (tontineId: string) => void;
@@ -104,10 +105,12 @@ function createTontine(context: PortfolioContext, input: CreateTontineInput): To
  * Crée une carte de pointage et l'ajoute en tête de liste.
  * @param context Accès au store.
  * @param input Paramètres saisis.
+ * @returns La carte créée.
  */
-function createCard(context: PortfolioContext, input: CreateCardInput): void {
+function createCard(context: PortfolioContext, input: CreateCardInput): SavingsCard {
   const card = buildCard(input);
   context.set((state) => ({ cards: prependCard(state.cards, card) }));
+  return card;
 }
 
 /**

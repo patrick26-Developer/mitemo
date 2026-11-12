@@ -1,5 +1,5 @@
-import { Share } from "react-native";
 import { fireEvent, screen } from "@testing-library/react-native";
+import { router } from "expo-router";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
@@ -23,6 +23,8 @@ async function chooseCadence(label: string): Promise<void> {
   await fireEvent.press(screen.getByTestId("sheet-select-trigger"));
   await fireEvent.press(screen.getByRole("button", { name: label }));
 }
+
+jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 
 describe("TontineCreateSheet", () => {
   beforeEach(() => {
@@ -98,10 +100,7 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByDisplayValue("Tontine du Marché")).toBeOnTheScreen();
   });
 
-  it("résume tout, crée la tontine, puis propose seulement de partager l'invitation", async () => {
-    const share = jest
-      .spyOn(Share, "share")
-      .mockResolvedValue({ action: "sharedAction", activityType: undefined });
+  it("résume tout, crée la tontine, puis ouvre directement sa page, sans étape d'invitation", async () => {
     const onClose = jest.fn();
     await renderWithSafeArea(<TontineCreateSheet visible onClose={onClose} />);
     await fillEssentials();
@@ -118,27 +117,15 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
 
-    expect(screen.queryByText("Récapitulatif")).toBeNull();
-
     await fireEvent.press(screen.getByRole("button", { name: "Créer la tontine" }));
 
-    expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByText("Votre tontine est prête")).toBeOnTheScreen();
     const created = usePortfolioStore
       .getState()
       .tontines.find((item) => item.name === "Tontine du Marché");
     expect(created?.frequency).toEqual({ unit: "semaine", interval: 2 });
     expect(created?.totalRounds).toBe(6);
-
-    const code = screen.getByTestId("tontine-invitation-code");
-    expect(code).toBeOnTheScreen();
-    expect(screen.queryByRole("button", { name: "Terminer" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Confirmer" })).toBeNull();
-
-    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
-
-    expect(share).toHaveBeenCalledWith({
-      message: expect.stringContaining(created?.invitationCode ?? "absent") as string,
-    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(router.push).toHaveBeenCalledWith(`/tontine/${created?.id ?? "absent"}`);
+    expect(screen.queryByText("Votre tontine est prête")).toBeNull();
   });
 });

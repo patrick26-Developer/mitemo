@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react-native";
+import { router } from "expo-router";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { tomorrowUtc } from "../../../shared/model/model.clock";
@@ -28,6 +29,8 @@ async function chooseDeadline(): Promise<void> {
     new Date(`${tomorrowUtc()}T00:00:00.000Z`),
   );
 }
+
+jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 
 describe("SavingsCreateSheet", () => {
   beforeEach(() => {
@@ -81,7 +84,7 @@ describe("SavingsCreateSheet", () => {
     expect(screen.getByDisplayValue("Loyer de Février")).toBeOnTheScreen();
   });
 
-  it("crée la carte avec les pointages déduits du rythme", async () => {
+  it("crée la carte avec les pointages déduits du rythme, puis ouvre sa page", async () => {
     const onClose = jest.fn();
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={onClose} />);
     await fillProject();
@@ -96,6 +99,7 @@ describe("SavingsCreateSheet", () => {
     expect(created?.goal).toBe(60_000n);
     expect(created?.deadline).toBe(tomorrowUtc());
     expect(created?.markersTotal).toBeGreaterThan(0);
+    expect(router.push).toHaveBeenCalledWith(`/savings-detail/${created?.id ?? "absent"}`);
   });
 
   it("refuse de créer une carte sans échéance", async () => {

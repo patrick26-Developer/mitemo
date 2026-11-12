@@ -21,7 +21,6 @@ import {
   tontineInvalidFields,
   tontineRecap,
 } from "../model/model.tontine-form";
-import { TontineCreatedPanel } from "./panel.tontine-created";
 
 /** Props de la feuille de création d'une tontine. */
 export interface TontineCreateSheetProps {
@@ -182,17 +181,8 @@ const STEP_CONTENTS = [
  * @returns La feuille « Nouvelle tontine ».
  */
 export function TontineCreateSheet(props: TontineCreateSheetProps) {
-  const { form, error, steps, update, next, back, close, tontine, finish, share, invitationCode } =
-    useTontineCreate(props.onClose);
+  const { form, error, steps, update, next, back, close } = useTontineCreate(props.onClose);
   const StepContent = STEP_CONTENTS[steps.index] ?? TontineEssentialsStep;
-
-  if (tontine !== null) {
-    return (
-      <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={finish}>
-        <TontineCreatedPanel tontine={tontine} invitationCode={invitationCode} onShare={share} />
-      </BottomSheet>
-    );
-  }
 
   return (
     <BottomSheet
