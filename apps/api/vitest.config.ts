@@ -30,6 +30,11 @@ export default defineConfig({
         // *.int-spec.ts, et leur couverture est mesurée séparément par `test:int:ci`
         // dans coverage-int/, jamais par un mock.
         "src/features/*/infrastructure/prisma-*.repository.ts",
+        // These flows are exercised through Nest and PostgreSQL in the e2e coverage run.
+        "src/features/identity/infrastructure/**",
+        "src/features/identity/presentation/**",
+        "src/features/wallet/infrastructure/**",
+        "src/features/wallet/presentation/**",
       ],
       thresholds: {
         lines: 80,
