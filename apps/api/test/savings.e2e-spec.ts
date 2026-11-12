@@ -1,3 +1,5 @@
+import { hash } from "argon2";
+import { PrismaService } from "../src/shared/database/prisma.service.js";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
@@ -19,7 +21,7 @@ it.runIf(process.env["MITEMO_DEMO_AUTH"] === "true")(
       expect(paths["/savings/goals/{id}/calendar"]?.get?.responses["200"]).toBeDefined();
       expect(paths["/savings/goals/{id}/contributions"]?.get).toBeDefined();
       const login = async () => {
-        const credentials = { phoneNumber: "+24206" + randomInt(1000000, 10000000), pin: "493625" };
+        const credentials = { phoneNumber: "+24206" + randomInt(1000000, 10000000), pin: "4936" };
         await client
           .post("/auth/register")
           .send({ ...credentials, displayName: "Épargne" })
@@ -32,10 +34,36 @@ it.runIf(process.env["MITEMO_DEMO_AUTH"] === "true")(
             otp: body.simulatedOtp,
           })
           .expect(200);
-        return "Bearer " + session.body.accessToken;
+        return {
+          authorization: "Bearer " + session.body.accessToken,
+          phoneNumber: credentials.phoneNumber,
+        };
       };
-      const owner = await login();
-      const other = await login();
+      const { authorization: owner, phoneNumber } = await login();
+      const { authorization: other } = await login();
+      const pushPath = "/notifications/push-tokens";
+      const push = {
+        token: "ExponentPushToken[demo-test-token]",
+        platform: "ANDROID",
+        appVersion: "1.0.0",
+      };
+      await client.post(pushPath).send(push).expect(401);
+      await client
+        .post(pushPath)
+        .set("Authorization", owner)
+        .send({ ...push, token: "bad" })
+        .expect(400);
+      const registered = await client
+        .post(pushPath)
+        .set("Authorization", owner)
+        .send(push)
+        .expect(200);
+      await client
+        .post(pushPath)
+        .set("Authorization", owner)
+        .send(push)
+        .expect(200, registered.body);
+
       const body = {
         name: "Fournitures",
         terms: {
@@ -80,6 +108,19 @@ it.runIf(process.env["MITEMO_DEMO_AUTH"] === "true")(
       expect(
         calendar.body.items.every((item: { state: string }) => item.state === "UPCOMING"),
       ).toBe(true);
+      const legacyPin = "483927";
+      await app.get(PrismaService).appUser.update({
+        where: { phoneNumber },
+        data: { pinHash: await hash(legacyPin) },
+      });
+      const legacy = await client
+        .post("/auth/login")
+        .send({ phoneNumber, pin: legacyPin })
+        .expect(200);
+      await client
+        .post("/auth/verify")
+        .send({ challengeId: legacy.body.challengeId, otp: legacy.body.simulatedOtp })
+        .expect(200);
     } finally {
       await app.close();
     }
