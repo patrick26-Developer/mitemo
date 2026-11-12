@@ -82,6 +82,8 @@ describe("SavingsCreateSheet", () => {
     expect(screen.getByText("5 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
     expect(screen.getByText("6 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getAllByTestId(/^fact-row-/)).toHaveLength(4);
+    expect(screen.getAllByTestId("fact-divider")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "Créer la carte" })).toBeOnTheScreen();
   });
 

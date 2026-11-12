@@ -1,11 +1,12 @@
+import { CalendarCheck, Coins, Link, Receipt, Target } from "lucide-react-native";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
-import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
-import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { StepTransition } from "../../../shared/components/atoms/transition.step";
+import type { FactItem } from "../../../shared/components/atoms/row.fact";
+import { FactList } from "../../../shared/components/macros/list.facts";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
@@ -89,17 +90,38 @@ function SavingsProjectStep(props: SavingsCreateFieldsProps) {
  * @param tontine Nom de la tontine rattachée, `null` sans tontine.
  * @returns Les lignes affichables, dans l'ordre choisi.
  */
-function recapRows(recap: SavingsRecap, tontine: string | null): readonly SheetRecapRow[] {
+function recapRows(recap: SavingsRecap, tontine: string | null): readonly FactItem[] {
   const rows = [
-    tontine === null ? null : { label: "Tontine rattachée", value: tontine },
-    recap.goal === null ? null : { label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
+    tontine === null
+      ? null
+      : { id: "tontine", icon: Link, label: "Tontine rattachée", value: tontine },
+    recap.goal === null
+      ? null
+      : { id: "goal", icon: Target, label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
     recap.fee === null
       ? null
-      : { label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`, value: `${formatAmount(recap.fee)} FCFA` },
+      : {
+          id: "fee",
+          icon: Receipt,
+          label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`,
+          value: `${formatAmount(recap.fee)} FCFA`,
+        },
     recap.markerAmount === null
       ? null
-      : { label: "Par pointage", value: `${formatAmount(recap.markerAmount)} FCFA` },
-    recap.markers === null ? null : { label: "Pointages prévus", value: `${recap.markers}` },
+      : {
+          id: "marker",
+          icon: Coins,
+          label: "Par pointage",
+          value: `${formatAmount(recap.markerAmount)} FCFA`,
+        },
+    recap.markers === null
+      ? null
+      : {
+          id: "markers",
+          icon: CalendarCheck,
+          label: "Pointages prévus",
+          value: `${recap.markers}`,
+        },
   ];
 
   return rows.flatMap((row) => (row === null ? [] : [row]));
@@ -152,7 +174,7 @@ function SavingsRecapStep(props: SavingsCreateFieldsProps) {
   const { form, tontines } = props;
   const tontine = linkedTontineName(tontines, form.tontineId);
 
-  return <SheetRecap rows={recapRows(savingsRecap(form, new Date()), tontine)} />;
+  return <FactList items={recapRows(savingsRecap(form, new Date()), tontine)} />;
 }
 
 /** Contenu de chaque étape, dans l'ordre de SAVINGS_FORM_STEPS. */

@@ -114,6 +114,8 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByText("6 membres")).toBeOnTheScreen();
     expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getAllByTestId(/^fact-row-/)).toHaveLength(5);
+    expect(screen.getAllByTestId("fact-divider")).toHaveLength(4);
 
     await fireEvent.press(screen.getByRole("button", { name: "Créer la tontine" }));
 

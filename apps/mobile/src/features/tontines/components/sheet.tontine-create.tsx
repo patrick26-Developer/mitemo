@@ -1,11 +1,12 @@
+import { CalendarClock, HandCoins, Landmark, Users, Wallet } from "lucide-react-native";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
-import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
-import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { StepTransition } from "../../../shared/components/atoms/transition.step";
+import type { FactItem } from "../../../shared/components/atoms/row.fact";
+import { FactList } from "../../../shared/components/macros/list.facts";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatFrequency } from "../../../shared/member/model.portfolio";
@@ -99,22 +100,42 @@ function TontineRhythmStep(props: TontineCreateFieldsProps) {
  * @param recap Valeurs calculées à partir du formulaire.
  * @returns Les lignes affichables, dans l'ordre choisi.
  */
-function recapRows(form: TontineFormState, recap: TontineRecap): readonly SheetRecapRow[] {
+function recapRows(form: TontineFormState, recap: TontineRecap): readonly FactItem[] {
   const name = form.name.trim();
   const rows = [
-    name === "" ? null : { label: "Tontine", value: name },
+    name === "" ? null : { id: "name", icon: Landmark, label: "Tontine", value: name },
     recap.frequency === null
       ? null
-      : { label: "Fréquence", value: formatFrequency(recap.frequency) },
+      : {
+          id: "frequency",
+          icon: CalendarClock,
+          label: "Fréquence",
+          value: formatFrequency(recap.frequency),
+        },
     recap.participants === null
       ? null
-      : { label: "Participants", value: `${recap.participants} membres` },
+      : {
+          id: "participants",
+          icon: Users,
+          label: "Participants",
+          value: `${recap.participants} membres`,
+        },
     recap.pot === null
       ? null
-      : { label: "Restourne par tour", value: `${formatAmount(recap.pot)} FCFA` },
+      : {
+          id: "pot",
+          icon: HandCoins,
+          label: "Restourne par tour",
+          value: `${formatAmount(recap.pot)} FCFA`,
+        },
     recap.cycleTotal === null
       ? null
-      : { label: "Total du cycle", value: `${formatAmount(recap.cycleTotal)} FCFA` },
+      : {
+          id: "cycle",
+          icon: Wallet,
+          label: "Total du cycle",
+          value: `${formatAmount(recap.cycleTotal)} FCFA`,
+        },
   ];
 
   return rows.flatMap((row) => (row === null ? [] : [row]));
@@ -167,7 +188,7 @@ function TontineParticipantsField(props: TontineCreateFieldsProps) {
 function TontineRecapStep(props: TontineCreateFieldsProps) {
   const { form } = props;
 
-  return <SheetRecap rows={recapRows(form, tontineRecap(form))} />;
+  return <FactList items={recapRows(form, tontineRecap(form))} />;
 }
 
 /** Contenu de chaque étape, dans l'ordre de TONTINE_FORM_STEPS. */

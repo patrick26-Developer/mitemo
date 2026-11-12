@@ -25,10 +25,10 @@ describe("MemberSummarySheet", () => {
     expect(screen.getByText("Téléphone")).toBeOnTheScreen();
     expect(screen.getByText("+242 06 570 6622")).toBeOnTheScreen();
     expect(screen.getByText("Développeur")).toBeOnTheScreen();
-    expect(screen.getAllByTestId(/^member-fact-card-/)).toHaveLength(4);
-    expect(screen.getAllByTestId("member-fact-divider")).toHaveLength(3);
+    expect(screen.getAllByTestId(/^fact-row-/)).toHaveLength(4);
+    expect(screen.getAllByTestId("fact-divider")).toHaveLength(3);
     expect(
-      screen.getByTestId("member-fact-icon-phone", { includeHiddenElements: true }),
+      screen.getByTestId("fact-icon-phone", { includeHiddenElements: true }),
     ).toBeOnTheScreen();
   });
 
