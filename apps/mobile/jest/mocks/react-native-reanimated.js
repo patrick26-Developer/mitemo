@@ -131,6 +131,35 @@ export const Easing = {
   inOut: identity,
   bezier: bezierEasing,
 };
+/**
+ * Animation par images clés, sans effet dans les tests : la vue garde sa forme finale.
+ */
+export class Keyframe {
+  /**
+   * Retient les images clés, ignorées.
+   * @param {object} definitions Images clés de l'animation.
+   */
+  constructor(definitions) {
+    this.definitions = definitions;
+  }
+
+  /**
+   * Ignore la durée.
+   * @returns {Keyframe} La même animation.
+   */
+  duration() {
+    return this;
+  }
+
+  /**
+   * Ignore le délai.
+   * @returns {Keyframe} La même animation.
+   */
+  delay() {
+    return this;
+  }
+}
+
 export const FadeIn = entering;
 export const FadeInDown = entering;
 export const FadeInRight = entering;
