@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import type { LayoutChangeEvent } from "react-native";
 
-import { DOCK_GAP, MIN_DOCK_INSET, useDockInset } from "./hook.dock-inset";
+import { DOCK_GAP, MIN_DOCK_INSET, NO_DOCK_INSET, useDockInset } from "./hook.dock-inset";
 
 /**
  * Construit un événement de mise en page de la hauteur donnée.
@@ -33,5 +33,13 @@ describe("useDockInset", () => {
     await act(() => result.current.onDockLayout(layoutOf(40)));
 
     expect(result.current.paddingBottom).toBe(MIN_DOCK_INSET);
+  });
+
+  it("réduit la marge quand le dock n'a aucun bouton", async () => {
+    const { result } = await renderHook(() => useDockInset());
+
+    await act(() => result.current.onDockLayout(layoutOf(0)));
+
+    expect(result.current.paddingBottom).toBe(NO_DOCK_INSET);
   });
 });

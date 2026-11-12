@@ -124,13 +124,16 @@ function DockActions(props: DockActionsProps) {
  * qui reste touchable entre eux. Le dock reste visible quand le contenu défile ;
  * les retours d'opération sortent en toast.
  * @param props Action principale, action secondaire et mesure.
- * @returns Le dock d'actions, ou rien quand aucune action n'est possible.
+ * @returns Le dock d'actions ; sans action, un repère vide de hauteur nulle,
+ * pour que le contenu cesse de réserver la place des boutons.
  */
 export function ActionsDock(props: ActionsDockProps) {
   const { primary, secondary = null, onLayout } = props;
   const insets = useSafeAreaInsets();
 
-  if (primary === null && secondary === null) return null;
+  if (primary === null && secondary === null) {
+    return <View testID="actions-dock-empty" onLayout={onLayout} style={styles.empty} />;
+  }
 
   return (
     <View
@@ -155,4 +158,5 @@ const styles = StyleSheet.create({
     paddingTop: TOP_PADDING,
     paddingHorizontal: SIDE_PADDING,
   },
+  empty: { position: "absolute", left: 0, right: 0, bottom: 0, height: 0 },
 });
