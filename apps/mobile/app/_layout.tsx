@@ -24,7 +24,7 @@ export default function RootLayout() {
   if (!ready) return <ActivityIndicator accessibilityLabel="Restauration de la session" />;
 
   return (
-    <KeyboardProvider>
+    <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected {...routes.member}>

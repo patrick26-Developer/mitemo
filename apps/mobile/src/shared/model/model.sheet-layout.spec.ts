@@ -5,6 +5,7 @@ import {
   SHEET_MAX_HEIGHT_RATIO,
   SHEET_MIN_HEIGHT_RATIO,
   computeSheetLayout,
+  sheetContentPaddingBottom,
 } from "./model.sheet-layout";
 
 describe("computeSheetLayout", () => {
@@ -86,5 +87,29 @@ describe("computeSheetLayout", () => {
 
     expect(layout.minHeight).toBe(640 * SHEET_MIN_HEIGHT_RATIO);
     expect(layout.maxHeight).toBe(640 * SHEET_MAX_HEIGHT_RATIO);
+  });
+
+  describe("sheetContentPaddingBottom", () => {
+    it("garde la marge basse sur Android, où la carte posée à plat n'a ni arrondi ni marge", () => {
+      const android = computeSheetLayout({
+        platform: "android",
+        keyboardHeight: 0,
+        bottomInset: 16,
+        screenHeight: 800,
+      });
+
+      expect(sheetContentPaddingBottom(android)).toBe(16 + SHEET_BOTTOM_PADDING);
+    });
+
+    it("colle au contenu sur iOS, où l'arrondi et la marge de la carte flottante font l'espace", () => {
+      const ios = computeSheetLayout({
+        platform: "ios",
+        keyboardHeight: 0,
+        bottomInset: 34,
+        screenHeight: 844,
+      });
+
+      expect(sheetContentPaddingBottom(ios)).toBe(34);
+    });
   });
 });

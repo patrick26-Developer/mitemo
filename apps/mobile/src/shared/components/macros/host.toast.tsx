@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useToastStore } from "../../feedback/store.toast";
 import type { Toast } from "../../feedback/store.toast";
 import { PALETTE } from "../../theme/theme.palette";
+import { SHADOWS } from "../../theme/theme.shadow";
 
 /** Durée d'affichage d'un toast, en millisecondes. */
 export const TOAST_DURATION_MS = 3500;
@@ -106,13 +107,8 @@ function ToastCard(props: ToastCardProps) {
   );
 }
 
-/** Position flottante et ombre du toast, que Tailwind n'exprime pas côté natif. */
+/** Position flottante et ombre du toast, identique sur iOS et Android. */
 const styles = StyleSheet.create({
   host: { position: "absolute", left: 16, right: 16, zIndex: 1000, elevation: 20 },
-  card: {
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-  },
+  card: SHADOWS.toast,
 });

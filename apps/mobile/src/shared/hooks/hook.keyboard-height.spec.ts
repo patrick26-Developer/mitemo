@@ -86,6 +86,17 @@ describe("useKeyboardHeight", () => {
     expect(configure).toHaveBeenCalledWith(LayoutAnimation.create(250, "easeInEaseOut", "opacity"));
   });
 
+  it("n'anime pas la mise en page sur Android, où l'animation effaçait la feuille", async () => {
+    (Platform as { OS: string }).OS = "android";
+    const configure = jest.spyOn(LayoutAnimation, "configureNext").mockImplementation(() => {});
+    const { result } = await renderHook(() => useKeyboardHeight());
+
+    await emit("keyboardWillShow", { height: 280, duration: 200 });
+
+    expect(result.current).toBe(280);
+    expect(configure).not.toHaveBeenCalled();
+  });
+
   it("adoucit le changement quand le clavier ne donne pas de durée", async () => {
     const configure = jest.spyOn(LayoutAnimation, "configureNext").mockImplementation(() => {});
     await renderHook(() => useKeyboardHeight());

@@ -2,6 +2,7 @@ import { Search, X } from "lucide-react-native";
 import { Pressable, TextInput, View } from "react-native";
 
 import { PALETTE } from "../../theme/theme.palette";
+import { FIELD_INPUT_RESET } from "../../theme/theme.field-input";
 
 /** Action de la croix d'effacement d'un champ de recherche. */
 export interface SearchFieldClear {
@@ -45,6 +46,7 @@ export function SearchField(props: SearchFieldProps) {
         accessibilityLabel={accessibilityLabel}
         returnKeyType="search"
         className="flex-1 text-[15px] text-ink"
+        style={FIELD_INPUT_RESET}
       />
       {showClear ? (
         <Pressable

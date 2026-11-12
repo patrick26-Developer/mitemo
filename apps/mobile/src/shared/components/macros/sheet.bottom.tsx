@@ -7,7 +7,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -19,9 +18,10 @@ import { useFocusedFieldReveal } from "../../hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
 import { useSheetDrag } from "../../hooks/hook.sheet-drag";
 import type { SheetLayout } from "../../model/model.sheet-layout";
-import { SHEET_BOTTOM_PADDING, computeSheetLayout } from "../../model/model.sheet-layout";
+import { computeSheetLayout, sheetContentPaddingBottom } from "../../model/model.sheet-layout";
 import { FOCUS_RING_SCROLL } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
+import { SHADOWS } from "../../theme/theme.shadow";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
@@ -34,8 +34,8 @@ export interface BottomSheetProps {
   readonly onClose: () => void;
   readonly children: ReactNode;
   /**
-   * Actions posées sous le contenu, hors du défilement : elles restent visibles
-   * au-dessus du clavier, même quand le contenu dépasse.
+   * Actions posées à la fin du contenu, par exemple « Continuer » : elles
+   * défilent avec lui, sur iOS comme sur Android.
    */
   readonly footer?: ReactNode;
 }
@@ -185,23 +185,17 @@ function SheetSurface(props: SheetSurfaceProps) {
   const panHandlers = useSheetDrag(translateY, header.onClose);
   const scrollRef = useRef<ScrollViewInstance>(null);
   useFocusedFieldReveal(scrollRef, keyboardHeight);
-  // Une feuille colle à son contenu : ni hauteur minimale, ni rembourrage bas,
-  // seuls le clavier et la zone sûre réservent de la place.
   const contentLayout = {
     ...layout,
     minHeight: 0,
-    paddingBottom: Math.max(0, layout.paddingBottom - SHEET_BOTTOM_PADDING),
+    paddingBottom: sheetContentPaddingBottom(layout),
   };
 
   return (
     <Animated.View
       testID="bottom-sheet"
       className="border-card-border"
-      style={[
-        styles.surface,
-        computeSheetCardStyle(contentLayout),
-        { transform: [{ translateY }] },
-      ]}
+      style={[SHADOWS.sheet, computeSheetCardStyle(contentLayout), { transform: [{ translateY }] }]}
     >
       <SheetHeader title={header.title} onClose={header.onClose} dragHandlers={panHandlers} />
       <ScrollView
@@ -214,23 +208,10 @@ function SheetSurface(props: SheetSurfaceProps) {
         contentContainerStyle={FOCUS_RING_SCROLL.content}
       >
         {children}
+        {footer === undefined ? null : <View testID="bottom-sheet-footer">{footer}</View>}
       </ScrollView>
-      {footer === undefined ? null : (
-        <View testID="bottom-sheet-footer" className="pt-4">
-          {footer}
-        </View>
-      )}
     </Animated.View>
   );
 }
 
 /** Ombre portée de la feuille, que Tailwind n'exprime pas côté natif. */
-const styles = StyleSheet.create({
-  surface: {
-    shadowColor: "#000",
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: -8 },
-    elevation: 24,
-  },
-});

@@ -76,3 +76,16 @@ export function computeSheetLayout(input: SheetLayoutInput): SheetLayout {
     bottomRadius: floating ? SHEET_BOTTOM_RADIUS : 0,
   };
 }
+
+/**
+ * Marge sous le contenu d'une feuille. Sur iOS, la carte flottante colle à
+ * son contenu : son arrondi et sa marge basse font l'espace, seuls le clavier
+ * et la zone sûre réservent de la place. Sur Android, la carte est posée à
+ * plat : elle garde sa marge basse, sans quoi les boutons touchaient le bord.
+ * @param layout Disposition calculée de la feuille.
+ * @returns La marge basse du contenu, en points.
+ */
+export function sheetContentPaddingBottom(layout: SheetLayout): number {
+  if (layout.bottomRadius === 0) return layout.paddingBottom;
+  return Math.max(0, layout.paddingBottom - SHEET_BOTTOM_PADDING);
+}
