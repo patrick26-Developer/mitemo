@@ -8,10 +8,31 @@ export const TONTINE_TINTS: readonly (readonly [string, string])[] = [
   ["#F5B94A", "#FAD98C"],
   ["#9DB6F5", "#C9D6FF"],
   ["#F2A0B5", "#FBD0DA"],
+  ["#A78BFA", "#D8CBFE"],
+  ["#F59E7A", "#FBCFBC"],
+  ["#3CC7C2", "#A3ECE8"],
+  ["#5EB8F2", "#B8DFFA"],
+  ["#D6CF45", "#EFEA9C"],
+  ["#C77DBA", "#EAC6E3"],
+  ["#CDB38A", "#EADFCB"],
+  ["#94A3B8", "#CFD7E3"],
 ];
 
 /** Nom de chaque dégradé, lu par les lecteurs d'écran. */
-export const TONTINE_TINT_LABELS: readonly string[] = ["Vert", "Ambre", "Bleu", "Rose"];
+export const TONTINE_TINT_LABELS: readonly string[] = [
+  "Vert",
+  "Ambre",
+  "Bleu",
+  "Rose",
+  "Violet",
+  "Corail",
+  "Turquoise",
+  "Ciel",
+  "Citron",
+  "Prune",
+  "Sable",
+  "Ardoise",
+];
 
 /** Réglages qu'un administrateur peut modifier. */
 export interface TontineSettings {
