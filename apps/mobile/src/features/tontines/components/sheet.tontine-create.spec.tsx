@@ -75,7 +75,7 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByLabelText("Fréquence des tours : Toutes les 2 semaines")).toBeOnTheScreen();
   });
 
-  it("règle les participants au compteur, sur l'étape de la fréquence", async () => {
+  it("fait saisir les participants au clavier, sur l'étape de la fréquence", async () => {
     await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
     await fillEssentials();
 
@@ -84,10 +84,12 @@ describe("TontineCreateSheet", () => {
     ).toBeOnTheScreen();
     expect(screen.queryByLabelText("Tours")).toBeNull();
 
-    await fireEvent.press(screen.getByLabelText("Augmenter Participants"));
-    await fireEvent.press(screen.getByLabelText("Augmenter Participants"));
+    expect(screen.queryByLabelText("Augmenter Participants")).toBeNull();
+    expect(screen.getByLabelText("Participants")).toHaveDisplayValue("6");
 
-    expect(screen.getByLabelText("Participants : 8")).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByLabelText("Participants"), "8");
+
+    expect(screen.getByLabelText("Participants")).toHaveDisplayValue("8");
   });
 
   it("revient à l'étape précédente en gardant la saisie", async () => {

@@ -1,6 +1,5 @@
 import { CalendarClock, HandCoins, Landmark, Users, Wallet } from "lucide-react-native";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
-import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
@@ -35,12 +34,6 @@ interface TontineCreateFieldsProps {
   readonly invalid: TontineInvalidFields;
   readonly onChange: (patch: Partial<TontineFormState>) => void;
 }
-
-/** Nombre minimal de participants proposé par le compteur. */
-const MIN_PARTICIPANTS = 2;
-
-/** Nombre maximal de participants proposé par le compteur. */
-const MAX_PARTICIPANTS = 50;
 
 /**
  * Première étape : le nom et la cotisation d'une nouvelle tontine.
@@ -167,13 +160,13 @@ function TontineParticipantsField(props: TontineCreateFieldsProps) {
   const { form, invalid, onChange } = props;
 
   return (
-    <SheetStepper
+    <SheetTextField
       label="Participants"
       value={form.participants}
-      min={MIN_PARTICIPANTS}
-      max={MAX_PARTICIPANTS}
-      onChange={(participants) => onChange({ participants })}
-      hint="Vous inclus. Chacun reçoit la restourne une fois."
+      onChangeText={(participants) => onChange({ participants })}
+      keyboardType="number-pad"
+      placeholder="6"
+      hint="Entre 2 et 50, vous inclus. Chacun reçoit la restourne une fois."
       invalid={invalid.participants}
     />
   );

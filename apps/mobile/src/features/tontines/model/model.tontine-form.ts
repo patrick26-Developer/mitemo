@@ -34,8 +34,8 @@ export interface TontineFormState {
   readonly contribution: string;
   /** Fréquence choisie dans la liste. Voir {@link TONTINE_CADENCE_GROUPS}. */
   readonly cadence: TontineCadenceId;
-  /** Participants, membre connecté inclus. */
-  readonly participants: number;
+  /** Participants saisis au clavier, membre connecté inclus. */
+  readonly participants: string;
 }
 
 /** Récapitulatif d'une tontine en cours de saisie. */
@@ -78,7 +78,7 @@ export const INITIAL_TONTINE_FORM: TontineFormState = {
   name: "",
   contribution: "",
   cadence: "semaine-1",
-  participants: 6,
+  participants: "6",
 };
 
 /** Nom et cotisation, communs à la première étape et au formulaire complet. */
@@ -93,11 +93,29 @@ const cadenceSchema = z.object({
 
 const participantsSchema = z.object({
   participants: z
-    .number({ error: PARTICIPANTS_ERROR })
-    .int(PARTICIPANTS_ERROR)
-    .min(MIN_PARTICIPANTS, { error: PARTICIPANTS_ERROR })
-    .max(MAX_PARTICIPANTS, { error: PARTICIPANTS_ERROR }),
+    .string()
+    .trim()
+    .regex(/^\d+$/, { error: PARTICIPANTS_ERROR })
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int(PARTICIPANTS_ERROR)
+        .min(MIN_PARTICIPANTS, { error: PARTICIPANTS_ERROR })
+        .max(MAX_PARTICIPANTS, { error: PARTICIPANTS_ERROR }),
+    ),
 });
+
+/**
+ * Lit le nombre de participants saisi.
+ * @param input Saisie du champ.
+ * @returns Le nombre, ou `null` s'il n'est pas un entier entre 2 et 50.
+ */
+function participantCount(input: string): number | null {
+  const parsed = participantsSchema.shape.participants.safeParse(input);
+
+  return parsed.success ? parsed.data : null;
+}
 
 /** Schémas des étapes intermédiaires ; la dernière valide tout le formulaire. */
 const STEP_SCHEMAS = [essentialsSchema, cadenceSchema.extend(participantsSchema.shape)] as const;
@@ -121,14 +139,14 @@ interface CycleTotals {
  */
 function cycleTotals(form: TontineFormState): CycleTotals | null {
   const contribution = parseAmountInput(form.contribution);
-  if (contribution === null || !Number.isInteger(form.participants)) return null;
-  if (form.participants < MIN_PARTICIPANTS) return null;
+  const participants = participantCount(form.participants);
+  if (contribution === null || participants === null) return null;
 
   return {
     contribution,
-    participants: form.participants,
-    pot: contribution * BigInt(form.participants - 1),
-    cycleTotal: contribution * BigInt(form.participants),
+    participants,
+    pot: contribution * BigInt(participants - 1),
+    cycleTotal: contribution * BigInt(participants),
   };
 }
 
@@ -185,15 +203,10 @@ export function parseTontineForm(form: TontineFormState): FormResult<CreateTonti
  * @returns Vrai pour chaque champ à signaler en rouge.
  */
 export function tontineInvalidFields(form: TontineFormState): TontineInvalidFields {
-  const participantsOk =
-    Number.isInteger(form.participants) &&
-    form.participants >= MIN_PARTICIPANTS &&
-    form.participants <= MAX_PARTICIPANTS;
-
   return {
     name: !isValidNameInput(form.name),
     contribution: parseAmountInput(form.contribution) === null,
-    participants: !participantsOk,
+    participants: participantCount(form.participants) === null,
   };
 }
 

@@ -15,7 +15,7 @@ const VALID_FORM: TontineFormState = {
   name: "Tontine du Quartier",
   contribution: "5000",
   cadence: "semaine-1",
-  participants: 6,
+  participants: "6",
 };
 
 describe("parseTontineForm", () => {
@@ -81,14 +81,19 @@ describe("parseTontineForm", () => {
   });
 
   it("refuse moins de deux participants", () => {
-    expect(parseTontineForm({ ...VALID_FORM, participants: 1 })).toEqual({
+    expect(parseTontineForm({ ...VALID_FORM, participants: "1" })).toEqual({
       ok: false,
       message: "Indiquez entre 2 et 50 participants.",
     });
   });
 
+  it("refuse un nombre de participants vide ou non entier", () => {
+    expect(parseTontineForm({ ...VALID_FORM, participants: "" }).ok).toBe(false);
+    expect(parseTontineForm({ ...VALID_FORM, participants: "6.5" }).ok).toBe(false);
+  });
+
   it("refuse plus de cinquante participants", () => {
-    expect(parseTontineForm({ ...VALID_FORM, participants: 51 })).toEqual({
+    expect(parseTontineForm({ ...VALID_FORM, participants: "51" })).toEqual({
       ok: false,
       message: "Indiquez entre 2 et 50 participants.",
     });
@@ -109,7 +114,7 @@ describe("tontineRecap", () => {
 
   it("n'affiche pas de cagnotte tant que la saisie est incomplète", () => {
     expect(tontineRecap({ ...VALID_FORM, contribution: "" }).pot).toBeNull();
-    expect(tontineRecap({ ...VALID_FORM, participants: 1 }).pot).toBeNull();
+    expect(tontineRecap({ ...VALID_FORM, participants: "1" }).pot).toBeNull();
   });
 
   it("ignore une fréquence hors de la liste", () => {
@@ -146,7 +151,7 @@ describe("tontineInvalidFields", () => {
         ...VALID_FORM,
         name: "T",
         contribution: "0",
-        participants: 1,
+        participants: "1",
       }),
     ).toEqual({ name: true, contribution: true, participants: true });
   });
@@ -158,7 +163,7 @@ describe("tontineStepError", () => {
   });
 
   it("ne valide à la première étape que le nom et la cotisation", () => {
-    expect(tontineStepError({ ...VALID_FORM, participants: 1 }, 0)).toBeNull();
+    expect(tontineStepError({ ...VALID_FORM, participants: "1" }, 0)).toBeNull();
     expect(tontineStepError({ ...VALID_FORM, name: "" }, 0)).toBe("Donnez un nom à la tontine.");
     expect(tontineStepError({ ...VALID_FORM, contribution: "0" }, 0)).toBe(
       "Saisissez une cotisation valide en FCFA.",
@@ -169,14 +174,14 @@ describe("tontineStepError", () => {
     expect(tontineStepError({ ...VALID_FORM, cadence: "x" }, 1)).toBe(
       "Choisissez une fréquence dans la liste.",
     );
-    expect(tontineStepError({ ...VALID_FORM, participants: 51 }, 1)).toBe(
+    expect(tontineStepError({ ...VALID_FORM, participants: "51" }, 1)).toBe(
       "Indiquez entre 2 et 50 participants.",
     );
     expect(tontineStepError(VALID_FORM, 1)).toBeNull();
   });
 
   it("valide tout le formulaire au récapitulatif", () => {
-    expect(tontineStepError({ ...VALID_FORM, participants: 1 }, 2)).toBe(
+    expect(tontineStepError({ ...VALID_FORM, participants: "1" }, 2)).toBe(
       "Indiquez entre 2 et 50 participants.",
     );
     expect(tontineStepError(VALID_FORM, 2)).toBeNull();
