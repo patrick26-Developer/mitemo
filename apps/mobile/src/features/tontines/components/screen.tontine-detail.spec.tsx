@@ -42,10 +42,10 @@ describe("TontineDetailScreen", () => {
     expect(screen.getAllByText("Mama Nadège").length).toBeGreaterThan(0);
   });
 
-  it("ne propose aucune action quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
+  it("propose de cotiser d'avance quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: /^Cotiser d'avance/ })).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 

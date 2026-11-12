@@ -28,6 +28,11 @@ export interface TontineMember {
    * chaque tour et touchée une fois.
    */
   readonly turns: number;
+  /**
+   * Tours suivants déjà cotisés d'avance, 0 par défaut : chacun règle
+   * d'office la cotisation d'un tour à venir.
+   */
+  readonly prepaidRounds?: number;
 }
 
 /** Invitation envoyée par l'administrateur, en attente de la réponse du contact. */

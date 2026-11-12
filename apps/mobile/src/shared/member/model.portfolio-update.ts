@@ -7,6 +7,7 @@ import {
   UnknownEntityError,
 } from "./model.portfolio-error";
 import { turnOrder } from "./model.tontine-turns";
+import { nextRoundPayment } from "./model.tontine-prepay";
 
 /**
  * Retrouve le membre connecté dans une tontine.
@@ -159,7 +160,8 @@ export function startTontine(tontines: readonly Tontine[], id: string): readonly
 }
 
 /**
- * Passe au tour suivant et remet les cotisations à zéro, ou clôt la tontine.
+ * Passe au tour suivant et remet les cotisations à zéro, sauf celles payées
+ * d'avance, ou clôt la tontine.
  * @param tontines Tontines du membre.
  * @param id Tontine concernée.
  * @returns La liste avec le tour avancé.
@@ -169,7 +171,7 @@ export function advanceRound(tontines: readonly Tontine[], id: string): readonly
     if (tontine.id !== id) return tontine;
     if (tontine.round >= tontine.totalRounds) return { ...tontine, state: "COMPLETED" };
 
-    const members = tontine.members.map((member) => ({ ...member, paidCurrentRound: false }));
+    const members = tontine.members.map((member) => ({ ...member, ...nextRoundPayment(member) }));
     return {
       ...tontine,
       round: tontine.round + 1,

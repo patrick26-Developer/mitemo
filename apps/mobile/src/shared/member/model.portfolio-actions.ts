@@ -40,6 +40,7 @@ import {
   startTontine as startTontineIn,
 } from "./model.portfolio-update";
 import { selfDue } from "./model.tontine-turns";
+import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
 
 /** Mise à jour partielle de l'état du portefeuille. */
 export type PortfolioUpdate =
@@ -116,15 +117,20 @@ function createCard(context: PortfolioContext, input: CreateCardInput): void {
 }
 
 /**
- * Règle la cotisation du membre connecté pour le tour en cours, payée par son
- * opérateur mobile : l'argent vient de Mobile Money ou d'Airtel Money, le solde
+ * Règle la cotisation du membre connecté pour le tour en cours, ou le tour
+ * suivant d'avance quand celui-ci est déjà réglé, payée par son opérateur mobile : l'argent vient de Mobile Money ou d'Airtel Money, le solde
  * de l'app n'est pas touché.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
  * @throws {ForbiddenOperationError} si la cotisation est déjà réglée ou interdite.
  */
 function contributeTontine(context: PortfolioContext, tontineId: string): void {
-  requireSelfCanPay(requireTontine(context.get().tontines, tontineId));
+  const tontine = requireTontine(context.get().tontines, tontineId);
+  if (canPayAhead(tontine)) {
+    context.set((state) => ({ tontines: markSelfPaidAhead(state.tontines, tontineId) }));
+    return;
+  }
+  requireSelfCanPay(tontine);
   context.set((state) => ({ tontines: markSelfPaid(state.tontines, tontineId) }));
 }
 
