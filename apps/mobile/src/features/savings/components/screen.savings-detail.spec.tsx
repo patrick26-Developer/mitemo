@@ -30,6 +30,23 @@ describe("SavingsDetailScreen", () => {
     usePortfolioStore.getState().reset();
   });
 
+  it("montre l'assiduité façon GitHub une fois l'échéance passée", async () => {
+    usePortfolioStore.setState({
+      cards: [makeCard({ startDate: "2020-01-06", deadline: "2020-02-10", markersTotal: 5 })],
+    });
+    await renderWithSafeArea(<SavingsDetailScreen id="c1" />);
+
+    expect(screen.getByText("Assiduité")).toBeOnTheScreen();
+    expect(screen.getAllByTestId(/^contribution-level-/)).toHaveLength(5);
+  });
+
+  it("garde la grille d'assiduité cachée avant l'échéance", async () => {
+    usePortfolioStore.setState({ cards: [makeCard({ deadline: "2999-12-31" })] });
+    await renderWithSafeArea(<SavingsDetailScreen id="c1" />);
+
+    expect(screen.queryByText("Assiduité")).toBeNull();
+  });
+
   it("affiche la carte demandée", async () => {
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 

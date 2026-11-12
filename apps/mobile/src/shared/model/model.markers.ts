@@ -60,6 +60,22 @@ function periodsBetween(frequency: TontineFrequency, start: string, deadline: st
 }
 
 /**
+ * Début du n-ième pointage d'un plan, compté depuis le départ : chaque date
+ * est calculée depuis le départ pour qu'un mois court ne décale pas la suite.
+ * @param plan Rythme et départ du plan.
+ * @param index Rang du pointage, 0 pour le premier.
+ * @returns La date de début, en ISO 8601 UTC (`AAAA-MM-JJ`).
+ */
+export function markerStart(plan: Omit<MarkerPlan, "deadline">, index: number): string {
+  const steps = index * plan.frequency.interval;
+  if (plan.frequency.unit === "mois") return shiftMonths(plan.start, steps);
+  const days = steps * (plan.frequency.unit === "semaine" ? 7 : 1);
+  return new Date(Date.parse(`${plan.start}T00:00:00.000Z`) + days * DAY_MS)
+    .toISOString()
+    .slice(0, 10);
+}
+
+/**
  * Calcule le nombre de marqueurs d'une carte à partir du rythme choisi, de la
  * date de création et de l'échéance. Une période entamée compte un marqueur.
  * @param plan Rythme, départ et échéance du plan.
