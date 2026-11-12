@@ -37,7 +37,7 @@ export function TontineDetailContent(props: TontineDetailContentProps) {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-5 px-4"
+        contentContainerClassName="gap-5 px-4 pt-5"
         contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
       >
         <TontineRecapCard item={item} />

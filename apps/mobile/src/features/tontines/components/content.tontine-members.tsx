@@ -76,7 +76,7 @@ function MembersToolbar(props: MembersToolbarProps) {
   const { item, search } = props;
 
   return (
-    <View className="gap-3">
+    <View className="gap-3 pt-5">
       <Text className="-mt-3 px-4 text-[14px] text-muted">{item.name}</Text>
       <View className="flex-row px-4">
         <SearchField

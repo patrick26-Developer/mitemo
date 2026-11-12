@@ -12,6 +12,12 @@ describe("DetailHeader", () => {
     expect(screen.getByRole("button", { name: "Retour" })).toBeOnTheScreen();
   });
 
+  it("fond son bas en dégradé, du blanc vers le transparent", async () => {
+    await renderWithSafeArea(<DetailHeader title="Loyer" />);
+
+    expect(screen.getByTestId("detail-header-fade")).toHaveStyle({ top: "100%" });
+  });
+
   it("donne au bouton de retour la couleur d'action de l'écran", async () => {
     await renderWithSafeArea(<DetailHeader title="Loyer" accent="#CFD8FF" />);
 

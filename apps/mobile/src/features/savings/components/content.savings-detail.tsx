@@ -33,7 +33,7 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
     <View className="flex-1">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-5 px-4"
+        contentContainerClassName="gap-5 px-4 pt-5"
         contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
       >
         <SavingsRecapCard item={item} tontineName={tontine?.name ?? null} />

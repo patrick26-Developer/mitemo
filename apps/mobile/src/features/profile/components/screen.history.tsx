@@ -13,7 +13,10 @@ export function HistoryScreen() {
   return (
     <ScreenFrame>
       <DetailHeader title="Historique" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4 px-4 pb-10">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="gap-4 px-4 pt-5 pb-10"
+      >
         <Text className="text-[13px] font-medium uppercase text-muted">Dernières opérations</Text>
         <View className="gap-2">
           {PROFILE_HISTORY.map((entry) => (
