@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Search } from "lucide-react-native";
 import { FlatList, Text, View } from "react-native";
 
 import { DetailHeader } from "../../../shared/components/macros/header.detail";
@@ -34,7 +35,6 @@ export function TontineMembersContent(props: TontineMembersContentProps) {
 
   return (
     <View className="flex-1">
-      <DetailHeader title="Membres" />
       <MembersToolbar item={item} search={search} />
       <FlatList
         data={search.rows}
@@ -61,37 +61,67 @@ export function TontineMembersContent(props: TontineMembersContentProps) {
   );
 }
 
-/** Props de la barre de recherche et de filtres. */
+/** Props de l'en-tête de la page membres. */
 interface MembersToolbarProps {
   readonly item: Tontine;
   readonly search: MemberSearchState;
 }
 
 /**
- * Nom de la tontine, champ de recherche et étiquettes de filtre.
- * @param props Tontine et état de la recherche.
- * @returns La barre au-dessus de la liste.
+ * En-tête de la page membres : la loupe de l'en-tête ouvre le champ de
+ * recherche, qui laisse sa place aux étiquettes de filtre une fois refermé.
+ * @param props Tontine et recherche.
+ * @returns L'en-tête, la recherche et les étiquettes.
  */
 function MembersToolbar(props: MembersToolbarProps) {
   const { item, search } = props;
+  const [open, setOpen] = useState(false);
+  const accent = item.headerColors[0];
+  const close = () => {
+    setOpen(false);
+    search.setQuery("");
+  };
+  const actions = open
+    ? []
+    : [{ label: "Rechercher un membre", icon: Search, onPress: () => setOpen(true) }];
 
   return (
-    <View className="gap-3 pt-5">
-      <Text className="-mt-3 px-4 text-[14px] text-muted">{item.name}</Text>
-      <View className="flex-row px-4">
-        <SearchField
-          value={search.query}
-          onChangeText={search.setQuery}
-          placeholder="Rechercher un membre"
-          accessibilityLabel="Rechercher un membre"
-          clear={{ label: "Effacer la recherche", onPress: () => search.setQuery("") }}
-          autoFocus={false}
-        />
-      </View>
+    <View className="gap-3">
+      <DetailHeader title="Membres" accent={accent} actions={actions} />
+      <Text className="-mt-2 px-4 text-[14px] text-muted">{item.name}</Text>
+      {open ? <MembersSearch search={search} onClose={close} /> : null}
       <MemberFilterTags
         options={search.options}
         value={search.filter}
         onChange={search.setFilter}
+        accent={accent}
+      />
+    </View>
+  );
+}
+
+/** Props du champ de recherche des membres. */
+interface MembersSearchProps {
+  readonly search: MemberSearchState;
+  readonly onClose: () => void;
+}
+
+/**
+ * Champ de recherche ouvert depuis la loupe, avec son bouton d'annulation.
+ * @param props Recherche et fermeture.
+ * @returns Le champ.
+ */
+function MembersSearch(props: MembersSearchProps) {
+  const { search, onClose } = props;
+
+  return (
+    <View className="flex-row px-4">
+      <SearchField
+        value={search.query}
+        onChangeText={search.setQuery}
+        placeholder="Rechercher un membre"
+        accessibilityLabel="Rechercher un membre"
+        clear={{ label: "Annuler la recherche", onPress: onClose, alwaysVisible: true }}
       />
     </View>
   );
