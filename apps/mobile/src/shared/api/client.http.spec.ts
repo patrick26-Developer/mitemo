@@ -1,185 +1,242 @@
 import { IDEMPOTENCY_KEY_HEADER } from "@mitemo/contracts";
+import { z } from "zod";
 
-import { apiClient, ApiClientError, apiRequest } from "./client.http";
+import type { ApiClientDeps } from "./client.http";
+import { createApiClient } from "./client.http";
+import { ApiClientError, ApiUnavailableError } from "./error.api";
+import type { SessionToken, SessionTokenVault } from "./model.session-token";
 
-const fetchMock = jest.fn();
+/** Instant de référence des tests, en UTC. */
+const NOW = Date.parse("2026-11-12T10:00:00.000Z");
 
-/** URL de base attendue, vide quand Expo ne la fixe pas à la compilation. */
-const BASE_URL = process.env["EXPO_PUBLIC_API_URL"] ?? "";
+/** Jeton valide une heure. */
+const TOKEN: SessionToken = { accessToken: "jeton-1", expiresAt: "2026-11-12T11:00:00.000Z" };
+
+/** Session renouvelée par l'API. */
+const RENEWED = {
+  accessToken: "jeton-2",
+  expiresAt: "2026-11-12T12:00:00.000Z",
+  user: { userId: "u1", displayName: "Aimée", maskedPhoneNumber: "06*****22", role: "USER" },
+};
+
+/** Schéma d'une réponse de test. */
+const PING = z.object({ ok: z.literal(true) });
 
 /**
- * Construit une réponse HTTP minimale, avec un corps JSON lisible.
- * @param payload Corps renvoyé.
+ * Réponse HTTP simulée.
  * @param status Statut HTTP.
- * @returns La réponse simulée.
+ * @param body Corps JSON, absent pour 204.
+ * @returns La réponse.
  */
-function makeResponse(payload: unknown, status = 200): Response {
+function reply(status: number, body?: unknown): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
-    json: () => Promise.resolve(payload),
+    json: () =>
+      body === undefined ? Promise.reject(new SyntaxError("vide")) : Promise.resolve(body),
   } as unknown as Response;
 }
 
 /**
- * Construit une réponse en échec dont le corps n'est pas du JSON.
- * @returns La réponse simulée.
+ * Coffre en mémoire.
+ * @param initial Jeton déjà conservé.
+ * @returns Le coffre et son contenu.
  */
-function makeUnreadableResponse(): Response {
+function memoryVault(
+  initial: SessionToken | null,
+): SessionTokenVault & { current: () => SessionToken | null } {
+  let token = initial;
   return {
-    ok: false,
-    status: 502,
-    json: () => Promise.reject(new Error("corps illisible")),
-  } as unknown as Response;
+    current: () => token,
+    load: () => Promise.resolve(token),
+    save: (next) => Promise.resolve(void (token = next)),
+    clear: () => Promise.resolve(void (token = null)),
+  };
 }
 
 /**
- * Renvoie le dernier appel `fetch` enregistré, avec ses types.
- * @returns L'URL appelée et l'initialisation de la requête.
+ * Client de test, branché sur un `fetch` simulé.
+ * @param over Dépendances à remplacer.
+ * @returns Le client et ses doubles.
  */
-function lastCall(): { url: string; init: RequestInit } {
-  const call = fetchMock.mock.calls.at(-1) as readonly [string, RequestInit?] | undefined;
-  if (call === undefined) throw new Error("Aucun appel fetch enregistré.");
-
-  const [url, init = {}] = call;
-  return { url, init };
+function setup(over: Partial<ApiClientDeps> = {}) {
+  const fetchMock = jest.fn<Promise<Response>, [string, RequestInit]>();
+  const vault = memoryVault(TOKEN);
+  const onSessionExpired = jest.fn();
+  const deps: ApiClientDeps = {
+    baseUrl: { ok: true, url: "https://api.mitemo.cg" },
+    fetch: fetchMock,
+    vault,
+    now: () => NOW,
+    timeoutMs: 15_000,
+    onSessionExpired,
+    ...over,
+  };
+  return { client: createApiClient(deps), fetchMock, vault, onSessionExpired };
 }
 
-describe("apiRequest", () => {
-  const originalFetch = globalThis.fetch;
+/**
+ * En-têtes du n-ième appel.
+ * @param fetchMock Double de `fetch`.
+ * @param index Rang de l'appel.
+ * @returns Les en-têtes envoyés.
+ */
+function headersOf(fetchMock: jest.Mock, index = 0): Record<string, string> {
+  return (fetchMock.mock.calls[index]?.[1] as RequestInit).headers as Record<string, string>;
+}
 
-  beforeAll(() => {
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+describe("createApiClient", () => {
+  it("envoie le jeton du trousseau et valide la réponse", async () => {
+    const { client, fetchMock } = setup();
+    fetchMock.mockResolvedValue(reply(200, { ok: true }));
+
+    await expect(
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.mitemo.cg/me");
+    expect(headersOf(fetchMock)["Authorization"]).toBe("Bearer jeton-1");
   });
 
-  afterAll(() => {
-    globalThis.fetch = originalFetch;
-  });
+  it("n'envoie aucun jeton sur une route publique, et une clé d'idempotence sur une écriture", async () => {
+    const { client, fetchMock } = setup();
+    fetchMock.mockResolvedValue(reply(200, { ok: true }));
 
-  beforeEach(() => {
-    fetchMock.mockReset();
-  });
-
-  it("renvoie le corps désérialisé d'une réponse réussie", async () => {
-    fetchMock.mockResolvedValue(makeResponse({ registeredAt: "2026-01-01T00:00:00.000Z" }));
-
-    const body = await apiRequest<{ registeredAt: string }>({ method: "GET", path: "/health" });
-
-    expect(body.registeredAt).toBe("2026-01-01T00:00:00.000Z");
-    const { url, init } = lastCall();
-    expect(url).toBe(`${BASE_URL}/health`);
-    expect(init.method).toBe("GET");
-    expect(init.body).toBeUndefined();
-  });
-
-  it("envoie le corps JSON et la clé d'idempotence fournis", async () => {
-    fetchMock.mockResolvedValue(makeResponse({}));
-
-    await apiRequest({
+    await client.request({
       method: "POST",
-      path: "/tontines",
-      body: { name: "Marché" },
-      idempotencyKey: "cle-1",
+      path: "/auth/login",
+      auth: false,
+      body: { a: 1 },
+      idempotent: true,
+      schema: PING,
     });
 
-    const { init } = lastCall();
-    expect(init.body).toBe(JSON.stringify({ name: "Marché" }));
-    expect(init.headers).toMatchObject({ [IDEMPOTENCY_KEY_HEADER]: "cle-1" });
+    const headers = headersOf(fetchMock);
+    expect(headers["Authorization"]).toBeUndefined();
+    expect(headers[IDEMPOTENCY_KEY_HEADER]).toMatch(/^mobile-[0-9a-f-]{36}$/);
+    expect(fetchMock.mock.calls[0]?.[1].body).toBe('{"a":1}');
   });
 
-  it("lève une ApiClientError porteuse du corps d'erreur du contrat", async () => {
-    fetchMock.mockResolvedValue(
-      makeResponse(
-        {
-          code: "CONFLICT",
-          message: "Déjà inscrit.",
-          traceId: "trace-9",
-          fields: [{ field: "phone", reason: "déjà pris" }],
-        },
-        409,
+  it("renouvelle la session une seule fois sur un 401, puis rejoue la requête", async () => {
+    const { client, fetchMock, vault } = setup();
+    fetchMock
+      .mockResolvedValueOnce(reply(401, { code: "UNAUTHENTICATED", message: "x", traceId: "t" }))
+      .mockResolvedValueOnce(reply(200, RENEWED))
+      .mockResolvedValueOnce(reply(200, { ok: true }));
+
+    await expect(
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("https://api.mitemo.cg/auth/refresh");
+    expect(headersOf(fetchMock, 2)["Authorization"]).toBe("Bearer jeton-2");
+    expect(vault.current()).toEqual({ accessToken: "jeton-2", expiresAt: RENEWED.expiresAt });
+  });
+
+  it("partage un seul renouvellement entre des requêtes simultanées", async () => {
+    const { client, fetchMock } = setup();
+    fetchMock.mockImplementation((url) =>
+      Promise.resolve(
+        url.endsWith("/auth/refresh")
+          ? reply(200, RENEWED)
+          : reply(fetchMock.mock.calls.length <= 2 ? 401 : 200, { ok: true }),
       ),
     );
 
-    const failure = apiRequest({ method: "POST", path: "/members" });
+    await Promise.all([
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+    ]);
 
-    await expect(failure).rejects.toBeInstanceOf(ApiClientError);
-    await expect(failure).rejects.toMatchObject({
+    expect(fetchMock.mock.calls.filter(([url]) => url.endsWith("/auth/refresh"))).toHaveLength(1);
+  });
+
+  it("efface la session et prévient l'application quand le renouvellement échoue", async () => {
+    const { client, fetchMock, vault, onSessionExpired } = setup();
+    fetchMock.mockResolvedValue(
+      reply(401, { code: "UNAUTHENTICATED", message: "x", traceId: "t" }),
+    );
+
+    await expect(
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+    ).rejects.toMatchObject({
+      code: "UNAUTHENTICATED",
+    });
+
+    expect(vault.current()).toBeNull();
+    expect(onSessionExpired).toHaveBeenCalledTimes(1);
+  });
+
+  it("n'envoie jamais un jeton expiré", async () => {
+    const expired = { accessToken: "vieux", expiresAt: "2026-11-12T09:00:00.000Z" };
+    const { client, fetchMock, onSessionExpired } = setup({ vault: memoryVault(expired) });
+
+    await expect(
+      client.request({ method: "GET", path: "/me", auth: true, schema: PING }),
+    ).rejects.toBeInstanceOf(ApiClientError);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(onSessionExpired).toHaveBeenCalledTimes(1);
+  });
+
+  it("renvoie l'erreur du contrat, et une erreur de repli pour un corps illisible", async () => {
+    const { client, fetchMock } = setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(409, { code: "CONFLICT", message: "Déjà fait", traceId: "t9" }),
+    );
+    await expect(
+      client.request({ method: "GET", path: "/x", auth: false, schema: PING }),
+    ).rejects.toMatchObject({
       status: 409,
       code: "CONFLICT",
-      traceId: "trace-9",
-      message: "Déjà inscrit.",
-      fields: [{ field: "phone", reason: "déjà pris" }],
+      traceId: "t9",
     });
+
+    fetchMock.mockResolvedValueOnce(reply(502));
+    await expect(
+      client.request({ method: "GET", path: "/x", auth: false, schema: PING }),
+    ).rejects.toMatchObject({ code: "INTERNAL" });
   });
 
-  it("retombe sur un corps d'erreur générique quand le format est inconnu", async () => {
-    fetchMock.mockResolvedValue(makeResponse({ code: 42 }, 500));
+  it("refuse une réponse qui ne respecte pas le contrat", async () => {
+    const { client, fetchMock } = setup();
+    fetchMock.mockResolvedValue(reply(200, { ok: "oui" }));
 
-    await expect(apiRequest({ method: "GET", path: "/health" })).rejects.toMatchObject({
-      status: 500,
-      code: "INTERNAL",
-      traceId: "inconnu",
-      fields: [],
+    await expect(
+      client.request({ method: "GET", path: "/x", auth: false, schema: PING }),
+    ).rejects.toEqual(new ApiUnavailableError("invalid-response"));
+  });
+
+  it("n'appelle rien quand l'URL de l'API n'est pas sûre", async () => {
+    const { client, fetchMock } = setup({ baseUrl: { ok: false, reason: "insecure" } });
+
+    await expect(
+      client.request({ method: "GET", path: "/x", auth: false, schema: PING }),
+    ).rejects.toMatchObject({
+      reason: "not-configured",
     });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("retombe sur un corps d'erreur générique quand le corps est illisible", async () => {
-    fetchMock.mockResolvedValue(makeUnreadableResponse());
+  it("abandonne une requête trop longue, et signale un réseau coupé", async () => {
+    jest.useFakeTimers();
+    const { client, fetchMock } = setup({ timeoutMs: 1_000 });
+    fetchMock.mockImplementationOnce(
+      (_url, init) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener("abort", () =>
+            reject(new DOMException("abandon", "AbortError")),
+          );
+        }),
+    );
+    const pending = client.request({ method: "GET", path: "/x", auth: false, schema: PING });
+    jest.advanceTimersByTime(1_000);
+    await expect(pending).rejects.toMatchObject({ reason: "timeout" });
+    jest.useRealTimers();
 
-    await expect(apiRequest({ method: "GET", path: "/health" })).rejects.toMatchObject({
-      status: 502,
-      code: "INTERNAL",
-    });
-  });
-});
-
-describe("apiClient", () => {
-  const originalFetch = globalThis.fetch;
-
-  beforeAll(() => {
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
-  });
-
-  afterAll(() => {
-    globalThis.fetch = originalFetch;
-  });
-
-  beforeEach(() => {
-    fetchMock.mockReset();
-  });
-
-  it("enregistre le jeton de notification avec une clé d'idempotence", async () => {
-    fetchMock.mockResolvedValue(makeResponse({ registeredAt: "2026-01-01T00:00:00.000Z" }));
-    const payload = {
-      token: "ExponentPushToken[abc]",
-      platform: "ANDROID" as const,
-      appVersion: "1.0.0",
-    };
-
-    const body = await apiClient.registerPushToken(payload);
-
-    expect(body.registeredAt).toBe("2026-01-01T00:00:00.000Z");
-    const { url, init } = lastCall();
-    expect(url).toBe(`${BASE_URL}/notifications/push-tokens`);
-    expect(init.method).toBe("POST");
-    expect(JSON.parse(String(init.body))).toEqual(payload);
-    const headers = init.headers as Record<string, string>;
-    expect(headers[IDEMPOTENCY_KEY_HEADER]).toMatch(/^mobile-[0-9a-f-]{36}$/);
-  });
-
-  it("tire une nouvelle clé d'idempotence à chaque appel", async () => {
-    fetchMock.mockResolvedValue(makeResponse({ registeredAt: "2026-01-01T00:00:00.000Z" }));
-    const payload = {
-      token: "ExponentPushToken[abc]",
-      platform: "IOS" as const,
-      appVersion: "1.0.0",
-    };
-
-    await apiClient.registerPushToken(payload);
-    const firstHeaders = lastCall().init.headers as Record<string, string>;
-    await apiClient.registerPushToken(payload);
-    const secondHeaders = lastCall().init.headers as Record<string, string>;
-
-    expect(firstHeaders[IDEMPOTENCY_KEY_HEADER]).not.toBe(secondHeaders[IDEMPOTENCY_KEY_HEADER]);
+    fetchMock.mockRejectedValueOnce(new TypeError("Network request failed"));
+    await expect(
+      client.request({ method: "GET", path: "/x", auth: false, schema: PING }),
+    ).rejects.toMatchObject({ reason: "offline" });
   });
 });
