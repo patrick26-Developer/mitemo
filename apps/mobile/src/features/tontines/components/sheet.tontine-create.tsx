@@ -1,6 +1,7 @@
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
+import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
@@ -51,8 +52,7 @@ function TontineEssentialsStep(props: TontineCreateFieldsProps) {
 
   return (
     <>
-      <SheetTextField
-        label="Nom"
+      <SheetNameField
         value={form.name}
         onChangeText={(name) => onChange({ name })}
         hint="Le nom que verront les membres."

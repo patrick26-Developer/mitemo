@@ -1,6 +1,7 @@
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
+import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
@@ -51,8 +52,7 @@ function SavingsProjectStep(
 
   return (
     <>
-      <SheetTextField
-        label="Nom"
+      <SheetNameField
         value={form.name}
         onChangeText={(name) => onChange({ name })}
         hint="Pour reconnaître cette carte dans vos listes."

@@ -17,17 +17,28 @@ export interface SheetTextFieldProps {
   readonly hint?: string;
   /** Signale une saisie refusée : bordure et anneau rouges. */
   readonly invalid?: boolean;
+  /** Nombre maximal de caractères saisissables ; illimité par défaut. */
+  readonly maxLength?: number;
 }
 
 /**
  * Affiche un champ de saisie avec son libellé et son aide, dans une feuille.
  * Le focus dessine un anneau bleu, une saisie refusée un anneau rouge, comme
  * les champs de shadcn/ui.
- * @param props Libellé, valeur, saisie, clavier, exemple, aide et erreur.
+ * @param props Libellé, valeur, saisie, clavier, exemple, aide, erreur et longueur maximale.
  * @returns Le champ de feuille.
  */
 export function SheetTextField(props: SheetTextFieldProps) {
-  const { label, value, onChangeText, keyboardType, placeholder, hint, invalid = false } = props;
+  const {
+    label,
+    value,
+    onChangeText,
+    keyboardType,
+    placeholder,
+    hint,
+    invalid = false,
+    maxLength,
+  } = props;
   const [focused, setFocused] = useState(false);
 
   return (
@@ -40,6 +51,7 @@ export function SheetTextField(props: SheetTextFieldProps) {
         autoCapitalize="words"
         autoCorrect={false}
         keyboardType={keyboardType}
+        maxLength={maxLength}
         placeholder={placeholder}
         placeholderTextColor="#8A90A2"
         onFocus={() => setFocused(true)}
