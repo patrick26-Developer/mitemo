@@ -25,7 +25,7 @@ export const SHEET_CLOSE_DURATION = 180;
  * @param translateY Translation animée de la feuille.
  */
 export function openSheet(translateY: Animated.Value): void {
-  Animated.spring(translateY, { toValue: 0, ...SHEET_OPEN_SPRING }).start();
+  settleSheet(translateY);
 }
 
 /**
@@ -49,5 +49,19 @@ export function closeSheet(translateY: Animated.Value, onClose: () => void): voi
  * @param translateY Translation animée de la feuille.
  */
 export function springBackSheet(translateY: Animated.Value): void {
-  Animated.spring(translateY, { toValue: 0, ...SHEET_OPEN_SPRING }).start();
+  settleSheet(translateY);
+}
+
+/**
+ * Ramène la feuille en place avec le ressort natif, puis aligne la valeur
+ * côté JavaScript : le ressort natif ne la met pas à jour, et un nouveau
+ * rendu (l'ouverture du clavier, par exemple) réappliquait sur Android la
+ * position de départ, hors de l'écran. La carte disparaissait alors en
+ * laissant le fond assombri.
+ * @param translateY Décalage vertical de la feuille.
+ */
+function settleSheet(translateY: Animated.Value): void {
+  Animated.spring(translateY, { toValue: 0, ...SHEET_OPEN_SPRING }).start(({ finished }) => {
+    if (finished) translateY.setValue(0);
+  });
 }
