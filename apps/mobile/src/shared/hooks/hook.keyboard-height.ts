@@ -1,47 +1,57 @@
 import { useEffect, useState } from "react";
-import { LayoutAnimation, Platform } from "react-native";
+import { Keyboard, Platform } from "react-native";
 import { KeyboardEvents } from "react-native-keyboard-controller";
 
-/**
- * Anime le prochain changement de mise en page au rythme du clavier, ou en
- * douceur quand le système ne donne pas de durée. Sur iOS seulement : sur
- * Android, `LayoutAnimation` dans la fenêtre d'une feuille effaçait la carte
- * en laissant le fond assombri ; la carte y prend donc sa place directement.
- * @param duration Durée de l'animation du clavier, en millisecondes.
- */
-function animateWithKeyboard(duration: number): void {
-  if (Platform.OS !== "ios") return;
-  LayoutAnimation.configureNext(
-    duration > 0
-      ? LayoutAnimation.create(duration, "easeInEaseOut", "opacity")
-      : LayoutAnimation.Presets.easeInEaseOut,
-  );
+/** Abonnement à retirer au démontage. */
+interface Subscription {
+  readonly remove: () => void;
 }
 
 /**
- * Hauteur du clavier, mise à jour avant son ouverture et sa fermeture. Les
- * événements viennent de `react-native-keyboard-controller` : ceux de React
- * Native ne partent pas sur Android quand le champ est dans une feuille
- * (fenêtre `Modal`), et le clavier recouvrait alors les champs.
+ * Suit le clavier d'iOS avec les événements de React Native et fait glisser
+ * la mise en page au rythme exact du clavier.
+ * @param setHeight Mise à jour de la hauteur.
+ * @returns Les abonnements à l'ouverture et à la fermeture.
+ */
+function followIosKeyboard(setHeight: (height: number) => void): readonly Subscription[] {
+  return [
+    Keyboard.addListener("keyboardWillShow", (event) => {
+      Keyboard.scheduleLayoutAnimation(event);
+      setHeight(event.endCoordinates.height);
+    }),
+    Keyboard.addListener("keyboardWillHide", (event) => {
+      Keyboard.scheduleLayoutAnimation(event);
+      setHeight(0);
+    }),
+  ];
+}
+
+/**
+ * Suit le clavier d'Android avec `react-native-keyboard-controller` : les
+ * événements de React Native ne partent pas quand le champ est dans une
+ * feuille (fenêtre `Modal`). Pas d'animation de mise en page : elle effaçait
+ * la carte dans la fenêtre d'une feuille.
+ * @param setHeight Mise à jour de la hauteur.
+ * @returns Les abonnements à l'ouverture et à la fermeture.
+ */
+function followAndroidKeyboard(setHeight: (height: number) => void): readonly Subscription[] {
+  return [
+    KeyboardEvents.addListener("keyboardWillShow", (event) => setHeight(event.height)),
+    KeyboardEvents.addListener("keyboardWillHide", () => setHeight(0)),
+  ];
+}
+
+/**
+ * Hauteur du clavier, mise à jour avant son ouverture et sa fermeture.
  * @returns La hauteur du clavier, nulle quand il est fermé.
  */
 export function useKeyboardHeight(): number {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    const show = KeyboardEvents.addListener("keyboardWillShow", (event) => {
-      animateWithKeyboard(event.duration);
-      setHeight(event.height);
-    });
-    const hide = KeyboardEvents.addListener("keyboardWillHide", (event) => {
-      animateWithKeyboard(event.duration);
-      setHeight(0);
-    });
-
-    return () => {
-      show.remove();
-      hide.remove();
-    };
+    const follow = Platform.OS === "ios" ? followIosKeyboard : followAndroidKeyboard;
+    const subscriptions = follow(setHeight);
+    return () => subscriptions.forEach((subscription) => subscription.remove());
   }, []);
 
   return height;

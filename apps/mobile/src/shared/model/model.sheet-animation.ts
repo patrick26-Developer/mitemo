@@ -9,12 +9,22 @@ const MIN_OPEN_OFFSET = 560;
  */
 export const SHEET_OPEN_OFFSET = Math.max(MIN_OPEN_OFFSET, Dimensions.get("screen").height);
 
+/**
+ * Moteur des animations de la feuille : JavaScript, pas natif. Une animation
+ * native ne met pas à jour la valeur côté JavaScript ; quand le clavier fait
+ * redessiner la feuille pendant son ouverture, React Native réappliquait
+ * cette valeur restée hors de l'écran : la carte disparaissait en laissant le
+ * fond assombri. Une translation par feuille ouverte ne pèse rien côté
+ * JavaScript.
+ */
+const SHEET_USE_NATIVE_DRIVER = false;
+
 /** Ressort d'ouverture : rapide, avec une arrivée amortie. */
 export const SHEET_OPEN_SPRING = {
   damping: 24,
   stiffness: 240,
   mass: 0.9,
-  useNativeDriver: true,
+  useNativeDriver: SHEET_USE_NATIVE_DRIVER,
 } as const;
 
 /** Durée de fermeture, en millisecondes. */
@@ -37,7 +47,7 @@ export function closeSheet(translateY: Animated.Value, onClose: () => void): voi
   Animated.timing(translateY, {
     toValue: SHEET_OPEN_OFFSET,
     duration: SHEET_CLOSE_DURATION,
-    useNativeDriver: true,
+    useNativeDriver: SHEET_USE_NATIVE_DRIVER,
   }).start(() => {
     translateY.setValue(SHEET_OPEN_OFFSET);
     onClose();
@@ -53,11 +63,8 @@ export function springBackSheet(translateY: Animated.Value): void {
 }
 
 /**
- * Ramène la feuille en place avec le ressort natif, puis aligne la valeur
- * côté JavaScript : le ressort natif ne la met pas à jour, et un nouveau
- * rendu (l'ouverture du clavier, par exemple) réappliquait sur Android la
- * position de départ, hors de l'écran. La carte disparaissait alors en
- * laissant le fond assombri.
+ * Ramène la feuille en place avec le ressort, et la fixe exactement à 0 à
+ * l'arrivée.
  * @param translateY Décalage vertical de la feuille.
  */
 function settleSheet(translateY: Animated.Value): void {
