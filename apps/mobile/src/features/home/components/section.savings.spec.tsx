@@ -5,6 +5,7 @@ import { makeCard } from "../../../shared/testing/fixtures.portfolio";
 import { SavingsSection } from "./section.savings";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
+jest.mock("expo-notifications", () => ({}));
 
 describe("SavingsSection", () => {
   it("liste les cartes données et ouvre l'onglet épargne depuis le titre", async () => {
