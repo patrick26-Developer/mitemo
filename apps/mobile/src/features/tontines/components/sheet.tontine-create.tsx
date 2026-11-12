@@ -1,4 +1,3 @@
-import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -189,6 +188,11 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
       visible={props.visible}
       title="Nouvelle tontine"
       onClose={close}
+      steps={{
+        index: steps.index,
+        total: steps.total,
+        title: TONTINE_FORM_STEPS[steps.index] ?? "",
+      }}
       footer={
         <SheetStepsFooter
           isFirst={steps.isFirst}
@@ -199,11 +203,6 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
         />
       }
     >
-      <StepIndicator
-        index={steps.index}
-        total={steps.total}
-        title={TONTINE_FORM_STEPS[steps.index] ?? ""}
-      />
       <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
     </BottomSheet>
   );

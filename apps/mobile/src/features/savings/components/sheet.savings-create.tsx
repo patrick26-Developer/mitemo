@@ -1,4 +1,3 @@
-import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -158,6 +157,11 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
       visible={props.visible}
       title="Nouvelle carte"
       onClose={close}
+      steps={{
+        index: steps.index,
+        total: steps.total,
+        title: SAVINGS_FORM_STEPS[steps.index] ?? "",
+      }}
       footer={
         <SheetStepsFooter
           isFirst={steps.isFirst}
@@ -168,11 +172,6 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
         />
       }
     >
-      <StepIndicator
-        index={steps.index}
-        total={steps.total}
-        title={SAVINGS_FORM_STEPS[steps.index] ?? ""}
-      />
       {steps.isFirst ? (
         <SavingsProjectStep form={form} invalid={invalid} onChange={update} />
       ) : (

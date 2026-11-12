@@ -159,6 +159,25 @@ describe("BottomSheet", () => {
     expect(screen.getByText("Contenu de la feuille")).toBeOnTheScreen();
   });
 
+  it("pose les étapes dans l'en-tête, à la place de la croix", async () => {
+    await renderWithSafeArea(
+      <BottomSheet
+        visible
+        title="Nouvelle tontine"
+        onClose={jest.fn()}
+        steps={{ index: 1, total: 3, title: "Le rythme" }}
+      >
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>,
+    );
+
+    const header = screen.getByTestId("bottom-sheet-header");
+    expect(header).toContainElement(
+      screen.getByRole("progressbar", { name: "Étape 2 sur 3 : Le rythme" }),
+    );
+    expect(screen.queryByRole("button", { name: "Fermer" })).toBeNull();
+  });
+
   it("ne pose aucun pied quand la feuille n'en a pas", async () => {
     await renderWithSafeArea(
       <BottomSheet visible title="Mes informations" onClose={jest.fn()}>

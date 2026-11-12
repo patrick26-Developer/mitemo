@@ -26,6 +26,8 @@ import { SHADOWS } from "../../theme/theme.shadow";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
+import type { StepIndicatorProps } from "../atoms/indicator.step";
+import { StepIndicator } from "../atoms/indicator.step";
 import { ToastHost } from "./host.toast";
 
 /** Props d'une feuille modale ancrée en bas de l'écran. */
@@ -39,6 +41,11 @@ export interface BottomSheetProps {
    * défilent avec lui, sur iOS comme sur Android.
    */
   readonly footer?: ReactNode;
+  /**
+   * Étapes d'un formulaire, posées dans l'en-tête à la place de la croix : la
+   * feuille se ferme alors en la glissant vers le bas ou en touchant le fond.
+   */
+  readonly steps?: StepIndicatorProps;
 }
 
 /**
@@ -107,7 +114,7 @@ function useSheetPresence(requested: boolean) {
  * @returns La feuille modale.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { title, onClose, children, footer } = props;
+  const { title, onClose, children, footer, steps } = props;
   const { keyboardHeight, layout } = useSheetLayout();
   const { translateY, visible, onDismiss } = useSheetPresence(props.visible);
   const close = useStableClose(translateY, onClose);
@@ -126,7 +133,7 @@ export function BottomSheet(props: BottomSheetProps) {
         <SheetBackdrop onPress={close} />
         <SheetSurface
           translateY={translateY}
-          header={{ title, onClose: close }}
+          header={{ title, onClose: close, steps }}
           layout={layout}
           keyboardHeight={keyboardHeight}
           footer={footer}
@@ -149,10 +156,11 @@ interface SheetSurfaceProps {
   readonly footer?: ReactNode;
 }
 
-/** Titre et fermeture de l'en-tête. */
+/** Titre, étapes éventuelles et fermeture de l'en-tête. */
 interface SheetHeaderContent {
   readonly title: string;
   readonly onClose: () => void;
+  readonly steps: StepIndicatorProps | undefined;
 }
 
 /** Props de l'en-tête glissable d'une feuille. */
@@ -163,30 +171,38 @@ interface SheetHeaderProps {
 
 /**
  * Rend la poignée, le titre et le bouton de fermeture de la feuille.
- * @param props Titre, fermeture et gestionnaires du glissement.
+ * @param props Titre, étapes, fermeture et gestionnaires du glissement.
  * @returns L'en-tête glissable.
  */
 function SheetHeader(props: SheetHeaderProps) {
-  const { title, onClose } = props.header;
+  const { title, onClose, steps } = props.header;
 
   return (
     <View testID="bottom-sheet-header" {...props.dragHandlers}>
       <View className="mb-3 items-center">
         <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
       </View>
-      <View className="mb-2 flex-row items-center justify-between">
-        <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">
+      <View className="mb-2 flex-row items-center justify-between gap-3">
+        <Text
+          accessibilityRole="header"
+          numberOfLines={1}
+          className="flex-1 text-[20px] font-bold text-ink"
+        >
           {title}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Fermer"
-          hitSlop={8}
-          onPress={onClose}
-          className="h-9 w-9 items-center justify-center rounded-full bg-field"
-        >
-          <X size={18} color={PALETTE.muted} />
-        </Pressable>
+        {steps === undefined ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Fermer"
+            hitSlop={8}
+            onPress={onClose}
+            className="h-9 w-9 items-center justify-center rounded-full bg-field"
+          >
+            <X size={18} color={PALETTE.muted} />
+          </Pressable>
+        ) : (
+          <StepIndicator {...steps} />
+        )}
       </View>
     </View>
   );
