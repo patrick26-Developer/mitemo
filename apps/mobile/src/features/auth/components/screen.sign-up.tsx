@@ -11,6 +11,7 @@ import { AuthHeading } from "./heading.auth";
 import { AuthLayout } from "./layout.auth";
 import { AuthPrimaryButton } from "./button.auth-primary";
 import { SignUpFields } from "./fields.sign-up";
+import { TermsSheet } from "./sheet.terms";
 
 /**
  * Première étape d'inscription : identité, profession et numéro de téléphone.
@@ -37,6 +38,11 @@ export function SignUpScreen() {
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.action).duration(AUTH_ENTRANCE_DURATION)}
       >
         <AuthPrimaryButton label="Continuer" onPress={form.submit} disabled={!form.validPhone} />
+        <TermsSheet
+          visible={form.termsOpen}
+          onAccept={form.acceptTerms}
+          onDecline={form.declineTerms}
+        />
       </Animated.View>
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.footer).duration(AUTH_ENTRANCE_DURATION)}
