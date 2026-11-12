@@ -38,16 +38,13 @@ describe("WithdrawSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("revient à la saisie par « Retour » en haut de la feuille, sans retirer", async () => {
+  it("n'a aucun bouton Retour au code PIN", async () => {
     await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
 
     await fireEvent.changeText(screen.getByLabelText("Montant (FCFA)"), "5000");
     await fireEvent.press(screen.getByRole("button", { name: "Retirer vers MTN MoMo" }));
-    const back = screen.getByRole("button", { name: "Retour" });
-    expect(screen.getByTestId("bottom-sheet-header")).toContainElement(back);
-    await fireEvent.press(back);
 
-    expect(screen.getByDisplayValue("5000")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
     expect(usePortfolioStore.getState().available).toBe(20_000n);
   });
 

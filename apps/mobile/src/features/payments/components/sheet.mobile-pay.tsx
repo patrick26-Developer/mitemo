@@ -110,12 +110,7 @@ export function MobilePaySheet(props: MobilePaySheetProps) {
   const amount = `${formatAmount(request.amount)} FCFA`;
 
   return (
-    <BottomSheet
-      visible={visible}
-      title={request.title}
-      onClose={pay.close}
-      {...(pay.stage === "pin" ? { onBack: pay.back } : {})}
-    >
+    <BottomSheet visible={visible} title={request.title} onClose={pay.close}>
       {pay.stage === "choose" ? <PayChoice request={request} onChoose={pay.choose} /> : null}
       {pay.stage === "pending" && pay.method !== "MITEMO" ? (
         <PayPendingStep

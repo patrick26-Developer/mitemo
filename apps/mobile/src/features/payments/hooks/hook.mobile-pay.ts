@@ -69,5 +69,5 @@ export function useMobilePay(options: MobilePayOptions) {
   };
   useOperatorConfirmation({ stage, method, amount, onConfirmed: confirm });
 
-  return { stage, method, choose, back, close, confirm };
+  return { stage, method, choose, close, confirm };
 }

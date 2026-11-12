@@ -1,4 +1,4 @@
-import { ChevronLeft, X } from "lucide-react-native";
+import { X } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useFocusedFieldReveal } from "../../hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
+import { useModalPresence } from "../../hooks/hook.modal-presence";
 import { useSheetDrag } from "../../hooks/hook.sheet-drag";
 import type { SheetLayout } from "../../model/model.sheet-layout";
 import { computeSheetLayout, sheetContentPaddingBottom } from "../../model/model.sheet-layout";
@@ -38,11 +39,6 @@ export interface BottomSheetProps {
    * défilent avec lui, sur iOS comme sur Android.
    */
   readonly footer?: ReactNode;
-  /**
-   * Retour à l'étape précédente, par exemple du code PIN au choix du moyen :
-   * posé en haut, à gauche du titre.
-   */
-  readonly onBack?: () => void;
 }
 
 /**
@@ -80,6 +76,27 @@ function useSheetLayout(): { readonly keyboardHeight: number; readonly layout: S
 }
 
 /**
+ * Présence de la feuille : sa visibilité réelle, retenue sur iOS tant que la
+ * fermeture précédente n'est pas finie, et sa montée à chaque ouverture.
+ * @param requested Visibilité demandée par le propriétaire.
+ * @returns La translation, la visibilité à appliquer et la fin de fermeture.
+ */
+function useSheetPresence(requested: boolean) {
+  const [translateY] = useState(() => new Animated.Value(SHEET_OPEN_OFFSET));
+  const { shown: visible, onDismiss } = useModalPresence(requested);
+  useEffect(() => {
+    if (!visible) {
+      translateY.setValue(SHEET_OPEN_OFFSET);
+      return;
+    }
+
+    openSheet(translateY);
+  }, [visible, translateY]);
+
+  return { translateY, visible, onDismiss };
+}
+
+/**
  * Affiche un contenu dans une feuille qui monte depuis le bas, plutôt que dans
  * une nouvelle page : le contexte de l'écran reste visible derrière.
  *
@@ -90,18 +107,9 @@ function useSheetLayout(): { readonly keyboardHeight: number; readonly layout: S
  * @returns La feuille modale.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { visible, title, onClose, children, footer, onBack } = props;
+  const { title, onClose, children, footer } = props;
   const { keyboardHeight, layout } = useSheetLayout();
-  const [translateY] = useState(() => new Animated.Value(SHEET_OPEN_OFFSET));
-  useEffect(() => {
-    if (!visible) {
-      translateY.setValue(SHEET_OPEN_OFFSET);
-      return;
-    }
-
-    openSheet(translateY);
-  }, [visible, translateY]);
-
+  const { translateY, visible, onDismiss } = useSheetPresence(props.visible);
   const close = useStableClose(translateY, onClose);
 
   return (
@@ -112,12 +120,13 @@ export function BottomSheet(props: BottomSheetProps) {
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={close}
+      onDismiss={onDismiss}
     >
       <View accessibilityViewIsModal importantForAccessibility="yes" className="flex-1 justify-end">
         <SheetBackdrop onPress={close} />
         <SheetSurface
           translateY={translateY}
-          header={{ title, onClose: close, onBack }}
+          header={{ title, onClose: close }}
           layout={layout}
           keyboardHeight={keyboardHeight}
           footer={footer}
@@ -140,11 +149,10 @@ interface SheetSurfaceProps {
   readonly footer?: ReactNode;
 }
 
-/** Titre, fermeture et retour éventuel de l'en-tête. */
+/** Titre et fermeture de l'en-tête. */
 interface SheetHeaderContent {
   readonly title: string;
   readonly onClose: () => void;
-  readonly onBack: (() => void) | undefined;
 }
 
 /** Props de l'en-tête glissable d'une feuille. */
@@ -153,57 +161,32 @@ interface SheetHeaderProps {
   readonly dragHandlers: GestureResponderHandlers;
 }
 
-/** Props d'un bouton rond de l'en-tête. */
-interface HeaderIconButtonProps {
-  readonly label: string;
-  readonly onPress: () => void;
-  readonly children: ReactNode;
-}
-
-/**
- * Bouton rond de l'en-tête : « Retour » ou « Fermer ».
- * @param props Libellé, action et icône.
- * @returns Le bouton.
- */
-function HeaderIconButton(props: HeaderIconButtonProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={props.label}
-      hitSlop={8}
-      onPress={props.onPress}
-      className="h-9 w-9 items-center justify-center rounded-full bg-field"
-    >
-      {props.children}
-    </Pressable>
-  );
-}
-
 /**
  * Rend la poignée, le titre et le bouton de fermeture de la feuille.
- * @param props Titre, fermeture, retour éventuel et gestionnaires du glissement.
+ * @param props Titre, fermeture et gestionnaires du glissement.
  * @returns L'en-tête glissable.
  */
 function SheetHeader(props: SheetHeaderProps) {
-  const { title, onClose, onBack } = props.header;
+  const { title, onClose } = props.header;
 
   return (
     <View testID="bottom-sheet-header" {...props.dragHandlers}>
       <View className="mb-3 items-center">
         <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
       </View>
-      <View className="mb-2 flex-row items-center justify-between gap-3">
-        {onBack === undefined ? null : (
-          <HeaderIconButton label="Retour" onPress={onBack}>
-            <ChevronLeft size={20} color={PALETTE.muted} />
-          </HeaderIconButton>
-        )}
+      <View className="mb-2 flex-row items-center justify-between">
         <Text accessibilityRole="header" className="flex-1 text-[20px] font-bold text-ink">
           {title}
         </Text>
-        <HeaderIconButton label="Fermer" onPress={onClose}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Fermer"
+          hitSlop={8}
+          onPress={onClose}
+          className="h-9 w-9 items-center justify-center rounded-full bg-field"
+        >
           <X size={18} color={PALETTE.muted} />
-        </HeaderIconButton>
+        </Pressable>
       </View>
     </View>
   );

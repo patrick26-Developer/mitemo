@@ -1,4 +1,5 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Dimensions, Platform, Text } from "react-native";
 
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
@@ -11,6 +12,27 @@ jest.mock("../../hooks/hook.keyboard-height", () => ({
 }));
 
 const keyboardHeightMock = jest.mocked(useKeyboardHeight);
+
+/** Marges sûres fixes, pour les rendus successifs d'une même feuille. */
+const METRICS = {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+
+/**
+ * Feuille des conditions, ouverte ou fermée, dans ses zones sûres.
+ * @param visible Visibilité demandée.
+ * @returns L'élément à rendre ou à re-rendre.
+ */
+function termsSheet(visible: boolean) {
+  return (
+    <SafeAreaProvider initialMetrics={METRICS}>
+      <BottomSheet visible={visible} title="Conditions d'utilisation" onClose={jest.fn()}>
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>
+    </SafeAreaProvider>
+  );
+}
 
 describe("BottomSheet", () => {
   const initialPlatform = Platform.OS;
@@ -127,28 +149,14 @@ describe("BottomSheet", () => {
     expect(scroll).toContainElement(footer);
   });
 
-  it("pose « Retour » en haut, dans l'en-tête, quand la feuille en propose un", async () => {
-    const onBack = jest.fn();
-    await renderWithSafeArea(
-      <BottomSheet visible title="Cotiser" onClose={jest.fn()} onBack={onBack}>
-        <Text>Code PIN</Text>
-      </BottomSheet>,
-    );
+  it("rouvre la feuille aussitôt sur Android, qui n'attend aucune fin de fermeture", async () => {
+    (Platform as { OS: string }).OS = "android";
+    const { rerender } = await render(termsSheet(true));
 
-    const back = screen.getByRole("button", { name: "Retour" });
-    expect(screen.getByTestId("bottom-sheet-header")).toContainElement(back);
-    await fireEvent.press(back);
-    expect(onBack).toHaveBeenCalledTimes(1);
-  });
+    await rerender(termsSheet(false));
+    await rerender(termsSheet(true));
 
-  it("n'affiche aucun retour quand la feuille n'en propose pas", async () => {
-    await renderWithSafeArea(
-      <BottomSheet visible title="Cotiser" onClose={jest.fn()}>
-        <Text>Choix</Text>
-      </BottomSheet>,
-    );
-
-    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
+    expect(screen.getByText("Contenu de la feuille")).toBeOnTheScreen();
   });
 
   it("ne pose aucun pied quand la feuille n'en a pas", async () => {
