@@ -1,9 +1,9 @@
 import Svg, { Path } from "react-native-svg";
 
-import { AUTH_COLORS } from "../model/model.auth-theme";
+import { PALETTE } from "../../theme/theme.palette";
 
-/** Props du logo Mitemo blanc. */
-export interface AuthLogoProps {
+/** Props du logo Mitemo. */
+export interface MitemoLogoProps {
   /** Largeur du logo, en points. */
   readonly width?: number;
   /** Couleur des trois formes du logo. */
@@ -11,16 +11,17 @@ export interface AuthLogoProps {
 }
 
 /**
- * Affiche le logo Mitemo posé sur le fond bleu de l'authentification.
+ * Affiche le logo Mitemo, blanc par défaut pour les fonds bleus de
+ * l'authentification, du lancement et de la présentation.
  * @param props Largeur et couleur du logo.
  * @returns Le logo vectoriel.
  */
-export function AuthLogo(props: AuthLogoProps) {
-  const { width = 130, color = AUTH_COLORS.sheet } = props;
+export function MitemoLogo(props: MitemoLogoProps) {
+  const { width = 130, color = PALETTE.white } = props;
   const height = (width * 89) / 151;
 
   return (
-    <Svg testID="auth-logo" width={width} height={height} viewBox="0 0 151 89" fill="none">
+    <Svg testID="mitemo-logo" width={width} height={height} viewBox="0 0 151 89" fill="none">
       <Path
         d="M0 70.0242V52.767C0 22.8989 19.2484 0 46.7934 0C58.4088 0 68.3648 3.98242 75.3341 8.96044C51.7714 10.6198 37.5011 27.8769 37.5011 52.767V70.0242C37.5011 74.9971 35.5256 79.7664 32.0092 83.2828C28.4928 86.7992 23.7235 88.7747 18.7505 88.7747C13.7776 88.7747 9.00832 86.7992 5.49191 83.2828C1.9755 79.7664 0 74.9971 0 70.0242Z"
         fill={color}

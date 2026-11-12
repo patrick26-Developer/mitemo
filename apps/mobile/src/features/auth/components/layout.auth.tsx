@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GridBackground } from "../../../shared/components/atoms/background.grid";
 import { CornerDecor } from "../../../shared/components/atoms/decor.corner";
+import { MitemoLogo } from "../../../shared/components/atoms/logo.mitemo";
 import { useFocusedFieldReveal } from "../../../shared/hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../../shared/hooks/hook.keyboard-height";
 import type { SheetLayout } from "../../../shared/model/model.sheet-layout";
@@ -15,7 +16,6 @@ import { computeSheetLayout } from "../../../shared/model/model.sheet-layout";
 import { FOCUS_RING_SCROLL } from "../../../shared/theme/theme.field";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../../shared/theme/theme.sheet-card";
 import { AUTH_COLORS } from "../model/model.auth-theme";
-import { AuthLogo } from "./logo.auth";
 
 /** Props de l'écran d'authentification. */
 export interface AuthLayoutProps {
@@ -112,7 +112,7 @@ function AuthLogoArea(props: AuthLogoAreaProps) {
   return (
     <View style={[styles.logoArea, { paddingTop: topInset }]}>
       <Animated.View entering={ZoomIn.duration(600)}>
-        <AuthLogo />
+        <MitemoLogo />
       </Animated.View>
     </View>
   );
