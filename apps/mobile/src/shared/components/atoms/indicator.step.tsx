@@ -55,8 +55,8 @@ function StepMarkers(props: StepMarkersProps) {
 
 /**
  * Indique où en est le membre dans un formulaire en plusieurs étapes : une
- * pastille numérotée par étape, reliée par un filet, puis le titre et la
- * position de l'étape courante.
+ * pastille numérotée par étape, reliée par un filet. Le titre et la position
+ * ne sont annoncés qu'aux lecteurs d'écran.
  * @param props Étape courante, nombre d'étapes et titre.
  * @returns L'indicateur d'étape.
  */
@@ -73,10 +73,6 @@ export function StepIndicator(props: StepIndicatorProps) {
       className="gap-2"
     >
       <StepMarkers index={index} total={total} />
-      <View className="flex-row items-baseline justify-between">
-        <Text className="text-[16px] font-semibold text-ink">{title}</Text>
-        <Text className="text-[12px] text-muted">{position}</Text>
-      </View>
     </View>
   );
 }

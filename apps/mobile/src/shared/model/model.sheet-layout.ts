@@ -4,6 +4,9 @@ export const SHEET_MARGIN = 8;
 /** Espace ajouté sous le contenu d'une carte, en points. */
 export const SHEET_BOTTOM_PADDING = 20;
 
+/** Arrondi bas de la carte flottante d'iOS, en points ; nul sur Android. */
+export const SHEET_BOTTOM_RADIUS = 48;
+
 /** Part de l'écran qu'une carte peut occuper au maximum. */
 export const SHEET_MAX_HEIGHT_RATIO = 0.88;
 
@@ -36,8 +39,10 @@ export interface SheetLayout {
   readonly maxHeight: number;
   /** Espace sous le contenu, clavier et barre système compris, en points. */
   readonly paddingBottom: number;
-  /** Marge sous la carte, constante : la carte ne se déplace pas. */
+  /** Marge sous la carte, constante : la carte ne se déplace pas. Nulle sur Android. */
   readonly marginBottom: number;
+  /** Arrondi des coins bas : la carte flotte sur iOS, elle est posée à plat sur Android. */
+  readonly bottomRadius: number;
 }
 
 /**
@@ -58,6 +63,7 @@ export interface SheetLayout {
 export function computeSheetLayout(input: SheetLayoutInput): SheetLayout {
   const { platform, keyboardHeight, bottomInset, screenHeight } = input;
   const keyboardVisible = keyboardHeight > 0;
+  const floating = platform === "ios";
   const keyboardSpace = keyboardVisible
     ? keyboardHeight + (platform === "android" ? bottomInset : 0)
     : bottomInset;
@@ -66,6 +72,7 @@ export function computeSheetLayout(input: SheetLayoutInput): SheetLayout {
     minHeight: screenHeight * SHEET_MIN_HEIGHT_RATIO,
     maxHeight: screenHeight * SHEET_MAX_HEIGHT_RATIO,
     paddingBottom: keyboardSpace + SHEET_BOTTOM_PADDING,
-    marginBottom: SHEET_MARGIN,
+    marginBottom: floating ? SHEET_MARGIN : 0,
+    bottomRadius: floating ? SHEET_BOTTOM_RADIUS : 0,
   };
 }
