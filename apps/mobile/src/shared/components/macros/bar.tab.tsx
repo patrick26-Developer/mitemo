@@ -5,8 +5,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HAIRLINE_WIDTH } from "../../theme/theme.hairline-width";
 import { TAB_ICONS } from "../../theme/theme.tab-icons";
-import { useConnectionStatus } from "../../hooks/hook.connection-status";
-import { ConnectionBar } from "../atoms/bar.connection";
 import { TabItem } from "../atoms/item.tab";
 import type { NotificationArea } from "../../notifications/model.notification";
 import type { BadgeCounts } from "../../notifications/model.notification-badges";
@@ -33,18 +31,13 @@ const TABS: readonly {
 const MIN_BOTTOM_INSET = 16;
 
 /**
- * Barre d'onglets commune aux quatre sections de l'application, surmontée de
- * la barre de connexion quand le réseau est coupé ou vient de revenir.
+ * Barre d'onglets commune aux quatre sections de l'application. L'état du
+ * réseau est annoncé par ConnectionHost, commun à toutes les pages.
  * @param props État, émetteur d'événements et navigation fournis par Expo Router.
- * @returns La barre d'onglets et l'état de la connexion.
+ * @returns La barre d'onglets.
  */
 export function AnimatedTabBar(props: BottomTabBarProps) {
-  return (
-    <View>
-      <ConnectionBar status={useConnectionStatus()} />
-      <TabShell {...props} />
-    </View>
-  );
+  return <TabShell {...props} />;
 }
 
 /**

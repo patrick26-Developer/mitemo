@@ -11,7 +11,7 @@ export interface ConnectionBarProps {
 
 /** Apparence de la barre pour chaque état annoncé. */
 const BAR_STYLES = {
-  offline: { color: PALETTE.ink, label: "Vous n'êtes pas connecté à Internet", Icon: WifiOff },
+  offline: { color: PALETTE.danger, label: "Vous n'êtes pas connecté à Internet", Icon: WifiOff },
   restored: { color: "#1F8A4C", label: "Connexion rétablie", Icon: Wifi },
 } as const;
 
@@ -30,7 +30,7 @@ export function ConnectionBar(props: ConnectionBarProps) {
       testID="connection-bar"
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
-      className="flex-row items-center justify-center gap-2 py-2"
+      className="flex-row items-center justify-center gap-2 self-center rounded-full px-4 py-2"
       style={{ backgroundColor: color }}
     >
       <Icon size={14} color={PALETTE.white} strokeWidth={2.2} />

@@ -28,6 +28,7 @@ import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.shee
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
 import type { StepIndicatorProps } from "../atoms/indicator.step";
 import { StepIndicator } from "../atoms/indicator.step";
+import { ConnectionHost } from "./host.connection";
 import { ToastHost } from "./host.toast";
 
 /** Props d'une feuille modale ancrée en bas de l'écran. */
@@ -141,6 +142,7 @@ export function BottomSheet(props: BottomSheetProps) {
           {children}
         </SheetSurface>
         <ToastHost />
+        <ConnectionHost />
       </View>
     </Modal>
   );

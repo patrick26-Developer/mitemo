@@ -9,11 +9,11 @@ describe("ConnectionBar", () => {
     expect(screen.queryByTestId("connection-bar")).not.toBeOnTheScreen();
   });
 
-  it("annonce la coupure sur une barre noire", async () => {
+  it("annonce la coupure sur une pastille rouge", async () => {
     await render(<ConnectionBar status="offline" />);
 
     expect(screen.getByText("Vous n'êtes pas connecté à Internet")).toBeOnTheScreen();
-    expect(screen.getByTestId("connection-bar")).toHaveStyle({ backgroundColor: "#0E1423" });
+    expect(screen.getByTestId("connection-bar")).toHaveStyle({ backgroundColor: "#B42318" });
   });
 
   it("annonce le retour du réseau sur une barre verte", async () => {

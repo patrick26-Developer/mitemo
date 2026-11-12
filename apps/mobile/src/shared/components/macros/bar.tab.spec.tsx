@@ -75,12 +75,12 @@ describe("AnimatedTabBar", () => {
     expect(navigateToTab).not.toHaveBeenCalled();
   });
 
-  it("prévient juste au-dessus des onglets quand l'appareil n'a plus de réseau", async () => {
+  it("laisse l'alerte de réseau à l'hôte commun à toute l'application", async () => {
     jest.mocked(useNetworkState).mockReturnValue({ isConnected: false });
     const { props } = buildProps(0);
     await renderWithSafeArea(<AnimatedTabBar {...props} />);
 
-    expect(screen.getByText("Vous n'êtes pas connecté à Internet")).toBeOnTheScreen();
+    expect(screen.queryByTestId("connection-bar")).toBeNull();
   });
 
   it("compte les tontines et les cartes qui ont du nouveau, « 9+ » au-delà de 9", async () => {

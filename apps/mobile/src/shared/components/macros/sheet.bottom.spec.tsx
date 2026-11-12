@@ -7,6 +7,10 @@ import { SHEET_MAX_HEIGHT_RATIO } from "../../model/model.sheet-layout";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { BottomSheet } from "./sheet.bottom";
 
+jest.mock("expo-network", () => ({
+  useNetworkState: jest.fn(() => ({ isConnected: false, isInternetReachable: false })),
+}));
+
 jest.mock("../../hooks/hook.keyboard-height", () => ({
   useKeyboardHeight: jest.fn(),
 }));
@@ -58,6 +62,16 @@ describe("BottomSheet", () => {
     expect(
       screen.getByTestId("grid-background", { includeHiddenElements: true }),
     ).toBeOnTheScreen();
+  });
+
+  it("signale aussi la coupure du réseau par-dessus la feuille", async () => {
+    await renderWithSafeArea(
+      <BottomSheet visible title="Cotiser" onClose={jest.fn()}>
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>,
+    );
+
+    expect(screen.getByText("Vous n'êtes pas connecté à Internet")).toBeOnTheScreen();
   });
 
   it("ne rend rien quand elle est fermée", async () => {
