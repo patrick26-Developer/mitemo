@@ -21,6 +21,15 @@ const TONES: Readonly<Record<SectionTitleTone, { classes: string; color: string 
 };
 
 /** Décalage du chevron, aligné optiquement sur la ligne de base du libellé. */
+/**
+ * Couleur du texte d'un titre de section, que reprennent ses points de page.
+ * @param tone Ton du titre.
+ * @returns La couleur du texte.
+ */
+export function sectionTitleColor(tone: SectionTitleTone): string {
+  return TONES[tone].color;
+}
+
 const CHEVRON_STYLE = { marginTop: 2 };
 
 /**
@@ -38,7 +47,7 @@ export function SectionTitle(props: SectionTitleProps) {
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={8}
-      className="mb-2.5 flex-row items-center gap-0.5 self-start px-4"
+      className="flex-row items-center gap-0.5"
     >
       <Text className={`text-[16px] font-medium ${classes}`}>{label}</Text>
       <ChevronRight size={16} color={color} strokeWidth={3} style={CHEVRON_STYLE} />
