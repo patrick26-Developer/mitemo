@@ -134,12 +134,17 @@ describe("PinScreen", () => {
     expect(screen.queryByRole("progressbar")).toBeNull();
   });
 
-  it("enregistre l'identité à la fin d'une inscription", async () => {
+  it("fait confirmer le code choisi, puis enregistre l'identité à la fin d'une inscription", async () => {
     useAuthDraft
       .getState()
       .startSignUp({ firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" }, PHONE);
     await renderWithSafeArea(<PinScreen />);
 
+    await enterPin("4821");
+    expect(
+      await screen.findByText("Saisissez à nouveau votre code pour le confirmer."),
+    ).toBeOnTheScreen();
+    expect(useSessionStore.getState().signedIn).toBe(false);
     await enterPin("4821");
 
     await waitFor(() => expect(useSessionStore.getState().signedIn).toBe(true));
@@ -152,6 +157,39 @@ describe("PinScreen", () => {
     await act(async () => {});
 
     expect(router.replace).not.toHaveBeenCalledWith("/(auth)/sign-in");
+  });
+
+  it("refuse une confirmation différente du code choisi", async () => {
+    useAuthDraft
+      .getState()
+      .startSignUp({ firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" }, PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await enterPin("4821");
+    await screen.findByText("Saisissez à nouveau votre code pour le confirmer.");
+    await enterPin("1111");
+
+    expect(
+      await screen.findByText("Les deux codes ne correspondent pas. Réessayez."),
+    ).toBeOnTheScreen();
+    expect(useSessionStore.getState().signedIn).toBe(false);
+    await expect(checkPin({ phone: PHONE, pin: "4821" }, mockPinAuth.deps)).resolves.toBe(false);
+  });
+
+  it("revient au choix du code depuis la confirmation", async () => {
+    useAuthDraft
+      .getState()
+      .startSignUp({ firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" }, PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await enterPin("4821");
+    await screen.findByText("Saisissez à nouveau votre code pour le confirmer.");
+    await fireEvent.press(screen.getByRole("button", { name: "Retour" }));
+
+    expect(
+      screen.getByText("Choisissez un code à 4 chiffres pour sécuriser votre compte."),
+    ).toBeOnTheScreen();
+    expect(router.back).not.toHaveBeenCalled();
   });
 
   it("revient à la connexion sans brouillon", async () => {
