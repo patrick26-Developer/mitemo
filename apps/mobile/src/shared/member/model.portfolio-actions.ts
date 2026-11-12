@@ -39,6 +39,7 @@ import {
 import { selfDue } from "./model.tontine-turns";
 import type { TontineSettings } from "./model.tontine-settings";
 import { adminActions } from "./model.portfolio-admin";
+import { walletActions } from "./model.portfolio-wallet";
 import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
 
 /** Mise à jour partielle de l'état du portefeuille. */
@@ -79,6 +80,8 @@ export interface PortfolioState {
   /** Pointe un marqueur, payé par l'opérateur choisi. */
   contributeCard: (cardId: string, payment: CardPayment) => void;
   withdrawCard: (cardId: string) => void;
+  /** Retire une partie du solde disponible vers l'opérateur mobile du membre. */
+  withdrawAvailable: (amount: bigint) => void;
   transferCardToTontine: (cardId: string) => void;
   reset: () => void;
 }
@@ -248,6 +251,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     acceptInvitation: (id, turns) => acceptInvitation(context, id, turns),
     declineInvitation: (id) => declineInvitation(context, id),
     ...adminActions(context),
+    ...walletActions(context),
     contributeCard: (id, payment) => contributeCard(context, id, payment),
     withdrawCard: (id) => withdrawCard(context, id),
     transferCardToTontine: (id) => transferCardToTontine(context, id),

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
+import { fireEvent, screen } from "@testing-library/react-native";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { INITIAL_PRIVACY, usePrivacyStore } from "../../../shared/member/store.privacy";
@@ -16,7 +17,7 @@ describe("BalanceCard", () => {
   });
 
   it("affiche le solde disponible et le total mis de côté", async () => {
-    await render(<BalanceCard />);
+    await renderWithSafeArea(<BalanceCard />);
 
     expect(screen.getByText("Solde disponible")).toBeOnTheScreen();
     expect(screen.getByText(/125 000/)).toBeOnTheScreen();
@@ -24,7 +25,7 @@ describe("BalanceCard", () => {
   });
 
   it("masque puis réaffiche les montants", async () => {
-    await render(<BalanceCard />);
+    await renderWithSafeArea(<BalanceCard />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Masquer les montants" }));
 
@@ -34,5 +35,14 @@ describe("BalanceCard", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Afficher les montants" }));
 
     expect(screen.getByText(/125 000/)).toBeOnTheScreen();
+  });
+
+  it("ouvre le retrait vers MTN MoMo ou Airtel Money quand on touche la carte", async () => {
+    await renderWithSafeArea(<BalanceCard />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer de mon solde" }));
+
+    expect(screen.getByRole("header", { name: "Retirer" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Retirer vers MTN MoMo" })).toBeOnTheScreen();
   });
 });
