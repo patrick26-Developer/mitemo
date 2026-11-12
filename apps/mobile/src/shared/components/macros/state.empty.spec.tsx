@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen } from "@testing-library/react-native";
 import { Wallet } from "lucide-react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
@@ -21,5 +21,16 @@ describe("EmptyState", () => {
     );
 
     expect(screen.getByTestId("empty-state-icon")).toBeOnTheScreen();
+  });
+
+  it("propose une action quand elle est fournie", async () => {
+    const onPress = jest.fn();
+    await renderWithSafeArea(
+      <EmptyState title="Vide" message="Rien ici." action={{ label: "Créer", onPress }} />,
+    );
+
+    await fireEvent.press(screen.getByRole("button", { name: "Créer" }));
+
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 });
