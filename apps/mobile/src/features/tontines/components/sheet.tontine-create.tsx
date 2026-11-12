@@ -5,6 +5,7 @@ import { SheetTextField } from "../../../shared/components/macros/field.sheet-te
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
+import { StepTransition } from "../../../shared/components/atoms/transition.step";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatFrequency } from "../../../shared/member/model.portfolio";
@@ -202,7 +203,9 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
         />
       }
     >
-      <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
+      <StepTransition index={steps.index}>
+        <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
+      </StepTransition>
     </BottomSheet>
   );
 }

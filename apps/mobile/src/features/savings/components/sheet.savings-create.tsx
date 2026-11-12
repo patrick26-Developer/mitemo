@@ -5,6 +5,7 @@ import { SheetTextField } from "../../../shared/components/macros/field.sheet-te
 import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
+import { StepTransition } from "../../../shared/components/atoms/transition.step";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
@@ -211,7 +212,9 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
         />
       }
     >
-      <SavingsStep index={steps.index} fields={{ form, invalid, tontines, onChange: update }} />
+      <StepTransition index={steps.index}>
+        <SavingsStep index={steps.index} fields={{ form, invalid, tontines, onChange: update }} />
+      </StepTransition>
     </BottomSheet>
   );
 }
