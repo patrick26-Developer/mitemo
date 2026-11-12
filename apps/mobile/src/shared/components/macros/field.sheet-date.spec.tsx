@@ -1,5 +1,5 @@
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import { fireEvent, screen } from "@testing-library/react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
 import { Platform } from "react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
@@ -12,10 +12,12 @@ describe("SheetDateField", () => {
   const initialPlatform = Platform.OS;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.spyOn(DateTimePickerAndroid, "open").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     (Platform as { OS: string }).OS = initialPlatform;
     jest.restoreAllMocks();
   });
@@ -42,13 +44,16 @@ describe("SheetDateField", () => {
     expect(screen.getByLabelText("Échéance : 28/02/2027")).toBeOnTheScreen();
   });
 
-  it("déplie le calendrier sous le champ et retient le jour touché, sans valider à part", async () => {
+  it("ouvre le calendrier dans une seconde feuille et retient le jour touché, sans valider à part", async () => {
     const onChange = jest.fn();
     await renderWithSafeArea(
       <SheetDateField label="Échéance" value="" minimum="2026-12-01" onChange={onChange} />,
     );
 
     await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
+
+    expect(screen.getByRole("header", { name: "Échéance" })).toBeOnTheScreen();
+
     await fireEvent(screen.getByTestId("native-date-picker"), "change", { type: "set" }, PICKED);
 
     expect(onChange).toHaveBeenCalledWith("2027-01-15");
@@ -57,14 +62,15 @@ describe("SheetDateField", () => {
     expect(screen.queryByRole("button", { name: "Valider" })).toBeNull();
   });
 
-  it("replie le calendrier au second toucher du champ sans rien changer", async () => {
+  it("referme le calendrier par la croix de sa feuille sans rien changer", async () => {
     const onChange = jest.fn();
     await renderWithSafeArea(
       <SheetDateField label="Échéance" value="" minimum="2026-12-01" onChange={onChange} />,
     );
 
     await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
-    await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
+    await fireEvent.press(screen.getByRole("button", { name: "Fermer" }));
+    await act(() => jest.runAllTimersAsync());
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.queryByTestId("native-date-picker")).not.toBeOnTheScreen();

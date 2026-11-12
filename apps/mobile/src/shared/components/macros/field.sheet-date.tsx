@@ -7,6 +7,7 @@ import { Platform, Pressable, Text, View } from "react-native";
 import { formatDate } from "../../format/format.date";
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
+import { BottomSheet } from "./sheet.bottom";
 
 /** Props d'un champ de date de feuille. */
 export interface SheetDateFieldProps {
@@ -55,8 +56,8 @@ function pickHandler(onChange: (isoDate: string) => void) {
 /**
  * Affiche la date choisie dans un champ et ouvre le calendrier natif au
  * toucher, pour éviter toute saisie de date au clavier. Sur iOS, le calendrier
- * se déplie sous le champ, dans la feuille ; sur Android, le dialogue natif
- * s'ouvre une seule fois.
+ * s'ouvre dans une seconde feuille, par-dessus le formulaire ; sur Android,
+ * le dialogue natif s'ouvre une seule fois.
  * @param props Libellé, date, minimum, aide et changement.
  * @returns Le champ de date et son calendrier.
  */
@@ -70,7 +71,7 @@ export function SheetDateField(props: SheetDateFieldProps) {
   };
   const toggle = () => {
     if (Platform.OS !== "android") {
-      setOpen(!open);
+      setOpen(true);
       return;
     }
     DateTimePickerAndroid.open({
@@ -85,7 +86,9 @@ export function SheetDateField(props: SheetDateFieldProps) {
     <View className="gap-1.5">
       <Text className="text-[12px] font-semibold uppercase text-muted">{label}</Text>
       <DateTrigger label={label} value={value} open={open} invalid={invalid} onPress={toggle} />
-      {open ? <DateCalendar shown={shown} minimum={minimum} onPick={pick} /> : null}
+      <BottomSheet visible={open} title={label} onClose={() => setOpen(false)}>
+        <DateCalendar shown={shown} minimum={minimum} onPick={pick} />
+      </BottomSheet>
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
     </View>
   );
@@ -127,7 +130,7 @@ function DateTrigger(props: DateTriggerProps) {
   );
 }
 
-/** Props du calendrier déplié sous le champ. */
+/** Props du calendrier de la seconde feuille. */
 interface DateCalendarProps {
   readonly shown: Date;
   readonly minimum: string;
@@ -135,10 +138,10 @@ interface DateCalendarProps {
 }
 
 /**
- * Déplie le calendrier natif d'iOS sous le champ : toucher un jour le retient
- * et replie le calendrier, sans bouton de validation à part.
+ * Calendrier natif d'iOS, dans la seconde feuille : toucher un jour le
+ * retient et ferme la feuille, sans bouton de validation à part.
  * @param props Date affichée, minimum et choix.
- * @returns Le calendrier déplié.
+ * @returns Le calendrier.
  */
 function DateCalendar(props: DateCalendarProps) {
   const { shown, minimum, onPick } = props;

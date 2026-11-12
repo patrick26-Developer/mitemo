@@ -1,10 +1,10 @@
-import { Check, ChevronDown, ChevronUp } from "lucide-react-native";
+import { Check, ChevronDown } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
-import { SHADOWS } from "../../theme/theme.shadow";
+import { BottomSheet } from "./sheet.bottom";
 
 /** Option d'un sélecteur de feuille. */
 export interface SheetSelectOption<Value extends string> {
@@ -45,13 +45,11 @@ function selectedLabel<Value extends string>(
   return option?.label ?? value;
 }
 
-/** Hauteur maximale de la liste dépliée, au-delà de laquelle elle défile. */
-const MENU_MAX_HEIGHT = 264;
-
 /**
- * Affiche un champ qui déplie une liste d'options groupées juste sous lui,
- * comme un `select` de formulaire : la valeur choisie reste visible dans le
- * champ, et la liste reste dans la feuille au lieu d'en ouvrir une seconde.
+ * Affiche un champ de choix, comme un `select` de formulaire : la valeur
+ * choisie reste visible dans le champ, et le toucher ouvre les options
+ * groupées dans une seconde feuille, par-dessus, qui se ferme au choix. La
+ * feuille du formulaire garde ainsi sa mise en page.
  * @template Value Type de la valeur portée par chaque option.
  * @param props Libellé, groupes, valeur, choix et aide.
  * @returns Le sélecteur et sa liste.
@@ -60,7 +58,6 @@ export function SheetSelect<Value extends string>(props: SheetSelectProps<Value>
   const { label, groups, value, onChange, hint, invalid = false } = props;
   const [open, setOpen] = useState(false);
   const current = selectedLabel(groups, value);
-  const Chevron = open ? ChevronUp : ChevronDown;
 
   return (
     <View className="gap-1.5">
@@ -70,14 +67,14 @@ export function SheetSelect<Value extends string>(props: SheetSelectProps<Value>
         accessibilityLabel={`${label} : ${current}`}
         accessibilityState={{ expanded: open }}
         testID="sheet-select-trigger"
-        onPress={() => setOpen(!open)}
+        onPress={() => setOpen(true)}
         className="h-12 flex-row items-center justify-between rounded-[14px] border px-4"
         style={fieldChrome({ focused: open, invalid })}
       >
         <Text className="text-[15px] text-ink">{current}</Text>
-        <Chevron size={16} color={open ? PALETTE.brand : PALETTE.muted} />
+        <ChevronDown size={16} color={open ? PALETTE.brand : PALETTE.muted} />
       </Pressable>
-      {open ? (
+      <BottomSheet visible={open} title={label} onClose={() => setOpen(false)}>
         <SelectMenu
           groups={groups}
           value={value}
@@ -86,13 +83,13 @@ export function SheetSelect<Value extends string>(props: SheetSelectProps<Value>
             setOpen(false);
           }}
         />
-      ) : null}
+      </BottomSheet>
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
     </View>
   );
 }
 
-/** Props de la liste dépliée d'un sélecteur. */
+/** Props de la liste d'options d'un sélecteur. */
 interface SelectMenuProps<Value extends string> {
   readonly groups: readonly SheetSelectGroup<Value>[];
   readonly value: Value;
@@ -100,31 +97,20 @@ interface SelectMenuProps<Value extends string> {
 }
 
 /**
- * Affiche la liste des options sous le champ, groupée par unité. Elle défile
- * d'elle-même quand elle dépasse, sans bloquer le défilement de la feuille.
+ * Affiche les options groupées par unité, dans la seconde feuille, qui
+ * défile quand elles dépassent.
  * @template Value Type de la valeur portée par chaque option.
  * @param props Groupes, valeur courante et choix.
- * @returns La liste dépliée.
+ * @returns La liste des options.
  */
 function SelectMenu<Value extends string>(props: SelectMenuProps<Value>) {
   const { groups, value, onSelect } = props;
 
   return (
-    <View
-      testID="sheet-select-menu"
-      className="rounded-[14px] border border-card-border bg-white"
-      style={styles.menu}
-    >
-      <ScrollView
-        nestedScrollEnabled
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator
-        contentContainerClassName="gap-3 p-2"
-      >
-        {groups.map((group) => (
-          <SelectGroup key={group.title} group={group} value={value} onSelect={onSelect} />
-        ))}
-      </ScrollView>
+    <View testID="sheet-select-menu" className="gap-3">
+      {groups.map((group) => (
+        <SelectGroup key={group.title} group={group} value={value} onSelect={onSelect} />
+      ))}
     </View>
   );
 }
@@ -193,12 +179,3 @@ function SelectOption<Value extends string>(props: SelectOptionProps<Value>) {
     </Pressable>
   );
 }
-
-/** Ombre et hauteur de la liste dépliée, que Tailwind n'exprime pas côté natif. */
-const styles = StyleSheet.create({
-  menu: {
-    maxHeight: MENU_MAX_HEIGHT,
-    overflow: "hidden",
-    ...SHADOWS.menu,
-  },
-});

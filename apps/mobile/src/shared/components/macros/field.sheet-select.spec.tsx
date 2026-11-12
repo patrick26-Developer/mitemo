@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { FIELD_CHROME } from "../../theme/theme.field";
@@ -20,6 +20,9 @@ const GROUPS = [
 ] as const;
 
 describe("SheetSelect", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
   it("affiche le libellé et la valeur choisie", async () => {
     await renderWithSafeArea(
       <SheetSelect label="Fréquence" groups={GROUPS} value="jour-2" onChange={jest.fn()} />,
@@ -64,7 +67,7 @@ describe("SheetSelect", () => {
     });
   });
 
-  it("déplie la liste sous le champ, dans la feuille, et la replie au second toucher", async () => {
+  it("ouvre le choix dans une seconde feuille, par-dessus, titrée par le libellé", async () => {
     await renderWithSafeArea(
       <SheetSelect label="Fréquence" groups={GROUPS} value="jour-1" onChange={jest.fn()} />,
     );
@@ -73,11 +76,22 @@ describe("SheetSelect", () => {
     await fireEvent.press(trigger);
 
     expect(trigger).toBeExpanded();
+    expect(screen.getByRole("header", { name: "Fréquence" })).toBeOnTheScreen();
     expect(screen.getByTestId("sheet-select-menu")).toBeOnTheScreen();
     expect(screen.getByLabelText("Chaque jour")).toBeSelected();
+  });
 
-    await fireEvent.press(trigger);
+  it("referme la seconde feuille par sa croix, sans rien changer", async () => {
+    const onChange = jest.fn();
+    await renderWithSafeArea(
+      <SheetSelect label="Fréquence" groups={GROUPS} value="jour-1" onChange={onChange} />,
+    );
 
+    await fireEvent.press(screen.getByTestId("sheet-select-trigger"));
+    await fireEvent.press(screen.getByRole("button", { name: "Fermer" }));
+    await act(() => jest.runAllTimersAsync());
+
+    expect(onChange).not.toHaveBeenCalled();
     expect(screen.queryByTestId("sheet-select-menu")).not.toBeOnTheScreen();
   });
 });
