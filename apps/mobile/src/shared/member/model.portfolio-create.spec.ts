@@ -6,6 +6,7 @@ import {
   buildJoiningSelf,
   buildTontine,
 } from "./model.portfolio-create";
+import { cardTintFor } from "./model.card-tint";
 
 /** Entrée de création de tontine utilisée par les tests. */
 const TONTINE_INPUT: CreateTontineInput = {
@@ -84,22 +85,22 @@ describe("buildTontine", () => {
 
 describe("buildCard", () => {
   it("part avec une épargne nulle et une carte active", () => {
-    const created = buildCard(CARD_INPUT, 0);
+    const created = buildCard(CARD_INPUT);
 
     expect(created.saved).toBe(0n);
     expect(created.state).toBe("ACTIVE");
   });
 
   it("conserve le rattachement à une tontine", () => {
-    expect(buildCard({ ...CARD_INPUT, tontineId: "t1" }, 0).tontineId).toBe("t1");
-    expect(buildCard(CARD_INPUT, 0).tontineId).toBeNull();
+    expect(buildCard({ ...CARD_INPUT, tontineId: "t1" }).tontineId).toBe("t1");
+    expect(buildCard(CARD_INPUT).tontineId).toBeNull();
   });
 
-  it("fait tourner les teintes selon le rang", () => {
-    expect(buildCard(CARD_INPUT, 0).tint).not.toBe(buildCard(CARD_INPUT, 1).tint);
+  it("teinte la carte selon le montant de son pointage", () => {
+    expect(buildCard(CARD_INPUT).tint).toBe(cardTintFor(CARD_INPUT.markerAmount));
   });
 
   it("préfixe l'identifiant par le type d'entité", () => {
-    expect(buildCard(CARD_INPUT, 0).id.startsWith("card-")).toBe(true);
+    expect(buildCard(CARD_INPUT).id.startsWith("card-")).toBe(true);
   });
 });

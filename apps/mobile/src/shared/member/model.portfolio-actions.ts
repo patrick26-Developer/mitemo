@@ -105,7 +105,7 @@ function createTontine(context: PortfolioContext, input: CreateTontineInput): To
  * @param input Paramètres saisis.
  */
 function createCard(context: PortfolioContext, input: CreateCardInput): void {
-  const card = buildCard(input, context.get().cards.length);
+  const card = buildCard(input);
   context.set((state) => ({ cards: prependCard(state.cards, card) }));
 }
 

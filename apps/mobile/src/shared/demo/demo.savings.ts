@@ -1,4 +1,5 @@
 import type { SavingsCard } from "../member/model.portfolio";
+import { cardTintFor } from "../member/model.card-tint";
 
 /**
  * Cartes de pointage livrées avec l'application tant que l'API n'est pas
@@ -16,7 +17,7 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     startDate: "2026-11-01",
     saved: 20_000n,
     deadline: "2026-12-31",
-    tint: "#CFD8FF",
+    tint: cardTintFor(5_000n),
     state: "ACTIVE",
     description:
       "Mise de côté pour le loyer de janvier. Chaque marqueur vaut 5 000 FCFA et l'échéance se règle depuis la carte.",
@@ -39,7 +40,7 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     startDate: "2026-10-15",
     saved: 8_000n,
     deadline: "2027-02-15",
-    tint: "#CDF5DD",
+    tint: cardTintFor(5_000n),
     state: "ACTIVE",
     description:
       "Réserve pour la prime d'assurance santé de la famille, à régler avant l'échéance.",
@@ -60,7 +61,7 @@ export const INITIAL_CARDS: readonly SavingsCard[] = [
     startDate: "2026-01-30",
     saved: 50_000n,
     deadline: "2026-06-30",
-    tint: "#F5D7B0",
+    tint: cardTintFor(10_000n),
     state: "ARCHIVED",
     description: "Réserve de précaution entièrement constituée, puis retirée sur le solde.",
     tontineId: null,
