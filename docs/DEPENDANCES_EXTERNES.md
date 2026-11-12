@@ -37,7 +37,18 @@ Versions vérifiées dans les paquets installés ; aucune dépendance ajoutée p
 | ESLint / Prettier | 10.14.0 / 3.9.10 |
 | Next.js (web, hors parcours prioritaire) | 16.4.5 |
 
-Version serveur PostgreSQL : à relever par `SELECT version()` ; ne pas déduire sa version du driver.
+PostgreSQL local : **17.5**, vérifié par `SELECT version()` sur `localhost/mitemo_dev`.
+La version du serveur Neon reste à relever séparément.
+
+## État opérationnel vérifié le soir du 12 novembre
+
+- `mitemo_dev` : sept migrations terminées, aucune annulée. API compilée lancée sur `0.0.0.0:3100` ; parcours HTTP inscription PIN4, OTP6, portefeuille à zéro serveur, historique, objectif sans débit, déconnexion/reconnexion et objectif conservé réussi. Aucun financement effectué.
+- `mitemo_test` : base locale distincte ; 32 tests PostgreSQL et 8 HTTP réussis. Les tests ne prouvent pas le parcours sur téléphone.
+- Expo : Metro 8082 vers Render ; Metro 8083 vers `http://192.168.128.163:3100` pour le secours sur le même Wi-Fi. Les deux statuts Metro répondent. Les sessions API/Metro doivent rester ouvertes ; la démonstration Android/iOS reste à exécuter sur appareils.
+- Render, informations fournies par Patrick dans la console : service `srv-dbq3dfjl550s739etbhg`, Frankfurt, Free, branche `develop`, Live `4762fcc` (PR #101 identité P0). Build figé pnpm 12.16.1, compilation contrats puis API ; démarrage `cd apps/api && node --env-file-if-exists=.env dist/main.js`. Aucun pré-déploiement renseigné ; PR Previews Off ; health check `/health`.
+- **Auto-Deploy est “After CI Checks Pass”, pas Off.** Ne pas fusionner vers `develop` avant passage confirmé à Off ou autorisation explicite du déploiement automatique.
+- `/health` distant a répondu 200 après 33 secondes, puis 200 à chaud ; les routes privées refusent sans session avec 401. La cause exacte de la latence nécessite les logs ; un réveil Free n'est qu'une hypothèse. Le client mobile expire après 15 secondes : préchauffer `/health` avant test et garder le secours local.
+- Neon Preview : association compute/branche, état des migrations et variables Render non encore vérifiés. Aucun changement distant effectué. La présence des sept migrations en local ne confirme pas leur application distante.
 
 ## Configuration sans secrets
 
