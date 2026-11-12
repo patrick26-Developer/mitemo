@@ -7,6 +7,7 @@ const LAYOUT: SheetLayout = {
   maxHeight: 743,
   paddingBottom: 54,
   marginBottom: SHEET_MARGIN,
+  bottomRadius: 48,
 };
 
 describe("computeSheetCardStyle", () => {
@@ -35,5 +36,13 @@ describe("computeSheetCardStyle", () => {
 
   it("partage la poignée entre toutes les cartes", () => {
     expect(SHEET_HANDLE_SHAPE).toEqual({ width: 42, height: 3, borderRadius: 2 });
+  });
+
+  it("reprend l'arrondi bas calculé, nul sur Android", () => {
+    expect(computeSheetCardStyle({ ...LAYOUT, bottomRadius: 0, marginBottom: 0 })).toMatchObject({
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      marginBottom: 0,
+    });
   });
 });

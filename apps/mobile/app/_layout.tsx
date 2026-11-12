@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "../global.css";
 
 import { launchRoutes, SplashGate, useOnboardingStore } from "../src/features/onboarding";
@@ -18,7 +19,9 @@ import { useSessionStore } from "../src/shared/session/store.session";
  * rappels de versement des cartes ne partent qu'une fois la session ouverte,
  * et l'icône de l'application porte le nombre de notifications non lues.
  * Les toasts de succès et d'erreur s'affichent par-dessus tous les écrans, et
- * l'écran de lancement par-dessus le tout, le temps de relire l'appareil.
+ * l'écran de lancement par-dessus le tout, le temps de relire l'appareil. Le
+ * fournisseur du clavier suit le clavier sur iOS comme sur Android, feuilles
+ * comprises.
  * @returns La pile de navigation et la barre d'état.
  */
 export default function RootLayout() {
@@ -27,7 +30,7 @@ export default function RootLayout() {
   const routes = launchRoutes({ signedIn, onboarded });
 
   return (
-    <>
+    <KeyboardProvider>
       <StatusBar style="dark" />
       <ProfilePhotoSync />
       <AppBadgeSync signedIn={signedIn} />
@@ -51,6 +54,6 @@ export default function RootLayout() {
       </Stack>
       <ToastHost />
       <SplashGate />
-    </>
+    </KeyboardProvider>
   );
 }

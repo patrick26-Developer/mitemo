@@ -1,5 +1,6 @@
 import {
   SHEET_BOTTOM_PADDING,
+  SHEET_BOTTOM_RADIUS,
   SHEET_MARGIN,
   SHEET_MAX_HEIGHT_RATIO,
   SHEET_MIN_HEIGHT_RATIO,
@@ -7,6 +8,15 @@ import {
 } from "./model.sheet-layout";
 
 describe("computeSheetLayout", () => {
+  it("pose la carte à plat contre le bas de l'écran sur Android, flottante sur iOS", () => {
+    const base = { keyboardHeight: 0, bottomInset: 12, screenHeight: 800 };
+    const android = computeSheetLayout({ ...base, platform: "android" });
+    const ios = computeSheetLayout({ ...base, platform: "ios" });
+
+    expect(android).toMatchObject({ marginBottom: 0, bottomRadius: 0 });
+    expect(ios).toMatchObject({ marginBottom: SHEET_MARGIN, bottomRadius: SHEET_BOTTOM_RADIUS });
+  });
+
   it("réserve la hauteur du clavier sous le contenu sur iOS", () => {
     const layout = computeSheetLayout({
       platform: "ios",
@@ -20,6 +30,7 @@ describe("computeSheetLayout", () => {
       maxHeight: 844 * SHEET_MAX_HEIGHT_RATIO,
       paddingBottom: 320 + SHEET_BOTTOM_PADDING,
       marginBottom: SHEET_MARGIN,
+      bottomRadius: SHEET_BOTTOM_RADIUS,
     });
   });
 
@@ -32,7 +43,7 @@ describe("computeSheetLayout", () => {
     });
 
     expect(layout.paddingBottom).toBe(12 + SHEET_BOTTOM_PADDING);
-    expect(layout.marginBottom).toBe(SHEET_MARGIN);
+    expect(layout.marginBottom).toBe(0);
   });
 
   it("ajoute la barre système à la hauteur du clavier sur Android", () => {
@@ -44,7 +55,7 @@ describe("computeSheetLayout", () => {
     });
 
     expect(layout.paddingBottom).toBe(300 + 12 + SHEET_BOTTOM_PADDING);
-    expect(layout.marginBottom).toBe(SHEET_MARGIN);
+    expect(layout.marginBottom).toBe(0);
   });
 
   it("ne déplace jamais la carte, clavier ouvert ou fermé", () => {

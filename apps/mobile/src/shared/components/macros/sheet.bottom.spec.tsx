@@ -88,7 +88,7 @@ describe("BottomSheet", () => {
 
     expect(screen.getByTestId("bottom-sheet")).toHaveStyle({
       paddingBottom: 354,
-      marginBottom: 8,
+      marginBottom: 0,
     });
   });
 

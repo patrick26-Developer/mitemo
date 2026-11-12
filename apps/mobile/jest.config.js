@@ -1,11 +1,12 @@
 /**
  * Tests unitaires du mobile : preset officiel d'Expo, rendu avec Testing Library.
- * Cinq paquets sont remplacés : `lucide-react-native`, qui n'expose que du module
+ * Plusieurs paquets sont remplacés : `lucide-react-native`, qui n'expose que du module
  * ES sous la condition `react-native`, `react-native-reanimated`, dont les
  * implémentations native et web ne fonctionnent pas sous Jest, `expo-crypto`,
  * dont le module natif est absent hors de l'appareil, `expo-linking`, qui
  * a besoin du manifeste Expo pour connaître le schéma, et `expo-contacts`, dont
- * le module natif du répertoire est absent hors de l'appareil.
+ * le module natif du répertoire est absent hors de l'appareil, et
+ * `react-native-keyboard-controller`, par le mock officiel du paquet.
  * @type {import("jest").Config}
  */
 module.exports = {
@@ -18,6 +19,8 @@ module.exports = {
     "^expo-crypto$": "<rootDir>/jest/mocks/expo-crypto.js",
     "^expo-linking$": "<rootDir>/jest/mocks/expo-linking.js",
     "^expo-contacts$": "<rootDir>/jest/mocks/expo-contacts.js",
+    "^react-native-keyboard-controller$":
+      "<rootDir>/node_modules/react-native-keyboard-controller/jest/index.js",
     "^@react-native-community/datetimepicker$": "<rootDir>/jest/mocks/datetime-picker.js",
     "^@react-native-async-storage/async-storage$":
       "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
