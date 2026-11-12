@@ -1,19 +1,25 @@
+import type { Tontine } from "../../../shared/member/model.portfolio";
 import { router } from "expo-router";
 import { View } from "react-native";
 
 import { SectionTitle } from "../../../shared/components/atoms/title.section";
 import { HorizontalCardList } from "../../../shared/components/macros/list.horizontal-card";
-import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { TontineCard } from "../../tontines";
 import { formatCountLabel } from "../model/model.home-content";
 
+/** Props de la section des tontines de l'accueil. */
+export interface TontinesSectionProps {
+  /** Tontines lancées ; la section n'est rendue que si la liste en contient. */
+  readonly items: readonly Tontine[];
+}
+
 /**
  * Affiche le titre et la liste horizontale des tontines actives du membre.
+ * @param props Tontines à afficher.
  * @returns La section des tontines.
  */
-export function TontinesSection() {
-  const tontines = usePortfolioStore((state) => state.tontines);
-  const active = tontines.filter((item) => item.state === "ACTIVE");
+export function TontinesSection(props: TontinesSectionProps) {
+  const active = props.items;
 
   return (
     <View className="-mt-[276px] mb-5 flex-col gap-3">
