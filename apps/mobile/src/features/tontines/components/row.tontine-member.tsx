@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { PALETTE } from "../../../shared/theme/theme.palette";
 import { accentRing } from "../../../shared/theme/theme.field";
 import type { TontineMember } from "../../../shared/member/model.portfolio";
+import { avatarColor } from "../../../shared/model/model.avatar-color";
 
 /** Couleur de l'état de la cotisation : vert à jour, rouge en attente. */
 const PAYMENT_COLORS = { paid: "#1F8A4C", due: PALETTE.danger } as const;
@@ -32,6 +33,7 @@ export interface TontineMemberRowProps {
  */
 export function TontineMemberRow(props: TontineMemberRowProps) {
   const { member, turnsLabel, focusAccent, onRemove, onPress } = props;
+  const avatar = { backgroundColor: avatarColor(member.name) };
   const focused = focusAccent !== undefined;
 
   return (
@@ -44,7 +46,7 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
       style={focused ? accentRing(focusAccent) : undefined}
       className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >
-      <View className="h-9 w-9 items-center justify-center rounded-full bg-avatar">
+      <View className="h-9 w-9 items-center justify-center rounded-full" style={avatar}>
         <Text className="text-[14px] font-bold text-white">{member.name.slice(0, 1)}</Text>
       </View>
       <View className="flex-1 gap-0.5">
