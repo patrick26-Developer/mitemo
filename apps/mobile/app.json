@@ -5,6 +5,7 @@
     "scheme": "mitemo",
     "version": "0.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
@@ -25,6 +26,15 @@
           "contactsPermission": "Mitemo lit vos contacts pour retrouver ceux qui ont déjà un compte et les ajouter à vos tontines."
         }
       ]
-    ]
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1136B3"
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    }
   }
 }
