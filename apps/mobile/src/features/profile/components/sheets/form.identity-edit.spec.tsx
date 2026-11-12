@@ -27,7 +27,7 @@ describe("IdentityEditForm", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
 
     expect(screen.getByRole("alert")).toBeOnTheScreen();
-    expect(screen.getByLabelText("Prénom")).toHaveStyle({
+    expect(screen.getByLabelText("Prénom").parent).toHaveStyle({
       borderColor: FIELD_CHROME.errorBorder,
       outlineColor: FIELD_CHROME.errorRing,
     });

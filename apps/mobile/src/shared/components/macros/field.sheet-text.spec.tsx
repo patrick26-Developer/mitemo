@@ -27,10 +27,21 @@ describe("SheetTextField", () => {
 
     await fireEvent(screen.getByLabelText("Cotisation"), "focus");
 
-    expect(screen.getByLabelText("Cotisation")).toHaveStyle({
+    expect(screen.getByTestId("sheet-text-field-chrome")).toHaveStyle({
       outlineWidth: 3,
       outlineColor: FIELD_CHROME.focusRing,
     });
+  });
+
+  it("laisse l'habillage à l'enveloppe : le champ garde sa marge au focus, même sur Android", async () => {
+    await renderWithSafeArea(
+      <SheetTextField label="Cotisation" value="" onChangeText={jest.fn()} />,
+    );
+
+    await fireEvent(screen.getByLabelText("Cotisation"), "focus");
+
+    expect(screen.getByTestId("sheet-text-field-chrome")).toHaveStyle({ paddingHorizontal: 16 });
+    expect(screen.getByLabelText("Cotisation")).toHaveStyle({ padding: 0, borderWidth: 0 });
   });
 
   it("dessine une bordure et un anneau rouges sur une saisie refusée", async () => {
@@ -38,7 +49,7 @@ describe("SheetTextField", () => {
       <SheetTextField label="Cotisation" value="" onChangeText={jest.fn()} invalid />,
     );
 
-    expect(screen.getByLabelText("Cotisation")).toHaveStyle({
+    expect(screen.getByTestId("sheet-text-field-chrome")).toHaveStyle({
       borderColor: FIELD_CHROME.errorBorder,
       outlineWidth: 3,
       outlineColor: FIELD_CHROME.errorRing,

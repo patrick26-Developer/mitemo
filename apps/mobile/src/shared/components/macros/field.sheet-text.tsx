@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import type { KeyboardTypeOptions } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
+import { FIELD_INPUT_RESET } from "../../theme/theme.field-input";
 
 /** Props d'un champ texte de feuille. */
 export interface SheetTextFieldProps {
@@ -44,22 +45,31 @@ export function SheetTextField(props: SheetTextFieldProps) {
   return (
     <View className="gap-1.5">
       <Text className="text-[12px] font-semibold uppercase text-muted">{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        accessibilityLabel={label}
-        autoCapitalize="words"
-        autoCorrect={false}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        placeholder={placeholder}
-        placeholderTextColor="#8A90A2"
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        className="h-12 rounded-[14px] border px-4 text-[15px] text-ink"
-        style={fieldChrome({ focused, invalid })}
-      />
+      <View
+        testID="sheet-text-field-chrome"
+        className="h-12 flex-row items-center rounded-[14px] border"
+        style={[styles.chrome, fieldChrome({ focused, invalid })]}
+      >
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          accessibilityLabel={label}
+          autoCapitalize="words"
+          autoCorrect={false}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          placeholderTextColor="#8A90A2"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="flex-1 text-[15px] text-ink"
+          style={FIELD_INPUT_RESET}
+        />
+      </View>
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
     </View>
   );
 }
+
+/** Marge horizontale de l'enveloppe du champ. */
+const styles = StyleSheet.create({ chrome: { paddingHorizontal: 16 } });
