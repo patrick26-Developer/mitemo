@@ -49,6 +49,7 @@ describe("ActionsDock", () => {
   it("ne rend rien sans action", async () => {
     await renderWithSafeArea(<ActionsDock primary={null} secondary={null} />);
 
+    expect(screen.getByTestId("actions-dock-empty")).toHaveStyle({ height: 0 });
     expect(screen.queryByTestId("actions-dock")).not.toBeOnTheScreen();
   });
 });

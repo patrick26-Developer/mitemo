@@ -21,6 +21,8 @@ export interface TontineMemberListProps {
   readonly onRemove: (memberId: string) => void;
   /** Annule une invitation envoyée ; l'administrateur seul la reçoit. */
   readonly onCancelInvitation?: (invitationId: string) => void;
+  /** Membre dont la fiche s'ouvre d'emblée, demandé par une notification. */
+  readonly focusMemberId?: string | null;
 }
 
 /**
@@ -30,12 +32,14 @@ export interface TontineMemberListProps {
  * complète, avec recherche et filtres. Ouvre l'historique de cotisation d'un
  * membre au clic, et laisse l'administrateur retirer un membre avant le
  * départ, après confirmation.
- * @param props Tontine affichée, retrait d'un membre et annulation d'une invitation.
+ * @param props Tontine, retrait, annulation et membre à ouvrir d'emblée.
  * @returns L'aperçu, la feuille d'historique et la confirmation de retrait.
  */
 export function TontineMemberList(props: TontineMemberListProps) {
-  const { item, onRemove, onCancelInvitation } = props;
-  const [selected, setSelected] = useState<TontineMember | null>(null);
+  const { item, onRemove, onCancelInvitation, focusMemberId = null } = props;
+  const [selected, setSelected] = useState<TontineMember | null>(
+    () => item.members.find((member) => member.id === focusMemberId) ?? null,
+  );
   const [removing, setRemoving] = useState<TontineMember | null>(null);
 
   return (

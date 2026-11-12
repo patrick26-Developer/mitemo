@@ -1,10 +1,15 @@
-# Parcours critique : création d'un compte, choix du code PIN et arrivée sur l'accueil.
+# Parcours critique : présentation au premier lancement, création d'un compte,
+# choix du code PIN et arrivée sur l'accueil.
 # Lancement : maestro test -e APP_ID=<identifiant de l'application> apps/mobile/.maestro
 appId: ${APP_ID}
 ---
 - launchApp:
     clearState: true
     clearKeychain: true
+- assertVisible: "Vos tontines, sans cahier"
+- tapOn: "Suivant"
+- assertVisible: "Cotisez en un geste"
+- tapOn: "Passer"
 - assertVisible: "Bon retour !"
 - tapOn: "Créer un compte"
 - tapOn: "Prénom"

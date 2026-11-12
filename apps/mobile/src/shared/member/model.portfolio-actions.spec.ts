@@ -77,8 +77,18 @@ describe("contributeTontine", () => {
     expect(canPayContribution(firstOf(state().tontines))).toBe(false);
   });
 
-  it("refuse une cotisation déjà réglée", () => {
+  it("cotise le tour suivant d'avance quand le tour en cours est réglé", () => {
     const paid = makeTontine({ members: [makeMember(SELF_MEMBER_ID, "ADMIN", true)] });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [paid] });
+
+    actions.contributeTontine("t1");
+
+    expect(state().tontines[0]?.members[0]?.prepaidRounds).toBe(1);
+  });
+
+  it("refuse une cotisation quand tous les tours restants sont réglés", () => {
+    const self = { ...makeMember(SELF_MEMBER_ID, "ADMIN", true), prepaidRounds: 2 };
+    const paid = makeTontine({ members: [self] });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [paid] });
 
     expect(() => actions.contributeTontine("t1")).toThrow(ForbiddenOperationError);

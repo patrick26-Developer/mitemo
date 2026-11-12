@@ -72,7 +72,7 @@ describe("TontineDetailDock", () => {
     expect(screen.getByTestId("sheet-primary-accent")).toBeOnTheScreen();
   });
 
-  it("ne propose rien quand le membre a payé mais que les autres non", async () => {
+  it("propose de cotiser le tour suivant d'avance une fois le tour réglé", async () => {
     await renderWithSafeArea(
       <TontineDetailDock
         item={makeTontine({
@@ -83,8 +83,23 @@ describe("TontineDetailDock", () => {
       />,
     );
 
-    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Cotiser d'avance 5 000 FCFA" }));
+
+    expect(await screen.findByText("2 sur 3")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
+  });
+
+  it("ne propose plus rien quand le total à verser est atteint", async () => {
+    const self = { ...makeMember(SELF_MEMBER_ID, "ADMIN", true), prepaidRounds: 2 };
+    await renderWithSafeArea(
+      <TontineDetailDock
+        item={makeTontine({ members: [self, makeMember("m2", "MEMBRE")] })}
+        actions={makeActions()}
+        onLayout={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
   });
 
   it("demande confirmation avant de distribuer la cagnotte", async () => {

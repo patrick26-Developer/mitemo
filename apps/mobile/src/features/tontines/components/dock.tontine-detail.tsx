@@ -16,6 +16,7 @@ import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
 import { selfDue } from "../../../shared/member/model.tontine-turns";
+import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
 const CONFIRM_ROUND: ConfirmSheetContent = {
@@ -31,6 +32,8 @@ export interface TontineDetailDockProps {
   readonly actions: TontineActionsState;
   /** Mesure du dock, pour que le contenu réserve sa hauteur réelle. */
   readonly onLayout: (event: LayoutChangeEvent) => void;
+  /** Ouvre d'emblée la feuille « Cotiser », demandée par une notification. */
+  readonly initialPay?: boolean;
 }
 
 /** Actions de la tontine et ouverture des feuilles du dock. */
@@ -56,9 +59,21 @@ function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null
   }
   if (item.state !== "ACTIVE") return null;
   if (canConfirmRound(item)) return { label: "Confirmer la restourne", onPress: askConfirm };
-  if (canPayContribution(item)) {
-    return { label: `Cotiser ${formatAmount(selfDue(item))} FCFA`, onPress: askPay };
-  }
+
+  return payAction(item, askPay);
+}
+
+/**
+ * Propose de cotiser le tour en cours, ou le tour suivant d'avance une fois
+ * le tour réglé, tant que le total (cotisation × tours) n'est pas atteint.
+ * @param item Tontine affichée.
+ * @param askPay Ouvre la feuille de paiement.
+ * @returns L'action de cotisation, ou `null` quand tout est déjà versé.
+ */
+function payAction(item: Tontine, askPay: () => void): DockAction | null {
+  const amount = `${formatAmount(selfDue(item))} FCFA`;
+  if (canPayContribution(item)) return { label: `Cotiser ${amount}`, onPress: askPay };
+  if (canPayAhead(item)) return { label: `Cotiser d'avance ${amount}`, onPress: askPay };
 
   return null;
 }
@@ -80,9 +95,11 @@ function tinted(action: DockAction | null, item: Tontine): DockAction | null {
  * @returns Le dock flottant et sa confirmation.
  */
 export function TontineDetailDock(props: TontineDetailDockProps) {
-  const { item, actions, onLayout } = props;
+  const { item, actions, onLayout, initialPay = false } = props;
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(
+    () => initialPay && payAction(item, () => undefined) !== null,
+  );
   const handlers = {
     actions,
     askConfirm: () => setConfirmOpen(true),

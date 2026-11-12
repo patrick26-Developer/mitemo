@@ -1,11 +1,13 @@
 import type { Tontine } from "../member/model.portfolio";
+import { AMIS_ACTIVITY, MARCHE_TOLAL_ACTIVITY } from "./demo.activity";
 
 /**
  * Tontines livrées avec l'application tant que l'API n'est pas branchée.
  * Le membre connecté administre la première et participe à la deuxième en
  * simple membre : les deux vues de l'écran de détail sont ainsi visibles.
  * Mama Nadège a pris deux tours dans la première, placés à la suite (2 et 3),
- * et chaque bénéficiaire suit l'ordre de passage.
+ * et chaque bénéficiaire suit l'ordre de passage. Les deux premières ont un
+ * fil d'activité, relayé dans les notifications.
  */
 export const INITIAL_TONTINES: readonly Tontine[] = [
   {
@@ -22,6 +24,7 @@ export const INITIAL_TONTINES: readonly Tontine[] = [
     headerColors: ["#2CCA86", "#62F79D"],
     invitationCode: null,
     invitations: [],
+    activity: MARCHE_TOLAL_ACTIVITY,
     members: [
       { id: "self", name: "Précieuse Mavoungou", role: "ADMIN", paidCurrentRound: true, turns: 1 },
       { id: "m2", name: "Mama Nadège", role: "MEMBRE", paidCurrentRound: true, turns: 2 },
@@ -48,6 +51,7 @@ export const INITIAL_TONTINES: readonly Tontine[] = [
     headerColors: ["#F5B94A", "#FAD98C"],
     invitationCode: null,
     invitations: [],
+    activity: AMIS_ACTIVITY,
     members: [
       { id: "m1", name: "Serge Makosso", role: "ADMIN", paidCurrentRound: true, turns: 1 },
       {

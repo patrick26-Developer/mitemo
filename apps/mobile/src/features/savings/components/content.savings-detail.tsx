@@ -12,17 +12,19 @@ import { SavingsTontinePanel } from "./panel.savings-tontine";
 /** Props du contenu d'une carte trouvée. */
 export interface SavingsDetailContentProps {
   readonly item: SavingsCard;
+  /** Ouvre d'emblée le pointage, demandé par une notification. */
+  readonly initialPay?: boolean;
 }
 
 /**
  * Affiche la synthèse, la carte récapitulative, l'historique des pointages et
  * la tontine rattachée d'une carte de pointage. Les actions vivent dans le dock, qui reste visible pendant le
  * défilement.
- * @param props Carte à afficher.
+ * @param props Carte à afficher et ouverture d'emblée du pointage.
  * @returns Le contenu détaillé de la carte.
  */
 export function SavingsDetailContent(props: SavingsDetailContentProps) {
-  const { item } = props;
+  const { item, initialPay = false } = props;
   const inset = useDockInset();
   const actions = useSavingsActions(item);
   const tontine = usePortfolioStore((state) =>
@@ -33,7 +35,7 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
     <View className="flex-1">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-5 px-4"
+        contentContainerClassName="gap-5 px-4 pt-5"
         contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
       >
         <SavingsRecapCard item={item} tontineName={tontine?.name ?? null} />
@@ -43,7 +45,12 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
         )}
         <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
       </ScrollView>
-      <SavingsDetailDock item={item} actions={actions} onLayout={inset.onDockLayout} />
+      <SavingsDetailDock
+        item={item}
+        actions={actions}
+        onLayout={inset.onDockLayout}
+        initialPay={initialPay}
+      />
     </View>
   );
 }

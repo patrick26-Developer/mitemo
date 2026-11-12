@@ -1,7 +1,8 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { accentColors } from "../../model/model.accent-color";
 import { PALETTE } from "../../theme/theme.palette";
@@ -52,7 +53,8 @@ function BackButton(props: BackButtonProps) {
 
 /**
  * Affiche un bouton de retour, le titre de l'écran de détail et ses actions
- * rapides à droite.
+ * rapides à droite, sur un fond blanc qui se fond en dégradé dans le contenu
+ * qui défile dessous.
  * @param props Titre de l'écran, couleur d'action et actions.
  * @returns L'en-tête de détail.
  */
@@ -60,7 +62,8 @@ export function DetailHeader(props: DetailHeaderProps) {
   const { title, accent, actions = [] } = props;
 
   return (
-    <View className="flex-row items-center gap-3 px-4 pb-5">
+    <View className="z-10 flex-row items-center gap-3 bg-white px-4 pb-1">
+      <HeaderFade />
       <BackButton accent={accent} />
       <Text
         accessibilityRole="header"
@@ -101,3 +104,27 @@ function HeaderActionButton(props: HeaderActionButtonProps) {
     </Pressable>
   );
 }
+
+/** Couleurs du fondu sous l'en-tête : blanc en haut, transparent en bas. */
+const FADE_COLORS = ["#FFFFFF", "rgba(255, 255, 255, 0)"] as const;
+
+/**
+ * Fondu posé sous l'en-tête : le contenu qui remonte disparaît en douceur
+ * au lieu d'être coupé net.
+ * @returns Le dégradé, qui laisse passer les touchers.
+ */
+function HeaderFade() {
+  return (
+    <LinearGradient
+      testID="detail-header-fade"
+      pointerEvents="none"
+      colors={FADE_COLORS}
+      style={styles.fade}
+    />
+  );
+}
+
+/** Position du fondu, juste sous l'en-tête, que Tailwind n'exprime pas côté natif. */
+const styles = StyleSheet.create({
+  fade: { position: "absolute", left: 0, right: 0, top: "100%", height: 24 },
+});

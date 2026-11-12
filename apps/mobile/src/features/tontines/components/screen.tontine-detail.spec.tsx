@@ -34,6 +34,18 @@ describe("TontineDetailScreen", () => {
     expect(screen.getByText("Membres : ")).toBeOnTheScreen();
   });
 
+  it("s'ouvre sur la feuille « Cotiser » depuis la notification de cotisation", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="2" focus={{ pay: true, memberId: null }} />);
+
+    expect(await screen.findByRole("header", { name: "Cotiser" })).toBeOnTheScreen();
+  });
+
+  it("s'ouvre sur la fiche du membre dont parle la notification", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="1" focus={{ pay: false, memberId: "m9" }} />);
+
+    expect(await screen.findByRole("header", { name: "David Nkodia" })).toBeOnTheScreen();
+  });
+
   it("affiche le cycle et le bénéficiaire", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
@@ -42,10 +54,10 @@ describe("TontineDetailScreen", () => {
     expect(screen.getAllByText("Mama Nadège").length).toBeGreaterThan(0);
   });
 
-  it("ne propose aucune action quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
+  it("propose de cotiser d'avance quand la cotisation est réglée mais que le tour n'est pas complet", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 
-    expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: /^Cotiser d'avance/ })).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 

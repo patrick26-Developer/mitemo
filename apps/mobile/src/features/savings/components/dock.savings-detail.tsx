@@ -25,6 +25,8 @@ export interface SavingsDetailDockProps {
   readonly actions: SavingsActionsState;
   /** Mesure du dock, pour que le contenu réserve sa hauteur réelle. */
   readonly onLayout: (event: LayoutChangeEvent) => void;
+  /** Ouvre d'emblée le pointage, demandé par une notification. */
+  readonly initialPay?: boolean;
 }
 
 /**
@@ -48,9 +50,9 @@ function pointAction(item: SavingsCard, onPress: () => void): DockAction | null 
  * @returns Le dock, la feuille de paiement et la confirmation.
  */
 export function SavingsDetailDock(props: SavingsDetailDockProps) {
-  const { item, actions, onLayout } = props;
+  const { item, actions, onLayout, initialPay = false } = props;
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(() => initialPay && cardCapabilities(item).canContribute);
   const { canWithdraw } = cardCapabilities(item);
 
   return (

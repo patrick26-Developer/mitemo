@@ -60,6 +60,23 @@ describe("confirmRound", () => {
     expect(state().tontines[0]?.round).toBe(2);
   });
 
+  it("règle d'office le nouveau tour d'un membre qui a cotisé d'avance", () => {
+    const paid = makeTontine({
+      members: [
+        { ...makeMember(SELF_MEMBER_ID, "ADMIN", true), prepaidRounds: 1 },
+        makeMember("m2", "MEMBRE", true),
+        makeMember("m3", "MEMBRE", true),
+      ],
+    });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [paid] });
+
+    actions.confirmRound("t1");
+
+    const members = state().tontines[0]?.members ?? [];
+    expect(members.map((member) => member.paidCurrentRound)).toEqual([true, false, false]);
+    expect(members[0]?.prepaidRounds).toBe(0);
+  });
+
   it("refuse la confirmation tant que tous les membres n'ont pas versé", () => {
     const { actions } = makePortfolio(TEST_PORTFOLIO);
 

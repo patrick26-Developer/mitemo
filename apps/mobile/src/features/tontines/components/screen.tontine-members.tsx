@@ -3,6 +3,7 @@ import { EmptyState } from "../../../shared/components/macros/state.empty";
 import { ScreenFrame } from "../../../shared/components/macros/frame.screen";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
+import { findTontine } from "../model/model.find-tontine";
 import { TontineMembersContent } from "./content.tontine-members";
 
 /** Props de l'écran de la liste complète des membres. */
@@ -13,12 +14,13 @@ export interface TontineMembersScreenProps {
 
 /**
  * Écran de la liste complète des membres d'une tontine, ouvert depuis
- * « Voir tous les membres » : recherche, filtres et lignes de chaque membre.
+ * « Voir tous les membres » : recherche, filtres et lignes de chaque membre,
+ * y compris pour la tontine d'une invitation pas encore acceptée.
  * @param props Identifiant de la tontine.
  * @returns L'écran des membres, ou l'état vide d'une tontine introuvable.
  */
 export function TontineMembersScreen(props: TontineMembersScreenProps) {
-  const tontine = usePortfolioStore((state) => state.tontines.find((item) => item.id === props.id));
+  const tontine = usePortfolioStore((state) => findTontine(state, props.id));
 
   return (
     <ScreenFrame>

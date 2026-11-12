@@ -4,6 +4,7 @@ import Animated from "react-native-reanimated";
 
 import { useTabItemAnimation } from "../../hooks/hook.tab-item-animation";
 import { PALETTE } from "../../theme/theme.palette";
+import { CountBadge } from "./badge.count";
 
 /** Props d'un onglet de la barre de navigation. */
 export interface TabItemProps {
@@ -14,15 +15,18 @@ export interface TabItemProps {
   readonly onLongPress: () => void;
   /** Identifiant de test posé sur l'icône. */
   readonly testID?: string;
+  /** Pastille des notifications non lues de l'onglet, absente quand il n'y a rien. */
+  readonly badge?: string | null;
 }
 
 /**
- * Affiche un onglet : icône seule au repos, icône et libellé quand il est actif.
+ * Affiche un onglet : icône seule au repos, icône et libellé quand il est actif,
+ * avec la pastille de ses notifications non lues.
  * @param props Onglet à afficher et actions de pression.
  * @returns La pastille de l'onglet.
  */
 export function TabItem(props: TabItemProps) {
-  const { focused, label, icon: Icon, onPress, onLongPress, testID } = props;
+  const { focused, label, icon: Icon, onPress, onLongPress, testID, badge } = props;
   const { pillStyle, labelStyle, iconStyle } = useTabItemAnimation(focused);
 
   return (
@@ -43,6 +47,7 @@ export function TabItem(props: TabItemProps) {
             fill={focused ? PALETTE.tabInk : "none"}
             strokeWidth={1.8}
           />
+          {badge == null ? null : <CountBadge label={badge} />}
         </Animated.View>
         <Animated.Text numberOfLines={1} style={[styles.label, labelStyle]}>
           {label}

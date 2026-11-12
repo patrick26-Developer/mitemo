@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { HAIRLINE_WIDTH } from "../../theme/theme.hairline-width";
 import { PALETTE } from "../../theme/theme.palette";
+import { CountBadge } from "./badge.count";
 
 /** Variantes de la pastille : posée sur des cartes ou sur le fond de l'écran. */
 export const ACTION_PILL_VARIANTS = ["raised", "flat"] as const;
@@ -17,6 +18,8 @@ export interface ActionPillAction {
   /** Libellé annoncé aux lecteurs d'écran. */
   readonly label: string;
   readonly onPress?: (() => void) | undefined;
+  /** Pastille de compteur posée sur l'icône, absente quand il n'y a rien. */
+  readonly badge?: string | null;
 }
 
 /** Props d'une pastille d'actions rapides. */
@@ -33,7 +36,8 @@ const VARIANTS: Readonly<Record<ActionPillVariant, { container: string; divider:
 };
 
 /**
- * Affiche des actions rapides côte à côte, séparées par un filet vertical.
+ * Affiche des actions rapides côte à côte, séparées par un filet vertical ;
+ * une action peut porter une pastille de compteur.
  * @param props Actions et variante de la pastille.
  * @returns La pastille d'actions.
  */
@@ -59,6 +63,7 @@ export function ActionPill(props: ActionPillProps) {
               onPress={action.onPress}
             >
               <Icon size={20} color={PALETTE.tabInk} />
+              {action.badge == null ? null : <CountBadge label={action.badge} />}
             </Pressable>
           </Fragment>
         );

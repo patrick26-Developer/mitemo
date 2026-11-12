@@ -1,13 +1,9 @@
-import { Bell } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { router } from "expo-router";
 
-import { SheetInfoCard } from "../../../shared/components/macros/card.sheet-info";
-import { SheetSection } from "../../../shared/components/macros/section.sheet";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
-import { SheetText } from "../../../shared/components/atoms/text.sheet";
-import { usePortfolioStore } from "../../../shared/member/store.portfolio";
-import { PALETTE } from "../../../shared/theme/theme.palette";
-import { buildNotifications } from "../model/model.home-notifications";
+import { useNotifications } from "../../../shared/notifications/hook.notifications";
+import { useSeenWhile } from "../../../shared/notifications/hook.seen-while";
+import { NotificationsContent } from "./content.notifications";
 
 /** Props de la feuille des notifications. */
 export interface NotificationsSheetProps {
@@ -16,36 +12,25 @@ export interface NotificationsSheetProps {
 }
 
 /**
- * Affiche les notifications déduites des tontines et des cartes du membre.
+ * Feuille des notifications, toutes sur le même modèle : invitations,
+ * cotisations, restournes, fil des autres membres et cartes. Ouvrir la
+ * feuille vide la pastille de la cloche ; toucher une notification la marque
+ * lue, ferme la feuille et ouvre l'endroit exact qu'elle concerne.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille des notifications.
  */
 export function NotificationsSheet(props: NotificationsSheetProps) {
   const { visible, onClose } = props;
-  const tontines = usePortfolioStore((state) => state.tontines);
-  const cards = usePortfolioStore((state) => state.cards);
-  const notifications = buildNotifications(tontines, cards);
+  const notifications = useNotifications();
+  useSeenWhile(notifications, visible ? "bell" : null);
+  const open = (href: string) => {
+    onClose();
+    router.push(href);
+  };
 
   return (
     <BottomSheet visible={visible} title="Notifications" onClose={onClose}>
-      {notifications.length === 0 ? (
-        <SheetText>Vous êtes à jour : aucune action n&apos;est attendue pour le moment.</SheetText>
-      ) : (
-        <SheetSection title="Récentes">
-          {notifications.map((notification) => (
-            <SheetInfoCard key={notification.id}>
-              <View className="flex-row items-center gap-2">
-                <Bell size={16} color={PALETTE.brand} />
-                <Text className="flex-1 text-[15px] font-semibold text-ink">
-                  {notification.title}
-                </Text>
-                <Text className="text-[11px] text-muted">{notification.time}</Text>
-              </View>
-              <Text className="text-[13px] leading-5 text-muted">{notification.message}</Text>
-            </SheetInfoCard>
-          ))}
-        </SheetSection>
-      )}
+      <NotificationsContent notifications={notifications} onOpen={open} />
     </BottomSheet>
   );
 }
