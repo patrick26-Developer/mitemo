@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "../global.css";
 
 import { launchRoutes, SplashGate, useOnboardingStore } from "../src/features/onboarding";
@@ -12,6 +13,7 @@ import { useSessionStore } from "../src/shared/session/store.session";
  * Attend la restauration serveur avant d'ouvrir le parcours OTP ou le compte.
  * Les routes locales non raccordées restent fermées pour ne pas afficher des
  * données de démonstration comme des données serveur.
+ * Le fournisseur clavier d'Espoir est conservé pour les feuilles Android et iOS.
  * @returns La pile de navigation et la barre d'état.
  */
 export default function RootLayout() {
@@ -22,7 +24,7 @@ export default function RootLayout() {
   if (!ready) return <ActivityIndicator accessibilityLabel="Restauration de la session" />;
 
   return (
-    <>
+    <KeyboardProvider>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected {...routes.member}>
@@ -45,6 +47,6 @@ export default function RootLayout() {
       </Stack>
       <ToastHost />
       <SplashGate />
-    </>
+    </KeyboardProvider>
   );
 }

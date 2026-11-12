@@ -7,9 +7,6 @@ import { PALETTE } from "./theme.palette";
 /** Rayon des coins hauts d'une carte ancrée en bas de l'écran, en points. */
 const SHEET_TOP_RADIUS = 24;
 
-/** Rayon des coins bas d'une carte ancrée en bas de l'écran, en points. */
-const SHEET_BOTTOM_RADIUS = 48;
-
 /** Rembourrage horizontal d'une carte ancrée en bas de l'écran, en points. */
 const SHEET_HORIZONTAL_PADDING = 20;
 
@@ -42,8 +39,8 @@ export function computeSheetCardStyle(layout: SheetLayout): ViewStyle {
     backgroundColor: PALETTE.white,
     borderTopLeftRadius: SHEET_TOP_RADIUS,
     borderTopRightRadius: SHEET_TOP_RADIUS,
-    borderBottomLeftRadius: SHEET_BOTTOM_RADIUS,
-    borderBottomRightRadius: SHEET_BOTTOM_RADIUS,
+    borderBottomLeftRadius: layout.bottomRadius,
+    borderBottomRightRadius: layout.bottomRadius,
     borderTopWidth: SHEET_TOP_BORDER,
     paddingHorizontal: SHEET_HORIZONTAL_PADDING,
     paddingTop: SHEET_TOP_PADDING,

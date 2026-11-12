@@ -1,11 +1,20 @@
 # Exécution du lot mobile connecté Preview
 
 Ce document prépare les opérations ; il n'autorise ni migration distante ni déploiement.
-Le lot part de `develop` à `1ba2e5e717201f40b6bafc0d309f4aa119f65c32`.
+Le lot part de `develop` à `1ba2e5e717201f40b6bafc0d309f4aa119f65c32`,
+puis intègre le correctif clavier Android #125 à `a62b84981e8ad032b6f3c6e076adac4e52a2d169`.
 Après revue et fusion de la PR d'intégration, relever le nouveau SHA de `develop`
 et reconstruire depuis ce SHA. Ne pas employer le `dist` de `.livraison-api`.
 
 ## Informations encore nécessaires
+
+Console Render relevée par Patrick : service `srv-dbq3dfjl550s739etbhg`, Frankfurt,
+Free, branche `develop`, Live affiché `4762fcc` lors du relevé. **Auto-Deploy est
+After CI Checks Pass**, pas Off ; PR Previews Off. Ne pas fusionner la PR #127
+avant passage confirmé à Off ou autorisation explicite de déploiement automatique.
+Le SHA Live doit être relevé de nouveau, car `develop` a avancé pendant les travaux.
+`/health` a répondu 200 après 33 secondes puis à chaud. Les logs sont nécessaires
+pour expliquer ce délai ; ne pas conclure à une panne ou à un réveil sans preuve.
 
 - Neon : confirmer le projet `mitemo`, la branche `br-solitary-mud-benm5t51`,
   son association au compute `ep-frosty-tree-be1lox57`, l'hôte direct complet,

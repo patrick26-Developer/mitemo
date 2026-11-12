@@ -32,6 +32,7 @@ Versions vérifiées dans les paquets installés ; aucune dépendance ajoutée p
 | Driver pg / argon2 | 8.23.1 / 0.45.2 |
 | libphonenumber-js | 1.13.15 |
 | Expo / React / React Native | 58.0.23 / 19.3.0 / 0.88.1 |
+| react-native-keyboard-controller (correctif Espoir #125) | 1.22.7 |
 | Zustand / Zod | 5.1.0 / 4.6.7 |
 | Vitest / Jest / React Native Testing Library | 5.1.0 / 30.5.2 / 14.1.0 |
 | ESLint / Prettier | 10.14.0 / 3.9.10 |
@@ -82,6 +83,7 @@ Voir [le protocole](adr/0006-admission-testeur-preview.md) et [le guide d'exécu
 ## Références officielles
 
 - [Expo : variables d'environnement](https://docs.expo.dev/guides/environment-variables/)
+- [Expo : clavier natif, version recommandée 1.22.7](https://docs.expo.dev/versions/latest/sdk/keyboard-controller/)
 - [Expo : comptes et organisations](https://docs.expo.dev/accounts/account-types/)
 - [Expo : development builds et iOS cloud](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Render : création de déploiement](https://api-docs.render.com/reference/create-deploy)

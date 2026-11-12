@@ -47,7 +47,7 @@ describe("AuthLayout", () => {
       </AuthLayout>,
     );
 
-    expect(screen.getByTestId("auth-sheet")).toHaveStyle({ paddingBottom: 374, marginBottom: 8 });
+    expect(screen.getByTestId("auth-sheet")).toHaveStyle({ paddingBottom: 374, marginBottom: 0 });
   });
 
   it("laisse la carte en place quand le clavier est fermé", async () => {

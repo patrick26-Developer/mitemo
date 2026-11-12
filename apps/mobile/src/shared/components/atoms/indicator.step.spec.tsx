@@ -8,8 +8,8 @@ describe("StepIndicator", () => {
 
     const progress = screen.getByRole("progressbar", { name: "Étape 1 sur 2 : L'essentiel" });
     expect(progress).toHaveAccessibilityValue({ min: 1, max: 2, now: 1 });
-    expect(screen.getByText("Étape 1 sur 2")).toBeOnTheScreen();
-    expect(screen.getByText("L'essentiel")).toBeOnTheScreen();
+    expect(screen.queryByText("Étape 1 sur 2")).toBeNull();
+    expect(screen.queryByText("L'essentiel")).toBeNull();
   });
 
   it("numérote les étapes et relie les pastilles", async () => {
