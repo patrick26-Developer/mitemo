@@ -21,7 +21,7 @@ describe("CardHistoryItem", () => {
     expect(screen.getByRole("checkbox", { name: /Pointage 1/ })).toBeChecked();
     expect(screen.getByText("02/11/2026 à 10:15")).toBeOnTheScreen();
     expect(screen.getByText("Airtel Money")).toBeOnTheScreen();
-    expect(screen.getByTestId("card-history-check")).toHaveStyle({ backgroundColor: "#2AD56E" });
+    expect(screen.getByTestId("check-mark")).toHaveStyle({ backgroundColor: "#2AD56E" });
     expect(screen.getByText("7 000 FCFA")).toBeOnTheScreen();
   });
 

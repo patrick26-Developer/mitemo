@@ -4,7 +4,8 @@ import { Pressable, Text, View } from "react-native";
 import { PALETTE } from "../../../shared/theme/theme.palette";
 import { accentRing } from "../../../shared/theme/theme.field";
 import type { TontineMember } from "../../../shared/member/model.portfolio";
-import { avatarColor } from "../../../shared/model/model.avatar-color";
+import { MemberPhoto } from "../../../shared/components/atoms/photo.member";
+import { useMemberPhotoUri } from "../hooks/hook.member-photo";
 
 /** Couleur de l'état de la cotisation : vert à jour, rouge en attente. */
 const PAYMENT_COLORS = { paid: "#1F8A4C", due: PALETTE.danger } as const;
@@ -33,7 +34,6 @@ export interface TontineMemberRowProps {
  */
 export function TontineMemberRow(props: TontineMemberRowProps) {
   const { member, turnsLabel, focusAccent, onRemove, onPress } = props;
-  const avatar = { backgroundColor: avatarColor(member.name) };
   const focused = focusAccent !== undefined;
 
   return (
@@ -46,9 +46,7 @@ export function TontineMemberRow(props: TontineMemberRowProps) {
       style={focused ? accentRing(focusAccent) : undefined}
       className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >
-      <View className="h-9 w-9 items-center justify-center rounded-full" style={avatar}>
-        <Text className="text-[14px] font-bold text-white">{member.name.slice(0, 1)}</Text>
-      </View>
+      <MemberRowPhoto member={member} />
       <View className="flex-1 gap-0.5">
         <Text className="text-[15px] text-ink" numberOfLines={1}>
           {member.name}
@@ -105,5 +103,30 @@ function MemberDetail(props: MemberDetailProps) {
       {turnsLabel === undefined ? "" : ` · ${turnsLabel}`}
       {focused ? " · À son tour" : ""}
     </Text>
+  );
+}
+
+/** Props de la photo d'une ligne de membre. */
+interface MemberRowPhotoProps {
+  readonly member: TontineMember;
+}
+
+/**
+ * Photo de profil du membre, ou son initiale sur sa couleur propre.
+ * @param props Membre affiché.
+ * @returns Le cercle de la photo.
+ */
+function MemberRowPhoto(props: MemberRowPhotoProps) {
+  const photoUri = useMemberPhotoUri(props.member.id);
+  const { name } = props.member;
+
+  return (
+    <MemberPhoto
+      photoUri={photoUri}
+      initial={name.slice(0, 1)}
+      size={36}
+      seed={name}
+      testID="member-row-photo"
+    />
   );
 }

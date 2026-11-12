@@ -1,14 +1,18 @@
-import { Text } from "react-native";
+import { Hourglass } from "lucide-react-native";
+import { Text, View } from "react-native";
 
-import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
-import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
+import { EmptyState } from "../../../shared/components/macros/state.empty";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine, TontineMember } from "../../../shared/member/model.portfolio";
 import { memberContributions } from "../../../shared/member/model.portfolio";
+import { freeTurns } from "../../../shared/member/model.tontine-turns";
+import { useMemberPhotoUri } from "../hooks/hook.member-photo";
 import { turnsLabel } from "../model/model.member-turns";
+import { MemberRoundItem } from "./item.member-round";
+import { MemberZoomPhoto } from "./photo.member-zoom";
 
-/** Props de la feuille d'historique d'un membre. */
+/** Props de la fiche d'un membre. */
 export interface TontineMemberSheetProps {
   readonly visible: boolean;
   readonly item: Tontine;
@@ -17,42 +21,63 @@ export interface TontineMemberSheetProps {
   readonly onClose: () => void;
 }
 
-/**
- * Construit les lignes de l'historique d'un membre.
- * @param item Tontine concernée.
- * @param member Membre affiché.
- * @returns Les tours et l'état de leur cotisation.
- */
-function historyRows(item: Tontine, member: TontineMember): readonly SheetRecapRow[] {
-  return memberContributions(item, member.id).map((entry) => ({
-    label: `Tour ${entry.round}`,
-    value: `${formatAmount(item.contribution)} FCFA · ${entry.paid ? "Réglé" : "En attente"}`,
-  }));
+/** Props de l'historique d'un membre. */
+interface MemberHistoryProps {
+  readonly item: Tontine;
+  readonly member: TontineMember;
 }
 
 /**
- * Affiche l'historique de cotisation d'un membre dans une feuille, ouvert
- * depuis la liste des membres du tour, avec son rôle et ses tours de passage.
+ * Historique d'un membre : avant le lancement, l'attente des membres ; ensuite,
+ * les tours passés, cochés quand il a cotisé.
+ * @param props Tontine et membre.
+ * @returns L'état d'attente ou la liste des tours.
+ */
+function MemberHistory(props: MemberHistoryProps) {
+  const { item, member } = props;
+  if (item.state === "PENDING") {
+    const missing = freeTurns(item);
+    const who = missing > 1 ? `${missing} membres` : `${missing} membre`;
+    return (
+      <EmptyState
+        icon={Hourglass}
+        title="Tontine en attente"
+        message={`La tontine attend encore ${who} pour débuter.`}
+      />
+    );
+  }
+  const amount = `${formatAmount(item.contribution)} FCFA`;
+
+  return (
+    <View className="gap-2.5">
+      {memberContributions(item, member.id).map((entry) => (
+        <MemberRoundItem
+          key={entry.round}
+          round={entry.round}
+          paid={entry.paid}
+          amount={amount}
+          accent={item.headerColors[0]}
+        />
+      ))}
+    </View>
+  );
+}
+
+/**
+ * Fiche d'un membre : sa photo, agrandissable, son historique de cotisation
+ * et son rôle.
  * @param props Visibilité, tontine, membre et fermeture.
- * @returns La feuille d'historique, ou rien sans membre choisi.
+ * @returns La fiche, ou rien quand aucun membre n'est choisi.
  */
 export function TontineMemberSheet(props: TontineMemberSheetProps) {
   const { visible, item, member, onClose } = props;
+  const photoUri = useMemberPhotoUri(member?.id ?? "");
   if (member === null) return null;
-  const rows = historyRows(item, member);
 
   return (
     <BottomSheet visible={visible} title={member.name} onClose={onClose}>
-      <Text className="text-[14px] leading-5 text-muted">
-        Cotisations de ce membre, tour par tour.
-      </Text>
-      {rows.length === 0 ? (
-        <Text className="text-[14px] text-muted">
-          Aucune cotisation enregistrée pour le moment.
-        </Text>
-      ) : (
-        <SheetRecap title="Historique des cotisations" rows={rows} />
-      )}
+      {photoUri === null ? null : <MemberZoomPhoto photoUri={photoUri} name={member.name} />}
+      <MemberHistory item={item} member={member} />
       <Text className="text-[12px] text-muted">
         {`${member.role === "ADMIN" ? "Administrateur de la tontine" : "Membre de la tontine"} · ${turnsLabel(item, member.id)}`}
       </Text>
