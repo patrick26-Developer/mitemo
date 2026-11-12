@@ -9,7 +9,6 @@ import {
   addSaved,
   advanceRound,
   clearSaved,
-  deductSaved,
   findSelfMember,
   markSelfPaid,
   prependCard,
@@ -231,10 +230,6 @@ describe("épargne d'une carte", () => {
     });
 
     expect(updated?.state).toBe("COMPLETED");
-  });
-
-  it("retire un montant de l'épargne", () => {
-    expect(deductSaved([makeCard()], "c1", 5_000n)[0]?.saved).toBe(15_000n);
   });
 
   it("vide l'épargne et clôt la carte", () => {

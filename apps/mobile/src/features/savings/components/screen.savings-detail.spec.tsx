@@ -140,7 +140,9 @@ describe("SavingsDetailScreen", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Régler la cotisation" }));
 
-    expect(useToastStore.getState().toast?.message).toBe("Cotisation de la tontine réglée.");
+    expect(useToastStore.getState().toast?.message).toBe(
+      "Cotisation réglée : la carte repart sur une copie neuve.",
+    );
     expect(firstOf(usePortfolioStore.getState().tontines).members[0]?.paidCurrentRound).toBe(true);
   });
 

@@ -173,23 +173,43 @@ describe("transferCardToTontine", () => {
     const linked = makeCard({ tontineId: "t1" });
     const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, cards: [linked] });
 
-    actions.transferCardToTontine("c1");
+    actions.transferCardToTontine("c1", "2026-12-01");
 
-    expect(state().cards[0]?.saved).toBe(15_000n);
     expect(canPayContribution(firstOf(state().tontines))).toBe(false);
+  });
+
+  it("archive la carte versée, rend le reste au solde et repart sur une copie neuve", () => {
+    const linked = makeCard({ tontineId: "t1" });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, available: 0n, cards: [linked] });
+
+    actions.transferCardToTontine("c1", "2026-12-01");
+
+    const [renewed, paid] = state().cards;
+    expect(paid?.state).toBe("ARCHIVED");
+    expect(state().available).toBe(15_000n);
+    expect(renewed).toMatchObject({
+      name: linked.name,
+      tontineId: "t1",
+      saved: 0n,
+      state: "ACTIVE",
+    });
+    expect(renewed?.id).not.toBe("c1");
+    expect(renewed?.startDate).toBe("2026-12-01");
   });
 
   it("refuse une carte sans tontine rattachée", () => {
     const { actions } = makePortfolio(TEST_PORTFOLIO);
 
-    expect(() => actions.transferCardToTontine("c1")).toThrow(ForbiddenOperationError);
+    expect(() => actions.transferCardToTontine("c1", "2026-12-01")).toThrow(
+      ForbiddenOperationError,
+    );
   });
 
   it("refuse une épargne insuffisante pour la cotisation", () => {
     const linked = makeCard({ tontineId: "t1", saved: 1_000n });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [linked] });
 
-    expect(() => actions.transferCardToTontine("c1")).toThrow(InsufficientFundsError);
+    expect(() => actions.transferCardToTontine("c1", "2026-12-01")).toThrow(InsufficientFundsError);
   });
 });
 

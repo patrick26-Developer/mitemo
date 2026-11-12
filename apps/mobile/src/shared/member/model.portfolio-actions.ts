@@ -25,7 +25,6 @@ import {
   addSaved,
   advanceRound,
   clearSaved,
-  deductSaved,
   markSelfPaid,
   prependCard,
   prependTontine,
@@ -41,6 +40,7 @@ import type { TontineSettings } from "./model.tontine-settings";
 import { adminActions } from "./model.portfolio-admin";
 import { walletActions } from "./model.portfolio-wallet";
 import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
+import { transferAndRenew } from "./model.card-renewal";
 
 /** Mise à jour partielle de l'état du portefeuille. */
 export type PortfolioUpdate =
@@ -82,7 +82,8 @@ export interface PortfolioState {
   withdrawCard: (cardId: string) => void;
   /** Retire une partie du solde disponible vers l'opérateur mobile du membre. */
   withdrawAvailable: (amount: bigint) => void;
-  transferCardToTontine: (cardId: string) => void;
+  /** Verse la carte à sa tontine et la fait repartir sur une copie neuve, datée de `today` (UTC). */
+  transferCardToTontine: (cardId: string, today: string) => void;
   reset: () => void;
 }
 
@@ -210,13 +211,15 @@ function withdrawCard(context: PortfolioContext, cardId: string): void {
 }
 
 /**
- * Règle la cotisation de la tontine rattachée avec l'épargne de la carte.
+ * Règle la cotisation de la tontine rattachée avec l'épargne de la carte,
+ * puis fait repartir la carte sur une copie neuve.
  * @param context Accès au store.
  * @param cardId Carte rattachée.
+ * @param today Date du jour, en UTC (`AAAA-MM-JJ`).
  * @throws {ForbiddenOperationError} si la carte n'est rattachée à aucune tontine.
  * @throws {InsufficientFundsError} si l'épargne ne couvre pas la cotisation.
  */
-function transferCardToTontine(context: PortfolioContext, cardId: string): void {
+function transferCardToTontine(context: PortfolioContext, cardId: string, today: string): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.tontineId === null) {
     throw new ForbiddenOperationError("Cette carte n'est liée à aucune tontine.");
@@ -228,7 +231,7 @@ function transferCardToTontine(context: PortfolioContext, cardId: string): void 
     throw new InsufficientFundsError("L'épargne de la carte ne couvre pas la cotisation.");
   }
   context.set((state) => ({
-    cards: deductSaved(state.cards, cardId, due),
+    ...transferAndRenew({ cards: state.cards, available: state.available, card, due, today }),
     tontines: markSelfPaid(state.tontines, tontine.id),
   }));
 }
@@ -254,7 +257,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...walletActions(context),
     contributeCard: (id, payment) => contributeCard(context, id, payment),
     withdrawCard: (id) => withdrawCard(context, id),
-    transferCardToTontine: (id) => transferCardToTontine(context, id),
+    transferCardToTontine: (id, today) => transferCardToTontine(context, id, today),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),
   };
 }
