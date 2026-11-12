@@ -46,7 +46,7 @@ export class IdentityController {
       required: ["phoneNumber", "pin", "displayName"],
       properties: {
         phoneNumber: { type: "string" },
-        pin: { type: "string", pattern: "^[0-9]{6}$" },
+        pin: { type: "string", pattern: "^[0-9]{4}$" },
         displayName: { type: "string" },
       },
     },
@@ -69,7 +69,7 @@ export class IdentityController {
       required: ["phoneNumber", "pin"],
       properties: {
         phoneNumber: { type: "string" },
-        pin: { type: "string", pattern: "^[0-9]{6}$" },
+        pin: { type: "string", pattern: "^(?:[0-9]{4}|[0-9]{6})$" },
       },
     },
   })

@@ -27,7 +27,7 @@ describe("UserRole", () => {
 
 describe("connexion en deux étapes", () => {
   it("vérifie d'abord le numéro et le PIN, puis l'OTP simulé", () => {
-    const start: StartLoginRequest = { phoneNumber: "+242061234567", pin: "123456" };
+    const start: StartLoginRequest = { phoneNumber: "+242061234567", pin: "1234" };
     const challenge: StartLoginResponse = {
       challengeId: "c1" as LoginChallengeId,
       expiresAt: toIsoDateTime("2026-11-07T08:05:00.000Z"),
@@ -35,7 +35,7 @@ describe("connexion en deux étapes", () => {
     };
     const verify: VerifyLoginRequest = { challengeId: challenge.challengeId, otp: "482913" };
 
-    assert.equal(start.pin.length, 6);
+    assert.equal(start.pin.length, 4);
     assert.equal(verify.challengeId, challenge.challengeId);
   });
 

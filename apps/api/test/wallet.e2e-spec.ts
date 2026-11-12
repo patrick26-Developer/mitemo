@@ -33,7 +33,7 @@ describe.runIf(enabled)("Wallet demonstration", () => {
 
   async function login() {
     const client = request.agent(app.getHttpServer()).set("X-Mitemo-Preview-Key", KEY);
-    const credentials = { phoneNumber: "+24206" + randomInt(1000000, 10000000), pin: "493625" };
+    const credentials = { phoneNumber: "+24206" + randomInt(1000000, 10000000), pin: "4936" };
     await client
       .post("/auth/register")
       .send({ ...credentials, displayName: "Démo portefeuille" })
