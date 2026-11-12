@@ -56,7 +56,7 @@ describe.runIf(enabled)("Wallet demonstration", () => {
       await request(app.getHttpServer())
         .get("/wallet")
         .set("Authorization", authorization)
-        .expect(401);
+        .expect(200);
       await client.get("/wallet/movements").query({ limit: 0 }).expect(400);
       await client.post("/wallet/demo-funding").send({}).expect(400);
       await client

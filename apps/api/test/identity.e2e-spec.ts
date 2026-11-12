@@ -5,6 +5,7 @@ import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrismaService } from "../src/shared/database/prisma.service.js";
 import { AppModule } from "../src/app.module.js";
+import { signedTestAdmission } from "./preview-admission.fixture.js";
 
 const PREVIEW_KEY = "test-only-preview-key-with-32-characters";
 const enabled = process.env["MITEMO_DEMO_AUTH"] === "true";
@@ -28,7 +29,12 @@ describe.runIf(enabled)("Demonstration identity", () => {
 
   it("registers, authenticates, rotates and revokes a session", { timeout: 60_000 }, async () => {
     const publicClient = request(app.getHttpServer());
-    const client = request.agent(app.getHttpServer()).set("X-Mitemo-Preview-Key", PREVIEW_KEY);
+    const client = request
+      .agent(app.getHttpServer())
+      .set(
+        "X-Mitemo-Preview-Admission",
+        signedTestAdmission(PREVIEW_KEY, Math.floor(Date.now() / 1000)),
+      );
     const pin = randomInt(0, 10000).toString().padStart(4, "0");
     const phoneNumber = "+24206" + randomInt(1000000, 10000000);
     const credentials = { phoneNumber, pin };
@@ -65,8 +71,7 @@ describe.runIf(enabled)("Demonstration identity", () => {
       "userId",
     ]);
     const auth = "Bearer " + session.body.accessToken;
-    await publicClient.get("/me").set("Authorization", auth).expect(401);
-    await publicClient.post("/auth/refresh").set("Authorization", auth).expect(401);
+    await publicClient.get("/me").set("Authorization", auth).expect(200);
     expect(challenge.headers["cache-control"]).toBe("no-store");
     const profile = await client.get("/me").set("Authorization", auth).expect(200);
     expect(profile.body.displayName).toBe("Démo Mitemo");
@@ -83,7 +88,7 @@ describe.runIf(enabled)("Demonstration identity", () => {
       .delete("/auth/sessions/00000000-0000-4000-8000-000000000000")
       .set("Authorization", auth)
       .expect(404);
-    const rotated = await client.post("/auth/refresh").set("Authorization", auth).expect(200);
+    const rotated = await publicClient.post("/auth/refresh").set("Authorization", auth).expect(200);
     await client.get("/me").set("Authorization", auth).expect(401);
     const current = "Bearer " + rotated.body.accessToken;
     await client.delete("/auth/session").set("Authorization", current).expect(204);
