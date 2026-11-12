@@ -1,15 +1,29 @@
 import { act, renderHook } from "@testing-library/react-native";
 
+import { useToastStore } from "../feedback/store.toast";
 import { usePortfolioFeedback } from "./hook.portfolio-feedback";
 
-describe("usePortfolioFeedback", () => {
-  it("commence sans message", async () => {
-    const { result } = await renderHook(() => usePortfolioFeedback());
+/**
+ * Lit le toast affiché, sans son identifiant.
+ * @returns La nature et le message du toast, ou `null`.
+ */
+function shownToast() {
+  const toast = useToastStore.getState().toast;
+  return toast === null ? null : { kind: toast.kind, message: toast.message };
+}
 
-    expect(result.current.feedback).toBeNull();
+describe("usePortfolioFeedback", () => {
+  beforeEach(() => {
+    useToastStore.getState().dismiss();
   });
 
-  it("annonce le succès et indique que l'opération a réussi", async () => {
+  it("n'affiche rien avant la première opération", async () => {
+    await renderHook(() => usePortfolioFeedback());
+
+    expect(shownToast()).toBeNull();
+  });
+
+  it("annonce le succès dans un toast et indique que l'opération a réussi", async () => {
     const { result } = await renderHook(() => usePortfolioFeedback());
     const action = jest.fn();
     let succeeded = false;
@@ -20,7 +34,7 @@ describe("usePortfolioFeedback", () => {
 
     expect(action).toHaveBeenCalledTimes(1);
     expect(succeeded).toBe(true);
-    expect(result.current.feedback).toEqual({ kind: "success", message: "C'est fait." });
+    expect(shownToast()).toEqual({ kind: "success", message: "C'est fait." });
   });
 
   it("affiche le message métier d'une opération refusée", async () => {
@@ -34,7 +48,7 @@ describe("usePortfolioFeedback", () => {
     });
 
     expect(succeeded).toBe(false);
-    expect(result.current.feedback).toEqual({ kind: "error", message: "Solde insuffisant." });
+    expect(shownToast()).toEqual({ kind: "error", message: "Solde insuffisant." });
   });
 
   it("retombe sur un message générique pour une erreur sans texte", async () => {
@@ -46,7 +60,7 @@ describe("usePortfolioFeedback", () => {
       }, "C'est fait.");
     });
 
-    expect(result.current.feedback).toEqual({
+    expect(shownToast()).toEqual({
       kind: "error",
       message: "L'opération n'a pas pu aboutir. Réessayez.",
     });
@@ -62,6 +76,6 @@ describe("usePortfolioFeedback", () => {
       result.current.run(() => undefined, "Second versement.");
     });
 
-    expect(result.current.feedback).toEqual({ kind: "success", message: "Second versement." });
+    expect(shownToast()).toEqual({ kind: "success", message: "Second versement." });
   });
 });

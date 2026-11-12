@@ -116,6 +116,24 @@ describe("PinScreen", () => {
     expect(useSessionStore.getState().signedIn).toBe(false);
   });
 
+  it("indique la deuxième étape de l'inscription", async () => {
+    useAuthDraft
+      .getState()
+      .startSignUp({ firstName: "Aimée", lastName: "Mbemba", occupation: "Commerçante" }, PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 2 sur 2 : Votre code PIN" }),
+    ).toBeOnTheScreen();
+  });
+
+  it("n'affiche pas d'étape à la connexion", async () => {
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
+
   it("enregistre l'identité à la fin d'une inscription", async () => {
     useAuthDraft
       .getState()
@@ -140,5 +158,15 @@ describe("PinScreen", () => {
     await renderWithSafeArea(<PinScreen />);
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/(auth)/sign-in"));
+  });
+
+  it("explique le code oublié dans une feuille, pas dans une alerte", async () => {
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Code PIN oublié" }));
+
+    expect(screen.getByRole("header", { name: "Code PIN oublié" })).toBeOnTheScreen();
+    expect(screen.getByText(/réinitialisation par SMS/)).toBeOnTheScreen();
   });
 });

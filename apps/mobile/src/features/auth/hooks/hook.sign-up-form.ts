@@ -3,10 +3,12 @@ import { useState } from "react";
 
 import { useAuthDraft } from "../model/model.auth-draft";
 import type { SignUpIdentity } from "../model/model.auth-draft";
+import type { SignUpInvalidFields } from "../model/model.auth-form";
 import {
   PHONE_DIGITS,
   isValidPhoneDigits,
   signUpError,
+  signUpInvalidFields,
   toInternationalPhone,
 } from "../model/model.auth-form";
 
@@ -24,6 +26,14 @@ interface SignUpFormState {
   readonly digits: string;
   readonly error: string;
 }
+
+/** Aucun champ à signaler tant que la saisie n'a pas été soumise. */
+const NO_INVALID: SignUpInvalidFields = {
+  firstName: false,
+  lastName: false,
+  occupation: false,
+  digits: false,
+};
 
 /** État initial du formulaire. */
 const INITIAL_FORM: SignUpFormState = {
@@ -57,6 +67,28 @@ function identityOf(state: SignUpFormState): SignUpIdentity {
 }
 
 /**
+ * Valide la première étape, puis ouvre le choix du code ou signale le refus.
+ * @param state Saisie courante.
+ * @param startSignUp Mémorise l'identité et le numéro du brouillon.
+ * @param report Affiche le message à corriger.
+ */
+function submitSignUp(
+  state: SignUpFormState,
+  startSignUp: (identity: SignUpIdentity, phone: string) => void,
+  report: (message: string) => void,
+): void {
+  const error = signUpError(state);
+
+  if (error !== "") {
+    report(error);
+    return;
+  }
+
+  startSignUp(identityOf(state), toInternationalPhone(state.digits));
+  router.push("/(auth)/pin");
+}
+
+/**
  * Gère l'identité, le numéro et la validation de la première étape
  * d'inscription.
  * @returns Les champs, les messages et les actions du formulaire.
@@ -68,19 +100,19 @@ export function useSignUpForm() {
     setState((current) => ({ ...current, [field]: value, error: "" }));
   };
   const submit = () => {
-    const error = signUpError(state);
-
-    if (error !== "") {
-      setState((current) => ({ ...current, error }));
-      return;
-    }
-
-    startSignUp(identityOf(state), toInternationalPhone(state.digits));
-    router.push("/(auth)/pin");
+    submitSignUp(state, startSignUp, (error) => setState((current) => ({ ...current, error })));
   };
   const message = state.error !== "" ? state.error : phoneHint(state.digits);
+  const invalid = message === "" ? NO_INVALID : signUpInvalidFields(state);
 
-  return { ...state, message, validPhone: isValidPhoneDigits(state.digits), submit, update };
+  return {
+    ...state,
+    message,
+    invalid,
+    validPhone: isValidPhoneDigits(state.digits),
+    submit,
+    update,
+  };
 }
 
 /** Champs et actions exposés par {@link useSignUpForm}. */

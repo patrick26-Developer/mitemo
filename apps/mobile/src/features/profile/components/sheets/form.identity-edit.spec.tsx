@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../../shared/member/store.member";
 import { renderWithSafeArea } from "../../../../shared/testing/util.render-with-safe-area";
+import { FIELD_CHROME } from "../../../../shared/theme/theme.field";
 import { IdentityEditForm } from "./form.identity-edit";
 
 describe("IdentityEditForm", () => {
@@ -26,17 +27,17 @@ describe("IdentityEditForm", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
 
     expect(screen.getByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Prénom")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
     expect(onDone).not.toHaveBeenCalled();
   });
 
-  it("se ferme sans rien changer à l'annulation", async () => {
-    const onDone = jest.fn();
-    await renderWithSafeArea(<IdentityEditForm onDone={onDone} />);
+  it("ne propose qu'Enregistrer, la croix de la feuille servant à abandonner", async () => {
+    await renderWithSafeArea(<IdentityEditForm onDone={jest.fn()} />);
 
-    await fireEvent.changeText(screen.getByLabelText("Prénom"), "Aimée");
-    await fireEvent.press(screen.getByRole("button", { name: "Annuler la modification" }));
-
-    expect(useMemberStore.getState().firstName).toBe("Précieuse");
-    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Enregistrer" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
   });
 });

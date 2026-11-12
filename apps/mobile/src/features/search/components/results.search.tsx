@@ -1,3 +1,4 @@
+import { Search } from "lucide-react-native";
 import { EmptyState } from "../../../shared/components/macros/state.empty";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { groupSearchResults, isSearchPending, searchEntries } from "../model/model.search-content";
@@ -32,6 +33,7 @@ export function SearchResults(props: SearchResultsProps) {
   if (groups.length === 0) {
     return (
       <EmptyState
+        icon={Search}
         title="Aucun résultat"
         message={`Aucune tontine, carte ou page ne correspond à « ${trimmedQuery} ».`}
       />

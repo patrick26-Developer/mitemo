@@ -1,0 +1,40 @@
+import { fireEvent, screen } from "@testing-library/react-native";
+
+import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
+import { FloatDock } from "./dock.float";
+
+describe("FloatDock", () => {
+  it("ne rend rien sans action", async () => {
+    await renderWithSafeArea(<FloatDock action={null} />);
+
+    expect(screen.queryByTestId("float-dock")).toBeNull();
+  });
+
+  it("déclenche l'action pressée", async () => {
+    const onPress = jest.fn();
+    await renderWithSafeArea(<FloatDock action={{ label: "Continuer", onPress }} />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("laisse passer les touchers autour de l'action vers le contenu", async () => {
+    await renderWithSafeArea(<FloatDock action={{ label: "Continuer", onPress: jest.fn() }} />);
+
+    expect(screen.getByTestId("float-dock")).toHaveProp("pointerEvents", "box-none");
+  });
+
+  it("transmet sa hauteur pour que le contenu réserve sa place", async () => {
+    const onLayout = jest.fn();
+    await renderWithSafeArea(
+      <FloatDock action={{ label: "Continuer", onPress: jest.fn() }} onLayout={onLayout} />,
+    );
+
+    await fireEvent(screen.getByTestId("float-dock"), "layout", {
+      nativeEvent: { layout: { height: 90 } },
+    });
+
+    expect(onLayout).toHaveBeenCalledTimes(1);
+  });
+});

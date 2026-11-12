@@ -1,13 +1,12 @@
 import { SELF_MEMBER_ID } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildTontine } from "./model.portfolio-create";
+import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
 
 /** Entrée de création de tontine utilisée par les tests. */
 const TONTINE_INPUT: CreateTontineInput = {
   name: "Tontine des tests",
   contribution: 5_000n,
   frequency: { unit: "semaine", interval: 1 },
-  totalRounds: 10,
   participantCount: 4,
   description: "Une tontine créée en test.",
 };
@@ -15,42 +14,42 @@ const TONTINE_INPUT: CreateTontineInput = {
 /** Entrée de création de carte utilisée par les tests. */
 const CARD_INPUT: CreateCardInput = {
   name: "Carte des tests",
+  goal: 10_000n,
   markerAmount: 2_000n,
   markersTotal: 5,
+  frequency: { unit: "mois", interval: 1 },
+  startDate: "2026-11-01",
   deadline: "2027-01-31",
   tontineId: null,
   description: "Une carte créée en test.",
 };
 
 describe("buildTontine", () => {
-  it("part au premier tour, active, sans code d'invitation", () => {
+  it("attend son départ, au premier tour et sans code d'invitation", () => {
     const created = buildTontine(TONTINE_INPUT, 0);
 
     expect(created.round).toBe(1);
-    expect(created.state).toBe("ACTIVE");
+    expect(created.state).toBe("PENDING");
     expect(created.invitationCode).toBeNull();
-    expect(created.totalRounds).toBe(10);
+    expect(created.totalRounds).toBe(4);
   });
 
-  it("inscrit le membre connecté en administrateur puis les invités", () => {
+  it("inscrit le membre connecté en administrateur, seul au départ", () => {
     const created = buildTontine(TONTINE_INPUT, 0);
 
-    expect(created.members).toHaveLength(4);
+    expect(created.members).toHaveLength(1);
     expect(created.members[0]).toMatchObject({ id: SELF_MEMBER_ID, role: "ADMIN" });
-    expect(created.members.slice(1).every((member) => member.role === "MEMBRE")).toBe(true);
     expect(created.beneficiaryId).toBe(SELF_MEMBER_ID);
   });
 
-  it("nomme les invités au-delà du vivier", () => {
-    const created = buildTontine({ ...TONTINE_INPUT, participantCount: 12 }, 0);
-
-    expect(created.members[10]?.name).toBe("Membre 11");
+  it("compte un tour par participant prévu", () => {
+    expect(buildTontine({ ...TONTINE_INPUT, participantCount: 1 }, 0).totalRounds).toBe(1);
+    expect(buildTontine({ ...TONTINE_INPUT, participantCount: 12 }, 0).totalRounds).toBe(12);
   });
 
-  it("n'inscrit que le membre connecté pour un seul participant", () => {
-    const created = buildTontine({ ...TONTINE_INPUT, participantCount: 1 }, 0);
-
-    expect(created.members).toHaveLength(1);
+  it("nomme les invités au-delà du vivier", () => {
+    expect(buildInvitedMember(9).name).toBe("Membre 11");
+    expect(buildInvitedMember(0).role).toBe("MEMBRE");
   });
 
   it("fait tourner les dégradés selon le rang", () => {

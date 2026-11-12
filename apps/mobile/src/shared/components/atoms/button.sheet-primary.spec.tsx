@@ -28,4 +28,13 @@ describe("SheetPrimaryButton", () => {
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+
+  it("fonce la couleur d'action de l'écran, avec un texte lisible dessus", async () => {
+    await renderWithSafeArea(
+      <SheetPrimaryButton label="Pointer" onPress={jest.fn()} accent="#CFD8FF" />,
+    );
+
+    expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#2044DF" });
+    expect(screen.getByText("Pointer")).toHaveStyle({ color: "#FFFFFF" });
+  });
 });

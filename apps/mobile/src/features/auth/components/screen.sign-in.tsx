@@ -19,7 +19,7 @@ import { PhoneField } from "./field.phone";
  * @returns L'écran de connexion.
  */
 export function SignInScreen() {
-  const { digits, setDigits, valid, error, submit } = useSignInForm();
+  const { digits, setDigits, valid, invalid, error, submit } = useSignInForm();
 
   return (
     <AuthLayout>
@@ -30,7 +30,12 @@ export function SignInScreen() {
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.body).duration(AUTH_ENTRANCE_DURATION)}
       >
-        <PhoneField digits={digits} onChange={setDigits} iconDelay={AUTH_ICON_DELAY} />
+        <PhoneField
+          digits={digits}
+          onChange={setDigits}
+          iconDelay={AUTH_ICON_DELAY}
+          invalid={invalid}
+        />
         <AuthErrorText message={error} />
       </Animated.View>
       <Animated.View

@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
+import { FIELD_CHROME } from "../../../shared/theme/theme.field";
 import { NO_ACCOUNT_ERROR, VAULT_ERROR } from "../hooks/hook.sign-in-form";
 import { INITIAL_AUTH_DRAFT, useAuthDraft } from "../model/model.auth-draft";
 import { registerPin } from "../model/model.pin-auth";
@@ -36,6 +37,18 @@ describe("SignInScreen", () => {
     expect(screen.getByText("Bon retour !")).toBeOnTheScreen();
     expect(screen.getByText("+242")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Se connecter" })).toBeOnTheScreen();
+  });
+
+  it("entoure de rouge un numéro refusé", async () => {
+    await renderWithSafeArea(<SignInScreen />);
+
+    await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "123456789");
+
+    expect(screen.getByTestId("phone-field")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineWidth: 3,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
   });
 
   it("dessine l'icône filaire du téléphone", async () => {

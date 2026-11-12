@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { Keyboard, Platform } from "react-native";
+import { Keyboard, LayoutAnimation, Platform } from "react-native";
 
 import { useKeyboardHeight } from "./hook.keyboard-height";
 
 /** Gestionnaire d'événement clavier réduit à ce que le hook consomme. */
-type KeyboardHandler = (event: { endCoordinates: { height: number } }) => void;
+type KeyboardHandler = (event: { endCoordinates: { height: number }; duration?: number }) => void;
 
 /** Gestionnaires enregistrés, indexés par nom d'événement. */
 const listeners = new Map<string, KeyboardHandler>();
@@ -65,5 +65,29 @@ describe("useKeyboardHeight", () => {
     });
 
     expect(result.current).toBe(280);
+  });
+
+  it("fait glisser la carte au rythme du clavier d'iOS", async () => {
+    const schedule = jest.spyOn(Keyboard, "scheduleLayoutAnimation").mockImplementation(() => {});
+    await renderHook(() => useKeyboardHeight());
+
+    const event = { endCoordinates: { height: 320 }, duration: 250 };
+    await act(async () => {
+      listeners.get("keyboardWillShow")?.(event);
+    });
+
+    expect(schedule).toHaveBeenCalledWith(event);
+  });
+
+  it("adoucit le changement sur Android, dont le clavier ne donne pas de durée", async () => {
+    (Platform as { OS: string }).OS = "android";
+    const configure = jest.spyOn(LayoutAnimation, "configureNext").mockImplementation(() => {});
+    await renderHook(() => useKeyboardHeight());
+
+    await act(async () => {
+      listeners.get("keyboardDidShow")?.({ endCoordinates: { height: 280 } });
+    });
+
+    expect(configure).toHaveBeenCalledWith(LayoutAnimation.Presets.easeInEaseOut);
   });
 });

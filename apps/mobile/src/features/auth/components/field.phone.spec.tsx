@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
+import { FIELD_CHROME } from "../../../shared/theme/theme.field";
 import { PhoneField } from "./field.phone";
 
 describe("PhoneField", () => {
@@ -26,5 +27,26 @@ describe("PhoneField", () => {
     await fireEvent(screen.getByLabelText("Numéro de téléphone"), "blur");
 
     expect(screen.getByDisplayValue("06")).toBeOnTheScreen();
+  });
+
+  it("dessine un anneau bleu au focus", async () => {
+    await render(<PhoneField digits="" onChange={jest.fn()} />);
+
+    await fireEvent(screen.getByLabelText("Numéro de téléphone"), "focus");
+
+    expect(screen.getByTestId("phone-field")).toHaveStyle({
+      outlineWidth: 3,
+      outlineColor: FIELD_CHROME.focusRing,
+    });
+  });
+
+  it("dessine une bordure et un anneau rouges sur un numéro refusé", async () => {
+    await render(<PhoneField digits="123" onChange={jest.fn()} invalid />);
+
+    expect(screen.getByTestId("phone-field")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineWidth: 3,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
   });
 });

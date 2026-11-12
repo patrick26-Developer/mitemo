@@ -5,7 +5,7 @@ import { SegmentedControl } from "./control.segmented";
 
 const OPTIONS = [
   { value: "active", label: "Actives" },
-  { value: "completed", label: "Terminées" },
+  { value: "completed", label: "Archivées" },
 ] as const;
 
 describe("SegmentedControl", () => {
@@ -15,7 +15,7 @@ describe("SegmentedControl", () => {
     );
 
     expect(screen.getByRole("tab", { name: "Actives" })).toBeSelected();
-    expect(screen.getByRole("tab", { name: "Terminées" })).not.toBeSelected();
+    expect(screen.getByRole("tab", { name: "Archivées" })).not.toBeSelected();
   });
 
   it("remonte la valeur de l'option pressée", async () => {
@@ -24,7 +24,7 @@ describe("SegmentedControl", () => {
       <SegmentedControl options={OPTIONS} value="active" onChange={onChange} />,
     );
 
-    fireEvent.press(screen.getByRole("tab", { name: "Terminées" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Archivées" }));
 
     expect(onChange).toHaveBeenCalledWith("completed");
   });

@@ -1,10 +1,6 @@
 import { canPayContribution, SELF_MEMBER_ID } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import {
-  ForbiddenOperationError,
-  InsufficientFundsError,
-  UnknownEntityError,
-} from "./model.portfolio-error";
+import { ForbiddenOperationError, InsufficientFundsError } from "./model.portfolio-error";
 import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   firstOf,
@@ -22,17 +18,19 @@ describe("createTontine", () => {
       name: "Nouvelle tontine",
       contribution: 10_000n,
       frequency: { unit: "mois", interval: 1 },
-      totalRounds: 6,
       participantCount: 3,
       description: "Créée depuis les tests.",
     };
 
-    actions.createTontine(input);
+    const created = actions.createTontine(input);
 
+    expect(created).toBe(state().tontines[0]);
     expect(state().tontines).toHaveLength(2);
     expect(state().tontines[0]?.name).toBe("Nouvelle tontine");
-    expect(state().tontines[0]?.members).toHaveLength(3);
+    expect(state().tontines[0]?.members).toHaveLength(1);
     expect(state().tontines[0]?.members[0]?.role).toBe("ADMIN");
+    expect(state().tontines[0]?.totalRounds).toBe(3);
+    expect(state().tontines[0]?.state).toBe("PENDING");
   });
 });
 
@@ -41,8 +39,11 @@ describe("createCard", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
     const input: CreateCardInput = {
       name: "Nouvelle carte",
+      goal: 10_000n,
       markerAmount: 2_000n,
       markersTotal: 5,
+      frequency: { unit: "mois", interval: 1 },
+      startDate: "2026-11-01",
       deadline: "2027-01-31",
       tontineId: "t1",
       description: "Créée depuis les tests.",
@@ -53,24 +54,27 @@ describe("createCard", () => {
     expect(state().cards[0]?.name).toBe("Nouvelle carte");
     expect(state().cards[0]?.tontineId).toBe("t1");
     expect(state().cards[0]?.saved).toBe(0n);
+    expect(state().cards[0]?.fee).toBe(1_000n);
+    expect(state().cards[0]?.entries).toEqual([]);
   });
 });
 
 describe("contributeTontine", () => {
-  it("débite le solde et marque la cotisation réglée", () => {
+  it("marque la cotisation réglée, payée par l'opérateur, sans toucher au solde de l'app", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
     actions.contributeTontine("t1");
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(TEST_PORTFOLIO.available);
     expect(canPayContribution(firstOf(state().tontines))).toBe(false);
   });
 
-  it("refuse une cotisation au-delà du solde sans rien modifier", () => {
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, available: 1_000n });
+  it("accepte une cotisation même avec un solde vide", () => {
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, available: 0n });
 
-    expect(() => actions.contributeTontine("t1")).toThrow(InsufficientFundsError);
-    expect(state().available).toBe(1_000n);
+    actions.contributeTontine("t1");
+
+    expect(canPayContribution(firstOf(state().tontines))).toBe(false);
   });
 
   it("refuse une cotisation déjà réglée", () => {
@@ -78,46 +82,6 @@ describe("contributeTontine", () => {
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [paid] });
 
     expect(() => actions.contributeTontine("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
-describe("withdrawTontine", () => {
-  it("verse la cagnotte au bénéficiaire et passe au tour suivant", () => {
-    const beneficiary = makeTontine({ beneficiaryId: SELF_MEMBER_ID });
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [beneficiary] });
-
-    actions.withdrawTontine("t1");
-
-    expect(state().available).toBe(30_000n);
-    expect(state().tontines[0]?.round).toBe(2);
-  });
-
-  it("refuse le retrait à un membre qui n'est pas bénéficiaire", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.withdrawTontine("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
-describe("transferToMember", () => {
-  it("débite le solde disponible", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
-
-    actions.transferToMember("t1", "m2", 3_000n);
-
-    expect(state().available).toBe(17_000n);
-  });
-
-  it("refuse un destinataire inconnu", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.transferToMember("t1", "absent", 1_000n)).toThrow(UnknownEntityError);
-  });
-
-  it("refuse un montant supérieur au solde", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.transferToMember("t1", "m2", 50_000n)).toThrow(InsufficientFundsError);
   });
 });
 
@@ -158,38 +122,68 @@ describe("removeMember", () => {
 });
 
 describe("contributeCard", () => {
-  it("débite un marqueur et l'ajoute à l'épargne", () => {
+  /** Pointage payé par Airtel Money. */
+  const PAYMENT = { at: "2026-11-11T09:15:00.000Z", method: "AIRTEL_MONEY" } as const;
+
+  it("ajoute un marqueur payé par Mobile Money sans toucher au solde Mitemo", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
-    actions.contributeCard("c1");
+    actions.contributeCard("c1", PAYMENT);
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(20_000n);
     expect(state().cards[0]?.saved).toBe(25_000n);
+    expect(state().cards[0]?.entries).toEqual([
+      { at: "2026-11-11T09:15:00.000Z", amount: 5_000n, method: "AIRTEL_MONEY" },
+    ]);
   });
 
   it("refuse une carte clôturée", () => {
     const completed = makeCard({ state: "COMPLETED" });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [completed] });
 
-    expect(() => actions.contributeCard("c1")).toThrow(ForbiddenOperationError);
+    expect(() => actions.contributeCard("c1", PAYMENT)).toThrow(ForbiddenOperationError);
   });
 
-  it("refuse un versement au-delà du solde", () => {
+  it("débite le solde quand le marqueur est payé depuis Mitemo", () => {
+    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
+
+    actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" });
+
+    expect(state().available).toBe(15_000n);
+    expect(state().cards[0]?.entries.at(-1)?.method).toBe("MITEMO");
+  });
+
+  it("refuse un paiement depuis Mitemo au-delà du solde", () => {
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, available: 1_000n });
 
-    expect(() => actions.contributeCard("c1")).toThrow(InsufficientFundsError);
+    expect(() => actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" })).toThrow(
+      InsufficientFundsError,
+    );
   });
 });
 
 describe("withdrawCard", () => {
-  it("verse l'épargne sur le solde et vide la carte", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
+  it("verse l'épargne d'une carte remplie sur le solde et l'archive", () => {
+    const full = makeCard({ saved: 30_000n, state: "COMPLETED" });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, cards: [full] });
 
     actions.withdrawCard("c1");
 
-    expect(state().available).toBe(40_000n);
-    expect(state().cards[0]?.saved).toBe(0n);
-    expect(state().cards[0]?.state).toBe("COMPLETED");
+    expect(state().available).toBe(50_000n);
+    expect(state().cards[0]?.state).toBe("ARCHIVED");
+  });
+
+  it("refuse de retirer une carte dont l'objectif n'est pas atteint", () => {
+    const { actions } = makePortfolio(TEST_PORTFOLIO);
+
+    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
+  });
+
+  it("refuse de retirer deux fois une carte archivée", () => {
+    const archived = makeCard({ saved: 30_000n, state: "ARCHIVED" });
+    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [archived] });
+
+    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
   });
 
   it("refuse le retrait d'une carte vide", () => {

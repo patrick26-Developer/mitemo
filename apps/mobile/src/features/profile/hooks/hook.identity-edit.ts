@@ -2,8 +2,14 @@ import { useState } from "react";
 
 import type { MemberProfile } from "../../../shared/member/store.member";
 import { useMemberStore } from "../../../shared/member/store.member";
-import type { ProfileIdentityInput } from "../model/model.profile-identity";
-import { profileIdentityError } from "../model/model.profile-identity";
+import type {
+  ProfileIdentityInput,
+  ProfileIdentityInvalidFields,
+} from "../model/model.profile-identity";
+import {
+  profileIdentityError,
+  profileIdentityInvalidFields,
+} from "../model/model.profile-identity";
 
 /** Champs modifiables du formulaire d'identité. */
 export type IdentityField = "firstName" | "lastName" | "occupation";
@@ -16,9 +22,18 @@ export interface IdentityFormState {
   readonly error: string;
 }
 
+/** Aucun champ à signaler tant que l'enregistrement n'a pas été tenté. */
+const NO_INVALID: ProfileIdentityInvalidFields = {
+  firstName: false,
+  lastName: false,
+  occupation: false,
+};
+
 /** État et actions du formulaire d'identité du profil. */
 export interface IdentityEdit {
   readonly form: IdentityFormState;
+  /** Champs à signaler en rouge, une fois l'enregistrement refusé. */
+  readonly invalid: ProfileIdentityInvalidFields;
   readonly update: (field: IdentityField, value: string) => void;
   readonly save: () => void;
 }
@@ -72,5 +87,7 @@ export function useIdentityEdit(onDone: () => void): IdentityEdit {
     onDone();
   };
 
-  return { form, update, save };
+  const invalid = form.error === "" ? NO_INVALID : profileIdentityInvalidFields(form);
+
+  return { form, invalid, update, save };
 }

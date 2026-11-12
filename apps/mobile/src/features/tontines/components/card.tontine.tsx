@@ -3,9 +3,11 @@ import { Users } from "lucide-react-native";
 import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
+import { NoisePattern } from "../../../shared/components/atoms/pattern.noise";
 import { PressableScale } from "../../../shared/components/atoms/scale.pressable";
 import { BarcodeStrip } from "../../../shared/components/atoms/strip.barcode";
 import { formatAmount } from "../../../shared/format/format.amount";
+import { darkenColor } from "../../../shared/model/model.accent-color";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import { beneficiaryName, formatFrequency } from "../../../shared/member/model.portfolio";
 import { CARD_WIDTH, computeHeaderWidth } from "../../../shared/theme/theme.card-layout";
@@ -38,17 +40,8 @@ function TontineCardBody(props: TontineCardBodyProps) {
 
   return (
     <View className="flex-col gap-4 overflow-hidden rounded-[20px] border border-card-border bg-white/25 p-2">
-      <View className="overflow-hidden rounded-[14px] border border-header-border">
-        <RadialCard
-          colors={item.headerColors}
-          className="h-[84px] items-center justify-center px-3 py-2"
-          width={headerWidth}
-        >
-          <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
-            {item.name}
-          </Text>
-        </RadialCard>
-      </View>
+      <NoisePattern />
+      <TontineCardHeader item={item} headerWidth={headerWidth} />
 
       <View className="gap-6 px-4 pb-4 pt-1">
         <View className="flex-row items-center">
@@ -62,13 +55,45 @@ function TontineCardBody(props: TontineCardBodyProps) {
           </Text>
         </View>
 
-        <TontineRound round={item.round} totalRounds={item.totalRounds} />
+        <TontineRound
+          round={item.round}
+          totalRounds={item.totalRounds}
+          accent={item.headerColors[0]}
+        />
         <BarcodeStrip color={PALETTE.barcodeOnCard} />
 
         <Text className="text-[13px] text-muted">
           Tour de <Text className="font-bold text-ink">{beneficiaryName(item)}</Text>
         </Text>
       </View>
+    </View>
+  );
+}
+
+/**
+ * Bandeau du nom de la tontine, bordé d'une nuance à peine plus foncée que
+ * le bord de son dégradé.
+ * @param props Tontine et largeur calculée du bandeau.
+ * @returns Le bandeau de la carte.
+ */
+function TontineCardHeader(props: TontineCardBodyProps) {
+  const { item, headerWidth } = props;
+
+  return (
+    <View
+      testID="tontine-card-header"
+      className="overflow-hidden rounded-[14px] border"
+      style={{ borderColor: darkenColor(item.headerColors[1]) }}
+    >
+      <RadialCard
+        colors={item.headerColors}
+        className="h-[84px] items-center justify-center px-3 py-2"
+        width={headerWidth}
+      >
+        <Text className="text-[19px] font-medium text-ink" numberOfLines={1}>
+          {item.name}
+        </Text>
+      </RadialCard>
     </View>
   );
 }

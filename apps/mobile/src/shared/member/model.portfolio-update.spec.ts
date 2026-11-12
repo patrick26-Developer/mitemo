@@ -195,14 +195,22 @@ describe("listes", () => {
 
 describe("épargne d'une carte", () => {
   it("ajoute un montant à l'épargne", () => {
-    const [updated] = addSaved([makeCard()], "c1", 5_000n);
+    const [updated] = addSaved([makeCard()], "c1", {
+      at: "2026-11-11T09:15:00.000Z",
+      amount: 5_000n,
+      method: "MTN_MOMO",
+    });
 
     expect(updated?.saved).toBe(25_000n);
     expect(updated?.state).toBe("ACTIVE");
   });
 
   it("clôt la carte quand l'objectif est atteint", () => {
-    const [updated] = addSaved([makeCard()], "c1", 10_000n);
+    const [updated] = addSaved([makeCard()], "c1", {
+      at: "2026-11-11T09:15:00.000Z",
+      amount: 10_000n,
+      method: "MTN_MOMO",
+    });
 
     expect(updated?.state).toBe("COMPLETED");
   });
@@ -212,9 +220,9 @@ describe("épargne d'une carte", () => {
   });
 
   it("vide l'épargne et clôt la carte", () => {
-    const [updated] = clearSaved([makeCard()], "c1");
+    const [updated] = clearSaved([makeCard({ saved: 30_000n, state: "COMPLETED" })], "c1");
 
-    expect(updated?.saved).toBe(0n);
-    expect(updated?.state).toBe("COMPLETED");
+    expect(updated?.saved).toBe(30_000n);
+    expect(updated?.state).toBe("ARCHIVED");
   });
 });

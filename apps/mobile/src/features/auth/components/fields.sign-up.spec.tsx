@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
+import { FIELD_CHROME } from "../../../shared/theme/theme.field";
 import type { SignUpForm } from "../hooks/hook.sign-up-form";
 import { SignUpFields } from "./fields.sign-up";
 
@@ -15,6 +16,7 @@ function emptyForm(): SignUpForm {
     digits: "",
     error: "",
     message: "",
+    invalid: { firstName: false, lastName: false, occupation: false, digits: false },
     validPhone: false,
     submit: jest.fn(),
     update: jest.fn(),
@@ -35,5 +37,25 @@ describe("SignUpFields", () => {
     expect(form.update).toHaveBeenCalledWith("lastName", "Mbemba");
     expect(form.update).toHaveBeenCalledWith("occupation", "Commerçante");
     expect(form.update).toHaveBeenCalledWith("digits", "065706622");
+  });
+
+  it("entoure de rouge les champs signalés", async () => {
+    const form = emptyForm();
+    await render(
+      <SignUpFields
+        form={{
+          ...form,
+          invalid: { firstName: true, lastName: false, occupation: false, digits: false },
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("auth-field-firstName")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+      outlineColor: FIELD_CHROME.errorRing,
+    });
+    expect(screen.getByTestId("auth-field-lastName")).not.toHaveStyle({
+      outlineColor: FIELD_CHROME.errorRing,
+    });
   });
 });

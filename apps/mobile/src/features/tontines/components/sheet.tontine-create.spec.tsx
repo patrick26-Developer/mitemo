@@ -1,48 +1,134 @@
+import { Share } from "react-native";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { TontineCreateSheet } from "./sheet.tontine-create";
 
+/**
+ * Remplit la première étape et passe à la suivante.
+ * @param name Nom de la tontine.
+ */
+async function fillEssentials(name = "Tontine du Marché"): Promise<void> {
+  await fireEvent.changeText(screen.getByLabelText("Nom"), name);
+  await fireEvent.changeText(screen.getByLabelText("Cotisation par tour (FCFA)"), "5000");
+  await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+}
+
+/**
+ * Choisit une fréquence dans la liste ouverte.
+ * @param label Libellé de la fréquence à sélectionner.
+ */
+async function chooseCadence(label: string): Promise<void> {
+  await fireEvent.press(screen.getByTestId("sheet-select-trigger"));
+  await fireEvent.press(screen.getByRole("button", { name: label }));
+}
+
 describe("TontineCreateSheet", () => {
   beforeEach(() => {
     usePortfolioStore.getState().reset();
   });
 
-  it("résume la cagnotte à mesure de la saisie", async () => {
+  it("commence à l'étape 1 sur 4, sans bouton Annuler", async () => {
     await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
 
-    await fireEvent.changeText(screen.getByLabelText("Cotisation par tour (FCFA)"), "5000");
-
-    expect(screen.getByText("Récapitulatif")).toBeOnTheScreen();
-    expect(screen.getByText("Cagnotte par tour")).toBeOnTheScreen();
-    expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
-    expect(screen.getByText("chaque semaine")).toBeOnTheScreen();
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 1 sur 4 : L'essentiel" }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
   });
 
-  it("crée la tontine et ferme la feuille", async () => {
+  it("reste à la première étape tant que le nom manque", async () => {
+    await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(screen.getByText("Donnez un nom à la tontine.")).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
+  });
+
+  it("fait choisir la fréquence dans une liste groupée, sans saisir d'intervalle", async () => {
+    await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
+    await fillEssentials();
+
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 2 sur 4 : La fréquence" }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByLabelText("Intervalle")).toBeNull();
+    expect(screen.getByLabelText("Fréquence des tours : Chaque semaine")).toBeOnTheScreen();
+
+    await chooseCadence("Toutes les 2 semaines");
+
+    expect(screen.getByLabelText("Fréquence des tours : Toutes les 2 semaines")).toBeOnTheScreen();
+  });
+
+  it("règle les participants au compteur et les déduit des tours", async () => {
+    await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
+    await fillEssentials();
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 3 sur 4 : Les participants" }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByLabelText("Tours")).toBeNull();
+
+    await fireEvent.press(screen.getByLabelText("Augmenter Participants"));
+    await fireEvent.press(screen.getByLabelText("Augmenter Participants"));
+
+    expect(screen.getByLabelText("Participants : 8")).toBeOnTheScreen();
+  });
+
+  it("revient à l'étape précédente en gardant la saisie", async () => {
+    await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
+    await fillEssentials();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Retour" }));
+
+    expect(screen.getByDisplayValue("Tontine du Marché")).toBeOnTheScreen();
+  });
+
+  it("résume tout, crée la tontine, puis propose seulement de partager l'invitation", async () => {
+    const share = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: "sharedAction", activityType: undefined });
     const onClose = jest.fn();
     await renderWithSafeArea(<TontineCreateSheet visible onClose={onClose} />);
+    await fillEssentials();
+    await chooseCadence("Toutes les 2 semaines");
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
-    await fireEvent.changeText(screen.getByLabelText("Nom"), "Tontine du Marché");
-    await fireEvent.changeText(screen.getByLabelText("Cotisation par tour (FCFA)"), "5000");
-    await fireEvent.changeText(screen.getByLabelText("Intervalle"), "2");
+    expect(
+      screen.getByRole("progressbar", { name: "Étape 4 sur 4 : Le récapitulatif" }),
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Tontine du Marché")).toBeOnTheScreen();
+    expect(screen.getByText("toutes les 2 semaines")).toBeOnTheScreen();
+    expect(screen.getByText("6 membres")).toBeOnTheScreen();
+    expect(screen.getByText("25 000 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("30 000 FCFA")).toBeOnTheScreen();
+
+    expect(screen.queryByText("Récapitulatif")).toBeNull();
+
     await fireEvent.press(screen.getByRole("button", { name: "Créer la tontine" }));
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByText("Votre tontine est prête")).toBeOnTheScreen();
     const created = usePortfolioStore
       .getState()
       .tontines.find((item) => item.name === "Tontine du Marché");
     expect(created?.frequency).toEqual({ unit: "semaine", interval: 2 });
-  });
+    expect(created?.totalRounds).toBe(6);
 
-  it("refuse une saisie incomplète", async () => {
-    const onClose = jest.fn();
-    await renderWithSafeArea(<TontineCreateSheet visible onClose={onClose} />);
+    const code = screen.getByTestId("tontine-invitation-code");
+    expect(code).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Terminer" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Confirmer" })).toBeNull();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Créer la tontine" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
 
-    expect(screen.getByText("Donnez un nom à la tontine.")).toBeOnTheScreen();
-    expect(onClose).not.toHaveBeenCalled();
+    expect(share).toHaveBeenCalledWith({
+      message: expect.stringContaining(created?.invitationCode ?? "absent") as string,
+    });
   });
 });

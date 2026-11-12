@@ -24,23 +24,27 @@ export function SignUpFields(props: SignUpFieldsProps) {
         value={form.firstName}
         onChangeText={(value) => form.update("firstName", value)}
         iconDelay={AUTH_ICON_DELAY}
+        invalid={form.invalid.firstName}
       />
       <AuthTextField
         kind="lastName"
         value={form.lastName}
         onChangeText={(value) => form.update("lastName", value)}
         iconDelay={AUTH_ICON_DELAY + AUTH_ICON_STEP}
+        invalid={form.invalid.lastName}
       />
       <AuthTextField
         kind="occupation"
         value={form.occupation}
         onChangeText={(value) => form.update("occupation", value)}
         iconDelay={AUTH_ICON_DELAY + AUTH_ICON_STEP * 2}
+        invalid={form.invalid.occupation}
       />
       <PhoneField
         digits={form.digits}
         onChange={(value) => form.update("digits", value)}
         iconDelay={AUTH_ICON_DELAY + AUTH_ICON_STEP * 3}
+        invalid={form.invalid.digits}
       />
     </>
   );

@@ -25,4 +25,16 @@ describe("SavingsDetailContent", () => {
 
     expect(screen.getAllByText("Tontine du marché").length).toBeGreaterThan(0);
   });
+
+  it("affiche la carte récapitulative puis l'historique des pointages", async () => {
+    const card = makeCard({
+      entries: [{ at: "2026-11-02T09:15:00.000Z", amount: 5_000n, method: "AIRTEL_MONEY" }],
+    });
+    usePortfolioStore.setState({ available: 20_000n, tontines: [], cards: [card] });
+    await renderWithSafeArea(<SavingsDetailContent item={card} />);
+
+    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Carte complète" })).toBeOnTheScreen();
+    expect(screen.getByText("02/11/2026 à 10:15")).toBeOnTheScreen();
+  });
 });

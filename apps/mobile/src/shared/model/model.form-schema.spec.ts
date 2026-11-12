@@ -1,6 +1,23 @@
 import { z } from "zod";
 
-import { amountSchema, countSchema, nameSchema, parseWithSchema } from "./model.form-schema";
+import {
+  amountSchema,
+  countSchema,
+  isValidNameInput,
+  nameSchema,
+  parseWithSchema,
+} from "./model.form-schema";
+
+describe("isValidNameInput", () => {
+  it("accepte un nom de 3 à 60 caractères utiles", () => {
+    expect(isValidNameInput("  Tontine  ")).toBe(true);
+  });
+
+  it("refuse un nom trop court ou trop long", () => {
+    expect(isValidNameInput("ab")).toBe(false);
+    expect(isValidNameInput("a".repeat(61))).toBe(false);
+  });
+});
 
 describe("nameSchema", () => {
   const schema = nameSchema("Donnez un nom.");

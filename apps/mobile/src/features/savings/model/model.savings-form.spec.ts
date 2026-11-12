@@ -1,15 +1,24 @@
-import { INITIAL_SAVINGS_FORM, parseSavingsForm, savingsRecap } from "./model.savings-form";
+import {
+  INITIAL_SAVINGS_FORM,
+  SAVINGS_FORM_STEPS,
+  parseSavingsForm,
+  savingsInvalidFields,
+  savingsRecap,
+  savingsStepError,
+} from "./model.savings-form";
+import type { SavingsFormState } from "./model.savings-form";
 
 /** Instant de référence, fixé pour que les tests ne dépendent pas de l'horloge. */
 const NOW = new Date("2026-11-11T09:30:00.000Z");
 
 /** Formulaire complet valide. */
-const VALID_FORM = {
+const VALID_FORM: SavingsFormState = {
   ...INITIAL_SAVINGS_FORM,
   name: "Loyer de Février",
+  goal: "60000",
   markerAmount: "5000",
-  markersTotal: "6",
-  deadline: "28/02/2027",
+  cadence: "semaine-1",
+  deadline: "2027-02-28",
 };
 
 describe("parseSavingsForm", () => {
@@ -20,12 +29,22 @@ describe("parseSavingsForm", () => {
     if (!result.ok) return;
     expect(result.value).toMatchObject({
       name: "Loyer de Février",
+      goal: 60_000n,
       markerAmount: 5_000n,
-      markersTotal: 6,
+      markersTotal: 16,
+      frequency: { unit: "semaine", interval: 1 },
+      startDate: "2026-11-11",
       deadline: "2027-02-28",
       tontineId: null,
     });
-    expect(result.value.description).toContain("5 000 FCFA");
+    expect(result.value.description).toContain("16 pointages");
+  });
+
+  it("déduit les pointages du rythme mensuel", () => {
+    const result = parseSavingsForm({ ...VALID_FORM, cadence: "mois-1" }, NOW);
+
+    expect(result.ok && result.value.markersTotal).toBe(4);
+    expect(result.ok && result.value.frequency).toEqual({ unit: "mois", interval: 1 });
   });
 
   it("conserve la tontine rattachée", () => {
@@ -41,71 +60,92 @@ describe("parseSavingsForm", () => {
     });
   });
 
-  it("refuse un nom trop court", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, name: "ab" }, NOW)).toEqual({
+  it("refuse un objectif invalide", () => {
+    expect(parseSavingsForm({ ...VALID_FORM, goal: "0" }, NOW)).toEqual({
       ok: false,
-      message: "Le nom doit contenir au moins 3 caractères.",
+      message: "Saisissez un objectif en FCFA.",
     });
   });
 
-  it("refuse un nom trop long", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, name: "a".repeat(61) }, NOW)).toEqual({
+  it("refuse un montant de pointage invalide", () => {
+    expect(parseSavingsForm({ ...VALID_FORM, markerAmount: "" }, NOW)).toEqual({
       ok: false,
-      message: "Le nom ne peut pas dépasser 60 caractères.",
+      message: "Saisissez le montant proposé par pointage en FCFA.",
     });
   });
 
-  it("refuse un montant de marqueur invalide", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, markerAmount: "0" }, NOW)).toEqual({
+  it("refuse une fréquence hors de la liste", () => {
+    expect(parseSavingsForm({ ...VALID_FORM, cadence: "annee-1" }, NOW)).toEqual({
       ok: false,
-      message: "Saisissez le montant d'un marqueur en FCFA.",
+      message: "Choisissez une fréquence dans la liste.",
     });
   });
 
-  it("refuse trop de marqueurs", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, markersTotal: "101" }, NOW)).toEqual({
+  it("refuse une échéance absente", () => {
+    expect(parseSavingsForm({ ...VALID_FORM, deadline: "" }, NOW)).toEqual({
       ok: false,
-      message: "Indiquez entre 1 et 100 marqueurs.",
-    });
-  });
-
-  it("refuse une échéance invalide", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, deadline: "30/02/2027" }, NOW)).toEqual({
-      ok: false,
-      message: "Saisissez une échéance au format JJ/MM/AAAA.",
+      message: "Choisissez une date d'échéance.",
     });
   });
 
   it("refuse une échéance déjà passée", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, deadline: "10/11/2026" }, NOW)).toEqual({
+    expect(parseSavingsForm({ ...VALID_FORM, deadline: "2026-11-11" }, NOW)).toEqual({
       ok: false,
       message: "Choisissez une échéance postérieure à aujourd'hui.",
     });
-  });
-
-  it("refuse l'échéance du jour même", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, deadline: "11/11/2026" }, NOW)).toEqual({
-      ok: false,
-      message: "Choisissez une échéance postérieure à aujourd'hui.",
-    });
-  });
-
-  it("accepte l'échéance du lendemain", () => {
-    expect(parseSavingsForm({ ...VALID_FORM, deadline: "12/11/2026" }, NOW).ok).toBe(true);
   });
 });
 
 describe("savingsRecap", () => {
-  it("résume l'objectif et l'échéance", () => {
-    expect(savingsRecap(VALID_FORM)).toEqual({ goal: 30_000n, deadline: "2027-02-28" });
+  it("résume l'objectif, le rythme et les pointages prévus", () => {
+    expect(savingsRecap(VALID_FORM, NOW)).toEqual({
+      goal: 60_000n,
+      fee: 6_000n,
+      markerAmount: 5_000n,
+      frequency: { unit: "semaine", interval: 1 },
+      markers: 16,
+      deadline: "2027-02-28",
+    });
   });
 
-  it("n'affiche pas d'objectif tant que la saisie est incomplète", () => {
-    expect(savingsRecap({ ...VALID_FORM, markerAmount: "" }).goal).toBeNull();
-    expect(savingsRecap({ ...VALID_FORM, markersTotal: "0" }).goal).toBeNull();
+  it("n'affiche rien tant que la saisie est incomplète", () => {
+    expect(savingsRecap({ ...VALID_FORM, goal: "" }, NOW).goal).toBeNull();
+    expect(savingsRecap({ ...VALID_FORM, goal: "" }, NOW).fee).toBeNull();
+    expect(savingsRecap({ ...VALID_FORM, deadline: "" }, NOW).markers).toBeNull();
+    expect(savingsRecap({ ...VALID_FORM, cadence: "annee-1" }, NOW).frequency).toBeNull();
+  });
+});
+
+describe("savingsInvalidFields", () => {
+  it("signale les champs vides ou mal saisis", () => {
+    expect(savingsInvalidFields(VALID_FORM)).toEqual({
+      name: false,
+      goal: false,
+      markerAmount: false,
+      deadline: false,
+    });
+    expect(
+      savingsInvalidFields({ ...VALID_FORM, name: "T", goal: "", markerAmount: "0", deadline: "" }),
+    ).toEqual({ name: true, goal: true, markerAmount: true, deadline: true });
+  });
+});
+
+describe("savingsStepError", () => {
+  it("découpe la saisie en deux étapes", () => {
+    expect(SAVINGS_FORM_STEPS).toEqual(["Le projet", "Le rythme"]);
   });
 
-  it("ignore une échéance invalide", () => {
-    expect(savingsRecap({ ...VALID_FORM, deadline: "30/02/2027" }).deadline).toBeNull();
+  it("valide le projet sans attendre le rythme", () => {
+    expect(savingsStepError({ ...VALID_FORM, deadline: "" }, 0, NOW)).toBeNull();
+    expect(savingsStepError({ ...VALID_FORM, goal: "" }, 0, NOW)).toBe(
+      "Saisissez un objectif en FCFA.",
+    );
+  });
+
+  it("valide le rythme et l'échéance à la dernière étape", () => {
+    expect(savingsStepError({ ...VALID_FORM, deadline: "2026-01-01" }, 1, NOW)).toBe(
+      "Choisissez une échéance postérieure à aujourd'hui.",
+    );
+    expect(savingsStepError(VALID_FORM, 1, NOW)).toBeNull();
   });
 });

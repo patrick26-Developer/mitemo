@@ -1,7 +1,13 @@
-import { Animated } from "react-native";
+import { Animated, Dimensions } from "react-native";
 
-/** Course d'ouverture de la feuille, en points. */
-export const SHEET_OPEN_OFFSET = 560;
+/** Course minimale d'ouverture de la feuille, en points. */
+const MIN_OPEN_OFFSET = 560;
+
+/**
+ * Course d'ouverture de la feuille, en points : toute la hauteur de l'écran,
+ * pour qu'une feuille haute parte et reparte entièrement hors de l'écran.
+ */
+export const SHEET_OPEN_OFFSET = Math.max(MIN_OPEN_OFFSET, Dimensions.get("screen").height);
 
 /** Ressort d'ouverture : rapide, avec une arrivée amortie. */
 export const SHEET_OPEN_SPRING = {

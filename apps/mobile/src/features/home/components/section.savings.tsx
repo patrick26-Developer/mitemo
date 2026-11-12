@@ -8,12 +8,13 @@ import { SavingsCard } from "../../savings";
 import { formatCountLabel } from "../model/model.home-content";
 
 /**
- * Affiche le titre et la liste horizontale des cartes de pointage actives.
+ * Affiche le titre et la liste horizontale des cartes de pointage actives :
+ * toute carte pas encore retirée, même remplie.
  * @returns La section des cartes de pointage.
  */
 export function SavingsSection() {
   const cards = usePortfolioStore((state) => state.cards);
-  const active = cards.filter((item) => item.state === "ACTIVE");
+  const active = cards.filter((item) => item.state !== "ARCHIVED");
 
   return (
     <View className="mt-4 flex-col gap-3">

@@ -10,4 +10,12 @@ describe("DetailHeader", () => {
     expect(screen.getByRole("header", { name: "Loyer de Janvier" })).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Retour" })).toBeOnTheScreen();
   });
+
+  it("donne au bouton de retour la couleur d'action de l'écran", async () => {
+    await renderWithSafeArea(<DetailHeader title="Loyer" accent="#CFD8FF" />);
+
+    expect(screen.getByRole("button", { name: "Retour" })).toHaveStyle({
+      backgroundColor: "#2044DF",
+    });
+  });
 });

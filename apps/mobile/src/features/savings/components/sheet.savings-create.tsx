@@ -1,16 +1,28 @@
-import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
-import { SheetPrimaryButton } from "../../../shared/components/atoms/button.sheet-primary";
+import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
+import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
+import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetTextField } from "../../../shared/components/macros/field.sheet-text";
+import { SheetStepsFooter } from "../../../shared/components/macros/footer.sheet-steps";
 import { SheetRecap } from "../../../shared/components/macros/sheet.recap";
 import type { SheetRecapRow } from "../../../shared/components/macros/sheet.recap";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
-import { formatLongDate } from "../../../shared/format/format.date";
 import type { Tontine } from "../../../shared/member/model.portfolio";
+import { CARD_FEE_PERCENT } from "../../../shared/member/model.card-fee";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { tomorrowUtc } from "../../../shared/model/model.clock";
+import { FREQUENCY_SELECT_GROUPS } from "../../../shared/model/model.frequency";
 import { useSavingsCreate } from "../hooks/hook.savings-create";
-import type { SavingsFormState, SavingsRecap } from "../model/model.savings-form";
-import { savingsRecap } from "../model/model.savings-form";
+import type {
+  SavingsFormState,
+  SavingsInvalidFields,
+  SavingsRecap,
+} from "../model/model.savings-form";
+import {
+  SAVINGS_FORM_STEPS,
+  savingsInvalidFields,
+  savingsRecap,
+} from "../model/model.savings-form";
 import { TontinePicker } from "./section.tontine-picker";
 
 /** Props de la feuille de création d'une carte de pointage. */
@@ -22,23 +34,20 @@ export interface SavingsCreateSheetProps {
 /** Props des champs de la carte en cours de saisie. */
 interface SavingsCreateFieldsProps {
   readonly form: SavingsFormState;
+  readonly invalid: SavingsInvalidFields;
   readonly tontines: readonly Tontine[];
   readonly onChange: (patch: Partial<SavingsFormState>) => void;
 }
 
-/** Props des champs d'identité d'une carte en cours de saisie. */
-interface SavingsIdentityFieldsProps {
-  readonly form: SavingsFormState;
-  readonly onChange: (patch: Partial<SavingsFormState>) => void;
-}
-
 /**
- * Affiche le nom et le montant d'un marqueur d'une nouvelle carte.
+ * Première étape : le nom, l'objectif et le montant proposé par pointage.
  * @param props Saisie courante et mise à jour des champs.
- * @returns Les champs d'identité de la carte.
+ * @returns Les champs du projet.
  */
-function SavingsIdentityFields(props: SavingsIdentityFieldsProps) {
-  const { form, onChange } = props;
+function SavingsProjectStep(
+  props: Pick<SavingsCreateFieldsProps, "form" | "invalid" | "onChange">,
+) {
+  const { form, invalid, onChange } = props;
 
   return (
     <>
@@ -47,48 +56,25 @@ function SavingsIdentityFields(props: SavingsIdentityFieldsProps) {
         value={form.name}
         onChangeText={(name) => onChange({ name })}
         hint="Pour reconnaître cette carte dans vos listes."
+        invalid={invalid.name}
       />
       <SheetTextField
-        label="Montant d'un marqueur (FCFA)"
+        label="Objectif (FCFA)"
+        value={form.goal}
+        onChangeText={(goal) => onChange({ goal })}
+        keyboardType="number-pad"
+        placeholder="30000"
+        hint="Le montant que vous voulez réunir."
+        invalid={invalid.goal}
+      />
+      <SheetTextField
+        label="Montant par pointage (FCFA)"
         value={form.markerAmount}
         onChangeText={(markerAmount) => onChange({ markerAmount })}
         keyboardType="number-pad"
         placeholder="5000"
-        hint="Chaque marqueur ajoute ce montant à l'épargne."
-      />
-    </>
-  );
-}
-
-/**
- * Affiche l'objectif, l'échéance et la tontine rattachée d'une nouvelle carte.
- * @param props Saisie courante, tontines disponibles et mise à jour des champs.
- * @returns Les champs de l'objectif de la carte.
- */
-function SavingsTargetFields(props: SavingsCreateFieldsProps) {
-  const { form, tontines, onChange } = props;
-
-  return (
-    <>
-      <SheetTextField
-        label="Nombre de marqueurs"
-        value={form.markersTotal}
-        onChangeText={(markersTotal) => onChange({ markersTotal })}
-        keyboardType="number-pad"
-        hint="Entre 1 et 100."
-      />
-      <SheetTextField
-        label="Échéance (JJ/MM/AAAA)"
-        value={form.deadline}
-        onChangeText={(deadline) => onChange({ deadline })}
-        keyboardType="numbers-and-punctuation"
-        placeholder="31/12/2026"
-        hint="Dernier jour pour atteindre l'objectif."
-      />
-      <TontinePicker
-        tontines={tontines}
-        selected={form.tontineId}
-        onSelect={(tontineId) => onChange({ tontineId })}
+        hint="Ce que vous mettez de côté à chaque pointage."
+        invalid={invalid.markerAmount}
       />
     </>
   );
@@ -100,36 +86,98 @@ function SavingsTargetFields(props: SavingsCreateFieldsProps) {
  * @returns Les lignes affichables, dans l'ordre choisi.
  */
 function recapRows(recap: SavingsRecap): readonly SheetRecapRow[] {
-  const rows: SheetRecapRow[] = [];
-  if (recap.goal !== null) {
-    rows.push({ label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` });
-  }
-  if (recap.deadline !== null) {
-    rows.push({ label: "Échéance", value: formatLongDate(recap.deadline) });
-  }
+  const rows = [
+    recap.goal === null ? null : { label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
+    recap.fee === null
+      ? null
+      : { label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`, value: `${formatAmount(recap.fee)} FCFA` },
+    recap.markerAmount === null
+      ? null
+      : { label: "Par pointage", value: `${formatAmount(recap.markerAmount)} FCFA` },
+    recap.markers === null ? null : { label: "Pointages prévus", value: `${recap.markers}` },
+  ];
 
-  return rows;
+  return rows.flatMap((row) => (row === null ? [] : [row]));
 }
 
 /**
- * Saisit les règles d'une nouvelle carte et la crée dans le portefeuille, en la
- * rattachant éventuellement à une tontine.
+ * Deuxième étape : le rythme des pointages, l'échéance au calendrier, la
+ * tontine rattachée et le récapitulatif.
+ * @param props Saisie courante, tontines disponibles et mise à jour des champs.
+ * @returns Les champs du rythme.
+ */
+function SavingsRhythmStep(props: SavingsCreateFieldsProps) {
+  const { form, invalid, tontines, onChange } = props;
+
+  return (
+    <>
+      <SheetSelect
+        label="Fréquence des pointages"
+        groups={FREQUENCY_SELECT_GROUPS}
+        value={form.cadence}
+        onChange={(cadence) => onChange({ cadence })}
+        hint="Le rythme auquel vous mettez de côté."
+      />
+      <SheetDateField
+        label="Échéance"
+        value={form.deadline}
+        minimum={tomorrowUtc()}
+        onChange={(deadline) => onChange({ deadline })}
+        hint="Dernier jour pour atteindre l'objectif."
+        invalid={invalid.deadline}
+      />
+      <TontinePicker
+        tontines={tontines}
+        selected={form.tontineId}
+        onSelect={(tontineId) => onChange({ tontineId })}
+      />
+      <SheetRecap title="Récapitulatif" rows={recapRows(savingsRecap(form, new Date()))} />
+    </>
+  );
+}
+
+/**
+ * Saisit les règles d'une nouvelle carte en deux étapes et la crée dans le
+ * portefeuille, avec autant de pointages que le rythme en permet.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle carte ».
  */
 export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
-  const { visible, onClose } = props;
-  const { form, error, update, submit } = useSavingsCreate(onClose);
+  const { form, error, steps, update, next, back, close } = useSavingsCreate(props.onClose);
   const tontines = usePortfolioStore((state) => state.tontines);
-  const recap = savingsRecap(form);
+  const flags = savingsInvalidFields(form);
+  const invalid: SavingsInvalidFields = {
+    name: error !== null && flags.name,
+    goal: error !== null && flags.goal,
+    markerAmount: error !== null && flags.markerAmount,
+    deadline: error !== null && flags.deadline,
+  };
 
   return (
-    <BottomSheet visible={visible} title="Nouvelle carte" onClose={onClose}>
-      <SavingsIdentityFields form={form} onChange={update} />
-      <SavingsTargetFields form={form} tontines={tontines} onChange={update} />
-      <SheetRecap title="Récapitulatif" rows={recapRows(recap)} />
-      {error === null ? null : <FeedbackBanner kind="error" message={error} />}
-      <SheetPrimaryButton label="Créer la carte" onPress={submit} />
+    <BottomSheet
+      visible={props.visible}
+      title="Nouvelle carte"
+      onClose={close}
+      footer={
+        <SheetStepsFooter
+          isFirst={steps.isFirst}
+          isLast={steps.isLast}
+          finalLabel="Créer la carte"
+          onBack={back}
+          onNext={next}
+        />
+      }
+    >
+      <StepIndicator
+        index={steps.index}
+        total={steps.total}
+        title={SAVINGS_FORM_STEPS[steps.index] ?? ""}
+      />
+      {steps.isFirst ? (
+        <SavingsProjectStep form={form} invalid={invalid} onChange={update} />
+      ) : (
+        <SavingsRhythmStep form={form} invalid={invalid} tontines={tontines} onChange={update} />
+      )}
     </BottomSheet>
   );
 }

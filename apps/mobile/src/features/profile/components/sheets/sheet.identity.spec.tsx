@@ -42,14 +42,11 @@ describe("IdentitySheet", () => {
     expect(useMemberStore.getState().name).toBe("Précieuse Mavoungou");
   });
 
-  it("annule la modification", async () => {
+  it("n'affiche pas de bouton Annuler pendant la modification", async () => {
     await renderWithSafeArea(<IdentitySheet />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Modifier mes informations" }));
-    await fireEvent.changeText(screen.getByLabelText("Prénom"), "Aimée");
-    await fireEvent.press(screen.getByRole("button", { name: "Annuler la modification" }));
 
-    expect(screen.getByText("Précieuse")).toBeOnTheScreen();
-    expect(useMemberStore.getState().firstName).toBe("Précieuse");
+    expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
   });
 });

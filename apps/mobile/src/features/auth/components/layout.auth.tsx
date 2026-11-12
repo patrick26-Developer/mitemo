@@ -1,14 +1,18 @@
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
+import { useRef } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
+import type { ScrollViewInstance } from "react-native";
 import Animated, { Easing, SlideInDown, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GridBackground } from "../../../shared/components/atoms/background.grid";
 import { CornerDecor } from "../../../shared/components/atoms/decor.corner";
+import { useFocusedFieldReveal } from "../../../shared/hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../../shared/hooks/hook.keyboard-height";
 import type { SheetLayout } from "../../../shared/model/model.sheet-layout";
 import { computeSheetLayout } from "../../../shared/model/model.sheet-layout";
+import { FOCUS_RING_SCROLL } from "../../../shared/theme/theme.field";
 import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../../shared/theme/theme.sheet-card";
 import { AUTH_COLORS } from "../model/model.auth-theme";
 import { AuthLogo } from "./logo.auth";
@@ -46,7 +50,9 @@ export function AuthLayout(props: AuthLayoutProps) {
       <CornerDecor side="left" />
       <CornerDecor side="right" />
       <AuthLogoArea topInset={insets.top} />
-      <AuthSheet layout={sheetLayout}>{children}</AuthSheet>
+      <AuthSheet layout={sheetLayout} keyboardHeight={keyboardHeight}>
+        {children}
+      </AuthSheet>
     </View>
   );
 }
@@ -54,6 +60,8 @@ export function AuthLayout(props: AuthLayoutProps) {
 /** Props de la carte d'authentification. */
 interface AuthSheetProps {
   readonly layout: SheetLayout;
+  /** Hauteur du clavier, pour garder le champ en cours de saisie visible. */
+  readonly keyboardHeight: number;
   readonly children: ReactNode;
 }
 
@@ -63,7 +71,9 @@ interface AuthSheetProps {
  * @returns La carte ancrée en bas de l'écran.
  */
 function AuthSheet(props: AuthSheetProps) {
-  const { layout, children } = props;
+  const { layout, keyboardHeight, children } = props;
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  useFocusedFieldReveal(scrollRef, keyboardHeight);
 
   return (
     <Animated.View
@@ -73,10 +83,12 @@ function AuthSheet(props: AuthSheetProps) {
     >
       <View style={[SHEET_HANDLE_SHAPE, styles.handle]} />
       <ScrollView
+        ref={scrollRef}
         testID="auth-scroll"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
+        style={FOCUS_RING_SCROLL.scroll}
+        contentContainerStyle={[FOCUS_RING_SCROLL.content, styles.content]}
       >
         {children}
       </ScrollView>
@@ -125,5 +137,5 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: AUTH_COLORS.handle,
   },
-  content: { paddingTop: 12 },
+  content: { paddingTop: 12 + FOCUS_RING_SCROLL.content.padding },
 });

@@ -48,7 +48,8 @@ export function useSignInForm() {
   const [submitError, setSubmitError] = useState("");
   const checkAccount = useAccountCheck(setSubmitError);
   const valid = isValidPhoneDigits(digits);
-  const phoneError = digits.length === PHONE_DIGITS && !valid ? PHONE_ERROR : "";
+  const invalid = digits.length === PHONE_DIGITS && !valid;
+  const phoneError = invalid ? PHONE_ERROR : "";
 
   const setDigits = (value: string) => {
     setSubmitError("");
@@ -58,5 +59,5 @@ export function useSignInForm() {
     if (valid) checkAccount(toInternationalPhone(digits));
   };
 
-  return { digits, setDigits, valid, error: submitError || phoneError, submit };
+  return { digits, setDigits, valid, invalid, error: submitError || phoneError, submit };
 }

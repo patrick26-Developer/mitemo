@@ -22,17 +22,6 @@ describe("ActionsDock", () => {
     expect(onSecondary).toHaveBeenCalledTimes(1);
   });
 
-  it("affiche le retour d'opération au-dessus des actions", async () => {
-    await renderWithSafeArea(
-      <ActionsDock
-        primary={{ label: "Pointer", onPress: jest.fn() }}
-        notice={{ kind: "success", message: "Pointage ajouté." }}
-      />,
-    );
-
-    expect(screen.getByText("Pointage ajouté.")).toBeOnTheScreen();
-  });
-
   it("prend toute la largeur quand seule l'action secondaire existe", async () => {
     await renderWithSafeArea(
       <ActionsDock primary={null} secondary={{ label: "Transférer", onPress: jest.fn() }} />,
@@ -41,19 +30,23 @@ describe("ActionsDock", () => {
     expect(screen.getByRole("button", { name: "Transférer" })).toBeOnTheScreen();
   });
 
-  it("affiche le retour même quand plus aucune action n'est possible", async () => {
-    await renderWithSafeArea(
-      <ActionsDock
-        primary={null}
-        secondary={null}
-        notice={{ kind: "success", message: "L'épargne a été retirée." }}
-      />,
-    );
+  it("flotte sans fond, en laissant passer les touchers autour des boutons", async () => {
+    await renderWithSafeArea(<ActionsDock primary={{ label: "Pointer", onPress: jest.fn() }} />);
 
-    expect(screen.getByText("L'épargne a été retirée.")).toBeOnTheScreen();
+    const dock = screen.getByTestId("actions-dock");
+    expect(dock).not.toHaveStyle({ backgroundColor: "#FFFFFF" });
+    expect(dock.props["pointerEvents"]).toBe("box-none");
   });
 
-  it("ne rend rien sans action ni retour", async () => {
+  it("donne à l'action principale la couleur d'action de l'écran", async () => {
+    await renderWithSafeArea(
+      <ActionsDock primary={{ label: "Pointer", onPress: jest.fn(), accent: "#F5D7B0" }} />,
+    );
+
+    expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#DF8C20" });
+  });
+
+  it("ne rend rien sans action", async () => {
     await renderWithSafeArea(<ActionsDock primary={null} secondary={null} />);
 
     expect(screen.queryByTestId("actions-dock")).not.toBeOnTheScreen();

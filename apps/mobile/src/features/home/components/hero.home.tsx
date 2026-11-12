@@ -20,15 +20,17 @@ const HERO_STOPS = [0, 0.6, 1] as const;
 export interface HomeHeroProps {
   /** Marge haute de la zone sûre de l'écran, en points. */
   readonly topInset: number;
+  /** Ouvre le résumé du membre depuis son avatar. */
+  readonly onOpenMember: () => void;
 }
 
 /**
  * Affiche le bandeau bleu qui porte la salutation et le solde.
- * @param props Marge haute de la zone sûre.
+ * @param props Marge haute de la zone sûre et ouverture du résumé du membre.
  * @returns Le bandeau dégradé.
  */
 export function HomeHero(props: HomeHeroProps) {
-  const { topInset } = props;
+  const { topInset, onOpenMember } = props;
 
   return (
     <LinearGradient colors={HERO_COLORS} locations={HERO_STOPS} style={{ height: HERO_HEIGHT }}>
@@ -36,7 +38,7 @@ export function HomeHero(props: HomeHeroProps) {
       <CornerDecor side="left" />
       <CornerDecor side="right" />
       <View className="flex-col gap-6 pb-6" style={{ paddingTop: topInset + 12 }}>
-        <HomeHeader />
+        <HomeHeader onOpenMember={onOpenMember} />
         <BalanceCard />
       </View>
     </LinearGradient>

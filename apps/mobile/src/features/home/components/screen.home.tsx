@@ -1,4 +1,4 @@
-import { useIsFocused } from "expo-router";
+import { router, useIsFocused } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HatchPattern } from "../../../shared/components/atoms/pattern.hatch";
 import { HomeActions } from "./actions.home";
 import { HomeHero } from "./hero.home";
+import { MemberSummarySheet } from "./sheet.member-summary";
 import { NotificationsSheet } from "./sheet.notifications";
 import { SavingsSection } from "./section.savings";
 import { TontinesSection } from "./section.tontines";
@@ -21,6 +22,7 @@ export function HomeScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [memberOpen, setMemberOpen] = useState(false);
 
   return (
     <View className="flex-1 bg-white">
@@ -34,7 +36,7 @@ export function HomeScreen() {
       */}
       <View testID="home-scroll-guard" style={{ height: 0 }} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <HomeHero topInset={insets.top} />
+        <HomeHero topInset={insets.top} onOpenMember={() => setMemberOpen(true)} />
         <TontinesSection />
         <HatchPattern />
         <SavingsSection />
@@ -44,6 +46,14 @@ export function HomeScreen() {
       </ScrollView>
       <HomeActions topInset={insets.top} onOpenNotifications={() => setNotificationsOpen(true)} />
       <NotificationsSheet visible={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      <MemberSummarySheet
+        visible={memberOpen}
+        onClose={() => setMemberOpen(false)}
+        onOpenProfile={() => {
+          setMemberOpen(false);
+          router.push("/profile");
+        }}
+      />
     </View>
   );
 }

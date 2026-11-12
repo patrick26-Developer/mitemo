@@ -26,6 +26,8 @@
   --color-danger: #b42318;
   /* Filet de séparation de la barre d'onglets. */
   --color-hairline: #e5e5e5;
+  /* Fond gris clair d'un champ ou d'une pastille neutre. */
+  --color-field: #f4f5f8;
   /* Texte atténué sur fond sombre. */
   --color-on-dark-muted: rgba(255, 255, 255, 0.75);
   /* Texte le plus discret sur fond sombre. */
@@ -42,8 +44,6 @@
   --color-on-dark-glass-border: rgba(255, 255, 255, 0.063);
   /* Bordure de la carte de tontine. */
   --color-card-border: rgba(190, 196, 214, 0.5);
-  /* Bordure du bandeau dégradé d'une tontine. */
-  --color-header-border: #aebff4;
   /* Bordure de la règle de cotisation d'une tontine. */
   --color-rule-border: rgba(88, 93, 106, 0.376);
   /* Bordure du panneau sombre d'une carte. */

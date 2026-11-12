@@ -10,7 +10,8 @@ export interface SheetRecapRow {
 
 /** Props d'un récapitulatif de feuille. */
 export interface SheetRecapProps {
-  readonly title: string;
+  /** Titre de la carte, omis quand le titre de l'étape le dit déjà. */
+  readonly title?: string;
   /** Lignes à afficher ; un récapitulatif vide n'est pas rendu. */
   readonly rows: readonly SheetRecapRow[];
 }
@@ -28,7 +29,9 @@ export function SheetRecap(props: SheetRecapProps) {
 
   return (
     <SheetInfoCard>
-      <Text className="text-[12px] font-semibold uppercase text-muted">{title}</Text>
+      {title === undefined ? null : (
+        <Text className="text-[12px] font-semibold uppercase text-muted">{title}</Text>
+      )}
       {rows.map((row) => (
         <View key={row.label} className="flex-row items-center justify-between gap-4 pt-1">
           <Text className="text-[13px] text-muted">{row.label}</Text>

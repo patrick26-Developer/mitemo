@@ -26,4 +26,11 @@ describe("TontineCard", () => {
 
     expect(router.push).toHaveBeenCalledWith("/tontine/t9");
   });
+
+  it("pose un motif de bruit et borde le bandeau d'une nuance plus foncée", async () => {
+    await render(<TontineCard item={makeTontine()} index={0} />);
+
+    expect(screen.getByTestId("noise-pattern")).toBeOnTheScreen();
+    expect(screen.getByTestId("tontine-card-header")).toHaveStyle({ borderColor: "#28F479" });
+  });
 });

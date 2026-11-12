@@ -27,4 +27,14 @@ describe("SheetSecondaryButton", () => {
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+
+  it("se borde de la couleur d'action de l'écran quand elle est fournie", async () => {
+    await renderWithSafeArea(
+      <SheetSecondaryButton label="Payer avec MTN MoMo" onPress={jest.fn()} accent="#CFD8FF" />,
+    );
+
+    expect(screen.getByRole("button", { name: "Payer avec MTN MoMo" })).toHaveStyle({
+      borderColor: "#2044DF",
+    });
+  });
 });

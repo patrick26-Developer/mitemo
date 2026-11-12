@@ -1,6 +1,6 @@
-import { ArrowRight } from "lucide-react-native";
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
+import { FilledButtonFace } from "../../../shared/components/atoms/face.button-filled";
 import { PressableScale } from "../../../shared/components/atoms/scale.pressable";
 import { AUTH_COLORS } from "../model/model.auth-theme";
 
@@ -11,8 +11,13 @@ export interface AuthPrimaryButtonProps {
   readonly disabled?: boolean;
 }
 
+/** Couleurs du bouton : bleu de l'authentification, bordure comprise, libellé blanc. */
+const AUTH_BUTTON_COLORS = { background: AUTH_COLORS.button, foreground: AUTH_COLORS.sheet };
+
 /**
- * Affiche le bouton bleu principal, avec sa flèche et son état désactivé.
+ * Affiche l'action principale d'un écran d'authentification avec le même
+ * dessin que les autres boutons pleins de l'application, atténuée quand elle
+ * est désactivée.
  * @param props Libellé, action et état désactivé.
  * @returns Le bouton d'action.
  */
@@ -21,30 +26,12 @@ export function AuthPrimaryButton(props: AuthPrimaryButtonProps) {
 
   return (
     <PressableScale accessibilityLabel={label} onPress={onPress} disabled={disabled}>
-      <View style={[styles.button, disabled && styles.disabled]}>
-        <Text style={styles.label}>{label}</Text>
-        <ArrowRight size={22} color={AUTH_COLORS.sheet} />
+      <View style={disabled ? DISABLED_STYLE : undefined}>
+        <FilledButtonFace label={label} colors={AUTH_BUTTON_COLORS} testID="auth-primary-face" />
       </View>
     </PressableScale>
   );
 }
 
-/** Styles de la pastille bleue et de son ombre. */
-const styles = StyleSheet.create({
-  button: {
-    height: 58,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    borderRadius: 29,
-    backgroundColor: AUTH_COLORS.button,
-    shadowColor: AUTH_COLORS.shadow,
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
-  disabled: { opacity: 0.55 },
-  label: { color: AUTH_COLORS.sheet, fontSize: 19, fontWeight: "600" },
-});
+/** Atténuation du bouton désactivé. */
+const DISABLED_STYLE = { opacity: 0.55 } as const;

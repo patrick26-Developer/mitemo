@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { Text, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
+import { NoisePattern } from "../../../shared/components/atoms/pattern.noise";
 import { PressableScale } from "../../../shared/components/atoms/scale.pressable";
 import type { SavingsCard as SavingsCardModel } from "../../../shared/member/model.portfolio";
 import { CARD_WIDTH } from "../../../shared/theme/theme.card-layout";
@@ -30,7 +31,8 @@ function SavingsCardBody(props: SavingsCardBodyProps) {
   const { item } = props;
 
   return (
-    <View className="rounded-[20px] p-0.5" style={{ backgroundColor: item.tint }}>
+    <View className="overflow-hidden rounded-[20px] p-0.5" style={{ backgroundColor: item.tint }}>
+      <NoisePattern />
       <Text className="px-4 py-4 text-[18px] font-medium text-ink" numberOfLines={1}>
         {item.name}
       </Text>

@@ -1,9 +1,7 @@
 import { StyleSheet, View } from "react-native";
+import type { LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HAIRLINE_WIDTH } from "../../theme/theme.hairline-width";
-import { FeedbackBanner } from "../atoms/banner.feedback";
-import type { FeedbackKind } from "../atoms/banner.feedback";
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import type { SheetButtonTone } from "../atoms/button.sheet-primary";
 import { SheetSecondaryButton } from "../atoms/button.sheet-secondary";
@@ -26,12 +24,8 @@ export interface DockAction {
   readonly onPress: () => void;
   /** Teinte de l'action principale, bleu de marque par défaut. */
   readonly tone?: SheetButtonTone;
-}
-
-/** Retour d'opération affiché au-dessus des actions du dock. */
-export interface DockNotice {
-  readonly kind: FeedbackKind;
-  readonly message: string;
+  /** Couleur d'action propre à l'écran ; elle remplace la teinte. */
+  readonly accent?: string;
 }
 
 /** Props du dock d'actions flottant d'un écran de détail. */
@@ -40,8 +34,8 @@ export interface ActionsDockProps {
   readonly primary: DockAction | null;
   /** Action secondaire, affichée à gauche de l'action principale. */
   readonly secondary?: DockAction | null;
-  /** Dernier retour d'opération, affiché au-dessus des actions. */
-  readonly notice?: DockNotice | null;
+  /** Mesure du dock, pour que le contenu réserve sa hauteur réelle. */
+  readonly onLayout?: (event: LayoutChangeEvent) => void;
 }
 
 /** Props des deux boutons du dock. */
@@ -68,7 +62,26 @@ function DockPrimary(props: DockPrimaryProps) {
       label={action.label}
       onPress={action.onPress}
       {...(action.tone === undefined ? {} : { tone: action.tone })}
+      {...(action.accent === undefined ? {} : { accent: action.accent })}
     />
+  );
+}
+
+/**
+ * Affiche l'action secondaire : bordée par défaut, pleine à la couleur d'action
+ * de l'écran quand il en a une, comme l'action principale.
+ * @param props Action secondaire à rendre.
+ * @returns Le bouton secondaire du dock.
+ */
+function DockSecondary(props: DockPrimaryProps) {
+  const { action } = props;
+
+  if (action.accent === undefined) {
+    return <SheetSecondaryButton label={action.label} onPress={action.onPress} />;
+  }
+
+  return (
+    <SheetPrimaryButton label={action.label} onPress={action.onPress} accent={action.accent} />
   );
 }
 
@@ -86,7 +99,7 @@ function DockActions(props: DockActionsProps) {
 
     return (
       <View className="flex-1">
-        <SheetSecondaryButton label={secondary.label} onPress={secondary.onPress} />
+        <DockSecondary action={secondary} />
       </View>
     );
   }
@@ -96,7 +109,7 @@ function DockActions(props: DockActionsProps) {
   return (
     <View className="flex-row items-stretch gap-2.5">
       <View style={{ width: SECONDARY_WIDTH }}>
-        <SheetSecondaryButton label={secondary.label} onPress={secondary.onPress} />
+        <DockSecondary action={secondary} />
       </View>
       <View className="flex-1">
         <DockPrimary action={primary} />
@@ -106,31 +119,33 @@ function DockActions(props: DockActionsProps) {
 }
 
 /**
- * Pose les actions principales d'un écran de détail dans une barre ancrée en
- * bas, au-dessus de la zone sûre. Le dock reste visible quand le contenu défile
- * et affiche le dernier retour d'opération.
- * @param props Action principale, action secondaire et retour d'opération.
+ * Pose les actions principales d'un écran de détail en bas, au-dessus de la
+ * zone sûre, sans fond ni barre : seuls les boutons flottent sur le contenu,
+ * qui reste touchable entre eux. Le dock reste visible quand le contenu défile ;
+ * les retours d'opération sortent en toast.
+ * @param props Action principale, action secondaire et mesure.
  * @returns Le dock d'actions, ou rien quand aucune action n'est possible.
  */
 export function ActionsDock(props: ActionsDockProps) {
-  const { primary, secondary = null, notice = null } = props;
+  const { primary, secondary = null, onLayout } = props;
   const insets = useSafeAreaInsets();
 
-  if (primary === null && secondary === null && notice === null) return null;
+  if (primary === null && secondary === null) return null;
 
   return (
     <View
       testID="actions-dock"
-      className="gap-2.5 bg-white"
+      pointerEvents="box-none"
+      onLayout={onLayout}
+      className="gap-2.5"
       style={[styles.dock, { paddingBottom: Math.max(insets.bottom, MIN_BOTTOM_PADDING) }]}
     >
-      {notice === null ? null : <FeedbackBanner kind={notice.kind} message={notice.message} />}
       <DockActions primary={primary} secondary={secondary} />
     </View>
   );
 }
 
-/** Forme, filet et ombre du dock, que Tailwind n'exprime pas côté natif. */
+/** Position flottante du dock, que Tailwind n'exprime pas côté natif. */
 const styles = StyleSheet.create({
   dock: {
     position: "absolute",
@@ -139,15 +154,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingTop: TOP_PADDING,
     paddingHorizontal: SIDE_PADDING,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderTopWidth: HAIRLINE_WIDTH,
-    borderTopColor: "#E5E5E5",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
   },
 });

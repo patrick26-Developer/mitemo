@@ -6,7 +6,7 @@ import { BarcodeStrip } from "../../../shared/components/atoms/strip.barcode";
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatLongDate } from "../../../shared/format/format.date";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
-import { cardGoal, markersDone } from "../../../shared/member/model.portfolio";
+import { cardGoal, markerFill, markersDone } from "../../../shared/member/model.portfolio";
 import { HAIRLINE_WIDTH } from "../../../shared/theme/theme.hairline-width";
 import { PALETTE } from "../../../shared/theme/theme.palette";
 
@@ -49,7 +49,12 @@ export function SavingsPanel(props: SavingsPanelProps) {
         </Text>
       </View>
 
-      <MarkerProgress done={markersDone(item)} total={item.markersTotal} />
+      <MarkerProgress
+        done={markersDone(item)}
+        total={item.markersTotal}
+        partial={markerFill(item)}
+        accent={item.tint}
+      />
       <BarcodeStrip color={PALETTE.barcodeOnSavings} />
 
       <View className="mt-2.5 flex-row items-center gap-1.5">

@@ -16,7 +16,9 @@
           "cameraPermission": "Mitemo utilise l'appareil photo pour votre photo de profil."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      "expo-notifications"
     ]
   }
 }

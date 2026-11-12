@@ -1,5 +1,6 @@
 import { DetailHeader } from "../../../shared/components/macros/header.detail";
 import { EmptyState } from "../../../shared/components/macros/state.empty";
+import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
 import { ScreenFrame } from "../../../shared/components/macros/frame.screen";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { SavingsDetailContent } from "./content.savings-detail";
@@ -22,9 +23,13 @@ export function SavingsDetailScreen(props: SavingsDetailScreenProps) {
 
   return (
     <ScreenFrame>
-      <DetailHeader title={card?.name ?? "Carte"} />
+      <DetailHeader
+        title={card?.name ?? "Carte"}
+        {...(card === undefined ? {} : { accent: card.tint })}
+      />
       {card === undefined ? (
         <EmptyState
+          icon={TAB_ICONS.savings}
           title="Carte introuvable"
           message="Cette carte n'existe pas ou a été supprimée."
         />

@@ -15,6 +15,9 @@ export const PHONE_DIGITS = 9;
 /** Nombre de chiffres du code PIN. */
 export const PIN_LENGTH = 4;
 
+/** Titres des étapes de l'inscription : l'identité, puis le choix du code PIN. */
+export const SIGN_UP_STEPS = ["Votre identité", "Votre code PIN"] as const;
+
 /** Saisie de la première étape d'inscription. */
 export interface SignUpInput {
   readonly firstName: string;
@@ -22,6 +25,14 @@ export interface SignUpInput {
   readonly occupation: string;
   /** Chiffres du numéro local, sans indicatif. */
   readonly digits: string;
+}
+
+/** Champs refusés d'une inscription, une fois la saisie soumise. */
+export interface SignUpInvalidFields {
+  readonly firstName: boolean;
+  readonly lastName: boolean;
+  readonly occupation: boolean;
+  readonly digits: boolean;
 }
 
 /** Groupes de chiffres du numéro local : 2-3-2-2. */
@@ -125,6 +136,20 @@ export function isValidPhoneDigits(digits: string): boolean {
  */
 export function isValidPin(pin: string): boolean {
   return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(pin);
+}
+
+/**
+ * Repère les champs d'inscription à signaler en rouge après un refus.
+ * @param input Prénom, nom, profession et chiffres du numéro.
+ * @returns Vrai pour chaque champ qui ne respecte pas sa règle.
+ */
+export function signUpInvalidFields(input: SignUpInput): SignUpInvalidFields {
+  return {
+    firstName: !isValidPersonName(input.firstName),
+    lastName: !isValidPersonName(input.lastName),
+    occupation: !isValidPersonName(input.occupation),
+    digits: !isValidPhoneDigits(input.digits),
+  };
 }
 
 /**

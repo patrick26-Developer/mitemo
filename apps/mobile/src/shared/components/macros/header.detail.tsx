@@ -2,32 +2,55 @@ import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { accentColors } from "../../model/model.accent-color";
 import { PALETTE } from "../../theme/theme.palette";
 
 /** Props de l'en-tête d'un écran de détail. */
 export interface DetailHeaderProps {
   readonly title: string;
+  /** Couleur d'action de l'écran, appliquée au bouton de retour. */
+  readonly accent?: string;
+}
+
+/** Props du bouton de retour. */
+interface BackButtonProps {
+  readonly accent: string | undefined;
+}
+
+/**
+ * Ramène à l'écran précédent ; prend la couleur d'action de l'écran quand il
+ * en a une, gris neutre sinon.
+ * @param props Couleur d'action éventuelle.
+ * @returns Le bouton de retour.
+ */
+function BackButton(props: BackButtonProps) {
+  const colors = props.accent === undefined ? null : accentColors(props.accent);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Retour"
+      hitSlop={8}
+      onPress={() => router.back()}
+      className={`h-10 w-10 items-center justify-center rounded-full ${colors === null ? "bg-tab-active" : ""}`}
+      style={colors === null ? undefined : { backgroundColor: colors.background }}
+    >
+      <ChevronLeft size={22} color={colors?.foreground ?? PALETTE.tabInk} strokeWidth={2.2} />
+    </Pressable>
+  );
 }
 
 /**
  * Affiche un bouton de retour et le titre de l'écran de détail.
- * @param props Titre de l'écran.
+ * @param props Titre de l'écran et couleur d'action.
  * @returns L'en-tête de détail.
  */
 export function DetailHeader(props: DetailHeaderProps) {
-  const { title } = props;
+  const { title, accent } = props;
 
   return (
     <View className="flex-row items-center gap-3 px-4 pb-5">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Retour"
-        hitSlop={8}
-        onPress={() => router.back()}
-        className="h-10 w-10 items-center justify-center rounded-full bg-tab-active"
-      >
-        <ChevronLeft size={22} color={PALETTE.tabInk} strokeWidth={2.2} />
-      </Pressable>
+      <BackButton accent={accent} />
       <Text
         accessibilityRole="header"
         className="flex-1 text-[22px] font-bold text-ink"

@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react-native";
+import { Wallet } from "lucide-react-native";
 import { Text } from "react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
@@ -21,6 +22,7 @@ const CONFIG: FilterableListConfig<Item> = {
   isCompleted: (item) => item.done,
   searchPlaceholder: "Rechercher une tontine",
   searchSubject: "tontine",
+  emptyIcon: Wallet,
   emptyStates: {
     active: { title: "Aucune tontine active", message: "Créez votre première tontine." },
     completed: { title: "Aucune tontine terminée", message: "Elles apparaîtront ici." },
@@ -39,7 +41,7 @@ describe("FilterableList", () => {
   it("bascule sur les éléments terminés", async () => {
     await renderWithSafeArea(<FilterableList config={CONFIG} onAdd={jest.fn()} />);
 
-    await fireEvent.press(screen.getByRole("tab", { name: "Terminées" }));
+    await fireEvent.press(screen.getByRole("tab", { name: "Archivées" }));
 
     expect(screen.getByText("Tontine famille")).toBeOnTheScreen();
     expect(screen.queryByText("Tontine du marché")).toBeNull();

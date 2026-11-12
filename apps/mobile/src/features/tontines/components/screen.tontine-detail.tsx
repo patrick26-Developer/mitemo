@@ -1,5 +1,6 @@
 import { DetailHeader } from "../../../shared/components/macros/header.detail";
 import { EmptyState } from "../../../shared/components/macros/state.empty";
+import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
 import { ScreenFrame } from "../../../shared/components/macros/frame.screen";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { TontineDetailContent } from "./content.tontine-detail";
@@ -22,9 +23,13 @@ export function TontineDetailScreen(props: TontineDetailScreenProps) {
 
   return (
     <ScreenFrame>
-      <DetailHeader title={tontine?.name ?? "Tontine"} />
+      <DetailHeader
+        title={tontine?.name ?? "Tontine"}
+        {...(tontine === undefined ? {} : { accent: tontine.headerColors[0] })}
+      />
       {tontine === undefined ? (
         <EmptyState
+          icon={TAB_ICONS.tontines}
           title="Tontine introuvable"
           message="Cette tontine n'existe pas ou a été supprimée."
         />

@@ -1,7 +1,14 @@
-import type { SavingsCard, Tontine } from "./model.portfolio";
-import { createId, isTontineBeneficiary, SELF_MEMBER_ID, tontinePot } from "./model.portfolio";
+import type { CardPayment, SavingsCard, Tontine } from "./model.portfolio";
+import {
+  allMembersPaid,
+  cardCapabilities,
+  createId,
+  hasReachedQuota,
+  SELF_MEMBER_ID,
+  tontinePot,
+} from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildTontine } from "./model.portfolio-create";
+import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -11,6 +18,7 @@ import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   addSaved,
   advanceRound,
+  appendTontineMember,
   clearSaved,
   deductSaved,
   markSelfPaid,
@@ -20,11 +28,10 @@ import {
   requireAdmin,
   requireCard,
   requireFunds,
-  requireOtherMember,
-  requirePositive,
   requireSelfCanPay,
   requireTontine,
   setInvitationCode,
+  startTontine as startTontineIn,
 } from "./model.portfolio-update";
 
 /** Mise à jour partielle de l'état du portefeuille. */
@@ -40,27 +47,21 @@ export interface PortfolioContext {
   readonly set: PortfolioSet;
 }
 
-/** Paramètres d'un transfert vers un autre membre d'une tontine. */
-export interface TransferToMemberInput {
-  readonly tontineId: string;
-  readonly memberId: string;
-  /** Montant strictement positif, en plus petite unité de la devise. */
-  readonly amount: bigint;
-}
-
 /** État partagé des tontines, des cartes et du solde disponible. */
 export interface PortfolioState {
   readonly available: bigint;
   readonly tontines: readonly Tontine[];
   readonly cards: readonly SavingsCard[];
-  createTontine: (input: CreateTontineInput) => void;
+  createTontine: (input: CreateTontineInput) => Tontine;
   createCard: (input: CreateCardInput) => void;
+  startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
-  withdrawTontine: (tontineId: string) => void;
-  transferToMember: (tontineId: string, memberId: string, amount: bigint) => void;
+  confirmRound: (tontineId: string) => void;
+  addMember: (tontineId: string) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
-  contributeCard: (cardId: string) => void;
+  /** Pointe un marqueur, payé par l'opérateur choisi. */
+  contributeCard: (cardId: string, payment: CardPayment) => void;
   withdrawCard: (cardId: string) => void;
   transferCardToTontine: (cardId: string) => void;
   reset: () => void;
@@ -81,10 +82,13 @@ function createInvitationCode(): string {
  * Crée une tontine et l'ajoute en tête de liste.
  * @param context Accès au store.
  * @param input Paramètres saisis.
+ * @returns La tontine créée, telle qu'elle est conservée.
  */
-function createTontine(context: PortfolioContext, input: CreateTontineInput): void {
+function createTontine(context: PortfolioContext, input: CreateTontineInput): Tontine {
   const tontine = buildTontine(input, context.get().tontines.length);
   context.set((state) => ({ tontines: prependTontine(state.tontines, tontine) }));
+
+  return tontine;
 }
 
 /**
@@ -98,50 +102,76 @@ function createCard(context: PortfolioContext, input: CreateCardInput): void {
 }
 
 /**
- * Règle la cotisation du membre connecté pour le tour en cours.
+ * Règle la cotisation du membre connecté pour le tour en cours, payée par son
+ * opérateur mobile : l'argent vient de Mobile Money ou d'Airtel Money, le solde
+ * de l'app n'est pas touché.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
  * @throws {ForbiddenOperationError} si la cotisation est déjà réglée ou interdite.
- * @throws {InsufficientFundsError} si le solde disponible ne couvre pas la cotisation.
  */
 function contributeTontine(context: PortfolioContext, tontineId: string): void {
-  const tontine = requireTontine(context.get().tontines, tontineId);
-  requireSelfCanPay(tontine);
-  requireFunds(context.get().available, tontine.contribution);
-  context.set((state) => ({
-    available: state.available - tontine.contribution,
-    tontines: markSelfPaid(state.tontines, tontineId),
-  }));
+  requireSelfCanPay(requireTontine(context.get().tontines, tontineId));
+  context.set((state) => ({ tontines: markSelfPaid(state.tontines, tontineId) }));
 }
 
 /**
- * Verse la cagnotte du tour au bénéficiaire et passe au tour suivant.
+ * Lance une tontine préparée, une fois tous ses membres réunis.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
- * @throws {ForbiddenOperationError} si le membre connecté n'est pas le bénéficiaire.
+ * @throws {ForbiddenOperationError} si le membre connecté n'administre pas la tontine.
+ * @throws {ForbiddenOperationError} si la tontine est déjà lancée ou incomplète.
  */
-function withdrawTontine(context: PortfolioContext, tontineId: string): void {
+function startTontine(context: PortfolioContext, tontineId: string): void {
   const tontine = requireTontine(context.get().tontines, tontineId);
-  if (!isTontineBeneficiary(tontine)) {
-    throw new ForbiddenOperationError("Vous ne recevez pas la cagnotte de ce tour.");
+  requireAdmin(tontine);
+  if (tontine.state !== "PENDING") {
+    throw new ForbiddenOperationError("Cette tontine est déjà lancée.");
   }
+  if (!hasReachedQuota(tontine)) {
+    throw new ForbiddenOperationError("La tontine n'a pas encore tous ses membres.");
+  }
+  context.set((state) => ({ tontines: startTontineIn(state.tontines, tontineId) }));
+}
+
+/**
+ * Confirme la restourne : la cagnotte est distribuée au bénéficiaire et le tour
+ * passe au suivant, sans action de retrait ni de transfert.
+ * @param context Accès au store.
+ * @param tontineId Tontine concernée.
+ * @throws {ForbiddenOperationError} si le membre connecté n'administre pas la tontine.
+ * @throws {ForbiddenOperationError} si tous les membres n'ont pas encore versé.
+ */
+function confirmRound(context: PortfolioContext, tontineId: string): void {
+  const tontine = requireTontine(context.get().tontines, tontineId);
+  requireAdmin(tontine);
+  if (tontine.state !== "ACTIVE" || !allMembersPaid(tontine)) {
+    throw new ForbiddenOperationError("Tous les membres n'ont pas encore versé leur cotisation.");
+  }
+  const toSelf = tontine.beneficiaryId === SELF_MEMBER_ID;
+  const pot = tontinePot(tontine);
   context.set((state) => ({
-    available: state.available + tontinePot(tontine),
+    available: toSelf ? state.available + pot : state.available,
     tontines: advanceRound(state.tontines, tontineId),
   }));
 }
 
 /**
- * Transfère un montant du solde disponible vers un autre membre de la tontine.
+ * Ajoute un membre à une tontine préparée, tant que le quota n'est pas atteint.
  * @param context Accès au store.
- * @param input Tontine, destinataire et montant.
+ * @param tontineId Tontine concernée.
+ * @throws {ForbiddenOperationError} si la tontine est lancée ou déjà complète.
  */
-function transferToMember(context: PortfolioContext, input: TransferToMemberInput): void {
-  const tontine = requireTontine(context.get().tontines, input.tontineId);
-  requirePositive(input.amount);
-  requireFunds(context.get().available, input.amount);
-  requireOtherMember(tontine, input.memberId);
-  context.set((state) => ({ available: state.available - input.amount }));
+function addMember(context: PortfolioContext, tontineId: string): void {
+  const tontine = requireTontine(context.get().tontines, tontineId);
+  requireAdmin(tontine);
+  if (tontine.state !== "PENDING") {
+    throw new ForbiddenOperationError("Cette tontine est déjà lancée.");
+  }
+  if (hasReachedQuota(tontine)) {
+    throw new ForbiddenOperationError("La tontine a déjà tous ses membres.");
+  }
+  const member = buildInvitedMember(tontine.members.length - 1);
+  context.set((state) => ({ tontines: appendTontineMember(state.tontines, tontineId, member) }));
 }
 
 /**
@@ -174,33 +204,40 @@ function removeMember(context: PortfolioContext, tontineId: string, memberId: st
 }
 
 /**
- * Ajoute un marqueur d'épargne à une carte.
+ * Ajoute un marqueur d'épargne à une carte et l'inscrit dans son historique.
  * @param context Accès au store.
  * @param cardId Carte concernée.
+ * @param payment Instant du pointage et opérateur qui l'a réglé.
  * @throws {ForbiddenOperationError} si la carte est clôturée.
- * @throws {InsufficientFundsError} si le solde disponible ne couvre pas le marqueur.
+ * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur.
  */
-function contributeCard(context: PortfolioContext, cardId: string): void {
+function contributeCard(context: PortfolioContext, cardId: string, payment: CardPayment): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.state !== "ACTIVE") {
     throw new ForbiddenOperationError("Cette carte est clôturée.");
   }
-  requireFunds(context.get().available, card.markerAmount);
+  const debit = payment.method === "MITEMO" ? card.markerAmount : 0n;
+  requireFunds(context.get().available, debit);
   context.set((state) => ({
-    available: state.available - card.markerAmount,
-    cards: addSaved(state.cards, cardId, card.markerAmount),
+    available: state.available - debit,
+    cards: addSaved(state.cards, cardId, { ...payment, amount: card.markerAmount }),
   }));
 }
 
 /**
- * Verse l'épargne d'une carte sur le solde disponible et clôt la carte.
+ * Verse l'épargne d'une carte remplie sur le solde disponible et archive la
+ * carte : une carte archivée est terminée et retirée.
  * @param context Accès au store.
  * @param cardId Carte concernée.
  * @throws {InvalidAmountError} si la carte n'a aucune épargne.
+ * @throws {ForbiddenOperationError} si l'objectif n'est pas atteint ou la carte déjà archivée.
  */
 function withdrawCard(context: PortfolioContext, cardId: string): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.saved <= 0n) throw new InvalidAmountError("Cette carte n'a rien à retirer.");
+  if (!cardCapabilities(card).canWithdraw) {
+    throw new ForbiddenOperationError("Le retrait n'est possible qu'une fois l'objectif atteint.");
+  }
   context.set((state) => ({
     available: state.available + card.saved,
     cards: clearSaved(state.cards, cardId),
@@ -240,13 +277,13 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...INITIAL_PORTFOLIO,
     createTontine: (input) => createTontine(context, input),
     createCard: (input) => createCard(context, input),
+    startTontine: (id) => startTontine(context, id),
     contributeTontine: (id) => contributeTontine(context, id),
-    withdrawTontine: (id) => withdrawTontine(context, id),
-    transferToMember: (tontineId, memberId, amount) =>
-      transferToMember(context, { tontineId, memberId, amount }),
+    confirmRound: (id) => confirmRound(context, id),
+    addMember: (id) => addMember(context, id),
     inviteMember: (id) => inviteMember(context, id),
     removeMember: (tontineId, memberId) => removeMember(context, tontineId, memberId),
-    contributeCard: (id) => contributeCard(context, id),
+    contributeCard: (id, payment) => contributeCard(context, id, payment),
     withdrawCard: (id) => withdrawCard(context, id),
     transferCardToTontine: (id) => transferCardToTontine(context, id),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),

@@ -22,10 +22,10 @@ describe("SavingsScreen", () => {
     expect(screen.queryByText("Fonds d'urgence")).not.toBeOnTheScreen();
   });
 
-  it("affiche les cartes terminées quand on choisit leur filtre", async () => {
+  it("affiche les cartes retirées quand on choisit leur filtre", async () => {
     await renderWithSafeArea(<SavingsScreen />);
 
-    fireEvent.press(screen.getByRole("tab", { name: "Terminées" }));
+    fireEvent.press(screen.getByRole("tab", { name: "Retirées" }));
 
     expect(await screen.findByText("Fonds d'urgence")).toBeOnTheScreen();
     expect(screen.queryByText("Loyer de Janvier")).not.toBeOnTheScreen();

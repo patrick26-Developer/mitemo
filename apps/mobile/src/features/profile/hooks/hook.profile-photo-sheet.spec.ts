@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Alert } from "react-native";
 
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/store.member";
 import { saveProfilePhoto } from "../model/model.profile-photo-file";
@@ -8,6 +7,7 @@ import { PHOTO_ERRORS } from "./hook.profile-photo";
 import { useProfilePhotoSheet } from "./hook.profile-photo-sheet";
 
 jest.mock("expo-image-picker", () => ({
+  UIImagePickerPreferredAssetRepresentationMode: { Current: "current" },
   launchImageLibraryAsync: jest.fn(),
   launchCameraAsync: jest.fn(),
   requestCameraPermissionsAsync: jest.fn(),
@@ -19,7 +19,6 @@ jest.mock("../model/model.profile-photo-file", () => ({
 
 const launchLibrary = jest.mocked(ImagePicker.launchImageLibraryAsync);
 const savePhoto = jest.mocked(saveProfilePhoto);
-const alert = jest.spyOn(Alert, "alert").mockImplementation();
 
 /** Résultat d'un choix abouti, avec une photo carrée. */
 const PICKED: ImagePicker.ImagePickerSuccessResult = {
@@ -29,9 +28,6 @@ const PICKED: ImagePicker.ImagePickerSuccessResult = {
 
 /** Résultat d'un choix annulé par le membre. */
 const CANCELED: ImagePicker.ImagePickerCanceledResult = { canceled: true, assets: null };
-
-/** Titre de l'alerte d'un enregistrement impossible. */
-const SAVE_FAILED_TITLE = "Photo non modifiée";
 
 /**
  * Promesse dont le test contrôle le moment de la résolution.
@@ -111,7 +107,7 @@ describe("useProfilePhotoSheet", () => {
     expect(result.current.sheetProps.visible).toBe(true);
   });
 
-  it("annonce un enregistrement impossible après la fermeture", async () => {
+  it("rouvre la feuille avec l'explication quand l'enregistrement échoue après sa fermeture", async () => {
     savePhoto.mockRejectedValue(new Error("compression impossible"));
     launchLibrary.mockResolvedValue(PICKED);
     const { result } = await renderHook(() => useProfilePhotoSheet());
@@ -119,8 +115,8 @@ describe("useProfilePhotoSheet", () => {
     await act(() => result.current.headerProps.onChangePhoto());
     await act(() => result.current.sheetProps.onPickFromLibrary());
 
-    await waitFor(() => expect(alert).toHaveBeenCalledWith(SAVE_FAILED_TITLE, PHOTO_ERRORS.save));
-    expect(result.current.sheetProps.visible).toBe(false);
+    await waitFor(() => expect(result.current.sheetProps.visible).toBe(true));
+    expect(result.current.sheetProps.errorMessage).toBe(PHOTO_ERRORS.save);
     expect(result.current.headerProps.photoUri).toBeNull();
   });
 

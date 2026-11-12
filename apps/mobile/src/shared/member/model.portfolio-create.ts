@@ -1,4 +1,5 @@
 import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./model.portfolio";
+import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
 
 /** Noms proposés aux membres invités lors d'une création locale. */
@@ -33,7 +34,6 @@ export interface CreateTontineInput {
   readonly name: string;
   readonly contribution: bigint;
   readonly frequency: TontineFrequency;
-  readonly totalRounds: number;
   readonly participantCount: number;
   readonly description: string;
 }
@@ -41,34 +41,45 @@ export interface CreateTontineInput {
 /** Paramètres saisis pour créer une carte de pointage. */
 export interface CreateCardInput {
   readonly name: string;
+  /** Objectif d'épargne, en plus petite unité de la devise. */
+  readonly goal: bigint;
+  /** Montant proposé à chaque pointage, en plus petite unité de la devise. */
   readonly markerAmount: bigint;
+  /** Nombre de marqueurs déduit du rythme et de l'échéance. */
   readonly markersTotal: number;
+  readonly frequency: TontineFrequency;
+  /** Date de création du plan, en ISO 8601 UTC (`AAAA-MM-JJ`). */
+  readonly startDate: string;
   readonly deadline: string;
   readonly tontineId: string | null;
   readonly description: string;
 }
 
 /**
- * Construit la liste des membres d'une nouvelle tontine : le membre connecté
- * en administrateur, puis les participants invités.
- * @param participantCount Nombre total de participants.
- * @returns Les membres, cotisation du tour en cours non réglée.
+ * Construit le membre invité qui prend le rang donné.
+ * @param index Rang de l'invité, à partir de 0.
+ * @returns Le membre, cotisation du tour en cours non réglée.
  */
-function buildMembers(participantCount: number): readonly TontineMember[] {
-  const self: TontineMember = {
+export function buildInvitedMember(index: number): TontineMember {
+  return {
+    id: `member-${index + 1}`,
+    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
+    role: "MEMBRE",
+    paidCurrentRound: false,
+  };
+}
+
+/**
+ * Construit le membre connecté, administrateur d'une nouvelle tontine.
+ * @returns Son adhésion, cotisation du tour en cours non réglée.
+ */
+function buildSelfMember(): TontineMember {
+  return {
     id: SELF_MEMBER_ID,
     name: SELF_NAME,
     role: "ADMIN",
     paidCurrentRound: false,
   };
-  const others = Array.from({ length: Math.max(participantCount - 1, 0) }, (_, index) => ({
-    id: `member-${index + 1}`,
-    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
-    role: "MEMBRE" as const,
-    paidCurrentRound: false,
-  }));
-
-  return [self, ...others];
 }
 
 /**
@@ -78,7 +89,7 @@ function buildMembers(participantCount: number): readonly TontineMember[] {
  * @returns La tontine prête à être ajoutée.
  */
 export function buildTontine(input: CreateTontineInput, index: number): Tontine {
-  const members = buildMembers(input.participantCount);
+  const members = [buildSelfMember()];
 
   return {
     id: createId("tontine"),
@@ -86,10 +97,10 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
     contribution: input.contribution,
     frequency: input.frequency,
     round: 1,
-    totalRounds: input.totalRounds,
-    state: "ACTIVE",
+    totalRounds: input.participantCount,
+    state: "PENDING",
     members,
-    beneficiaryId: members[0]?.id ?? SELF_MEMBER_ID,
+    beneficiaryId: SELF_MEMBER_ID,
     description: input.description,
     headerColors: TONTINE_TINTS[index % TONTINE_TINTS.length] ?? ["#2CCA86", "#62F79D"],
     invitationCode: null,
@@ -106,13 +117,18 @@ export function buildCard(input: CreateCardInput, index: number): SavingsCard {
   return {
     id: createId("card"),
     name: input.name,
+    goal: input.goal,
     markerAmount: input.markerAmount,
     markersTotal: input.markersTotal,
+    frequency: input.frequency,
+    startDate: input.startDate,
     saved: 0n,
     deadline: input.deadline,
     tint: CARD_TINTS[index % CARD_TINTS.length] ?? "#CFD8FF",
     state: "ACTIVE",
     description: input.description,
     tontineId: input.tontineId,
+    fee: cardCreationFee(input.goal),
+    entries: [],
   };
 }
