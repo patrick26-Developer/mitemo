@@ -1,5 +1,5 @@
 import { makeCard, makeTontine } from "../../../shared/testing/fixtures.portfolio";
-import { homeSections } from "./model.home-sections";
+import { HOME_PREVIEW_LIMIT, homeSections } from "./model.home-sections";
 
 describe("homeSections", () => {
   it("ne garde que les tontines lancées et les cartes non archivées", () => {
@@ -19,6 +19,20 @@ describe("homeSections", () => {
       [makeCard({ state: "ARCHIVED" })],
     );
 
-    expect(sections).toEqual({ tontines: [], cards: [], empty: true });
+    expect(sections).toEqual({
+      tontines: [],
+      tontineCount: 0,
+      cards: [],
+      cardCount: 0,
+      empty: true,
+    });
+  });
+
+  it("ne garde que les premières en aperçu, mais compte toutes les actives", () => {
+    const tontines = Array.from({ length: 7 }, (_, index) => makeTontine({ id: `t${index}` }));
+    const sections = homeSections(tontines, []);
+
+    expect(sections.tontines).toHaveLength(HOME_PREVIEW_LIMIT);
+    expect(sections.tontineCount).toBe(7);
   });
 });

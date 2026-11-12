@@ -33,6 +33,7 @@ describe("TontineMembersScreen", () => {
   it("cherche un membre par son nom", async () => {
     await renderWithSafeArea(<TontineMembersScreen id="1" />);
 
+    await fireEvent.press(screen.getByRole("button", { name: "Rechercher un membre" }));
     await fireEvent.changeText(screen.getByPlaceholderText("Rechercher un membre"), "leonie");
 
     expect(screen.getByText("Léonie Bantsimba")).toBeOnTheScreen();
@@ -42,6 +43,7 @@ describe("TontineMembersScreen", () => {
   it("explique une recherche sans résultat", async () => {
     await renderWithSafeArea(<TontineMembersScreen id="1" />);
 
+    await fireEvent.press(screen.getByRole("button", { name: "Rechercher un membre" }));
     await fireEvent.changeText(screen.getByPlaceholderText("Rechercher un membre"), "zzz");
 
     expect(screen.getByText("Aucun membre trouvé")).toBeOnTheScreen();
@@ -53,6 +55,16 @@ describe("TontineMembersScreen", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Historique de Serge Makosso" }));
 
     expect(await screen.findByRole("header", { name: "Serge Makosso" })).toBeOnTheScreen();
+  });
+
+  it("cache le champ de recherche derrière la loupe de l'en-tête, et le referme", async () => {
+    await renderWithSafeArea(<TontineMembersScreen id="1" />);
+
+    expect(screen.queryByPlaceholderText("Rechercher un membre")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Rechercher un membre" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Annuler la recherche" }));
+
+    expect(screen.queryByPlaceholderText("Rechercher un membre")).toBeNull();
   });
 
   it("signale une tontine introuvable", async () => {

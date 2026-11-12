@@ -255,21 +255,6 @@ export function addSaved(
 }
 
 /**
- * Retire un montant de l'épargne d'une carte.
- * @param cards Cartes du membre.
- * @param id Carte concernée.
- * @param amount Montant à retirer.
- * @returns La liste avec l'épargne mise à jour.
- */
-export function deductSaved(
-  cards: readonly SavingsCard[],
-  id: string,
-  amount: bigint,
-): readonly SavingsCard[] {
-  return cards.map((card) => (card.id === id ? { ...card, saved: card.saved - amount } : card));
-}
-
-/**
  * Archive une carte dont l'épargne vient d'être retirée. Le montant épargné
  * reste inscrit pour l'historique, mais ne compte plus dans le total.
  * @param cards Cartes du membre.

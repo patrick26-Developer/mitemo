@@ -122,7 +122,7 @@ describe("TontineDetailDock", () => {
     expect(actions.confirm).toHaveBeenCalledTimes(1);
   });
 
-  it("propose à l'administrateur de partager l'invitation tant qu'il manque des membres", async () => {
+  it("grise « Cotiser » en attendant les membres, et laisse l'administrateur partager", async () => {
     const actions = makeActions();
     const pending = makeTontine({
       state: "PENDING",
@@ -133,22 +133,24 @@ describe("TontineDetailDock", () => {
       <TontineDetailDock item={pending} actions={actions} onLayout={jest.fn()} />,
     );
 
+    expect(screen.getByRole("button", { name: "En attente de 2 membres" })).toBeDisabled();
     await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
 
     expect(actions.share).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("button", { name: /^Cotiser/ })).toBeNull();
   });
 
-  it("ne propose rien à un simple membre d'une tontine à lancer", async () => {
+  it("montre aussi l'attente à un simple membre, sans partage", async () => {
     const pending = makeTontine({
       state: "PENDING",
+      totalRounds: 2,
       members: [makeMember(SELF_MEMBER_ID, "MEMBRE")],
     });
     await renderWithSafeArea(
       <TontineDetailDock item={pending} actions={makeActions()} onLayout={jest.fn()} />,
     );
 
-    expect(screen.getByTestId("actions-dock-empty")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "En attente de 1 membre" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
   });
 
   it("propose d'activer la restourne quand tous les membres sont réunis", async () => {

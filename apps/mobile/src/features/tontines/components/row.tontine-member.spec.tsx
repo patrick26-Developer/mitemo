@@ -1,3 +1,5 @@
+import { useMemberStore } from "../../../shared/member/store.member";
+import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import { makeMember } from "../../../shared/testing/fixtures.portfolio";
@@ -59,5 +61,13 @@ describe("TontineMemberRow", () => {
 
     await render(<TontineMemberRow member={makeMember("m3", "MEMBRE")} />);
     expect(screen.getByText("En attente")).toHaveStyle({ color: "#B42318" });
+  });
+
+  it("montre la photo de profil du membre à la place de son initiale", async () => {
+    useMemberStore.setState({ photoUri: "file:///photo.jpg" });
+    await render(<TontineMemberRow member={makeMember(SELF_MEMBER_ID, "ADMIN", true)} />);
+
+    expect(screen.getByTestId("member-row-photo")).toBeOnTheScreen();
+    useMemberStore.setState({ photoUri: null });
   });
 });

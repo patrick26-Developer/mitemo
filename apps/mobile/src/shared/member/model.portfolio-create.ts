@@ -7,10 +7,8 @@ import type {
 } from "./model.portfolio";
 import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
+import { cardTintFor } from "./model.card-tint";
 import { TONTINE_TINTS } from "./model.tontine-settings";
-
-/** Teintes des nouvelles cartes de pointage. */
-const CARD_TINTS = ["#CFD8FF", "#CDF5DD", "#F5D7B0", "#F2C9E4"] as const;
 
 /** Nom du membre connecté, tant que l'authentification n'est pas branchée. */
 const SELF_NAME = "Précieuse Mavoungou";
@@ -118,10 +116,9 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
 /**
  * Construit une carte à partir du formulaire de création.
  * @param input Paramètres saisis.
- * @param index Rang de la carte, pour choisir sa teinte.
  * @returns La carte prête à être ajoutée.
  */
-export function buildCard(input: CreateCardInput, index: number): SavingsCard {
+export function buildCard(input: CreateCardInput): SavingsCard {
   return {
     id: createId("card"),
     name: input.name,
@@ -132,7 +129,7 @@ export function buildCard(input: CreateCardInput, index: number): SavingsCard {
     startDate: input.startDate,
     saved: 0n,
     deadline: input.deadline,
-    tint: CARD_TINTS[index % CARD_TINTS.length] ?? "#CFD8FF",
+    tint: cardTintFor(input.markerAmount),
     state: "ACTIVE",
     description: input.description,
     tontineId: input.tontineId,

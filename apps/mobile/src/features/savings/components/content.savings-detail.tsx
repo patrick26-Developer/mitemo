@@ -3,9 +3,12 @@ import { ScrollView, Text, View } from "react-native";
 import { useDockInset } from "../../../shared/hooks/hook.dock-inset";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { todayUtc } from "../../../shared/model/model.clock";
 import { useSavingsActions } from "../hooks/hook.savings-actions";
+import { isPastDeadline } from "../model/model.card-contributions";
 import { SavingsRecapCard } from "./card.savings-recap";
 import { SavingsDetailDock } from "./dock.savings-detail";
+import { CardContributionsGrid } from "./grid.card-contributions";
 import { CardHistoryList } from "./list.card-history";
 import { SavingsTontinePanel } from "./panel.savings-tontine";
 
@@ -39,6 +42,7 @@ export function SavingsDetailContent(props: SavingsDetailContentProps) {
         contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
       >
         <SavingsRecapCard item={item} tontineName={tontine?.name ?? null} />
+        {isPastDeadline(item, todayUtc()) ? <CardContributionsGrid item={item} /> : null}
         <CardHistoryList item={item} />
         {tontine === undefined ? null : (
           <SavingsTontinePanel item={item} tontine={tontine} onTransfer={actions.transfer} />

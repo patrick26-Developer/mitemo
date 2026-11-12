@@ -1,5 +1,6 @@
 import type { SavingsCard as SavingsCardModel } from "../../../shared/member/model.portfolio";
 import { router } from "expo-router";
+import { PALETTE } from "../../../shared/theme/theme.palette";
 import { View } from "react-native";
 
 import { SectionTitle } from "../../../shared/components/atoms/title.section";
@@ -13,6 +14,8 @@ export interface SavingsSectionProps {
   readonly items: readonly SavingsCardModel[];
   /** Vrai sans section des tontines : la section remonte sur le bandeau bleu. */
   readonly lead: boolean;
+  /** Total des cartes non archivées, affiché dans le titre. */
+  readonly count: number;
 }
 
 /**
@@ -27,7 +30,7 @@ export function SavingsSection(props: SavingsSectionProps) {
   return (
     <View className={lead ? "-mt-[276px] mb-5 flex-col gap-3" : "mt-4 flex-col gap-3"}>
       <SectionTitle
-        label={formatCountLabel(active.length, "Carte de pointage", "Cartes de pointage")}
+        label={formatCountLabel(props.count, "Carte active", "Cartes actives")}
         tone={lead ? "light" : "dark"}
         onPress={() => router.push("/savings")}
       />
@@ -35,6 +38,7 @@ export function SavingsSection(props: SavingsSectionProps) {
         items={active}
         keyOf={(item) => item.id}
         renderItem={(item, index) => <SavingsCard item={item} index={index} />}
+        dotsColor={lead ? PALETTE.white : PALETTE.brand}
       />
     </View>
   );

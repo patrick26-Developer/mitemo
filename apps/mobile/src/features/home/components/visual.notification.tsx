@@ -38,6 +38,7 @@ export function NotificationVisualView(props: NotificationVisualViewProps) {
       <MemberPhoto
         photoUri={null}
         initial={visual.name.charAt(0).toUpperCase()}
+        seed={visual.name}
         size={VISUAL_SIZE}
         testID="notification-avatar"
       />

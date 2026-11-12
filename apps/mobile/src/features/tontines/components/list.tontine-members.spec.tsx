@@ -64,7 +64,7 @@ describe("TontineMemberList", () => {
 
     expect(await screen.findByRole("header", { name: "Membre m2" })).toBeOnTheScreen();
     expect(screen.getByText("Tour 1")).toBeOnTheScreen();
-    expect(screen.getAllByText(/· Réglé/)).toHaveLength(2);
+    expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(2);
     expect(screen.getByText("Membre de la tontine · Tour 1")).toBeOnTheScreen();
   });
 

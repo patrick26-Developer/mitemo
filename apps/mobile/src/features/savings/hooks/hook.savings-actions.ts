@@ -5,6 +5,7 @@ import { nowIsoUtc } from "../../../shared/model/model.clock";
 import type { PaymentMethod } from "../../../shared/model/model.payment-method";
 import { paymentMethodLabel } from "../../../shared/model/model.payment-method";
 import { usePortfolioFeedback } from "../../../shared/hooks/hook.portfolio-feedback";
+import { todayUtc } from "../../../shared/model/model.clock";
 
 /** Actions offertes sur une carte de pointage ; leur résultat sort en toast. */
 export interface SavingsActionsState {
@@ -33,6 +34,9 @@ export function useSavingsActions(card: SavingsCard): SavingsActionsState {
     withdraw: () =>
       act((store) => store.withdrawCard(card.id), "L'épargne a rejoint votre solde disponible."),
     transfer: () =>
-      act((store) => store.transferCardToTontine(card.id), "Cotisation de la tontine réglée."),
+      act(
+        (store) => store.transferCardToTontine(card.id, todayUtc()),
+        "Cotisation réglée : la carte repart sur une copie neuve.",
+      ),
   };
 }
