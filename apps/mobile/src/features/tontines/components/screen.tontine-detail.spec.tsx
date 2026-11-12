@@ -134,6 +134,16 @@ describe("TontineDetailScreen", () => {
     });
   });
 
+  it("ouvre les réglages de l'administrateur depuis « Plus d'options »", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="1" />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Plus d'options" }));
+    await fireEvent.changeText(screen.getByLabelText("Nom"), "Tontine du Grand Marché");
+    await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(screen.getByRole("header", { name: "Tontine du Grand Marché" })).toBeOnTheScreen();
+  });
+
   it("affiche un état vide quand la tontine n'existe pas", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="inconnue" />);
 

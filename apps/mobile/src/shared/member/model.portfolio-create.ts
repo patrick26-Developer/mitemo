@@ -7,14 +7,7 @@ import type {
 } from "./model.portfolio";
 import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
-
-/** Dégradés des nouvelles tontines, du centre vers le bord. */
-const TONTINE_TINTS: readonly (readonly [string, string])[] = [
-  ["#2CCA86", "#62F79D"],
-  ["#F5B94A", "#FAD98C"],
-  ["#9DB6F5", "#C9D6FF"],
-  ["#F2A0B5", "#FBD0DA"],
-];
+import { TONTINE_TINTS } from "./model.tontine-settings";
 
 /** Teintes des nouvelles cartes de pointage. */
 const CARD_TINTS = ["#CFD8FF", "#CDF5DD", "#F5D7B0", "#F2C9E4"] as const;
