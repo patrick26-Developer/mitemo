@@ -31,11 +31,11 @@ describe("TontineCreateSheet", () => {
     usePortfolioStore.getState().reset();
   });
 
-  it("commence à l'étape 1 sur 4, sans bouton Annuler", async () => {
+  it("commence à l'étape 1 sur 3, sans bouton Annuler", async () => {
     await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
 
     expect(
-      screen.getByRole("progressbar", { name: "Étape 1 sur 4 : L'essentiel" }),
+      screen.getByRole("progressbar", { name: "Étape 1 sur 3 : L'essentiel" }),
     ).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: /Annuler/ })).toBeNull();
     expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
@@ -47,7 +47,7 @@ describe("TontineCreateSheet", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
     expect(screen.getByText("Donnez un nom à la tontine.")).toBeOnTheScreen();
-    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 3/ })).toBeOnTheScreen();
   });
 
   it("refuse un nom sans lettre et compte les caractères saisis", async () => {
@@ -57,7 +57,7 @@ describe("TontineCreateSheet", () => {
 
     expect(screen.getByText("Le nom doit contenir au moins une lettre.")).toBeOnTheScreen();
     expect(screen.getByText("Le nom que verront les membres. 4/30")).toBeOnTheScreen();
-    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 3/ })).toBeOnTheScreen();
   });
 
   it("fait choisir la fréquence dans une liste groupée, sans saisir d'intervalle", async () => {
@@ -65,7 +65,7 @@ describe("TontineCreateSheet", () => {
     await fillEssentials();
 
     expect(
-      screen.getByRole("progressbar", { name: "Étape 2 sur 4 : La fréquence" }),
+      screen.getByRole("progressbar", { name: "Étape 2 sur 3 : Le rythme" }),
     ).toBeOnTheScreen();
     expect(screen.queryByLabelText("Intervalle")).toBeNull();
     expect(screen.getByLabelText("Fréquence des tours : Chaque semaine")).toBeOnTheScreen();
@@ -75,13 +75,12 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByLabelText("Fréquence des tours : Toutes les 2 semaines")).toBeOnTheScreen();
   });
 
-  it("règle les participants au compteur et les déduit des tours", async () => {
+  it("règle les participants au compteur, sur l'étape de la fréquence", async () => {
     await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
     await fillEssentials();
-    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
     expect(
-      screen.getByRole("progressbar", { name: "Étape 3 sur 4 : Les participants" }),
+      screen.getByRole("progressbar", { name: "Étape 2 sur 3 : Le rythme" }),
     ).toBeOnTheScreen();
     expect(screen.queryByLabelText("Tours")).toBeNull();
 
@@ -106,10 +105,9 @@ describe("TontineCreateSheet", () => {
     await fillEssentials();
     await chooseCadence("Toutes les 2 semaines");
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
 
     expect(
-      screen.getByRole("progressbar", { name: "Étape 4 sur 4 : Le récapitulatif" }),
+      screen.getByRole("progressbar", { name: "Étape 3 sur 3 : Le récapitulatif" }),
     ).toBeOnTheScreen();
     expect(screen.getByText("Tontine du Marché")).toBeOnTheScreen();
     expect(screen.getByText("toutes les 2 semaines")).toBeOnTheScreen();

@@ -153,13 +153,8 @@ describe("tontineInvalidFields", () => {
 });
 
 describe("tontineStepError", () => {
-  it("découpe la saisie en quatre étapes", () => {
-    expect(TONTINE_FORM_STEPS).toEqual([
-      "L'essentiel",
-      "La fréquence",
-      "Les participants",
-      "Le récapitulatif",
-    ]);
+  it("découpe la saisie en trois étapes au plus", () => {
+    expect(TONTINE_FORM_STEPS).toEqual(["L'essentiel", "Le rythme", "Le récapitulatif"]);
   });
 
   it("ne valide à la première étape que le nom et la cotisation", () => {
@@ -170,24 +165,20 @@ describe("tontineStepError", () => {
     );
   });
 
-  it("valide la fréquence à la deuxième étape", () => {
+  it("valide la fréquence et les participants ensemble, à la deuxième étape", () => {
     expect(tontineStepError({ ...VALID_FORM, cadence: "x" }, 1)).toBe(
       "Choisissez une fréquence dans la liste.",
+    );
+    expect(tontineStepError({ ...VALID_FORM, participants: 51 }, 1)).toBe(
+      "Indiquez entre 2 et 50 participants.",
     );
     expect(tontineStepError(VALID_FORM, 1)).toBeNull();
   });
 
-  it("valide les participants à la troisième étape", () => {
-    expect(tontineStepError({ ...VALID_FORM, participants: 51 }, 2)).toBe(
+  it("valide tout le formulaire au récapitulatif", () => {
+    expect(tontineStepError({ ...VALID_FORM, participants: 1 }, 2)).toBe(
       "Indiquez entre 2 et 50 participants.",
     );
     expect(tontineStepError(VALID_FORM, 2)).toBeNull();
-  });
-
-  it("valide tout le formulaire au récapitulatif", () => {
-    expect(tontineStepError({ ...VALID_FORM, participants: 1 }, 3)).toBe(
-      "Indiquez entre 2 et 50 participants.",
-    );
-    expect(tontineStepError(VALID_FORM, 3)).toBeNull();
   });
 });

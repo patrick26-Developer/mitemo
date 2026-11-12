@@ -12,7 +12,7 @@ import {
   tontineStepError,
 } from "../model/model.tontine-form";
 
-/** Règles du formulaire de création en quatre étapes. */
+/** Règles du formulaire de création en trois étapes. */
 const CREATE_RULES = {
   initial: INITIAL_TONTINE_FORM,
   total: TONTINE_FORM_STEPS.length,

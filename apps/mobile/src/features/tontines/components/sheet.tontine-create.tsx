@@ -70,21 +70,25 @@ function TontineEssentialsStep(props: TontineCreateFieldsProps) {
 }
 
 /**
- * Deuxième étape : la fréquence des tours, choisie dans une liste groupée.
+ * Deuxième étape, le rythme : la fréquence des tours, choisie dans une liste
+ * groupée, et le nombre de participants.
  * @param props Saisie courante et mise à jour des champs.
- * @returns Le sélecteur de fréquence.
+ * @returns Le sélecteur de fréquence et le compteur de participants.
  */
-function TontineCadenceStep(props: TontineCreateFieldsProps) {
+function TontineRhythmStep(props: TontineCreateFieldsProps) {
   const { form, onChange } = props;
 
   return (
-    <SheetSelect
-      label="Fréquence des tours"
-      groups={TONTINE_CADENCE_GROUPS}
-      value={form.cadence}
-      onChange={(cadence) => onChange({ cadence })}
-      hint="Le rythme auquel chaque membre verse sa cotisation."
-    />
+    <>
+      <SheetSelect
+        label="Fréquence des tours"
+        groups={TONTINE_CADENCE_GROUPS}
+        value={form.cadence}
+        onChange={(cadence) => onChange({ cadence })}
+        hint="Le rythme auquel chaque membre verse sa cotisation."
+      />
+      <TontineParticipantsField {...props} />
+    </>
   );
 }
 
@@ -132,12 +136,12 @@ function invalidFields(form: TontineFormState, error: string | null): TontineInv
 }
 
 /**
- * Troisième étape : le nombre de participants. Chaque participant reçoit la
- * cagnotte une fois, donc le cycle compte autant de tours que de participants.
+ * Nombre de participants. Chaque participant reçoit la cagnotte une fois,
+ * donc le cycle compte autant de tours que de participants.
  * @param props Saisie courante et mise à jour des champs.
  * @returns Le compteur de participants.
  */
-function TontineParticipantsStep(props: TontineCreateFieldsProps) {
+function TontineParticipantsField(props: TontineCreateFieldsProps) {
   const { form, invalid, onChange } = props;
 
   return (
@@ -166,16 +170,11 @@ function TontineRecapStep(props: TontineCreateFieldsProps) {
 }
 
 /** Contenu de chaque étape, dans l'ordre de TONTINE_FORM_STEPS. */
-const STEP_CONTENTS = [
-  TontineEssentialsStep,
-  TontineCadenceStep,
-  TontineParticipantsStep,
-  TontineRecapStep,
-];
+const STEP_CONTENTS = [TontineEssentialsStep, TontineRhythmStep, TontineRecapStep];
 
 /**
- * Saisit les règles d'une nouvelle tontine en quatre étapes, la crée puis
- * propose de partager son code d'invitation.
+ * Saisit les règles d'une nouvelle tontine en trois étapes, la crée puis
+ * ouvre sa page.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle tontine ».
  */
