@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
+import { SHADOWS } from "../../theme/theme.shadow";
 
 /** Option d'un sélecteur de feuille. */
 export interface SheetSelectOption<Value extends string> {
@@ -198,10 +199,6 @@ const styles = StyleSheet.create({
   menu: {
     maxHeight: MENU_MAX_HEIGHT,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    ...SHADOWS.menu,
   },
 });

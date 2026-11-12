@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { HAIRLINE_WIDTH } from "../../theme/theme.hairline-width";
 import { PALETTE } from "../../theme/theme.palette";
 import { CountBadge } from "./badge.count";
+import { SHADOWS } from "../../theme/theme.shadow";
 
 /** Variantes de la pastille : posée sur des cartes ou sur le fond de l'écran. */
 export const ACTION_PILL_VARIANTS = ["raised", "flat"] as const;
@@ -77,11 +78,7 @@ const styles = StyleSheet.create({
   raised: {
     borderWidth: HAIRLINE_WIDTH,
     borderCurve: "continuous",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    ...SHADOWS.pill,
   },
   flat: {
     borderWidth: 1,

@@ -13,6 +13,7 @@ import type { BadgeCounts } from "../../notifications/model.notification-badges"
 import { badgeLabel } from "../../notifications/model.notification-badges";
 import { useNotifications } from "../../notifications/hook.notifications";
 import { useSeenWhile } from "../../notifications/hook.seen-while";
+import { SHADOWS } from "../../theme/theme.shadow";
 
 /** Onglets de l'application, dans l'ordre où ils sont affichés. */
 const TABS: readonly {
@@ -117,10 +118,6 @@ const styles = StyleSheet.create({
   shell: {
     borderTopWidth: HAIRLINE_WIDTH,
     borderCurve: "continuous",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -2 },
-    elevation: 10,
+    ...SHADOWS.tabBar,
   },
 });

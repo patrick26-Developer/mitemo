@@ -5,6 +5,7 @@ import { fieldChrome } from "../../../shared/theme/theme.field";
 import { PHONE_COUNTRY_CODE, formatPhoneInput, keepPhoneDigits } from "../model/model.auth-form";
 import { AUTH_COLORS } from "../model/model.auth-theme";
 import { AuthFieldIcon } from "./icon.auth-field";
+import { FIELD_INPUT_RESET } from "../../../shared/theme/theme.field-input";
 
 /** Props du champ de numéro de téléphone. */
 export interface PhoneFieldProps {
@@ -53,7 +54,7 @@ export function PhoneField(props: PhoneFieldProps) {
           accessibilityLabel="Numéro de téléphone"
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          style={styles.input}
+          style={[FIELD_INPUT_RESET, styles.input]}
         />
       </View>
     </View>

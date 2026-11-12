@@ -6,6 +6,7 @@ import { fieldChrome } from "../../../shared/theme/theme.field";
 import { AUTH_COLORS } from "../model/model.auth-theme";
 import type { AuthFieldIconKind } from "./icon.auth-field";
 import { AuthFieldIcon } from "./icon.auth-field";
+import { FIELD_INPUT_RESET } from "../../../shared/theme/theme.field-input";
 
 /** Champs texte de la première étape d'inscription. */
 export const AUTH_TEXT_FIELD_KINDS = ["firstName", "lastName", "occupation"] as const;
@@ -92,7 +93,7 @@ export function AuthTextField(props: AuthTextFieldProps) {
           autoCorrect={false}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          style={styles.input}
+          style={[FIELD_INPUT_RESET, styles.input]}
         />
       </View>
       {content.helper === undefined ? null : <Text style={styles.helper}>{content.helper}</Text>}

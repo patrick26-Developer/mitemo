@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import type { KeyboardTypeOptions } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
+import { FIELD_INPUT_RESET } from "../../theme/theme.field-input";
 
 /** Props d'un champ texte de feuille. */
 export interface SheetTextFieldProps {
@@ -56,10 +57,13 @@ export function SheetTextField(props: SheetTextFieldProps) {
         placeholderTextColor="#8A90A2"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="h-12 rounded-[14px] border px-4 text-[15px] text-ink"
-        style={fieldChrome({ focused, invalid })}
+        className="h-12 rounded-[14px] border text-[15px] text-ink"
+        style={[FIELD_INPUT_RESET, styles.input, fieldChrome({ focused, invalid })]}
       />
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
     </View>
   );
 }
+
+/** Marge horizontale du champ, posée en style pour valoir aussi sur Android. */
+const styles = StyleSheet.create({ input: { paddingHorizontal: 16 } });
