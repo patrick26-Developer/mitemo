@@ -37,4 +37,15 @@ describe("SheetPrimaryButton", () => {
     expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#2044DF" });
     expect(screen.getByText("Pointer")).toHaveStyle({ color: "#FFFFFF" });
   });
+
+  it("grise et désactive le bouton en teinte « disabled »", async () => {
+    const onPress = jest.fn();
+    await renderWithSafeArea(
+      <SheetPrimaryButton label="En attente" onPress={onPress} tone="disabled" />,
+    );
+
+    expect(screen.getByRole("button", { name: "En attente" })).toBeDisabled();
+    await fireEvent.press(screen.getByRole("button", { name: "En attente" }));
+    expect(onPress).not.toHaveBeenCalled();
+  });
 });

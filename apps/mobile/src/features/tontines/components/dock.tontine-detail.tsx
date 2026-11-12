@@ -9,13 +9,12 @@ import type { Tontine } from "../../../shared/member/model.portfolio";
 import {
   canConfirmRound,
   canPayContribution,
-  hasReachedQuota,
   isTontineAdmin,
 } from "../../../shared/member/model.portfolio";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
-import { selfDue } from "../../../shared/member/model.tontine-turns";
+import { canInviteMembers, freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
 import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
@@ -61,17 +60,32 @@ function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null
 }
 
 /**
- * Action d'une tontine à lancer, réservée à l'administrateur : partager
- * l'invitation tant qu'il manque des membres, puis activer la restourne.
+ * Action d'une tontine à lancer : tant qu'il manque des membres, « Cotiser »
+ * reste visible mais grisé avec l'attente ; une fois complète,
+ * l'administrateur active la restourne.
  * @param item Tontine à lancer.
  * @param actions Actions de la tontine.
- * @returns L'action, ou `null` pour un simple membre.
+ * @returns L'action, ou `null` pour un simple membre d'une tontine complète.
  */
 function pendingAction(item: Tontine, actions: TontineActionsState): DockAction | null {
-  if (!isTontineAdmin(item)) return null;
-  if (!hasReachedQuota(item)) return { label: "Partager l'invitation", onPress: actions.share };
+  const missing = freeTurns(item);
+  if (missing > 0) {
+    const label = `En attente de ${missing} ${missing > 1 ? "membres" : "membre"}`;
+    return { label, onPress: () => undefined, tone: "disabled" };
+  }
+  return isTontineAdmin(item) ? { label: "Activer la restourne", onPress: actions.start } : null;
+}
 
-  return { label: "Activer la restourne", onPress: actions.start };
+/**
+ * Action secondaire : partager l'invitation, pour l'administrateur et tant
+ * que la tontine accepte de nouveaux membres.
+ * @param item Tontine affichée.
+ * @param actions Actions de la tontine.
+ * @returns Le partage, ou `null`.
+ */
+function secondaryAction(item: Tontine, actions: TontineActionsState): DockAction | null {
+  if (!isTontineAdmin(item) || !canInviteMembers(item)) return null;
+  return { label: "Partager l'invitation", onPress: actions.share, accent: item.headerColors[0] };
 }
 
 /**
@@ -96,7 +110,8 @@ function payAction(item: Tontine, askPay: () => void): DockAction | null {
  * @returns L'action teintée, ou `null`.
  */
 function tinted(action: DockAction | null, item: Tontine): DockAction | null {
-  return action === null ? null : { ...action, accent: item.headerColors[0] };
+  if (action === null || action.tone === "disabled") return action;
+  return { ...action, accent: item.headerColors[0] };
 }
 
 /**
@@ -119,7 +134,11 @@ export function TontineDetailDock(props: TontineDetailDockProps) {
 
   return (
     <>
-      <ActionsDock primary={tinted(primaryAction(item, handlers), item)} onLayout={onLayout} />
+      <ActionsDock
+        primary={tinted(primaryAction(item, handlers), item)}
+        secondary={secondaryAction(item, actions)}
+        onLayout={onLayout}
+      />
       <TontinePaySheet
         visible={payOpen}
         item={item}
