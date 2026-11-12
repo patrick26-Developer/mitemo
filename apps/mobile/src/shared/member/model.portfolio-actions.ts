@@ -39,7 +39,7 @@ import {
   setInvitationCode,
   startTontine as startTontineIn,
 } from "./model.portfolio-update";
-import { selfDue } from "./model.tontine-turns";
+import { canInviteMembers, selfDue } from "./model.tontine-turns";
 import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
 
 /** Mise à jour partielle de l'état du portefeuille. */
@@ -180,10 +180,14 @@ function confirmRound(context: PortfolioContext, tontineId: string): void {
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
  * @returns Le code d'invitation à partager.
+ * @throws {ForbiddenOperationError} si la tontine est lancée ou complète.
  */
 function inviteMember(context: PortfolioContext, tontineId: string): string {
   const tontine = requireTontine(context.get().tontines, tontineId);
   requireAdmin(tontine);
+  if (!canInviteMembers(tontine)) {
+    throw new ForbiddenOperationError("Cette tontine n'accepte plus de nouveaux membres.");
+  }
   const code = tontine.invitationCode ?? createInvitationCode();
   context.set((state) => ({ tontines: setInvitationCode(state.tontines, tontineId, code) }));
   return code;

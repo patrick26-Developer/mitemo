@@ -96,8 +96,11 @@ describe("contributeTontine", () => {
 });
 
 describe("inviteMember", () => {
+  /** Tontine à lancer, où il manque encore deux membres. */
+  const OPEN = makeTontine({ state: "PENDING", members: [makeMember(SELF_MEMBER_ID, "ADMIN")] });
+
   it("crée puis conserve le même code d'invitation", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [OPEN] });
 
     const first = actions.inviteMember("t1");
     const second = actions.inviteMember("t1");
@@ -112,6 +115,18 @@ describe("inviteMember", () => {
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [simple] });
 
     expect(() => actions.inviteMember("t1")).toThrow(ForbiddenOperationError);
+  });
+
+  it("refuse de partager une tontine lancée ou complète", () => {
+    const full = makeTontine({ id: "t2", state: "PENDING" });
+    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [makeTontine(), full] });
+
+    expect(() => actions.inviteMember("t1")).toThrow(
+      "Cette tontine n'accepte plus de nouveaux membres.",
+    );
+    expect(() => actions.inviteMember("t2")).toThrow(
+      "Cette tontine n'accepte plus de nouveaux membres.",
+    );
   });
 });
 

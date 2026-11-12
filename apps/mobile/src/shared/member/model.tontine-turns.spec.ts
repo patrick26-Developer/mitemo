@@ -1,5 +1,12 @@
 import { makeMember, makeTontine } from "../testing/fixtures.portfolio";
-import { freeTurns, memberDue, selfDue, takenTurns, turnOrder } from "./model.tontine-turns";
+import {
+  canInviteMembers,
+  freeTurns,
+  memberDue,
+  selfDue,
+  takenTurns,
+  turnOrder,
+} from "./model.tontine-turns";
 
 /** Tontine de 6 tours : le membre connecté prend 1 tour, m2 en prend 3, m3 en prend 1. */
 const SHARED = makeTontine({
@@ -51,5 +58,15 @@ describe("selfDue", () => {
 
   it("vaut une cotisation quand le membre connecté n'y participe pas", () => {
     expect(selfDue(makeTontine({ members: [] }))).toBe(5_000n);
+  });
+});
+
+describe("canInviteMembers", () => {
+  it("n'ouvre les invitations qu'avant le lancement, tant qu'il manque des membres", () => {
+    const pending = { ...SHARED, state: "PENDING" as const, totalRounds: 8 };
+
+    expect(canInviteMembers(pending)).toBe(true);
+    expect(canInviteMembers({ ...pending, totalRounds: 5 })).toBe(false);
+    expect(canInviteMembers({ ...pending, state: "ACTIVE" })).toBe(false);
   });
 });

@@ -3,7 +3,8 @@ import { Share, UserPlus } from "lucide-react-native";
 import type { HeaderAction } from "../../../shared/components/macros/header.detail";
 import { DetailHeader } from "../../../shared/components/macros/header.detail";
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { hasReachedQuota, isTontineAdmin } from "../../../shared/member/model.portfolio";
+import { isTontineAdmin } from "../../../shared/member/model.portfolio";
+import { canInviteMembers } from "../../../shared/member/model.tontine-turns";
 
 /** Props de l'en-tête du détail d'une tontine. */
 export interface TontineDetailHeaderProps {
@@ -22,13 +23,12 @@ export interface TontineDetailHeaderProps {
  */
 function headerActions(props: TontineDetailHeaderProps): readonly HeaderAction[] {
   const { item, onShare, onAddMember } = props;
-  if (!isTontineAdmin(item)) return [];
+  if (!isTontineAdmin(item) || !canInviteMembers(item)) return [];
 
-  const share: HeaderAction = { label: "Partager l'invitation", icon: Share, onPress: onShare };
-  const canAdd = item.state === "PENDING" && !hasReachedQuota(item);
-  return canAdd
-    ? [share, { label: "Ajouter un membre", icon: UserPlus, onPress: onAddMember }]
-    : [share];
+  return [
+    { label: "Partager l'invitation", icon: Share, onPress: onShare },
+    { label: "Ajouter un membre", icon: UserPlus, onPress: onAddMember },
+  ];
 }
 
 /**
