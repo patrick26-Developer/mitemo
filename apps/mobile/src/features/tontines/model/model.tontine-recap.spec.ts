@@ -8,10 +8,10 @@ import {
 } from "./model.tontine-recap";
 
 describe("tontineStatus", () => {
-  it("annonce une tontine en préparation avec les membres réunis", () => {
+  it("annonce une tontine en préparation avec les tours déjà pris", () => {
     expect(tontineStatus(makeTontine({ state: "PENDING", totalRounds: 5 }))).toEqual({
       label: "En préparation",
-      detail: "3 sur 5 membres",
+      detail: "3 sur 5 tours pris",
     });
   });
 

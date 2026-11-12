@@ -35,7 +35,7 @@ describe("TontineDetailContent", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Ajouter un membre" }));
 
-    expect(await screen.findByRole("header", { name: "Ajouter un membre" })).toBeOnTheScreen();
+    expect(await screen.findByRole("header", { name: "Inviter un membre" })).toBeOnTheScreen();
   });
 
   it("cache les outils d'administration à un simple membre", async () => {

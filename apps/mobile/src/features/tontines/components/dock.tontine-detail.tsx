@@ -15,6 +15,7 @@ import {
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
+import { selfDue } from "../../../shared/member/model.tontine-turns";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
 const CONFIRM_ROUND: ConfirmSheetContent = {
@@ -56,7 +57,7 @@ function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null
   if (item.state !== "ACTIVE") return null;
   if (canConfirmRound(item)) return { label: "Confirmer la restourne", onPress: askConfirm };
   if (canPayContribution(item)) {
-    return { label: `Cotiser ${formatAmount(item.contribution)} FCFA`, onPress: askPay };
+    return { label: `Cotiser ${formatAmount(selfDue(item))} FCFA`, onPress: askPay };
   }
 
   return null;

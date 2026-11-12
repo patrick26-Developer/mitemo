@@ -1,6 +1,5 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
-import type { TontineMember } from "../../../shared/member/model.portfolio";
 import type { MemberContact } from "../../../shared/member/model.portfolio-create";
 
 /** Indicatif pays par défaut des numéros du répertoire : République du Congo. */
@@ -13,13 +12,18 @@ export interface PhoneContact {
   readonly phone: string;
 }
 
+/** Personne déjà liée à la tontine, membre ou invitée, reconnue à son numéro E.164. */
+export interface KnownPhone {
+  readonly phone?: string | undefined;
+}
+
 /** Ce qu'il faut pour proposer les contacts à inscrire dans une tontine. */
 export interface ContactMatchInput {
   readonly contacts: readonly PhoneContact[];
   /** Numéros E.164 qui ont un compte Mitemo. */
   readonly accounts: ReadonlySet<string>;
-  /** Membres déjà inscrits, à ne pas proposer de nouveau. */
-  readonly members: readonly TontineMember[];
+  /** Membres déjà inscrits et contacts déjà invités, à ne pas proposer de nouveau. */
+  readonly members: readonly KnownPhone[];
 }
 
 /**

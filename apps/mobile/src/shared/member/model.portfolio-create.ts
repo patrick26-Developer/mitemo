@@ -1,4 +1,10 @@
-import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./model.portfolio";
+import type {
+  PendingInvitation,
+  SavingsCard,
+  Tontine,
+  TontineFrequency,
+  TontineMember,
+} from "./model.portfolio";
 import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
 
@@ -50,19 +56,30 @@ export interface MemberContact {
 }
 
 /**
- * Construit le membre inscrit à partir d'un contact du répertoire.
+ * Prépare l'invitation d'un contact du répertoire : il ne devient membre
+ * qu'une fois qu'il l'a acceptée.
  * @param contact Nom et numéro du contact.
  * @param generate Source d'identifiant, injectée pour les tests.
- * @returns Le membre, cotisation du tour en cours non réglée.
+ * @returns L'invitation en attente de réponse.
  */
-export function buildContactMember(contact: MemberContact, generate?: () => string): TontineMember {
+export function buildInvitation(
+  contact: MemberContact,
+  generate?: () => string,
+): PendingInvitation {
   return {
-    id: generate === undefined ? createId("member") : createId("member", generate),
+    id: generate === undefined ? createId("invitation") : createId("invitation", generate),
     name: contact.name,
     phone: contact.phone,
-    role: "MEMBRE",
-    paidCurrentRound: false,
   };
+}
+
+/**
+ * Construit l'adhésion du membre connecté qui accepte une invitation.
+ * @param turns Nombre de tours choisis, déjà validé.
+ * @returns Son adhésion de simple membre, cotisation du tour non réglée.
+ */
+export function buildJoiningSelf(turns: number): TontineMember {
+  return { id: SELF_MEMBER_ID, name: SELF_NAME, role: "MEMBRE", paidCurrentRound: false, turns };
 }
 
 /**
@@ -75,6 +92,7 @@ function buildSelfMember(): TontineMember {
     name: SELF_NAME,
     role: "ADMIN",
     paidCurrentRound: false,
+    turns: 1,
   };
 }
 
@@ -100,6 +118,7 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
     description: input.description,
     headerColors: TONTINE_TINTS[index % TONTINE_TINTS.length] ?? ["#2CCA86", "#62F79D"],
     invitationCode: null,
+    invitations: [],
   };
 }
 

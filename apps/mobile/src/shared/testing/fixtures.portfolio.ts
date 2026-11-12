@@ -8,10 +8,10 @@ import { createPortfolioActions } from "../member/model.portfolio-actions";
  * @param id Identifiant du membre.
  * @param role Rôle dans la tontine.
  * @param paid `true` quand la cotisation du tour est réglée.
- * @returns Le membre prêt à être utilisé.
+ * @returns Le membre prêt à être utilisé, avec un seul tour.
  */
 export function makeMember(id: string, role: "ADMIN" | "MEMBRE", paid = false): TontineMember {
-  return { id, name: `Membre ${id}`, role, paidCurrentRound: paid };
+  return { id, name: `Membre ${id}`, role, paidCurrentRound: paid, turns: 1 };
 }
 
 /** Membres par défaut : le membre connecté administrateur et deux invités. */
@@ -40,6 +40,7 @@ export function makeTontine(over: Partial<Tontine> = {}): Tontine {
     description: "Une tontine de test.",
     headerColors: ["#2CCA86", "#62F79D"],
     invitationCode: null,
+    invitations: [],
     ...over,
   };
 }
@@ -86,6 +87,7 @@ export const TEST_PORTFOLIO = {
   available: 20_000n,
   tontines: [makeTontine()],
   cards: [makeCard()],
+  invitations: [],
 } as const;
 
 /**
@@ -93,7 +95,9 @@ export const TEST_PORTFOLIO = {
  * @param initial État de départ.
  * @returns Les actions et l'accès à l'état courant.
  */
-export function makePortfolio(initial: Pick<PortfolioState, "available" | "tontines" | "cards">) {
+export function makePortfolio(
+  initial: Pick<PortfolioState, "available" | "tontines" | "cards" | "invitations">,
+) {
   let state = initial;
   const context: PortfolioContext = {
     get: () => state as PortfolioState,

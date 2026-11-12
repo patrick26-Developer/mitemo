@@ -26,7 +26,8 @@ jest.mock("../../auth", () => {
  */
 function makeActions(over: Partial<TontineActionsState> = {}): TontineActionsState {
   return {
-    addMember: jest.fn(),
+    invite: jest.fn(),
+    cancelInvitation: jest.fn(),
     start: jest.fn(),
     contribute: jest.fn(),
     confirm: jest.fn(),

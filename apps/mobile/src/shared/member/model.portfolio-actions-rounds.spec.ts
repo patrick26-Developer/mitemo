@@ -7,60 +7,6 @@ import {
   TEST_PORTFOLIO,
 } from "../testing/fixtures.portfolio";
 
-/** Contact du répertoire qui a un compte Mitemo. */
-const AIMEE = { name: "Aimée Mbemba", phone: "+242065706622" } as const;
-
-describe("addMember", () => {
-  it("inscrit le contact choisi tant que le quota n'est pas atteint", () => {
-    const pending = makeTontine({
-      state: "PENDING",
-      totalRounds: 3,
-      members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
-    });
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [pending] });
-
-    actions.addMember("t1", AIMEE);
-
-    expect(state().tontines[0]?.members).toHaveLength(2);
-    expect(state().tontines[0]?.members[1]).toMatchObject({
-      name: "Aimée Mbemba",
-      phone: "+242065706622",
-      role: "MEMBRE",
-    });
-  });
-
-  it("refuse un contact déjà membre", () => {
-    const pending = makeTontine({
-      state: "PENDING",
-      totalRounds: 3,
-      members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
-    });
-    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [pending] });
-    actions.addMember("t1", AIMEE);
-
-    expect(() => actions.addMember("t1", AIMEE)).toThrow(ForbiddenOperationError);
-  });
-
-  it("refuse un membre de plus quand le quota est atteint", () => {
-    const { actions } = makePortfolio({
-      ...TEST_PORTFOLIO,
-      tontines: [makeTontine({ state: "PENDING" })],
-    });
-
-    expect(() => actions.addMember("t1", AIMEE)).toThrow(ForbiddenOperationError);
-  });
-
-  it("refuse l'ajout à un simple membre", () => {
-    const pending = makeTontine({
-      state: "PENDING",
-      members: [makeMember(SELF_MEMBER_ID, "MEMBRE")],
-    });
-    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [pending] });
-
-    expect(() => actions.addMember("t1", AIMEE)).toThrow(ForbiddenOperationError);
-  });
-});
-
 describe("startTontine", () => {
   it("lance la tontine complète et ouvre le premier tour", () => {
     const { actions, state } = makePortfolio({

@@ -49,7 +49,7 @@ export function TontineDetailContent(props: TontineDetailContentProps) {
         visible={addOpen}
         item={item}
         onClose={() => setAddOpen(false)}
-        onAdd={actions.addMember}
+        onAdd={actions.invite}
         onShare={actions.share}
       />
     </View>

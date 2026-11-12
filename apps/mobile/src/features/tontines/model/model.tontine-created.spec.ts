@@ -8,7 +8,7 @@ const FRESH = makeTontine({
   contribution: 5_000n,
   totalRounds: 6,
   frequency: { unit: "semaine", interval: 1 },
-  members: [{ id: "self", name: "Moi", role: "ADMIN", paidCurrentRound: false }],
+  members: [{ id: "self", name: "Moi", role: "ADMIN", paidCurrentRound: false, turns: 1 }],
 });
 
 describe("tontineCreatedSummary", () => {

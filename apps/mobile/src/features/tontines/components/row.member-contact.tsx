@@ -23,7 +23,7 @@ export function MemberContactRow(props: MemberContactRowProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Ajouter ${contact.name}`}
+      accessibilityLabel={`Inviter ${contact.name}`}
       onPress={onPress}
       className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >

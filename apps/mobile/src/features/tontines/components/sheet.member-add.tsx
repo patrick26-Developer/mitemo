@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { SheetSecondaryButton } from "../../../shared/components/atoms/button.sheet-secondary";
@@ -15,15 +16,17 @@ export interface MemberAddSheetProps {
   readonly visible: boolean;
   readonly item: Tontine;
   readonly onClose: () => void;
-  /** Inscrit le contact choisi dans la tontine. */
+  /** Invite le contact choisi ; il rejoint la tontine s'il accepte. */
   readonly onAdd: (contact: MemberContact) => void;
   /** Partage le lien d'invitation, pour qui n'a pas encore de compte. */
   readonly onShare: () => void;
 }
 
 /**
- * Propose d'inscrire un contact du répertoire qui a un compte Mitemo ; pour
- * les autres, le lien d'invitation se partage depuis le pied de la feuille.
+ * Propose d'inviter un contact du répertoire qui a un compte Mitemo : comme
+ * pour un groupe WhatsApp, il n'est pas ajouté d'office mais reçoit une
+ * invitation qu'il accepte ou refuse. Pour les autres, le lien d'invitation se
+ * partage depuis le pied de la feuille.
  * @param props Visibilité, tontine, fermeture, inscription et partage.
  * @returns La feuille « Ajouter un membre ».
  */
@@ -33,10 +36,14 @@ export function MemberAddSheet(props: MemberAddSheetProps) {
   return (
     <BottomSheet
       visible={visible}
-      title="Ajouter un membre"
+      title="Inviter un membre"
       onClose={onClose}
       footer={<SheetSecondaryButton label="Partager le lien d'invitation" onPress={onShare} />}
     >
+      <SheetText>
+        Le contact reçoit une invitation : il rejoint la tontine s&apos;il l&apos;accepte, en
+        choisissant son nombre de tours.
+      </SheetText>
       {visible ? (
         <MemberPicker
           item={item}
@@ -63,7 +70,9 @@ interface MemberPickerProps {
  * @returns Le contenu de la feuille.
  */
 function MemberPicker(props: MemberPickerProps) {
-  const state = useMemberPicker(props.item.members);
+  const { item } = props;
+  const known = useMemo(() => [...item.members, ...item.invitations], [item]);
+  const state = useMemberPicker(known);
 
   if (state.status === "loading") {
     return <ActivityIndicator testID="member-picker-loading" color={PALETTE.brand} />;
@@ -79,8 +88,8 @@ function MemberPicker(props: MemberPickerProps) {
   if (state.contacts.length === 0) {
     return (
       <SheetText>
-        Aucun de vos contacts n&apos;a encore de compte Mitemo. Partagez-leur le lien
-        d&apos;invitation.
+        Aucun de vos contacts n&apos;a encore de compte Mitemo, ou tous sont déjà invités. Partagez
+        le lien d&apos;invitation aux autres.
       </SheetText>
     );
   }

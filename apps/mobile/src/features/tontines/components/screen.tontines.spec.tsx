@@ -1,5 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
+import { INITIAL_PORTFOLIO } from "../../../shared/member/model.portfolio-initial";
+import { usePortfolioStore } from "../../../shared/member/store.portfolio";
+import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { TontinesScreen } from "./screen.tontines";
 
@@ -61,6 +64,32 @@ describe("TontinesScreen", () => {
     await renderWithSafeArea(<TontinesScreen />);
 
     expect(screen.getByText("Tour 4 / 10")).toBeOnTheScreen();
-    expect(screen.getByText("Mama Nadège")).toBeOnTheScreen();
+    expect(screen.getByText("Jean-Baptiste Okemba")).toBeOnTheScreen();
+  });
+
+  it("rejoint une tontine depuis une invitation, avec le nombre de tours choisi", async () => {
+    usePortfolioStore.setState({ ...INITIAL_PORTFOLIO });
+    await renderWithSafeArea(<TontinesScreen />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "1 invitation à une tontine" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Accepter" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Augmenter Nombre de tours" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Rejoindre" }));
+
+    const [joined] = usePortfolioStore.getState().tontines;
+    expect(joined?.name).toBe("Commerçantes de Poto-Poto");
+    expect(joined?.members.find((member) => member.id === SELF_MEMBER_ID)?.turns).toBe(2);
+    expect(screen.queryByRole("button", { name: /invitation à une tontine/ })).toBeNull();
+  });
+
+  it("refuse une invitation sans rejoindre la tontine", async () => {
+    usePortfolioStore.setState({ ...INITIAL_PORTFOLIO });
+    await renderWithSafeArea(<TontinesScreen />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "1 invitation à une tontine" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Refuser" }));
+
+    expect(usePortfolioStore.getState().invitations).toEqual([]);
+    expect(screen.queryByText("Commerçantes de Poto-Poto")).toBeNull();
   });
 });

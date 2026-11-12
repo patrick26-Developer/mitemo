@@ -1,6 +1,7 @@
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import { formatFrequency, tontinePot } from "../../../shared/member/model.portfolio";
+import { freeTurns } from "../../../shared/member/model.tontine-turns";
 
 /**
  * Invite à compléter la tontine, accordé au nombre de membres manquants.
@@ -18,7 +19,7 @@ function inviteSentence(missing: number): string {
  * @returns Le résumé affiché sous « Votre tontine est prête ».
  */
 export function tontineCreatedSummary(tontine: Tontine): string {
-  const missing = Math.max(tontine.totalRounds - tontine.members.length, 0);
+  const missing = freeTurns(tontine);
   const pot = formatAmount(tontinePot(tontine));
 
   return `« ${tontine.name} » est prévue pour ${tontine.totalRounds} participants, ${formatFrequency(tontine.frequency)}. ${inviteSentence(missing)} Restourne de ${pot} FCFA par tour.`;

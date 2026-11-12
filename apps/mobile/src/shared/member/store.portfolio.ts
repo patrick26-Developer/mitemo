@@ -12,7 +12,7 @@ import { INITIAL_PORTFOLIO, PORTFOLIO_STORAGE_KEY } from "./model.portfolio-init
  * de forme d'une tontine ou d'une carte : un format plus ancien est remplacé
  * par les données de départ au lieu d'être relu avec des champs manquants.
  */
-export const PORTFOLIO_STORAGE_VERSION = 5;
+export const PORTFOLIO_STORAGE_VERSION = 6;
 
 /**
  * Remplace un portefeuille enregistré dans un format périmé par les données de

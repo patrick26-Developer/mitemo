@@ -12,7 +12,7 @@ describe("MemberContactRow", () => {
       />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Ajouter Aimée Mbemba" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Inviter Aimée Mbemba" }));
 
     expect(screen.getByText("+242 06 570 6622")).toBeOnTheScreen();
     expect(onPress).toHaveBeenCalledTimes(1);

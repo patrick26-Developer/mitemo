@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import type { TontineMember } from "../../../shared/member/model.portfolio";
 import type { MemberContact } from "../../../shared/member/model.portfolio-create";
 import { readDeviceContacts } from "../api/api.device-contacts";
 import { findMitemoAccounts } from "../api/api.mitemo-directory";
+import type { KnownPhone } from "../model/model.contact-match";
 import { mitemoContacts, toE164 } from "../model/model.contact-match";
 
 /** État de la recherche des contacts à inscrire. */
@@ -18,7 +18,7 @@ export type MemberPickerState =
  * @param members Membres déjà inscrits.
  * @returns L'état final de la recherche.
  */
-async function loadMitemoContacts(members: readonly TontineMember[]): Promise<MemberPickerState> {
+async function loadMitemoContacts(members: readonly KnownPhone[]): Promise<MemberPickerState> {
   const device = await readDeviceContacts();
   if (device.status === "denied") return device;
 
@@ -34,10 +34,10 @@ async function loadMitemoContacts(members: readonly TontineMember[]): Promise<Me
  * Cherche, à l'ouverture, les contacts du répertoire qui ont un compte Mitemo
  * et peuvent être inscrits dans la tontine. Seuls les numéros que le membre a
  * déjà dans son répertoire sont proposés.
- * @param members Membres déjà inscrits, à écarter.
+ * @param members Membres déjà inscrits et contacts déjà invités, à écarter ; liste stable entre deux rendus.
  * @returns L'état de la recherche : en cours, accès refusé ou contacts trouvés.
  */
-export function useMemberPicker(members: readonly TontineMember[]): MemberPickerState {
+export function useMemberPicker(members: readonly KnownPhone[]): MemberPickerState {
   const [state, setState] = useState<MemberPickerState>({ status: "loading" });
 
   useEffect(() => {

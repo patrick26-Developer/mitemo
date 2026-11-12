@@ -12,8 +12,10 @@ type RunAction = (action: (store: PortfolioState) => void, success: string | nul
 
 /** Actions offertes sur une tontine ; leur résultat sort en toast. */
 export interface TontineActionsState {
-  /** Inscrit un contact qui a un compte Mitemo, tant que le quota n'est pas atteint. */
-  readonly addMember: (contact: MemberContact) => void;
+  /** Invite un contact qui a un compte Mitemo ; il rejoint la tontine en acceptant. */
+  readonly invite: (contact: MemberContact) => void;
+  /** Annule une invitation envoyée, tant que le contact n'a pas répondu. */
+  readonly cancelInvitation: (invitationId: string) => void;
   /** Lance la tontine, une fois tous ses membres réunis. */
   readonly start: () => void;
   /** Règle la cotisation du tour par l'opérateur choisi. */
@@ -44,6 +46,28 @@ function contributeHandler(tontine: Tontine, act: RunAction): (method: PaymentMe
 }
 
 /**
+ * Construit l'envoi et l'annulation des invitations : le contact devient
+ * membre seulement en acceptant.
+ * @param tontine Tontine affichée.
+ * @param act Exécution d'une opération, avec son message de succès.
+ * @returns L'invitation et son annulation.
+ */
+function invitationHandlers(
+  tontine: Tontine,
+  act: RunAction,
+): Pick<TontineHandlers, "invite" | "cancelInvitation"> {
+  return {
+    invite: (contact) =>
+      act(
+        (store) => store.inviteContact(tontine.id, contact),
+        `Invitation envoyée à ${contact.name}.`,
+      ),
+    cancelInvitation: (invitationId) =>
+      act((store) => store.cancelInvitation(tontine.id, invitationId), "Invitation annulée."),
+  };
+}
+
+/**
  * Construit les actions d'une tontine autour de l'exécution du portefeuille.
  * La distribution est automatique : l'administrateur ne fait que confirmer.
  * @param tontine Tontine affichée.
@@ -52,8 +76,7 @@ function contributeHandler(tontine: Tontine, act: RunAction): (method: PaymentMe
  */
 function tontineHandlers(tontine: Tontine, act: RunAction): TontineHandlers {
   return {
-    addMember: (contact) =>
-      act((store) => store.addMember(tontine.id, contact), `${contact.name} rejoint la tontine.`),
+    ...invitationHandlers(tontine, act),
     start: () => act((store) => store.startTontine(tontine.id), "La tontine est lancée."),
     contribute: contributeHandler(tontine, act),
     confirm: () =>
