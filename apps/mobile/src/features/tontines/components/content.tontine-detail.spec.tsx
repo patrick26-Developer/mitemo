@@ -17,7 +17,7 @@ describe("TontineDetailContent", () => {
     await renderWithSafeArea(<TontineDetailContent item={tontine} />);
 
     expect(screen.getByText("Membres")).toBeOnTheScreen();
-    expect(screen.getByText("3 sur 3 inscrits")).toBeOnTheScreen();
+    expect(screen.getByText("3 inscrits")).toBeOnTheScreen();
     expect(screen.getByTestId("tontine-recap-card")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Retirer Membre m2" })).toBeOnTheScreen();
     expect(screen.getByText("Une tontine de test.")).toBeOnTheScreen();

@@ -3,52 +3,50 @@ import { Text, View } from "react-native";
 
 import { ConfirmSheet } from "../../../shared/components/macros/sheet.confirm";
 import type { Tontine, TontineMember } from "../../../shared/member/model.portfolio";
-import {
-  isTontineAdmin,
-  paidMemberCount,
-  SELF_MEMBER_ID,
-} from "../../../shared/member/model.portfolio";
-import { accentColors } from "../../../shared/model/model.accent-color";
-import type { MemberTurn } from "../model/model.member-turns";
-import { memberTurns } from "../model/model.member-turns";
+import { paidMemberCount } from "../../../shared/member/model.portfolio";
+import { takenTurns } from "../../../shared/member/model.tontine-turns";
+import { previewTurns } from "../model/model.member-turns";
+import { canCancelInvitation, removalContent } from "../model/model.member-management";
+import { InvitedMemberRow } from "./row.member-invited";
+import { MemberTimelineItem } from "./item.member-timeline";
+import { SeeAllMembersButton } from "./button.see-all-members";
 import { TontineMemberSheet } from "./sheet.tontine-member";
-import { TontineMemberRow } from "./row.tontine-member";
-import { TurnStep } from "./step.turn";
+
+/** Nombre de lignes montrées dans le détail, avant « Voir tous les membres ». */
+const PREVIEW_SIZE = 5;
 
 /** Props de la liste des membres d'une tontine. */
 export interface TontineMemberListProps {
   readonly item: Tontine;
   readonly onRemove: (memberId: string) => void;
+  /** Annule une invitation envoyée ; l'administrateur seul la reçoit. */
+  readonly onCancelInvitation?: (invitationId: string) => void;
 }
 
 /**
- * Affiche les membres dans l'ordre de passage, de 1 au dernier ; celui dont
- * c'est le tour reste à sa place, cerclé. Ouvre l'historique de cotisation
- * d'un membre au clic. Un
- * administrateur peut retirer les autres membres avant le départ, après
- * confirmation ; un simple membre voit la même liste sans gestion.
- * @param props Tontine affichée et action de retrait.
- * @returns La liste des membres, la feuille d'historique et la confirmation de retrait.
+ * Affiche un aperçu des membres dans l'ordre de passage, centré sur le tour en
+ * cours, puis les invitations envoyées, grisées. Une tontine de 1 000 membres
+ * n'est jamais déroulée ici : « Voir tous les membres » ouvre la liste
+ * complète, avec recherche et filtres. Ouvre l'historique de cotisation d'un
+ * membre au clic, et laisse l'administrateur retirer un membre avant le
+ * départ, après confirmation.
+ * @param props Tontine affichée, retrait d'un membre et annulation d'une invitation.
+ * @returns L'aperçu, la feuille d'historique et la confirmation de retrait.
  */
 export function TontineMemberList(props: TontineMemberListProps) {
-  const { item, onRemove } = props;
+  const { item, onRemove, onCancelInvitation } = props;
   const [selected, setSelected] = useState<TontineMember | null>(null);
   const [removing, setRemoving] = useState<TontineMember | null>(null);
 
   return (
     <View className="gap-2">
       <MembersHeader item={item} />
-      <View>
-        {memberTurns(item).map((entry) => (
-          <MemberTimelineItem
-            key={entry.member.id}
-            item={item}
-            entry={entry}
-            onSelect={setSelected}
-            onAskRemove={setRemoving}
-          />
-        ))}
-      </View>
+      <MembersPreview
+        item={item}
+        onSelect={setSelected}
+        onAskRemove={setRemoving}
+        {...(onCancelInvitation === undefined ? {} : { onCancelInvitation })}
+      />
       <TontineMemberSheet
         visible={selected !== null}
         item={item}
@@ -68,41 +66,49 @@ export function TontineMemberList(props: TontineMemberListProps) {
   );
 }
 
-/** Props d'un membre dans la frise de passage. */
-interface MemberTimelineItemProps {
+/** Props de l'aperçu des membres. */
+interface MembersPreviewProps {
   readonly item: Tontine;
-  readonly entry: MemberTurn;
-  /** Ouvre l'historique du membre. */
   readonly onSelect: (member: TontineMember) => void;
-  /** Demande la confirmation du retrait du membre. */
   readonly onAskRemove: (member: TontineMember) => void;
+  readonly onCancelInvitation?: (invitationId: string) => void;
 }
 
 /**
- * Pose un membre dans la frise verticale : son rang à gauche, relié au
- * suivant, et sa ligne à droite.
- * @param props Tontine, membre et rang, ouverture de l'historique et retrait.
- * @returns L'élément de la frise.
+ * Pose la frise des rangs, les invitations qui tiennent encore dans l'aperçu
+ * et le lien vers la liste complète quand tout n'y tient pas.
+ * @param props Tontine, ouverture de l'historique, retrait et annulation.
+ * @returns L'aperçu des membres.
  */
-function MemberTimelineItem(props: MemberTimelineItemProps) {
-  const { item, entry, onSelect, onAskRemove } = props;
-  const { member } = entry;
+function MembersPreview(props: MembersPreviewProps) {
+  const { item, onSelect, onAskRemove, onCancelInvitation } = props;
+  const entries = previewTurns(item, PREVIEW_SIZE);
+  const invitations = item.invitations.slice(0, Math.max(PREVIEW_SIZE - entries.length, 0));
+  const total = item.members.length + item.invitations.length;
+  const hidden = takenTurns(item) + item.invitations.length > entries.length + invitations.length;
+  const cancellable = onCancelInvitation !== undefined && canCancelInvitation(item);
 
   return (
-    <View className="flex-row gap-3">
-      <TurnStep
-        turn={entry.turn}
-        last={entry.turn === item.members.length}
-        {...stepAccentOf(item, member)}
-      />
-      <View className="flex-1 pb-2">
-        <TontineMemberRow
-          entry={entry}
-          {...focusOf(item, member)}
-          {...(canRemove(item, member) ? { onRemove: () => onAskRemove(member) } : {})}
-          onPress={() => onSelect(member)}
-        />
+    <View className="gap-2">
+      <View>
+        {entries.map((entry) => (
+          <MemberTimelineItem
+            key={entry.turn}
+            item={item}
+            entry={entry}
+            onSelect={onSelect}
+            onAskRemove={onAskRemove}
+          />
+        ))}
       </View>
+      {invitations.map((invitation) => (
+        <InvitedMemberRow
+          key={invitation.id}
+          invitation={invitation}
+          {...(cancellable ? { onCancel: () => onCancelInvitation(invitation.id) } : {})}
+        />
+      ))}
+      {hidden ? <SeeAllMembersButton tontineId={item.id} count={total} /> : null}
     </View>
   );
 }
@@ -129,63 +135,25 @@ function MembersHeader(props: MembersHeaderProps) {
 }
 
 /**
- * Compte affiché à droite du titre : inscrits avant le départ, cotisations
- * reçues pendant le cycle.
+ * Compte affiché à droite du titre : inscrits et invités avant le départ (les
+ * tours pris sont dans le récapitulatif), cotisations reçues pendant le cycle.
  * @param item Tontine affichée.
- * @returns Le compte, par exemple « 2 sur 5 ont cotisé ».
+ * @returns Le compte, par exemple « 3 inscrits · 2 invités » ou « 2 sur 5 ont cotisé ».
  */
 function membersCount(item: Tontine): string {
-  const total = item.members.length;
-  if (item.state === "PENDING") return `${total} sur ${item.totalRounds} inscrits`;
-  return `${paidMemberCount(item)} sur ${total} ont cotisé`;
+  if (item.state !== "PENDING")
+    return `${paidMemberCount(item)} sur ${item.members.length} ont cotisé`;
+  const joined = plural(item.members.length, "inscrit");
+  const invited = item.invitations.length;
+  return invited === 0 ? joined : `${joined} · ${plural(invited, "invité")}`;
 }
 
 /**
- * Couleur de mise en avant d'un membre : celle de la tontine, seulement pour
- * le bénéficiaire du tour en cours.
- * @param item Tontine affichée.
- * @param member Membre de la ligne.
- * @returns La prop de mise en avant, vide pour les autres membres.
+ * Accorde un nom avec son nombre.
+ * @param count Nombre.
+ * @param noun Nom au singulier.
+ * @returns Par exemple « 1 invité » ou « 3 inscrits ».
  */
-function focusOf(item: Tontine, member: TontineMember): { focusAccent?: string } {
-  const focused = item.state === "ACTIVE" && member.id === item.beneficiaryId;
-  return focused ? { focusAccent: accentColors(item.headerColors[0]).background } : {};
-}
-
-/**
- * Couleur du rang du tour en cours dans la frise : celle de la tontine.
- * @param item Tontine affichée.
- * @param member Membre de la ligne.
- * @returns La prop de couleur, vide pour les autres rangs.
- */
-function stepAccentOf(item: Tontine, member: TontineMember): { accent?: string } {
-  const current = item.state === "ACTIVE" && member.id === item.beneficiaryId;
-  return current ? { accent: accentColors(item.headerColors[0]).background } : {};
-}
-
-/**
- * Indique si l'administrateur peut retirer ce membre : jamais lui-même, et
- * seulement avant le départ de la tontine.
- * @param item Tontine affichée.
- * @param member Membre de la ligne.
- * @returns `true` quand le retrait est permis.
- */
-function canRemove(item: Tontine, member: TontineMember): boolean {
-  return isTontineAdmin(item) && member.id !== SELF_MEMBER_ID && item.state === "PENDING";
-}
-
-/**
- * Texte de la confirmation de retrait d'un membre.
- * @param item Tontine affichée.
- * @param member Membre à retirer, `null` quand la feuille est fermée.
- * @returns Le titre, le message et l'action de la confirmation.
- */
-function removalContent(item: Tontine, member: TontineMember | null) {
-  const name = member?.name ?? "ce membre";
-  return {
-    title: `Retirer ${name} ?`,
-    message: `${name} ne fera plus partie de « ${item.name} ». Vous pourrez l'inviter de nouveau.`,
-    confirmLabel: "Retirer de la tontine",
-    tone: "danger" as const,
-  };
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count > 1 ? "s" : ""}`;
 }

@@ -20,22 +20,24 @@ export interface SearchFieldProps {
   /** Libellé du champ pour les lecteurs d'écran. */
   readonly accessibilityLabel: string;
   readonly clear: SearchFieldClear;
+  /** `false` pour ne pas ouvrir le clavier à l'affichage ; vrai par défaut. */
+  readonly autoFocus?: boolean;
 }
 
 /**
  * Affiche un champ de recherche prêt à la saisie, avec sa croix d'effacement.
- * @param props Valeur, saisie, texte indicatif, libellé et effacement.
+ * @param props Valeur, saisie, texte indicatif, libellé, effacement et prise de focus.
  * @returns Le champ de recherche.
  */
 export function SearchField(props: SearchFieldProps) {
-  const { value, onChangeText, placeholder, accessibilityLabel, clear } = props;
+  const { value, onChangeText, placeholder, accessibilityLabel, clear, autoFocus = true } = props;
   const showClear = clear.alwaysVisible === true || value.length > 0;
 
   return (
     <View className="flex-1 flex-row items-center gap-2 rounded-[22px] border border-rule-border bg-white px-3 py-2.5">
       <Search size={18} color={PALETTE.muted} />
       <TextInput
-        autoFocus
+        autoFocus={autoFocus}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

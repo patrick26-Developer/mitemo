@@ -6,6 +6,7 @@ import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine, TontineMember } from "../../../shared/member/model.portfolio";
 import { memberContributions } from "../../../shared/member/model.portfolio";
+import { turnsLabel } from "../model/model.member-turns";
 
 /** Props de la feuille d'historique d'un membre. */
 export interface TontineMemberSheetProps {
@@ -31,7 +32,7 @@ function historyRows(item: Tontine, member: TontineMember): readonly SheetRecapR
 
 /**
  * Affiche l'historique de cotisation d'un membre dans une feuille, ouvert
- * depuis la liste des membres du tour.
+ * depuis la liste des membres du tour, avec son rôle et ses tours de passage.
  * @param props Visibilité, tontine, membre et fermeture.
  * @returns La feuille d'historique, ou rien sans membre choisi.
  */
@@ -53,7 +54,7 @@ export function TontineMemberSheet(props: TontineMemberSheetProps) {
         <SheetRecap title="Historique des cotisations" rows={rows} />
       )}
       <Text className="text-[12px] text-muted">
-        {member.role === "ADMIN" ? "Administrateur de la tontine" : "Membre de la tontine"}
+        {`${member.role === "ADMIN" ? "Administrateur de la tontine" : "Membre de la tontine"} · ${turnsLabel(item, member.id)}`}
       </Text>
     </BottomSheet>
   );

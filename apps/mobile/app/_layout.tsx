@@ -29,6 +29,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="savings-detail/[id]" />
           <Stack.Screen name="tontine/[id]" />
+          <Stack.Screen name="tontine-members/[id]" />
           <Stack.Screen name="search" options={{ animation: "fade" }} />
           <Stack.Screen name="history" options={{ animation: "slide_from_right" }} />
         </Stack.Protected>

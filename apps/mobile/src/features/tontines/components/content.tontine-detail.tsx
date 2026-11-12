@@ -41,7 +41,11 @@ export function TontineDetailContent(props: TontineDetailContentProps) {
         contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
       >
         <TontineRecapCard item={item} />
-        <TontineMemberList item={item} onRemove={actions.remove} />
+        <TontineMemberList
+          item={item}
+          onRemove={actions.remove}
+          onCancelInvitation={actions.cancelInvitation}
+        />
         <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
       </ScrollView>
       <TontineDetailDock item={item} actions={actions} onLayout={inset.onDockLayout} />

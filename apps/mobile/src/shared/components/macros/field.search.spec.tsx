@@ -65,4 +65,19 @@ describe("SearchField", () => {
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+
+  it("prend le focus par défaut, sauf quand on le désactive", async () => {
+    await renderWithSafeArea(
+      <SearchField
+        value=""
+        onChangeText={jest.fn()}
+        placeholder="Rechercher un membre"
+        accessibilityLabel="Rechercher un membre"
+        clear={{ label: "Effacer", onPress: jest.fn() }}
+        autoFocus={false}
+      />,
+    );
+
+    expect(screen.getByPlaceholderText("Rechercher un membre")).toHaveProp("autoFocus", false);
+  });
 });
