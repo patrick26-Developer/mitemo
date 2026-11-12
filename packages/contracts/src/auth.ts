@@ -14,7 +14,7 @@ export type UserRole = (typeof USER_ROLES)[number];
 export interface StartLoginRequest {
   /** Numéro au format international E.164, par exemple « +242061234567 ». */
   readonly phoneNumber: string;
-  /** PIN à six chiffres. Jamais journalisé ni renvoyé par l'API. */
+  /** PIN à quatre chiffres. Un PIN historique à six chiffres reste accepté à la connexion. */
   readonly pin: string;
 }
 

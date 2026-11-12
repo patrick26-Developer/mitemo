@@ -29,7 +29,7 @@ describe.runIf(enabled)("Demonstration identity", () => {
   it("registers, authenticates, rotates and revokes a session", { timeout: 60_000 }, async () => {
     const publicClient = request(app.getHttpServer());
     const client = request.agent(app.getHttpServer()).set("X-Mitemo-Preview-Key", PREVIEW_KEY);
-    const pin = randomInt(100000, 1000000).toString();
+    const pin = randomInt(0, 10000).toString().padStart(4, "0");
     const phoneNumber = "+24206" + randomInt(1000000, 10000000);
     const credentials = { phoneNumber, pin };
     await client
@@ -128,7 +128,7 @@ describe.runIf(enabled)("Demonstration identity", () => {
       const client = request.agent(app.getHttpServer()).set("X-Mitemo-Preview-Key", PREVIEW_KEY);
       const prisma = app.get(PrismaService);
       const phoneNumber = "+24206" + randomInt(1000000, 10000000);
-      const pin = randomInt(100000, 1000000).toString();
+      const pin = randomInt(0, 10000).toString().padStart(4, "0");
       const credentials = { phoneNumber, pin };
       await client
         .post("/auth/register")
@@ -158,7 +158,7 @@ describe.runIf(enabled)("Demonstration identity", () => {
         .expect(401);
       await client
         .post("/auth/login")
-        .send({ ...credentials, pin: pin === "000000" ? "000001" : "000000" })
+        .send({ ...credentials, pin: pin === "0000" ? "0001" : "0000" })
         .expect(401);
       await client.post("/auth/verify").send({ challengeId: "invalid", otp: "000000" }).expect(400);
       await client
