@@ -45,25 +45,31 @@ export function SheetTextField(props: SheetTextFieldProps) {
   return (
     <View className="gap-1.5">
       <Text className="text-[12px] font-semibold uppercase text-muted">{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        accessibilityLabel={label}
-        autoCapitalize="words"
-        autoCorrect={false}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        placeholder={placeholder}
-        placeholderTextColor="#8A90A2"
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        className="h-12 rounded-[14px] border text-[15px] text-ink"
-        style={[FIELD_INPUT_RESET, styles.input, fieldChrome({ focused, invalid })]}
-      />
+      <View
+        testID="sheet-text-field-chrome"
+        className="h-12 flex-row items-center rounded-[14px] border"
+        style={[styles.chrome, fieldChrome({ focused, invalid })]}
+      >
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          accessibilityLabel={label}
+          autoCapitalize="words"
+          autoCorrect={false}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          placeholderTextColor="#8A90A2"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="flex-1 text-[15px] text-ink"
+          style={FIELD_INPUT_RESET}
+        />
+      </View>
       {hint === undefined ? null : <Text className="text-[12px] leading-4 text-muted">{hint}</Text>}
     </View>
   );
 }
 
-/** Marge horizontale du champ, posée en style pour valoir aussi sur Android. */
-const styles = StyleSheet.create({ input: { paddingHorizontal: 16 } });
+/** Marge horizontale de l'enveloppe du champ. */
+const styles = StyleSheet.create({ chrome: { paddingHorizontal: 16 } });

@@ -108,7 +108,7 @@ describe("BottomSheet", () => {
     });
   });
 
-  it("pose le pied hors du défilement, toujours visible sous le contenu", async () => {
+  it("pose le pied à la fin du contenu, qui défile avec lui", async () => {
     await renderWithSafeArea(
       <BottomSheet
         visible
@@ -124,7 +124,7 @@ describe("BottomSheet", () => {
     const scroll = screen.getByTestId("bottom-sheet-scroll");
 
     expect(footer).toHaveTextContent("Continuer");
-    expect(scroll).not.toContainElement(footer);
+    expect(scroll).toContainElement(footer);
   });
 
   it("ne pose aucun pied quand la feuille n'en a pas", async () => {

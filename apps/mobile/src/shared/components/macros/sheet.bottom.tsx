@@ -34,8 +34,8 @@ export interface BottomSheetProps {
   readonly onClose: () => void;
   readonly children: ReactNode;
   /**
-   * Actions posées sous le contenu, hors du défilement : elles restent visibles
-   * au-dessus du clavier, même quand le contenu dépasse.
+   * Actions posées à la fin du contenu, par exemple « Continuer » : elles
+   * défilent avec lui, sur iOS comme sur Android.
    */
   readonly footer?: ReactNode;
 }
@@ -208,12 +208,8 @@ function SheetSurface(props: SheetSurfaceProps) {
         contentContainerStyle={FOCUS_RING_SCROLL.content}
       >
         {children}
+        {footer === undefined ? null : <View testID="bottom-sheet-footer">{footer}</View>}
       </ScrollView>
-      {footer === undefined ? null : (
-        <View testID="bottom-sheet-footer" className="pt-4">
-          {footer}
-        </View>
-      )}
     </Animated.View>
   );
 }
