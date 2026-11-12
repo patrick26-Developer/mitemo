@@ -2,7 +2,7 @@ import { makeCard } from "../../../shared/testing/fixtures.portfolio";
 import { cardPayRequest } from "./model.card-pay";
 
 describe("cardPayRequest", () => {
-  it("décrit le prochain pointage, à la couleur de la carte", () => {
+  it("décrit le prochain pointage et sa part des frais de la carte, à la couleur de la carte", () => {
     const request = cardPayRequest(
       makeCard({ name: "Loyer", markerAmount: 5_000n, markersTotal: 6, tint: "#CDF5DD" }),
     );
@@ -13,9 +13,11 @@ describe("cardPayRequest", () => {
       rows: [
         { label: "Carte", value: "Loyer" },
         { label: "Pointage", value: "5 sur 6" },
-        { label: "Montant", value: "5 000 FCFA" },
+        { label: "Pointage du jour", value: "5 000 FCFA" },
+        { label: "Frais Mitemo (10 %)", value: "500 FCFA" },
+        { label: "Total", value: "5 500 FCFA" },
       ],
-      amount: 5_000n,
+      amount: 5_500n,
       accent: "#CDF5DD",
     });
   });

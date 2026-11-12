@@ -118,12 +118,13 @@ describe("contributeCard", () => {
     expect(() => actions.contributeCard("c1", PAYMENT)).toThrow(ForbiddenOperationError);
   });
 
-  it("débite le solde quand le marqueur est payé depuis Mitemo", () => {
+  it("débite le solde du pointage et de sa part des frais quand il est payé depuis Mitemo", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
     actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" });
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(14_500n);
+    expect(state().cards[0]?.saved).toBe(25_000n);
     expect(state().cards[0]?.entries.at(-1)?.method).toBe("MITEMO");
   });
 

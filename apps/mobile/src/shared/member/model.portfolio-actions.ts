@@ -4,11 +4,13 @@ import {
   allMembersPaid,
   cardCapabilities,
   hasReachedQuota,
+  markersDone,
   SELF_MEMBER_ID,
   tontinePot,
 } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput, MemberContact } from "./model.portfolio-create";
 import { buildCard, buildTontine } from "./model.portfolio-create";
+import { markerFee } from "./model.contribution-fee";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -176,18 +178,21 @@ function confirmRound(context: PortfolioContext, tontineId: string): void {
 
 /**
  * Ajoute un marqueur d'épargne à une carte et l'inscrit dans son historique.
+ * Payé depuis Mitemo, le solde est débité du marqueur et de sa part des frais
+ * de la carte ; seul le marqueur rejoint l'épargne.
  * @param context Accès au store.
  * @param cardId Carte concernée.
  * @param payment Instant du pointage et opérateur qui l'a réglé.
  * @throws {ForbiddenOperationError} si la carte est clôturée.
- * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur.
+ * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur et ses frais.
  */
 function contributeCard(context: PortfolioContext, cardId: string, payment: CardPayment): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.state !== "ACTIVE") {
     throw new ForbiddenOperationError("Cette carte est clôturée.");
   }
-  const debit = payment.method === "MITEMO" ? card.markerAmount : 0n;
+  const charged = card.markerAmount + markerFee(card, markersDone(card));
+  const debit = payment.method === "MITEMO" ? charged : 0n;
   requireFunds(context.get().available, debit);
   context.set((state) => ({
     available: state.available - debit,
