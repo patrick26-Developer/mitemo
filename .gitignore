@@ -23,6 +23,7 @@ web-build/
 # Tests
 coverage/
 coverage-int/
+coverage-e2e/
 playwright-report/
 test-results/
 
