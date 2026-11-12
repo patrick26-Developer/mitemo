@@ -1,10 +1,17 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { Keyboard, LayoutAnimation, Platform } from "react-native";
+import { LayoutAnimation, Platform } from "react-native";
+import { KeyboardEvents } from "react-native-keyboard-controller";
 
 import { useKeyboardHeight } from "./hook.keyboard-height";
 
-/** Gestionnaire d'événement clavier réduit à ce que le hook consomme. */
-type KeyboardHandler = (event: { endCoordinates: { height: number }; duration?: number }) => void;
+/** Données d'un événement clavier réduites à ce que le hook consomme. */
+interface KeyboardData {
+  readonly height: number;
+  readonly duration: number;
+}
+
+/** Gestionnaire d'événement clavier. */
+type KeyboardHandler = (event: KeyboardData) => void;
 
 /** Gestionnaires enregistrés, indexés par nom d'événement. */
 const listeners = new Map<string, KeyboardHandler>();
@@ -14,13 +21,24 @@ const remove = jest.fn();
 
 /** Remplace l'écouteur natif du clavier par une table de gestionnaires. */
 function captureKeyboardListeners(): void {
-  jest.spyOn(Keyboard, "addListener").mockImplementation(((
+  jest.spyOn(KeyboardEvents, "addListener").mockImplementation(((
     event: string,
     handler: KeyboardHandler,
   ) => {
     listeners.set(event, handler);
     return { remove };
-  }) as unknown as typeof Keyboard.addListener);
+  }) as unknown as typeof KeyboardEvents.addListener);
+}
+
+/**
+ * Émet un événement clavier capturé.
+ * @param name Nom de l'événement.
+ * @param event Hauteur et durée.
+ */
+async function emit(name: string, event: KeyboardData): Promise<void> {
+  await act(async () => {
+    listeners.get(name)?.(event);
+  });
 }
 
 describe("useKeyboardHeight", () => {
@@ -37,56 +55,42 @@ describe("useKeyboardHeight", () => {
     (Platform as { OS: string }).OS = initialPlatform;
   });
 
-  it("suit la hauteur du clavier sur iOS", async () => {
+  it("suit la hauteur du clavier, de son ouverture à sa fermeture", async () => {
     const { result, unmount } = await renderHook(() => useKeyboardHeight());
-
     expect(result.current).toBe(0);
 
-    await act(async () => {
-      listeners.get("keyboardWillShow")?.({ endCoordinates: { height: 320 } });
-    });
+    await emit("keyboardWillShow", { height: 320, duration: 250 });
     expect(result.current).toBe(320);
-
-    await act(async () => {
-      listeners.get("keyboardWillHide")?.({ endCoordinates: { height: 0 } });
-    });
+    await emit("keyboardWillHide", { height: 0, duration: 250 });
     expect(result.current).toBe(0);
 
     await unmount();
     expect(remove).toHaveBeenCalledTimes(2);
   });
 
-  it("écoute les événements Android", async () => {
+  it("lève la feuille avant l'arrivée du clavier sur Android aussi, même dans une feuille", async () => {
     (Platform as { OS: string }).OS = "android";
     const { result } = await renderHook(() => useKeyboardHeight());
 
-    await act(async () => {
-      listeners.get("keyboardDidShow")?.({ endCoordinates: { height: 280 } });
-    });
+    await emit("keyboardWillShow", { height: 280, duration: 200 });
 
     expect(result.current).toBe(280);
   });
 
-  it("fait glisser la carte au rythme du clavier d'iOS", async () => {
-    const schedule = jest.spyOn(Keyboard, "scheduleLayoutAnimation").mockImplementation(() => {});
-    await renderHook(() => useKeyboardHeight());
-
-    const event = { endCoordinates: { height: 320 }, duration: 250 };
-    await act(async () => {
-      listeners.get("keyboardWillShow")?.(event);
-    });
-
-    expect(schedule).toHaveBeenCalledWith(event);
-  });
-
-  it("adoucit le changement sur Android, dont le clavier ne donne pas de durée", async () => {
-    (Platform as { OS: string }).OS = "android";
+  it("fait glisser la carte au rythme du clavier", async () => {
     const configure = jest.spyOn(LayoutAnimation, "configureNext").mockImplementation(() => {});
     await renderHook(() => useKeyboardHeight());
 
-    await act(async () => {
-      listeners.get("keyboardDidShow")?.({ endCoordinates: { height: 280 } });
-    });
+    await emit("keyboardWillShow", { height: 320, duration: 250 });
+
+    expect(configure).toHaveBeenCalledWith(LayoutAnimation.create(250, "easeInEaseOut", "opacity"));
+  });
+
+  it("adoucit le changement quand le clavier ne donne pas de durée", async () => {
+    const configure = jest.spyOn(LayoutAnimation, "configureNext").mockImplementation(() => {});
+    await renderHook(() => useKeyboardHeight());
+
+    await emit("keyboardWillShow", { height: 280, duration: 0 });
 
     expect(configure).toHaveBeenCalledWith(LayoutAnimation.Presets.easeInEaseOut);
   });
