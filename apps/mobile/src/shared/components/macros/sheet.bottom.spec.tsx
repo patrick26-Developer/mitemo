@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react-native";
+import { fireEvent, screen } from "@testing-library/react-native";
 import { Dimensions, Platform, Text } from "react-native";
 
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
@@ -125,6 +125,30 @@ describe("BottomSheet", () => {
 
     expect(footer).toHaveTextContent("Continuer");
     expect(scroll).toContainElement(footer);
+  });
+
+  it("pose « Retour » en haut, dans l'en-tête, quand la feuille en propose un", async () => {
+    const onBack = jest.fn();
+    await renderWithSafeArea(
+      <BottomSheet visible title="Cotiser" onClose={jest.fn()} onBack={onBack}>
+        <Text>Code PIN</Text>
+      </BottomSheet>,
+    );
+
+    const back = screen.getByRole("button", { name: "Retour" });
+    expect(screen.getByTestId("bottom-sheet-header")).toContainElement(back);
+    await fireEvent.press(back);
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("n'affiche aucun retour quand la feuille n'en propose pas", async () => {
+    await renderWithSafeArea(
+      <BottomSheet visible title="Cotiser" onClose={jest.fn()}>
+        <Text>Choix</Text>
+      </BottomSheet>,
+    );
+
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
   });
 
   it("ne pose aucun pied quand la feuille n'en a pas", async () => {

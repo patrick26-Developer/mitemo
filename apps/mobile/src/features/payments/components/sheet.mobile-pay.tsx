@@ -114,7 +114,7 @@ export function MobilePaySheet(props: MobilePaySheetProps) {
       visible={visible}
       title={request.title}
       onClose={pay.close}
-      footer={pay.stage === "pin" ? <PayFooter pay={pay} /> : undefined}
+      {...(pay.stage === "pin" ? { onBack: pay.back } : {})}
     >
       {pay.stage === "choose" ? <PayChoice request={request} onChoose={pay.choose} /> : null}
       {pay.stage === "pending" && pay.method !== "MITEMO" ? (
@@ -132,20 +132,4 @@ export function MobilePaySheet(props: MobilePaySheetProps) {
       ) : null}
     </BottomSheet>
   );
-}
-
-/** Props du pied de la feuille de paiement. */
-interface PayFooterProps {
-  readonly pay: ReturnType<typeof useMobilePay>;
-}
-
-/**
- * Pied de la feuille au code PIN : « Retour » vers le choix du moyen. L'attente
- * Mobile Money n'a pas de pied : elle aboutit seule à la confirmation du
- * serveur, et la croix de la feuille l'annule.
- * @param props Actions du paiement.
- * @returns Le bouton « Retour ».
- */
-function PayFooter(props: PayFooterProps) {
-  return <SheetSecondaryButton label="Retour" onPress={props.pay.back} />;
 }

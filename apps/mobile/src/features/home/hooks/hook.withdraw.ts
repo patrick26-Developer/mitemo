@@ -31,6 +31,8 @@ export interface WithdrawState {
   readonly pending: PendingWithdraw | null;
   readonly choose: (method: WithdrawMethod) => void;
   readonly confirm: () => void;
+  /** Revient du code PIN à la saisie, montant gardé. */
+  readonly back: () => void;
   readonly close: () => void;
 }
 
@@ -82,5 +84,5 @@ export function useWithdraw(onClose: () => void): WithdrawState {
   const confirm = () => confirmWithdraw(pending, run, close);
   const setAmount = (text: string) => setDraft({ amount: text, pending: null });
 
-  return { amount, setAmount, pending, choose, confirm, close };
+  return { amount, setAmount, pending, choose, confirm, back: () => setAmount(amount), close };
 }

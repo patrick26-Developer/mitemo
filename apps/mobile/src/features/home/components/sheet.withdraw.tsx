@@ -71,7 +71,12 @@ export function WithdrawSheet(props: WithdrawSheetProps) {
   const summary = `${formatAmount(pending.amount)} FCFA vers ${paymentMethodName(pending.method)}`;
 
   return (
-    <BottomSheet visible={props.visible} title="Retirer" onClose={withdraw.close}>
+    <BottomSheet
+      visible={props.visible}
+      title="Retirer"
+      onClose={withdraw.close}
+      onBack={withdraw.back}
+    >
       <SheetText>{`Saisissez votre code PIN Mitemo pour retirer ${summary}.`}</SheetText>
       <PinConfirm onConfirmed={withdraw.confirm} />
     </BottomSheet>
