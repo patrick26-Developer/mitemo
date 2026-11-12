@@ -59,13 +59,24 @@ describe("FilterableList", () => {
     expect(screen.getByText("Aucune tontine ne correspond à « loyer ».")).toBeOnTheScreen();
   });
 
-  it("affiche l'état vide du filtre et propose d'ajouter", async () => {
+  it("masque l'en-tête quand la liste est vide, et propose de créer depuis l'état vide", async () => {
     const onAdd = jest.fn();
     await renderWithSafeArea(<FilterableList config={{ ...CONFIG, items: [] }} onAdd={onAdd} />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Ajouter" }));
-
+    expect(screen.queryByRole("button", { name: "Ajouter" })).toBeNull();
+    expect(screen.queryByPlaceholderText("Rechercher une tontine")).toBeNull();
     expect(screen.getByText("Aucune tontine active")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Créer" }));
+
     expect(onAdd).toHaveBeenCalledTimes(1);
+  });
+
+  it("garde l'en-tête quand seul le filtre est vide", async () => {
+    const completed = CONFIG.items.filter((item) => !CONFIG.isCompleted(item));
+    await renderWithSafeArea(
+      <FilterableList config={{ ...CONFIG, items: completed }} onAdd={jest.fn()} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Ajouter" })).toBeOnTheScreen();
   });
 });

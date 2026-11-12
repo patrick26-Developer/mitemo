@@ -22,7 +22,8 @@ describe("TontineDetailContent", () => {
     expect(screen.getByTestId("tontine-recap-card")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Retirer Membre m2" })).toBeOnTheScreen();
     expect(screen.getByText("Une tontine de test.")).toBeOnTheScreen();
-    expect(screen.getByRole("button", { name: "Partager l'invitation" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Activer la restourne" })).toBeOnTheScreen();
   });
 
   it("ouvre l'ajout d'un membre depuis l'en-tête tant que le quota n'est pas atteint", async () => {

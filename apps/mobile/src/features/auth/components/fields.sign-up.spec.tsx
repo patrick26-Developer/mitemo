@@ -20,6 +20,9 @@ function emptyForm(): SignUpForm {
     validPhone: false,
     submit: jest.fn(),
     update: jest.fn(),
+    termsOpen: false,
+    acceptTerms: jest.fn(),
+    declineTerms: jest.fn(),
   };
 }
 

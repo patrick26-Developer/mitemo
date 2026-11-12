@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 
 import { useAuthDraft } from "../model/model.auth-draft";
+import { TERMS_DECLINED } from "../model/model.terms";
 import type { SignUpIdentity } from "../model/model.auth-draft";
 import type { SignUpInvalidFields } from "../model/model.auth-form";
 import {
@@ -25,6 +26,8 @@ interface SignUpFormState {
   readonly occupation: string;
   readonly digits: string;
   readonly error: string;
+  /** Vrai pendant le rappel des conditions d'utilisation. */
+  readonly termsOpen: boolean;
 }
 
 /** Aucun champ à signaler tant que la saisie n'a pas été soumise. */
@@ -42,6 +45,7 @@ const INITIAL_FORM: SignUpFormState = {
   occupation: "",
   digits: "",
   error: "",
+  termsOpen: false,
 };
 
 /**
@@ -67,25 +71,41 @@ function identityOf(state: SignUpFormState): SignUpIdentity {
 }
 
 /**
- * Valide la première étape, puis ouvre le choix du code ou signale le refus.
- * @param state Saisie courante.
+ * Poursuit l'inscription une fois les conditions acceptées : l'identité et le
+ * numéro sont mémorisés, et le compte sera créé avec ce profil après le code PIN.
+ * @param state Saisie validée.
  * @param startSignUp Mémorise l'identité et le numéro du brouillon.
- * @param report Affiche le message à corriger.
  */
-function submitSignUp(
+function continueSignUp(
   state: SignUpFormState,
   startSignUp: (identity: SignUpIdentity, phone: string) => void,
-  report: (message: string) => void,
 ): void {
-  const error = signUpError(state);
-
-  if (error !== "") {
-    report(error);
-    return;
-  }
-
   startSignUp(identityOf(state), toInternationalPhone(state.digits));
   router.push("/(auth)/pin");
+}
+
+/** Ce dont dépendent les réponses au rappel des conditions. */
+interface TermsContext {
+  readonly state: SignUpFormState;
+  readonly patch: (change: Partial<SignUpFormState>) => void;
+  readonly startSignUp: (identity: SignUpIdentity, phone: string) => void;
+}
+
+/**
+ * Réponses au rappel des conditions : accepter poursuit l'inscription,
+ * refuser ferme la feuille et explique qu'aucun compte n'est créé.
+ * @param context Saisie, mise à jour et démarrage de l'inscription.
+ * @returns L'acceptation et le refus.
+ */
+function termsHandlers(context: TermsContext) {
+  const { state, patch, startSignUp } = context;
+  return {
+    acceptTerms: () => {
+      patch({ termsOpen: false });
+      continueSignUp(state, startSignUp);
+    },
+    declineTerms: () => patch({ termsOpen: false, error: TERMS_DECLINED }),
+  };
 }
 
 /**
@@ -96,23 +116,19 @@ function submitSignUp(
 export function useSignUpForm() {
   const [state, setState] = useState(INITIAL_FORM);
   const startSignUp = useAuthDraft((store) => store.startSignUp);
-  const update = (field: SignUpField, value: string) => {
-    setState((current) => ({ ...current, [field]: value, error: "" }));
-  };
+  const patch = (change: Partial<SignUpFormState>) =>
+    setState((current) => ({ ...current, ...change }));
+  const update = (field: SignUpField, value: string) => patch({ [field]: value, error: "" });
   const submit = () => {
-    submitSignUp(state, startSignUp, (error) => setState((current) => ({ ...current, error })));
+    const error = signUpError(state);
+    patch(error === "" ? { termsOpen: true } : { error });
   };
   const message = state.error !== "" ? state.error : phoneHint(state.digits);
   const invalid = message === "" ? NO_INVALID : signUpInvalidFields(state);
+  const terms = termsHandlers({ state, patch, startSignUp });
+  const validPhone = isValidPhoneDigits(state.digits);
 
-  return {
-    ...state,
-    message,
-    invalid,
-    validPhone: isValidPhoneDigits(state.digits),
-    submit,
-    update,
-  };
+  return { ...state, message, invalid, validPhone, submit, update, ...terms };
 }
 
 /** Champs et actions exposés par {@link useSignUpForm}. */

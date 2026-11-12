@@ -12,6 +12,17 @@ export function takenTurns(tontine: Tontine): number {
 }
 
 /**
+ * Indique si la tontine accepte encore de nouveaux membres : seulement avant
+ * son lancement, et tant que des tours restent libres. Une tontine lancée ne
+ * se partage plus.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand on peut partager l'invitation ou inviter un contact.
+ */
+export function canInviteMembers(tontine: Tontine): boolean {
+  return tontine.state === "PENDING" && freeTurns(tontine) > 0;
+}
+
+/**
  * Compte les tours encore libres, que de nouveaux membres peuvent prendre.
  * @param tontine Tontine concernée.
  * @returns Le nombre de tours libres, jamais négatif.

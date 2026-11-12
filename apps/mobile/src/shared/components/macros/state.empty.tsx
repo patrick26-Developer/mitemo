@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 import { PALETTE } from "../../theme/theme.palette";
+import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 
 /** Props de l'état vide d'un écran. */
 export interface EmptyStateProps {
@@ -9,6 +10,14 @@ export interface EmptyStateProps {
   readonly message: string;
   /** Icône de l'onglet concerné, affichée au-dessus du titre. */
   readonly icon?: LucideIcon;
+  /** Action proposée sous le message, par exemple « Créer ». */
+  readonly action?: EmptyStateAction;
+}
+
+/** Action d'un état vide. */
+export interface EmptyStateAction {
+  readonly label: string;
+  readonly onPress: () => void;
 }
 
 /**
@@ -18,7 +27,7 @@ export interface EmptyStateProps {
  * @returns Le message d'état vide.
  */
 export function EmptyState(props: EmptyStateProps) {
-  const { title, message, icon: Icon } = props;
+  const { title, message, icon: Icon, action } = props;
 
   return (
     <View testID="empty-state" className="flex-1 items-center justify-center gap-2 px-8 py-10">
@@ -34,6 +43,11 @@ export function EmptyState(props: EmptyStateProps) {
         {title}
       </Text>
       <Text className="text-center text-[14px] leading-6 text-muted">{message}</Text>
+      {action === undefined ? null : (
+        <View className="mt-4 w-full">
+          <SheetPrimaryButton label={action.label} onPress={action.onPress} />
+        </View>
+      )}
     </View>
   );
 }

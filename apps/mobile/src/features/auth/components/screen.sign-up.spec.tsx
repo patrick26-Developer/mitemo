@@ -81,10 +81,34 @@ describe("SignUpScreen", () => {
     expect(router.push).not.toHaveBeenCalled();
   });
 
-  it("continue vers le code PIN avec l'identité saisie", async () => {
+  it("rappelle les conditions d'utilisation avant de continuer", async () => {
     await renderWithSafeArea(<SignUpScreen />);
     await fillForm();
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(screen.getByRole("header", { name: "Conditions d'utilisation" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Refuser" })).toBeOnTheScreen();
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("ne crée rien quand les conditions sont refusées", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+    await fillForm();
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Refuser" }));
+
+    expect(router.push).not.toHaveBeenCalled();
+    expect(useAuthDraft.getState().mode).toBe(INITIAL_AUTH_DRAFT.mode);
+    expect(
+      screen.getByText("Acceptez les conditions d'utilisation pour créer votre compte."),
+    ).toBeOnTheScreen();
+  });
+
+  it("continue vers le code PIN avec l'identité saisie, une fois les conditions acceptées", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+    await fillForm();
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Accepter" }));
 
     expect(useAuthDraft.getState()).toMatchObject({
       mode: "sign-up",
