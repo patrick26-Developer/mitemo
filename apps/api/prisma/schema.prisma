@@ -89,6 +89,7 @@ model AppUser {
   createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   challenges      AuthChallenge[]
   sessions        AuthSession[]
+  pushTokens      NotificationPushToken[]
   savingsGoals    SavingsGoal[]
 
   walletAccountId String @unique @map("wallet_account_id")
@@ -152,4 +153,17 @@ model SavingsGoal {
 
   @@index([userId, createdAt, id])
   @@map("savings_goal")
+}
+
+/// Jeton de notification enregistré par le titulaire d’une session.
+model NotificationPushToken {
+  userId       String   @map("user_id") @db.Uuid
+  user         AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String
+  platform     String
+  appVersion   String   @map("app_version")
+  registeredAt DateTime @default(now()) @map("registered_at") @db.Timestamptz(3)
+
+  @@id([userId, token])
+  @@map("notification_push_token")
 }

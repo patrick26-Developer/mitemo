@@ -40,6 +40,12 @@ function phone(body: unknown): string {
   return input;
 }
 
+function readPin(body: unknown, allowLegacy = false): string {
+  const value = field(body, "pin");
+  if (/^[0-9]{4}$/.test(value) || (allowLegacy && /^[0-9]{6}$/.test(value))) return value;
+  throw new BadRequestException("PIN invalide");
+}
+
 function sixDigits(body: unknown, key: string): string {
   const value = field(body, key);
   if (!/^[0-9]{6}$/.test(value)) throw new BadRequestException("Six chiffres requis");
@@ -84,7 +90,7 @@ export class IdentityService {
       id: randomUUID(),
       phoneNumber: phone(body),
       displayName: name(body),
-      pinHash: await hash(sixDigits(body, "pin")),
+      pinHash: await hash(readPin(body)),
     };
     return this.createUser(data);
   }
@@ -118,7 +124,7 @@ export class IdentityService {
     const user = await this.prisma.appUser.findUnique({
       where: { phoneNumber: phone(body), isDemo: true },
     });
-    const pin = sixDigits(body, "pin");
+    const pin = readPin(body, true);
     if (!user || !(await verify(user.pinHash, pin))) throw new UnauthorizedException();
     return this.issueChallenge(user.id);
   }
