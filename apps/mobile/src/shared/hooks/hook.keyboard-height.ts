@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { LayoutAnimation } from "react-native";
+import { LayoutAnimation, Platform } from "react-native";
 import { KeyboardEvents } from "react-native-keyboard-controller";
 
 /**
  * Anime le prochain changement de mise en page au rythme du clavier, ou en
- * douceur quand le système ne donne pas de durée.
+ * douceur quand le système ne donne pas de durée. Sur iOS seulement : sur
+ * Android, `LayoutAnimation` dans la fenêtre d'une feuille effaçait la carte
+ * en laissant le fond assombri ; la carte y prend donc sa place directement.
  * @param duration Durée de l'animation du clavier, en millisecondes.
  */
 function animateWithKeyboard(duration: number): void {
+  if (Platform.OS !== "ios") return;
   LayoutAnimation.configureNext(
     duration > 0
       ? LayoutAnimation.create(duration, "easeInEaseOut", "opacity")

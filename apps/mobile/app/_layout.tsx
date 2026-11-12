@@ -21,7 +21,8 @@ import { useSessionStore } from "../src/shared/session/store.session";
  * Les toasts de succès et d'erreur s'affichent par-dessus tous les écrans, et
  * l'écran de lancement par-dessus le tout, le temps de relire l'appareil. Le
  * fournisseur du clavier suit le clavier sur iOS comme sur Android, feuilles
- * comprises.
+ * comprises ; il garde l'application en plein écran sous les barres système,
+ * sans quoi Android peignait une barre d'état blanche au-dessus du contenu.
  * @returns La pile de navigation et la barre d'état.
  */
 export default function RootLayout() {
@@ -30,7 +31,7 @@ export default function RootLayout() {
   const routes = launchRoutes({ signedIn, onboarded });
 
   return (
-    <KeyboardProvider>
+    <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
       <StatusBar style="dark" />
       <ProfilePhotoSync />
       <AppBadgeSync signedIn={signedIn} />
