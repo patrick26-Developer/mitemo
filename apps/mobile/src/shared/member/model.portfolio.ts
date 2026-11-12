@@ -2,6 +2,7 @@ import { randomUUID } from "expo-crypto";
 import type { CycleFrequencyUnit, TontineMemberRole } from "@mitemo/contracts";
 
 import type { PaymentMethod } from "../model/model.payment-method";
+import type { TontineActivity } from "./model.tontine-activity";
 import { takenTurns } from "./model.tontine-turns";
 
 /** Identifiant du membre connecté dans les données locales. */
@@ -72,6 +73,8 @@ export interface Tontine {
   readonly headerColors: readonly [string, string];
   /** Code d'invitation, `null` tant que l'administrateur n'en a pas créé. */
   readonly invitationCode: string | null;
+  /** Fil de la tontine, du plus ancien au plus récent ; vide par défaut. */
+  readonly activity?: readonly TontineActivity[];
 }
 
 /** Carte de pointage suivie par le membre. */

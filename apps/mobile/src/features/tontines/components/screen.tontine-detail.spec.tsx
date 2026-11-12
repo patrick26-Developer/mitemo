@@ -34,6 +34,18 @@ describe("TontineDetailScreen", () => {
     expect(screen.getByText("Membres : ")).toBeOnTheScreen();
   });
 
+  it("s'ouvre sur la feuille « Cotiser » depuis la notification de cotisation", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="2" focus={{ pay: true, memberId: null }} />);
+
+    expect(await screen.findByRole("header", { name: "Cotiser" })).toBeOnTheScreen();
+  });
+
+  it("s'ouvre sur la fiche du membre dont parle la notification", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="1" focus={{ pay: false, memberId: "m9" }} />);
+
+    expect(await screen.findByRole("header", { name: "David Nkodia" })).toBeOnTheScreen();
+  });
+
   it("affiche le cycle et le bénéficiaire", async () => {
     await renderWithSafeArea(<TontineDetailScreen id="1" />);
 

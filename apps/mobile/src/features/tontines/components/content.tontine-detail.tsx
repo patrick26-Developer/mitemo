@@ -1,29 +1,33 @@
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { View } from "react-native";
 
 import { useDockInset } from "../../../shared/hooks/hook.dock-inset";
+import type { DetailFocus } from "../../../shared/model/model.detail-focus";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import { useTontineActions } from "../hooks/hook.tontine-actions";
-import { TontineRecapCard } from "./card.tontine-recap";
+import { TontineDetailBody } from "./body.tontine-detail";
 import { TontineDetailDock } from "./dock.tontine-detail";
 import { TontineDetailHeader } from "./header.tontine-detail";
-import { TontineMemberList } from "./list.tontine-members";
 import { MemberAddSheet } from "./sheet.member-add";
 
 /** Props du contenu d'une tontine trouvée. */
 export interface TontineDetailContentProps {
   readonly item: Tontine;
+  /** Endroit à ouvrir : la feuille « Cotiser », ou la fiche d'un membre. */
+  readonly focus: DetailFocus;
 }
 
 /**
  * Affiche l'en-tête et ses actions rapides, la carte récapitulative et les
  * membres d'une tontine, sur le modèle du détail d'une carte de pointage. Les
  * actions du tour vivent dans le dock, qui reste visible pendant le défilement.
- * @param props Tontine à afficher.
+ * Une notification peut l'ouvrir sur la feuille « Cotiser », ou défiler
+ * jusqu'aux membres et ouvrir la fiche de l'un d'eux.
+ * @param props Tontine à afficher et endroit à ouvrir.
  * @returns Le contenu détaillé de la tontine.
  */
 export function TontineDetailContent(props: TontineDetailContentProps) {
-  const { item } = props;
+  const { item, focus } = props;
   const inset = useDockInset();
   const actions = useTontineActions(item);
   const [addOpen, setAddOpen] = useState(false);
@@ -35,20 +39,18 @@ export function TontineDetailContent(props: TontineDetailContentProps) {
         onShare={actions.share}
         onAddMember={() => setAddOpen(true)}
       />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-5 px-4 pt-5"
-        contentContainerStyle={{ paddingBottom: inset.paddingBottom }}
-      >
-        <TontineRecapCard item={item} />
-        <TontineMemberList
-          item={item}
-          onRemove={actions.remove}
-          onCancelInvitation={actions.cancelInvitation}
-        />
-        <Text className="text-[14px] leading-6 text-muted">{item.description}</Text>
-      </ScrollView>
-      <TontineDetailDock item={item} actions={actions} onLayout={inset.onDockLayout} />
+      <TontineDetailBody
+        item={item}
+        actions={actions}
+        focusMemberId={focus.memberId}
+        paddingBottom={inset.paddingBottom}
+      />
+      <TontineDetailDock
+        item={item}
+        actions={actions}
+        onLayout={inset.onDockLayout}
+        initialPay={focus.pay}
+      />
       <MemberAddSheet
         visible={addOpen}
         item={item}

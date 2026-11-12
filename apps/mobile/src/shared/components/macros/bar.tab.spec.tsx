@@ -1,7 +1,10 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, within } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { useNetworkState } from "expo-network";
 
+import { usePortfolioStore } from "../../member/store.portfolio";
+import { useNotificationMarksStore } from "../../notifications/store.notification-marks";
+import { makeCard, makeTontine, TEST_PORTFOLIO } from "../../testing/fixtures.portfolio";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { AnimatedTabBar } from "./bar.tab";
 
@@ -78,5 +81,37 @@ describe("AnimatedTabBar", () => {
     await renderWithSafeArea(<AnimatedTabBar {...props} />);
 
     expect(screen.getByText("Vous n'êtes pas connecté à Internet")).toBeOnTheScreen();
+  });
+
+  it("compte les tontines et les cartes qui ont du nouveau, « 9+ » au-delà de 9", async () => {
+    const tontines = Array.from({ length: 12 }, (_, index) => makeTontine({ id: `t${index}` }));
+    usePortfolioStore.setState({ ...TEST_PORTFOLIO, tontines, cards: [makeCard()] });
+    useNotificationMarksStore.setState({
+      readIds: [],
+      seen: { bell: [], tontines: [], savings: [] },
+    });
+    const { props } = buildProps(0);
+    await renderWithSafeArea(<AnimatedTabBar {...props} />);
+
+    const badgeOf = (name: string) =>
+      within(screen.getByRole("tab", { name })).queryByTestId("count-badge");
+    expect(badgeOf("Tontines")).toHaveTextContent("9+");
+    expect(badgeOf("Cartes")).toHaveTextContent("1");
+    expect(badgeOf("Profil")).toBeNull();
+  });
+
+  it("marque vu l'onglet actif : sa pastille disparaît et ne revient pas", async () => {
+    usePortfolioStore.setState({ ...TEST_PORTFOLIO, tontines: [makeTontine()], cards: [] });
+    useNotificationMarksStore.setState({
+      readIds: [],
+      seen: { bell: [], tontines: [], savings: [] },
+    });
+    const { props } = buildProps(3);
+    await renderWithSafeArea(<AnimatedTabBar {...props} />);
+
+    expect(
+      within(screen.getByRole("tab", { name: "Tontines" })).queryByTestId("count-badge"),
+    ).toBeNull();
+    expect(useNotificationMarksStore.getState().seen.tontines).toEqual(["pay-t1-1"]);
   });
 });

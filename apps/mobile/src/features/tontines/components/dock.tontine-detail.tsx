@@ -32,6 +32,8 @@ export interface TontineDetailDockProps {
   readonly actions: TontineActionsState;
   /** Mesure du dock, pour que le contenu réserve sa hauteur réelle. */
   readonly onLayout: (event: LayoutChangeEvent) => void;
+  /** Ouvre d'emblée la feuille « Cotiser », demandée par une notification. */
+  readonly initialPay?: boolean;
 }
 
 /** Actions de la tontine et ouverture des feuilles du dock. */
@@ -93,9 +95,11 @@ function tinted(action: DockAction | null, item: Tontine): DockAction | null {
  * @returns Le dock flottant et sa confirmation.
  */
 export function TontineDetailDock(props: TontineDetailDockProps) {
-  const { item, actions, onLayout } = props;
+  const { item, actions, onLayout, initialPay = false } = props;
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(
+    () => initialPay && payAction(item, () => undefined) !== null,
+  );
   const handlers = {
     actions,
     askConfirm: () => setConfirmOpen(true),

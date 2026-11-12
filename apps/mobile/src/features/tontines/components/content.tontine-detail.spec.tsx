@@ -4,6 +4,7 @@ import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { makeMember, makeTontine } from "../../../shared/testing/fixtures.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
+import { NO_FOCUS } from "../../../shared/model/model.detail-focus";
 import { TontineDetailContent } from "./content.tontine-detail";
 
 jest.mock("../api/api.device-contacts", () => ({
@@ -14,7 +15,7 @@ describe("TontineDetailContent", () => {
   it("montre les outils d'administration à l'administrateur", async () => {
     const tontine = makeTontine({ state: "PENDING" });
     usePortfolioStore.setState({ available: 20_000n, tontines: [tontine], cards: [] });
-    await renderWithSafeArea(<TontineDetailContent item={tontine} />);
+    await renderWithSafeArea(<TontineDetailContent item={tontine} focus={NO_FOCUS} />);
 
     expect(screen.getByText("Membres")).toBeOnTheScreen();
     expect(screen.getByText("3 inscrits")).toBeOnTheScreen();
@@ -31,7 +32,7 @@ describe("TontineDetailContent", () => {
       members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
     });
     usePortfolioStore.setState({ available: 20_000n, tontines: [tontine], cards: [] });
-    await renderWithSafeArea(<TontineDetailContent item={tontine} />);
+    await renderWithSafeArea(<TontineDetailContent item={tontine} focus={NO_FOCUS} />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Ajouter un membre" }));
 
@@ -43,7 +44,7 @@ describe("TontineDetailContent", () => {
       members: [makeMember(SELF_MEMBER_ID, "MEMBRE"), makeMember("m2", "ADMIN")],
     });
     usePortfolioStore.setState({ available: 20_000n, tontines: [tontine], cards: [] });
-    await renderWithSafeArea(<TontineDetailContent item={tontine} />);
+    await renderWithSafeArea(<TontineDetailContent item={tontine} focus={NO_FOCUS} />);
 
     expect(screen.queryByRole("button", { name: /^Retirer Membre/ })).toBeNull();
     expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();

@@ -38,6 +38,12 @@ describe("SavingsDetailScreen", () => {
     expect(screen.getByText(/30 000 FCFA/)).toBeOnTheScreen();
   });
 
+  it("s'ouvre sur le pointage depuis la notification de la carte", async () => {
+    await renderWithSafeArea(<SavingsDetailScreen id="1" focus={{ pay: true, memberId: null }} />);
+
+    expect(await screen.findByRole("header", { name: "Pointer" })).toBeOnTheScreen();
+  });
+
   it("affiche l'échéance et le reste à épargner", async () => {
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 

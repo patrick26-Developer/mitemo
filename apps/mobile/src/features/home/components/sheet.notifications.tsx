@@ -1,6 +1,8 @@
+import { router } from "expo-router";
+
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
-import type { InvitationReplyState } from "../../tontines";
-import { InvitationTurnsFooter, InvitationTurnsStep, useInvitationReply } from "../../tontines";
+import { useNotifications } from "../../../shared/notifications/hook.notifications";
+import { useSeenWhile } from "../../../shared/notifications/hook.seen-while";
 import { NotificationsContent } from "./content.notifications";
 
 /** Props de la feuille des notifications. */
@@ -10,51 +12,25 @@ export interface NotificationsSheetProps {
 }
 
 /**
- * Feuille des notifications : invitations reçues, à accepter ou refuser, puis
- * actions attendues sur les tontines et les cartes. Accepter une invitation
- * fait passer la même feuille au choix du nombre de tours, une seule feuille
- * à la fois.
+ * Feuille des notifications, toutes sur le même modèle : invitations,
+ * cotisations, restournes, fil des autres membres et cartes. Ouvrir la
+ * feuille vide la pastille de la cloche ; toucher une notification la marque
+ * lue, ferme la feuille et ouvre l'endroit exact qu'elle concerne.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille des notifications.
  */
 export function NotificationsSheet(props: NotificationsSheetProps) {
   const { visible, onClose } = props;
-  const reply = useInvitationReply();
-  const { choosing } = reply;
-  const close = () => {
-    reply.back();
+  const notifications = useNotifications();
+  useSeenWhile(notifications, visible ? "bell" : null);
+  const open = (href: string) => {
     onClose();
+    router.push(href);
   };
 
   return (
-    <BottomSheet
-      visible={visible}
-      title={choosing === null ? "Notifications" : "Choisir mes tours"}
-      onClose={close}
-      {...(choosing === null ? {} : { footer: <TurnsFooter reply={reply} /> })}
-    >
-      {choosing === null ? (
-        <NotificationsContent reply={reply} />
-      ) : (
-        <InvitationTurnsStep invitation={choosing} turns={reply.turns} onChange={reply.setTurns} />
-      )}
+    <BottomSheet visible={visible} title="Notifications" onClose={onClose}>
+      <NotificationsContent notifications={notifications} onOpen={open} />
     </BottomSheet>
   );
-}
-
-/** Props du pied du choix des tours. */
-interface TurnsFooterProps {
-  readonly reply: InvitationReplyState;
-}
-
-/**
- * « Retour » et « Rejoindre » ; une fois la tontine rejointe, la feuille
- * revient aux notifications.
- * @param props État de la réponse aux invitations.
- * @returns Le pied de la feuille.
- */
-function TurnsFooter(props: TurnsFooterProps) {
-  const { reply } = props;
-
-  return <InvitationTurnsFooter onBack={reply.back} onJoin={() => reply.accept()} />;
 }
