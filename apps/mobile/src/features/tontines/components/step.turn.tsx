@@ -1,6 +1,9 @@
 import { Text, View } from "react-native";
 
-import { accentColors } from "../../../shared/model/model.accent-color";
+import { PALETTE } from "../../../shared/theme/theme.palette";
+
+/** Contour gris des rangs ordinaires de la frise. */
+const IDLE_BORDER = "rgba(190, 196, 214, 0.9)";
 
 /** Props d'un rang de la frise de passage. */
 export interface TurnStepProps {
@@ -14,30 +17,31 @@ export interface TurnStepProps {
 
 /**
  * Affiche un rang de la frise verticale de passage, [1] → [2] → … → [X] :
- * le numéro dans une pastille, puis un trait vers le rang suivant. Le rang du
- * tour en cours est rempli de la couleur de la tontine.
+ * le numéro dans un cercle sans fond, grisé, puis un trait vers le rang
+ * suivant. Seul le rang du tour en cours prend la couleur de la tontine, sur
+ * son contour et son numéro, pour rester discret à côté des lignes de membres.
  * @param props Rang, position dans la frise et couleur éventuelle.
  * @returns Le rang et son trait.
  */
 export function TurnStep(props: TurnStepProps) {
   const { turn, last, accent } = props;
-  const colors = accent === undefined ? null : accentColors(accent);
+  const color = accent ?? IDLE_BORDER;
 
   return (
     <View className="w-8 items-center self-stretch">
       <View
         accessibilityLabel={`Tour ${turn}`}
-        className={`mt-3 size-8 items-center justify-center rounded-full border ${colors === null ? "border-card-border bg-tab-active" : ""}`}
-        style={colors === null ? undefined : { backgroundColor: accent, borderColor: accent }}
+        className="mt-3 size-8 items-center justify-center rounded-full border-[1.5px]"
+        style={{ backgroundColor: "transparent", borderColor: color }}
       >
         <Text
-          className={`text-[13px] font-bold ${colors === null ? "text-tab-ink" : ""}`}
-          style={colors === null ? undefined : { color: colors.foreground }}
+          className={`text-[13px] font-semibold ${accent === undefined ? "opacity-60" : ""}`}
+          style={{ color: accent ?? PALETTE.muted }}
         >
           {turn}
         </Text>
       </View>
-      {last ? null : <View testID="turn-connector" className="w-0.5 flex-1 bg-card-border" />}
+      {last ? null : <View testID="turn-connector" className="w-px flex-1 bg-card-border" />}
     </View>
   );
 }

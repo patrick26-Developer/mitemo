@@ -16,9 +16,16 @@ describe("TurnStep", () => {
     expect(screen.queryByTestId("turn-connector")).toBeNull();
   });
 
-  it("remplit le rang du tour en cours de la couleur de la tontine", async () => {
+  it("grise un rang ordinaire : contour seul, sans fond", async () => {
+    await render(<TurnStep turn={3} last={false} />);
+
+    expect(screen.getByLabelText("Tour 3")).toHaveStyle({ backgroundColor: "transparent" });
+  });
+
+  it("cercle le rang du tour en cours de la couleur de la tontine, sans le remplir", async () => {
     await render(<TurnStep turn={2} last={false} accent="#2044DF" />);
 
-    expect(screen.getByLabelText("Tour 2")).toHaveStyle({ backgroundColor: "#2044DF" });
+    const step = screen.getByLabelText("Tour 2");
+    expect(step).toHaveStyle({ borderColor: "#2044DF", backgroundColor: "transparent" });
   });
 });
