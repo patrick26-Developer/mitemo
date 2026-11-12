@@ -1,10 +1,14 @@
 import { existsSync } from "node:fs";
 
 import { defineConfig } from "prisma/config";
+import { requirePreviewDatabase } from "./src/shared/database/preview-database.js";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 
-const databaseUrl = process.env["DATABASE_URL"];
+const preview =
+  process.env["MITEMO_DEPLOYMENT"] === "preview" ||
+  process.env["RENDER_SERVICE_NAME"] === "mitemo-api-dev";
+const databaseUrl = preview ? requirePreviewDatabase(process.env) : process.env["DATABASE_URL"];
 
 /**
  * Configuration de la CLI Prisma. Les migrations utilisent DATABASE_URL, la connexion
