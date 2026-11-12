@@ -1,6 +1,7 @@
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatLongDate } from "../../../shared/format/format.date";
 import type { SavingsCard, Tontine } from "../../../shared/member/model.portfolio";
+import { selfDue } from "../../../shared/member/model.tontine-turns";
 import {
   canPayContribution,
   isTontineBeneficiary,
@@ -17,7 +18,8 @@ export interface HomeNotification {
 }
 
 /**
- * Construit la notification de cotisation d'un tour.
+ * Construit la notification de cotisation d'un tour, une cotisation par tour
+ * pris par le membre.
  * @param tontine Tontine concernée.
  * @returns La notification de cotisation à régler.
  */
@@ -25,7 +27,7 @@ function contributionNotification(tontine: Tontine): HomeNotification {
   return {
     id: `pay-${tontine.id}`,
     title: "Cotisation à régler",
-    message: `${tontine.name} : ${formatAmount(tontine.contribution)} FCFA à verser pour ce tour.`,
+    message: `${tontine.name} : ${formatAmount(selfDue(tontine))} FCFA à verser pour ce tour.`,
     time: `Tour ${tontine.round}`,
   };
 }

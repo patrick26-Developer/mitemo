@@ -9,7 +9,6 @@ import { searchEmptyState } from "../../model/model.list-empty-state";
 import { matchesFilter, matchesSearch } from "../../model/model.list-filter";
 import type { ListFilter } from "../../model/model.list-filter";
 import { EmptyState } from "./state.empty";
-import type { ListFilterControl } from "./header.list";
 import { ListHeader } from "./header.list";
 
 /** Réglages d'une liste filtrable et recherchable. */
@@ -35,34 +34,16 @@ export interface FilterableListConfig<Item> {
 export interface FilterableListProps<Item> {
   readonly config: FilterableListConfig<Item>;
   readonly onAdd: () => void;
-  /** Ligne posée sous la barre de filtres, par exemple les invitations reçues. */
-  readonly banner?: ReactElement | null;
-}
-
-/**
- * Construit le filtre d'état de l'en-tête, avec le libellé des terminés propre à la liste.
- * @param config Réglages de la liste.
- * @param value Filtre courant.
- * @param onChange Changement de filtre.
- * @returns Le contrôle du filtre.
- */
-function filterControl<Item>(
-  config: FilterableListConfig<Item>,
-  value: ListFilter,
-  onChange: (filter: ListFilter) => void,
-): ListFilterControl {
-  const archived = config.archivedLabel;
-  return { value, onChange, ...(archived === undefined ? {} : { archivedLabel: archived }) };
 }
 
 /**
  * Affiche une liste filtrable, avec sa recherche et son état vide.
  * @template Item Type des éléments listés.
- * @param props Réglages de la liste, ouverture de la création et ligne d'annonce éventuelle.
+ * @param props Réglages de la liste et ouverture de la création.
  * @returns La liste filtrable.
  */
 export function FilterableList<Item>(props: FilterableListProps<Item>) {
-  const { config, onAdd, banner = null } = props;
+  const { config, onAdd } = props;
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<ListFilter>("active");
   const [query, setQuery] = useState("");
@@ -80,15 +61,18 @@ export function FilterableList<Item>(props: FilterableListProps<Item>) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View className="bg-white">
-            <ListHeader
-              topInset={insets.top}
-              filter={filterControl(config, filter, setFilter)}
-              onAdd={onAdd}
-              search={{ query, onChange: setQuery, placeholder: config.searchPlaceholder }}
-            />
-            {banner}
-          </View>
+          <ListHeader
+            topInset={insets.top}
+            filter={{
+              value: filter,
+              onChange: setFilter,
+              ...(config.archivedLabel === undefined
+                ? {}
+                : { archivedLabel: config.archivedLabel }),
+            }}
+            onAdd={onAdd}
+            search={{ query, onChange: setQuery, placeholder: config.searchPlaceholder }}
+          />
         }
         stickyHeaderIndices={[0]}
         ListEmptyComponent={<EmptyState {...empty} icon={config.emptyIcon} />}

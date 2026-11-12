@@ -1,13 +1,7 @@
-import { Bell } from "lucide-react-native";
-import { Text, View } from "react-native";
-
-import { SheetInfoCard } from "../../../shared/components/macros/card.sheet-info";
-import { SheetSection } from "../../../shared/components/macros/section.sheet";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
-import { SheetText } from "../../../shared/components/atoms/text.sheet";
-import { usePortfolioStore } from "../../../shared/member/store.portfolio";
-import { PALETTE } from "../../../shared/theme/theme.palette";
-import { buildNotifications } from "../model/model.home-notifications";
+import type { InvitationReplyState } from "../../tontines";
+import { InvitationTurnsFooter, InvitationTurnsStep, useInvitationReply } from "../../tontines";
+import { NotificationsContent } from "./content.notifications";
 
 /** Props de la feuille des notifications. */
 export interface NotificationsSheetProps {
@@ -16,36 +10,51 @@ export interface NotificationsSheetProps {
 }
 
 /**
- * Affiche les notifications déduites des tontines et des cartes du membre.
+ * Feuille des notifications : invitations reçues, à accepter ou refuser, puis
+ * actions attendues sur les tontines et les cartes. Accepter une invitation
+ * fait passer la même feuille au choix du nombre de tours, une seule feuille
+ * à la fois.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille des notifications.
  */
 export function NotificationsSheet(props: NotificationsSheetProps) {
   const { visible, onClose } = props;
-  const tontines = usePortfolioStore((state) => state.tontines);
-  const cards = usePortfolioStore((state) => state.cards);
-  const notifications = buildNotifications(tontines, cards);
+  const reply = useInvitationReply();
+  const { choosing } = reply;
+  const close = () => {
+    reply.back();
+    onClose();
+  };
 
   return (
-    <BottomSheet visible={visible} title="Notifications" onClose={onClose}>
-      {notifications.length === 0 ? (
-        <SheetText>Vous êtes à jour : aucune action n&apos;est attendue pour le moment.</SheetText>
+    <BottomSheet
+      visible={visible}
+      title={choosing === null ? "Notifications" : "Choisir mes tours"}
+      onClose={close}
+      {...(choosing === null ? {} : { footer: <TurnsFooter reply={reply} /> })}
+    >
+      {choosing === null ? (
+        <NotificationsContent reply={reply} />
       ) : (
-        <SheetSection title="Récentes">
-          {notifications.map((notification) => (
-            <SheetInfoCard key={notification.id}>
-              <View className="flex-row items-center gap-2">
-                <Bell size={16} color={PALETTE.brand} />
-                <Text className="flex-1 text-[15px] font-semibold text-ink">
-                  {notification.title}
-                </Text>
-                <Text className="text-[11px] text-muted">{notification.time}</Text>
-              </View>
-              <Text className="text-[13px] leading-5 text-muted">{notification.message}</Text>
-            </SheetInfoCard>
-          ))}
-        </SheetSection>
+        <InvitationTurnsStep invitation={choosing} turns={reply.turns} onChange={reply.setTurns} />
       )}
     </BottomSheet>
   );
+}
+
+/** Props du pied du choix des tours. */
+interface TurnsFooterProps {
+  readonly reply: InvitationReplyState;
+}
+
+/**
+ * « Retour » et « Rejoindre » ; une fois la tontine rejointe, la feuille
+ * revient aux notifications.
+ * @param props État de la réponse aux invitations.
+ * @returns Le pied de la feuille.
+ */
+function TurnsFooter(props: TurnsFooterProps) {
+  const { reply } = props;
+
+  return <InvitationTurnsFooter onBack={reply.back} onJoin={() => reply.accept()} />;
 }
