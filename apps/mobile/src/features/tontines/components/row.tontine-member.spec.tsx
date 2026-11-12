@@ -1,6 +1,6 @@
 import { useMemberStore } from "../../../shared/member/store.member";
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { makeMember } from "../../../shared/testing/fixtures.portfolio";
 import { TontineMemberRow } from "./row.tontine-member";
@@ -68,6 +68,6 @@ describe("TontineMemberRow", () => {
     await render(<TontineMemberRow member={makeMember(SELF_MEMBER_ID, "ADMIN", true)} />);
 
     expect(screen.getByTestId("member-row-photo")).toBeOnTheScreen();
-    useMemberStore.setState({ photoUri: null });
+    await act(() => useMemberStore.setState({ photoUri: null }));
   });
 });

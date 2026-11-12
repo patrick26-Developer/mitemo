@@ -3,7 +3,6 @@ import { router } from "expo-router";
 
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { FIELD_CHROME } from "../../../shared/theme/theme.field";
-import { NO_ACCOUNT_ERROR, VAULT_ERROR } from "../hooks/hook.sign-in-form";
 import { INITIAL_AUTH_DRAFT, useAuthDraft } from "../model/model.auth-draft";
 import { registerPin } from "../model/model.pin-auth";
 import { createMemoryPinAuth } from "../testing/mock.pin-auth";
@@ -76,24 +75,23 @@ describe("SignInScreen", () => {
     expect(useAuthDraft.getState()).toMatchObject({ mode: "sign-in", phone: PHONE });
   });
 
-  it("propose de créer un compte quand le numéro est inconnu ici", async () => {
+  it("permet de retrouver un compte serveur inconnu de cet appareil", async () => {
     await renderWithSafeArea(<SignInScreen />);
 
     await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "065706622");
     await fireEvent.press(screen.getByRole("button", { name: "Se connecter" }));
 
-    expect(await screen.findByText(NO_ACCOUNT_ERROR)).toBeOnTheScreen();
-    expect(router.push).not.toHaveBeenCalled();
+    expect(router.push).toHaveBeenCalledWith("/(auth)/pin");
   });
 
-  it("signale un trousseau indisponible", async () => {
+  it("ne consulte pas l'ancien coffre PIN pour démarrer une connexion serveur", async () => {
     mockPinAuth.breakVault();
     await renderWithSafeArea(<SignInScreen />);
 
     await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "065706622");
     await fireEvent.press(screen.getByRole("button", { name: "Se connecter" }));
 
-    expect(await screen.findByText(VAULT_ERROR)).toBeOnTheScreen();
+    expect(router.push).toHaveBeenCalledWith("/(auth)/pin");
   });
 
   it("n'avance pas avec un numéro incomplet", async () => {

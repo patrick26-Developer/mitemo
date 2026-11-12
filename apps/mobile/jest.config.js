@@ -9,8 +9,18 @@
  * `react-native-keyboard-controller`, par le mock officiel du paquet.
  * @type {import("jest").Config}
  */
+/** Le stockage Web expérimental de Node n'existe pas dans l'environnement natif simulé. */
+Reflect.deleteProperty(globalThis, "localStorage");
+
+/** Les workers Jest héritent eux aussi de l'environnement natif, sans stockage Web Node. */
+process.env.NODE_OPTIONS = (
+  (process.env.NODE_OPTIONS || "") + " --no-experimental-webstorage"
+).trim();
+
 module.exports = {
   preset: "jest-expo",
+  /** Le premier rendu natif à froid peut dépasser cinq secondes sur Windows. */
+  testTimeout: 15_000,
   testMatch: ["<rootDir>/src/**/*.spec.{ts,tsx}"],
   moduleNameMapper: {
     "^lucide-react-native$":

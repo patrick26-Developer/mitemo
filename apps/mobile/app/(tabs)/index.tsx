@@ -1,3 +1,3 @@
-import { HomeScreen } from "../../src/features/home";
+import { ServerHomeScreen } from "../../src/features/server-account";
 
-export default HomeScreen;
+export default ServerHomeScreen;

@@ -13,6 +13,8 @@ jest.mock("expo-router", () => ({
 
 jest.mock("expo-status-bar", () => ({ StatusBar: jest.fn(() => null) }));
 
+jest.mock("expo-notifications", () => ({}));
+
 /**
  * Lit le style passé à la barre d'état au dernier rendu.
  * @returns Le style reçu, ou `undefined` si la barre n'a pas été rendue.

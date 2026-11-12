@@ -6,6 +6,7 @@ import { renderWithSafeArea } from "../../../shared/testing/util.render-with-saf
 import { HomeSections } from "./sections.home";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
+jest.mock("expo-notifications", () => ({}));
 
 describe("HomeSections", () => {
   beforeEach(() => {

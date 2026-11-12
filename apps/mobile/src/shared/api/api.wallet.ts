@@ -10,7 +10,7 @@ import { PUSH_TOKEN_SCHEMA, WALLET_SUMMARY_SCHEMA } from "./schema.wallet";
 /** Appels du compte : soldes du portefeuille et jeton de notification. */
 export interface AccountApi {
   walletSummary(): Promise<WalletSummaryResponse>;
-  /** Route pas encore exposée par l'API : l'appel échouera en 404 d'ici là. */
+  /** Enregistre le jeton du compte connecté ; nécessite la migration Preview des jetons Push. */
   registerPushToken(request: RegisterPushTokenRequest): Promise<RegisterPushTokenResponse>;
 }
 
