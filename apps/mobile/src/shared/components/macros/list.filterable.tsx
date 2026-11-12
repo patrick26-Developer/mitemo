@@ -10,6 +10,7 @@ import { matchesFilter, matchesSearch } from "../../model/model.list-filter";
 import type { ListFilter } from "../../model/model.list-filter";
 import { EmptyState } from "./state.empty";
 import { ListHeader } from "./header.list";
+import { TabBackground } from "./background.tab";
 
 /** Réglages d'une liste filtrable et recherchable. */
 export interface FilterableListConfig<Item> {
@@ -55,6 +56,7 @@ export function FilterableList<Item>(props: FilterableListProps<Item>) {
 
   return (
     <View className="flex-1 bg-white">
+      <TabBackground />
       <FlatList
         data={items}
         keyExtractor={config.keyOf}

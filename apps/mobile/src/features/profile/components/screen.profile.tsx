@@ -14,6 +14,7 @@ import { ProfileGroup } from "./group.profile";
 import { ProfileHeader } from "./header.profile";
 import { ProfileSignOut } from "./card.profile-sign-out";
 import { SignOutSheet } from "./sheet.sign-out";
+import { TabBackground } from "../../../shared/components/macros/background.tab";
 
 /**
  * Écran du profil du membre connecté, alimenté par le profil partagé.
@@ -29,6 +30,7 @@ export function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-white">
+      <TabBackground />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingTop: insets.top + 12 }}
