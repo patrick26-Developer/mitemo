@@ -106,20 +106,42 @@ describe("TontineDetailScreen", () => {
     expect(firstOf(usePortfolioStore.getState().tontines).round).toBe(2);
   });
 
-  it("partage l'invitation depuis l'en-tête, sans panneau de code à créer", async () => {
+  it("ne propose plus de partager ni d'inviter une fois la tontine lancée", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="1" />);
+
+    expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ajouter un membre" })).toBeNull();
+  });
+
+  it("partage l'invitation depuis l'en-tête tant qu'il manque des membres", async () => {
     const share = jest
       .spyOn(Share, "share")
       .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
-    await renderWithSafeArea(<TontineDetailScreen id="1" />);
+    usePortfolioStore.setState({
+      tontines: [makeTontine({ state: "PENDING", members: [makeMember(SELF_MEMBER_ID, "ADMIN")] })],
+    });
+    await renderWithSafeArea(<TontineDetailScreen id="t1" />);
 
-    expect(screen.queryByText("Administration")).not.toBeOnTheScreen();
-    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
+    expect(screen.getByRole("button", { name: "Ajouter un membre" })).toBeOnTheScreen();
+    await fireEvent.press(
+      firstOf(screen.getAllByRole("button", { name: "Partager l'invitation" })),
+    );
 
     const code = firstOf(usePortfolioStore.getState().tontines).invitationCode;
     expect(code).not.toBeNull();
     expect(share).toHaveBeenCalledWith({
       message: expect.stringContaining(`Code d'invitation : ${code ?? ""}`) as string,
     });
+  });
+
+  it("ouvre les réglages de l'administrateur depuis « Plus d'options »", async () => {
+    await renderWithSafeArea(<TontineDetailScreen id="1" />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Plus d'options" }));
+    await fireEvent.changeText(screen.getByLabelText("Nom"), "Tontine du Grand Marché");
+    await fireEvent.press(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(screen.getByRole("header", { name: "Tontine du Grand Marché" })).toBeOnTheScreen();
   });
 
   it("affiche un état vide quand la tontine n'existe pas", async () => {

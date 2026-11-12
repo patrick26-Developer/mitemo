@@ -8,8 +8,17 @@ import { formError, formOk } from "./model.form-result";
 /** Longueur minimale d'un nom saisi dans un formulaire. */
 const NAME_MIN_LENGTH = 3;
 
-/** Longueur maximale d'un nom saisi dans un formulaire. */
-const NAME_MAX_LENGTH = 60;
+/**
+ * Longueur maximale d'un nom de tontine ou de carte : il tient sur une ligne
+ * des cartes et des notifications sans être coupé.
+ */
+export const NAME_MAX_LENGTH = 30;
+
+/** Caractères admis : lettres (accentuées comprises), chiffres, espaces et ponctuation courante. */
+const NAME_CHARACTERS = /^[\p{L}\p{M}\d '’\-.&()]+$/u;
+
+/** Au moins une lettre : un nom fait seulement de chiffres ou de signes ne désigne rien. */
+const NAME_LETTER = /\p{L}/u;
 
 /** Message affiché quand zod ne fournit aucune explication exploitable. */
 const FALLBACK_ERROR = "Vérifiez la saisie.";
@@ -25,29 +34,55 @@ export interface CountRule {
 }
 
 /**
- * Indique si un nom saisi respecte la longueur attendue, espaces retirés.
+ * Nettoie un nom saisi : espaces retirés aux bords, un seul espace entre les mots.
  * @param text Nom saisi.
- * @returns Vrai si le nom contient entre 3 et 60 caractères utiles.
+ * @returns Le nom nettoyé.
  */
-export function isValidNameInput(text: string): boolean {
-  const length = text.trim().length;
-
-  return length >= NAME_MIN_LENGTH && length <= NAME_MAX_LENGTH;
+function cleanName(text: string): string {
+  return text.trim().replace(/\s+/g, " ");
 }
 
 /**
- * Construit le schéma d'un nom obligatoire : espaces retirés, longueur bornée
- * entre 3 et 60 caractères.
+ * Construit le schéma d'un nom de tontine ou de carte : nettoyé, de 3 à 30
+ * caractères, avec au moins une lettre et sans caractère exotique (emoji,
+ * symbole) qui s'afficherait mal dans les listes et les notifications.
  * @param emptyMessage Message affiché quand le nom est vide.
  * @returns Le schéma du champ, qui rend le nom nettoyé.
  */
 export function nameSchema(emptyMessage: string) {
   return z
     .string()
-    .trim()
-    .min(1, emptyMessage)
-    .min(NAME_MIN_LENGTH, `Le nom doit contenir au moins ${NAME_MIN_LENGTH} caractères.`)
-    .max(NAME_MAX_LENGTH, `Le nom ne peut pas dépasser ${NAME_MAX_LENGTH} caractères.`);
+    .transform(cleanName)
+    .pipe(
+      z
+        .string()
+        .min(1, emptyMessage)
+        .min(NAME_MIN_LENGTH, `Le nom doit contenir au moins ${NAME_MIN_LENGTH} caractères.`)
+        .max(NAME_MAX_LENGTH, `Le nom ne peut pas dépasser ${NAME_MAX_LENGTH} caractères.`)
+        .regex(
+          NAME_CHARACTERS,
+          "Le nom ne peut contenir que des lettres, des chiffres, des espaces et - ' . & ( ).",
+        )
+        .regex(NAME_LETTER, "Le nom doit contenir au moins une lettre."),
+    );
+}
+
+/**
+ * Indique si un nom saisi respecte toutes les règles de {@link nameSchema}.
+ * @param text Nom saisi.
+ * @returns Vrai si le nom est acceptable.
+ */
+export function isValidNameInput(text: string): boolean {
+  return nameSchema("").safeParse(text).success;
+}
+
+/**
+ * Compteur affiché sous le champ du nom, espaces superflus non comptés.
+ * @param text Nom saisi.
+ * @returns Par exemple « 17/30 ».
+ */
+export function nameCounter(text: string): string {
+  return `${cleanName(text).length}/${NAME_MAX_LENGTH}`;
 }
 
 /**

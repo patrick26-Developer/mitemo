@@ -22,6 +22,8 @@ appId: ${APP_ID}
 - inputText: "065706622"
 - hideKeyboard
 - tapOn: "Continuer"
+- assertVisible: "Conditions d'utilisation"
+- tapOn: "Accepter"
 - assertVisible: "Code PIN"
 - tapOn: "4"
 - tapOn: "8"

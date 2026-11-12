@@ -95,42 +95,6 @@ describe("contributeTontine", () => {
   });
 });
 
-describe("inviteMember", () => {
-  it("crée puis conserve le même code d'invitation", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
-
-    const first = actions.inviteMember("t1");
-    const second = actions.inviteMember("t1");
-
-    expect(first).toHaveLength(6);
-    expect(second).toBe(first);
-    expect(state().tontines[0]?.invitationCode).toBe(first);
-  });
-
-  it("refuse l'invitation à un membre simple", () => {
-    const simple = makeTontine({ members: [makeMember(SELF_MEMBER_ID, "MEMBRE")] });
-    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [simple] });
-
-    expect(() => actions.inviteMember("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
-describe("removeMember", () => {
-  it("retire un autre membre de la tontine", () => {
-    const { actions, state } = makePortfolio(TEST_PORTFOLIO);
-
-    actions.removeMember("t1", "m2");
-
-    expect(state().tontines[0]?.members.map((entry) => entry.id)).toEqual([SELF_MEMBER_ID, "m3"]);
-  });
-
-  it("refuse de retirer le membre connecté", () => {
-    const { actions } = makePortfolio(TEST_PORTFOLIO);
-
-    expect(() => actions.removeMember("t1", SELF_MEMBER_ID)).toThrow(ForbiddenOperationError);
-  });
-});
-
 describe("contributeCard", () => {
   /** Pointage payé par Airtel Money. */
   const PAYMENT = { at: "2026-11-11T09:15:00.000Z", method: "AIRTEL_MONEY" } as const;

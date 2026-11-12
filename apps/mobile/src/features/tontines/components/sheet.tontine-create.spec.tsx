@@ -48,6 +48,16 @@ describe("TontineCreateSheet", () => {
     expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
   });
 
+  it("refuse un nom sans lettre et compte les caractères saisis", async () => {
+    await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
+
+    await fillEssentials("2026");
+
+    expect(screen.getByText("Le nom doit contenir au moins une lettre.")).toBeOnTheScreen();
+    expect(screen.getByText("Le nom que verront les membres. 4/30")).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
+  });
+
   it("fait choisir la fréquence dans une liste groupée, sans saisir d'intervalle", async () => {
     await renderWithSafeArea(<TontineCreateSheet visible onClose={jest.fn()} />);
     await fillEssentials();

@@ -10,6 +10,7 @@ import { matchesFilter, matchesSearch } from "../../model/model.list-filter";
 import type { ListFilter } from "../../model/model.list-filter";
 import { EmptyState } from "./state.empty";
 import { ListHeader } from "./header.list";
+import { TabBackground } from "./background.tab";
 
 /** Réglages d'une liste filtrable et recherchable. */
 export interface FilterableListConfig<Item> {
@@ -36,15 +37,23 @@ export interface FilterableListProps<Item> {
   readonly onAdd: () => void;
 }
 
+/** Recherche et filtre appliqués à la liste. */
+interface ListQuery<Item> {
+  readonly filter: ListFilter;
+  readonly setFilter: (filter: ListFilter) => void;
+  readonly query: string;
+  readonly setQuery: (query: string) => void;
+  /** Éléments retenus par le filtre et la recherche. */
+  readonly items: readonly Item[];
+  readonly empty: EmptyStateContent;
+}
+
 /**
- * Affiche une liste filtrable, avec sa recherche et son état vide.
- * @template Item Type des éléments listés.
- * @param props Réglages de la liste et ouverture de la création.
- * @returns La liste filtrable.
+ * Filtre et recherche de la liste, et état vide correspondant.
+ * @param config Éléments et règles de la liste.
+ * @returns La recherche, le filtre et leur résultat.
  */
-export function FilterableList<Item>(props: FilterableListProps<Item>) {
-  const { config, onAdd } = props;
-  const insets = useSafeAreaInsets();
+function useListQuery<Item>(config: FilterableListConfig<Item>): ListQuery<Item> {
   const [filter, setFilter] = useState<ListFilter>("active");
   const [query, setQuery] = useState("");
   const items = config.items.filter(
@@ -52,30 +61,62 @@ export function FilterableList<Item>(props: FilterableListProps<Item>) {
       matchesFilter(config.isCompleted(item), filter) && matchesSearch(config.labelOf(item), query),
   );
   const empty = searchEmptyState(query, config.searchSubject) ?? config.emptyStates[filter];
+  return { filter, setFilter, query, setQuery, items, empty };
+}
+
+/** Props de l'en-tête de la liste filtrable. */
+interface FilterableHeaderProps<Item> {
+  readonly config: FilterableListConfig<Item>;
+  readonly list: ListQuery<Item>;
+  readonly onAdd: () => void;
+}
+
+/**
+ * En-tête de la liste : titre, ajout, filtre et recherche. Sans aucun
+ * élément, il se réduit à la marge haute : rien à filtrer ni à chercher.
+ * @param props Configuration, recherche et ajout.
+ * @returns L'en-tête, ou la seule marge haute.
+ */
+function FilterableHeader<Item>(props: FilterableHeaderProps<Item>) {
+  const { config, list, onAdd } = props;
+  const insets = useSafeAreaInsets();
+  if (config.items.length === 0) return <View style={{ height: insets.top }} />;
+  const archived =
+    config.archivedLabel === undefined ? {} : { archivedLabel: config.archivedLabel };
+
+  return (
+    <ListHeader
+      topInset={insets.top}
+      filter={{ value: list.filter, onChange: list.setFilter, ...archived }}
+      onAdd={onAdd}
+      search={{ query: list.query, onChange: list.setQuery, placeholder: config.searchPlaceholder }}
+    />
+  );
+}
+
+/**
+ * Liste filtrable d'un onglet : en-tête fixe (titre, ajout, filtre, recherche)
+ * et état vide expliqué. Une liste sans aucun élément masque l'en-tête et
+ * propose de créer depuis l'état vide.
+ * @param props Configuration de la liste et ajout d'un élément.
+ * @returns La liste filtrable.
+ */
+export function FilterableList<Item>(props: FilterableListProps<Item>) {
+  const { config, onAdd } = props;
+  const list = useListQuery(config);
+  const action = config.items.length === 0 ? { action: { label: "Créer", onPress: onAdd } } : {};
 
   return (
     <View className="flex-1 bg-white">
+      <TabBackground />
       <FlatList
-        data={items}
+        data={list.items}
         keyExtractor={config.keyOf}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={
-          <ListHeader
-            topInset={insets.top}
-            filter={{
-              value: filter,
-              onChange: setFilter,
-              ...(config.archivedLabel === undefined
-                ? {}
-                : { archivedLabel: config.archivedLabel }),
-            }}
-            onAdd={onAdd}
-            search={{ query, onChange: setQuery, placeholder: config.searchPlaceholder }}
-          />
-        }
+        ListHeaderComponent={<FilterableHeader config={config} list={list} onAdd={onAdd} />}
         stickyHeaderIndices={[0]}
-        ListEmptyComponent={<EmptyState {...empty} icon={config.emptyIcon} />}
+        ListEmptyComponent={<EmptyState {...list.empty} icon={config.emptyIcon} {...action} />}
         contentContainerClassName="grow gap-3 px-4 pb-6"
         renderItem={({ item, index }) => config.renderItem(item, index)}
       />

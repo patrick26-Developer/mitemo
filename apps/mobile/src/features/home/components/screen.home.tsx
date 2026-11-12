@@ -4,13 +4,11 @@ import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HatchPattern } from "../../../shared/components/atoms/pattern.hatch";
 import { HomeActions } from "./actions.home";
 import { HomeHero } from "./hero.home";
+import { HomeSections } from "./sections.home";
 import { MemberSummarySheet } from "./sheet.member-summary";
 import { NotificationsSheet } from "./sheet.notifications";
-import { SavingsSection } from "./section.savings";
-import { TontinesSection } from "./section.tontines";
 
 /**
  * Écran d'accueil : solde du membre, tontines et cartes de pointage en cours.
@@ -37,12 +35,7 @@ export function HomeScreen() {
       <View testID="home-scroll-guard" style={{ height: 0 }} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <HomeHero topInset={insets.top} onOpenMember={() => setMemberOpen(true)} />
-        <TontinesSection />
-        <HatchPattern />
-        <SavingsSection />
-        <View className="mt-5">
-          <HatchPattern />
-        </View>
+        <HomeSections />
       </ScrollView>
       <HomeActions topInset={insets.top} onOpenNotifications={() => setNotificationsOpen(true)} />
       <NotificationsSheet visible={notificationsOpen} onClose={() => setNotificationsOpen(false)} />

@@ -56,7 +56,7 @@ describe("parseTontineForm", () => {
   it("refuse un nom trop long", () => {
     expect(parseTontineForm({ ...VALID_FORM, name: "a".repeat(61) })).toEqual({
       ok: false,
-      message: "Le nom ne peut pas dépasser 60 caractères.",
+      message: "Le nom ne peut pas dépasser 30 caractères.",
     });
   });
 

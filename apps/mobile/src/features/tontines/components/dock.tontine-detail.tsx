@@ -53,14 +53,25 @@ interface DockHandlers {
  */
 function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null {
   const { actions, askConfirm, askPay } = handlers;
-  if (item.state === "PENDING") {
-    if (!isTontineAdmin(item) || !hasReachedQuota(item)) return null;
-    return { label: "Activer la restourne", onPress: actions.start };
-  }
+  if (item.state === "PENDING") return pendingAction(item, actions);
   if (item.state !== "ACTIVE") return null;
   if (canConfirmRound(item)) return { label: "Confirmer la restourne", onPress: askConfirm };
 
   return payAction(item, askPay);
+}
+
+/**
+ * Action d'une tontine à lancer, réservée à l'administrateur : partager
+ * l'invitation tant qu'il manque des membres, puis activer la restourne.
+ * @param item Tontine à lancer.
+ * @param actions Actions de la tontine.
+ * @returns L'action, ou `null` pour un simple membre.
+ */
+function pendingAction(item: Tontine, actions: TontineActionsState): DockAction | null {
+  if (!isTontineAdmin(item)) return null;
+  if (!hasReachedQuota(item)) return { label: "Partager l'invitation", onPress: actions.share };
+
+  return { label: "Activer la restourne", onPress: actions.start };
 }
 
 /**

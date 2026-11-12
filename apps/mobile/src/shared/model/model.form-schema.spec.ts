@@ -4,28 +4,51 @@ import {
   amountSchema,
   countSchema,
   isValidNameInput,
+  NAME_MAX_LENGTH,
+  nameCounter,
   nameSchema,
   parseWithSchema,
 } from "./model.form-schema";
 
 describe("isValidNameInput", () => {
-  it("accepte un nom de 3 à 60 caractères utiles", () => {
+  it("accepte un nom de 3 à 30 caractères utiles", () => {
     expect(isValidNameInput("  Tontine  ")).toBe(true);
+    expect(isValidNameInput("a".repeat(NAME_MAX_LENGTH))).toBe(true);
   });
 
-  it("refuse un nom trop court ou trop long", () => {
+  it("refuse un nom trop court, trop long, sans lettre ou avec un caractère interdit", () => {
     expect(isValidNameInput("ab")).toBe(false);
-    expect(isValidNameInput("a".repeat(61))).toBe(false);
+    expect(isValidNameInput("a".repeat(NAME_MAX_LENGTH + 1))).toBe(false);
+    expect(isValidNameInput("2026")).toBe(false);
+    expect(isValidNameInput("Tontine 🎉")).toBe(false);
+  });
+});
+
+describe("nameCounter", () => {
+  it("compte les caractères utiles sur le maximum autorisé", () => {
+    expect(nameCounter("  Tontine   du marché ")).toBe("17/30");
+    expect(nameCounter("")).toBe("0/30");
   });
 });
 
 describe("nameSchema", () => {
   const schema = nameSchema("Donnez un nom.");
 
-  it("nettoie les espaces autour du nom", () => {
-    expect(parseWithSchema(schema, "  Tontine du Marché  ")).toEqual({
+  it("nettoie les espaces autour du nom et entre les mots", () => {
+    expect(parseWithSchema(schema, "  Tontine   du Marché  ")).toEqual({
       ok: true,
       value: "Tontine du Marché",
+    });
+  });
+
+  it("accepte lettres accentuées, chiffres et ponctuation courante", () => {
+    expect(parseWithSchema(schema, "Épargne d'Aïcha - 2026 (N°1)")).toEqual({
+      ok: false,
+      message: "Le nom ne peut contenir que des lettres, des chiffres, des espaces et - ' . & ( ).",
+    });
+    expect(parseWithSchema(schema, "Épargne d’Aïcha - 2026 (1)")).toEqual({
+      ok: true,
+      value: "Épargne d’Aïcha - 2026 (1)",
     });
   });
 
@@ -33,14 +56,21 @@ describe("nameSchema", () => {
     expect(parseWithSchema(schema, "   ")).toEqual({ ok: false, message: "Donnez un nom." });
   });
 
-  it("impose entre 3 et 60 caractères", () => {
+  it("impose entre 3 et 30 caractères", () => {
     expect(parseWithSchema(schema, "ab")).toEqual({
       ok: false,
       message: "Le nom doit contenir au moins 3 caractères.",
     });
-    expect(parseWithSchema(schema, "a".repeat(61))).toEqual({
+    expect(parseWithSchema(schema, "a".repeat(31))).toEqual({
       ok: false,
-      message: "Le nom ne peut pas dépasser 60 caractères.",
+      message: "Le nom ne peut pas dépasser 30 caractères.",
+    });
+  });
+
+  it("exige au moins une lettre", () => {
+    expect(parseWithSchema(schema, "2026")).toEqual({
+      ok: false,
+      message: "Le nom doit contenir au moins une lettre.",
     });
   });
 });
