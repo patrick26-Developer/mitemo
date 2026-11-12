@@ -107,3 +107,10 @@ export type {
 
 export type { RegisterDemoUserRequest, UpdateCurrentUserRequest } from "./auth.ts";
 export type { ActiveSession } from "./auth.ts";
+
+export type {
+  CreateSavingsGoalRequest,
+  SavingsGoalCalendarResponse,
+  SavingsGoalResponse,
+  SavingsGoalsResponse,
+} from "./savings-goal.ts";
