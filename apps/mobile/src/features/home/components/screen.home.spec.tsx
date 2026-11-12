@@ -54,7 +54,7 @@ describe("HomeScreen", () => {
   it("liste les tontines du membre", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
-    expect(screen.getByText("2 Tontines")).toBeOnTheScreen();
+    expect(screen.getByText("2 Tontines actives")).toBeOnTheScreen();
     expect(screen.getByText("Tontine du Marché Tolal")).toBeOnTheScreen();
     expect(screen.getByText("Tour 4 / 10")).toBeOnTheScreen();
   });
@@ -62,7 +62,7 @@ describe("HomeScreen", () => {
   it("liste les cartes de pointage du membre", async () => {
     await renderWithSafeArea(<HomeScreen />);
 
-    expect(screen.getByText("2 Cartes de pointage")).toBeOnTheScreen();
+    expect(screen.getByText("2 Cartes actives")).toBeOnTheScreen();
     expect(screen.getByText("Loyer de Janvier")).toBeOnTheScreen();
   });
 

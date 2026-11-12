@@ -19,8 +19,8 @@ describe("HomeSections", () => {
     });
     await renderWithSafeArea(<HomeSections />);
 
-    expect(screen.getByRole("button", { name: "1 Tontine" })).toBeOnTheScreen();
-    expect(screen.queryByRole("button", { name: /Cartes? de pointage/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "1 Tontine active" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Cartes? actives?/ })).toBeNull();
   });
 
   it("masque la section des tontines quand aucune tontine n'est lancée", async () => {
@@ -30,8 +30,21 @@ describe("HomeSections", () => {
     });
     await renderWithSafeArea(<HomeSections />);
 
-    expect(screen.queryByRole("button", { name: /Tontines?$/ })).toBeNull();
-    expect(screen.getByRole("button", { name: "1 Carte de pointage" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /Tontines? actives?$/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "1 Carte active" })).toBeOnTheScreen();
+  });
+
+  it("limite l'aperçu à quelques tontines, avec le total des actives et un indicateur", async () => {
+    const tontines = Array.from({ length: 7 }, (_, index) =>
+      makeTontine({ id: `t${index}`, name: `Tontine ${index + 1}` }),
+    );
+    usePortfolioStore.setState({ tontines, cards: [] });
+    await renderWithSafeArea(<HomeSections />);
+
+    expect(screen.getByRole("button", { name: "7 Tontines actives" })).toBeOnTheScreen();
+    expect(screen.getByText("Tontine 5")).toBeOnTheScreen();
+    expect(screen.queryByText("Tontine 6")).toBeNull();
+    expect(screen.getAllByTestId(/^page-dot-/)).toHaveLength(5);
   });
 
   it("invite à créer quand rien n'est actif, puis ouvre le formulaire choisi", async () => {

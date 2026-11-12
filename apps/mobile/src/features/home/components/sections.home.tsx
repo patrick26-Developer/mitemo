@@ -40,10 +40,12 @@ export function HomeSections() {
 
   return (
     <>
-      {hasTontines ? <TontinesSection items={sections.tontines} /> : null}
+      {hasTontines ? (
+        <TontinesSection items={sections.tontines} count={sections.tontineCount} />
+      ) : null}
       {hasTontines ? <HatchPattern /> : null}
       {sections.cards.length > 0 ? (
-        <SavingsSection items={sections.cards} lead={!hasTontines} />
+        <SavingsSection items={sections.cards} lead={!hasTontines} count={sections.cardCount} />
       ) : null}
       <View className="mt-5">
         <HatchPattern />
