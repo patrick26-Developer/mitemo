@@ -5,8 +5,8 @@ import type { PaymentMethod } from "../model/model.payment-method";
 import type { TontineActivity } from "./model.tontine-activity";
 import { takenTurns } from "./model.tontine-turns";
 
-/** Identifiant du membre connecté dans les données locales. */
-export const SELF_MEMBER_ID = "self";
+export { SELF_MEMBER_ID } from "./model.self-member";
+import { SELF_MEMBER_ID } from "./model.self-member";
 
 /** Fréquence d'un cycle de tontine, telle qu'affichée dans l'application. */
 export interface TontineFrequency {

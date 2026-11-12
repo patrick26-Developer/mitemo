@@ -1,5 +1,5 @@
 import type { Tontine, TontineMember } from "./model.portfolio";
-import { SELF_MEMBER_ID } from "./model.portfolio";
+import { SELF_MEMBER_ID } from "./model.self-member";
 
 /**
  * Additionne les tours pris par les membres inscrits : un tour est une part,
