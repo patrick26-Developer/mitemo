@@ -8,10 +8,10 @@ import {
 } from "./model.tontine-recap";
 
 describe("tontineStatus", () => {
-  it("annonce une tontine en préparation avec les membres réunis", () => {
+  it("annonce une tontine en préparation avec les tours déjà pris", () => {
     expect(tontineStatus(makeTontine({ state: "PENDING", totalRounds: 5 }))).toEqual({
       label: "En préparation",
-      detail: "3 sur 5 membres",
+      detail: "3 sur 5 tours pris",
     });
   });
 
@@ -56,7 +56,7 @@ describe("tontineFactRows", () => {
     });
 
     expect(tontineFactRows(tontine)).toEqual([
-      { kind: "pot", label: "Cagnotte du tour", value: "10 000 FCFA" },
+      { kind: "pot", label: "Restourne du tour", value: "10 000 FCFA" },
       { kind: "beneficiary", label: "Bénéficiaire", value: "Membre m2" },
       { kind: "paid", label: "Cotisations reçues", value: "1 sur 3" },
       { kind: "remaining", label: "Tours restants", value: "2" },

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Share } from "react-native";
 
 import type { StepForm } from "../../../shared/hooks/hook.step-form";
 import { useStepForm } from "../../../shared/hooks/hook.step-form";
@@ -7,7 +6,7 @@ import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { CreateTontineInput } from "../../../shared/member/model.portfolio-create";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { TontineFormState } from "../model/model.tontine-form";
-import { invitationMessage } from "../model/model.tontine-created";
+import { shareInvitation } from "../api/api.share-invitation";
 import {
   INITIAL_TONTINE_FORM,
   TONTINE_FORM_STEPS,
@@ -58,7 +57,7 @@ export function useTontineCreate(onDone: () => void): TontineCreateState {
   return {
     ...stepForm,
     finish,
-    share: () => shareInvitation(created),
+    share: () => shareCreated(created),
     invitationCode: created?.invitationCode ?? null,
     tontine: created?.tontine ?? null,
   };
@@ -74,9 +73,9 @@ interface CreatedTontine {
  * Ouvre la feuille de partage native avec le message d'invitation.
  * @param created Tontine créée et son code, `null` avant la création.
  */
-function shareInvitation(created: CreatedTontine | null): void {
+function shareCreated(created: CreatedTontine | null): void {
   if (created === null) return;
-  void Share.share({ message: invitationMessage(created.tontine, created.invitationCode) });
+  shareInvitation(created.tontine, created.invitationCode);
 }
 
 /**

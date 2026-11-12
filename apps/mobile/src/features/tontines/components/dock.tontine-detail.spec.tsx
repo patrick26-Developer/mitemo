@@ -26,11 +26,12 @@ jest.mock("../../auth", () => {
  */
 function makeActions(over: Partial<TontineActionsState> = {}): TontineActionsState {
   return {
-    addMember: jest.fn(),
+    invite: jest.fn(),
+    cancelInvitation: jest.fn(),
     start: jest.fn(),
     contribute: jest.fn(),
     confirm: jest.fn(),
-    invite: jest.fn(),
+    share: jest.fn(),
     remove: jest.fn(),
     ...over,
   };
@@ -106,20 +107,17 @@ describe("TontineDetailDock", () => {
     expect(actions.confirm).toHaveBeenCalledTimes(1);
   });
 
-  it("propose d'ajouter un membre tant que le quota n'est pas atteint", async () => {
-    const actions = makeActions();
+  it("laisse l'ajout de membres à l'en-tête tant que le quota n'est pas atteint", async () => {
     const pending = makeTontine({
       state: "PENDING",
       totalRounds: 3,
       members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
     });
     await renderWithSafeArea(
-      <TontineDetailDock item={pending} actions={actions} onLayout={jest.fn()} />,
+      <TontineDetailDock item={pending} actions={makeActions()} onLayout={jest.fn()} />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Ajouter un membre" }));
-
-    expect(actions.addMember).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Ajouter un membre" })).toBeNull();
   });
 
   it("propose d'activer la restourne quand tous les membres sont réunis", async () => {

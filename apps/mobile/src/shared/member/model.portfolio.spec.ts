@@ -1,4 +1,5 @@
-import type { SavingsCard, Tontine, TontineMember } from "./model.portfolio";
+import type { SavingsCard, Tontine } from "./model.portfolio";
+import { makeMember as member, makeTontine } from "../testing/fixtures.portfolio";
 import {
   beneficiaryName,
   canPayContribution,
@@ -21,37 +22,12 @@ import {
 } from "./model.portfolio";
 
 /**
- * Construit un membre de tontine.
- * @param id Identifiant du membre.
- * @param role Rôle dans la tontine.
- * @param paid `true` quand la cotisation du tour est réglée.
- * @returns Le membre prêt à être utilisé.
- */
-function member(id: string, role: "ADMIN" | "MEMBRE", paid = false): TontineMember {
-  return { id, name: `Membre ${id}`, role, paidCurrentRound: paid };
-}
-
-/**
- * Construit une tontine de test.
+ * Construit une tontine de test de 10 tours.
  * @param over Valeurs à remplacer.
  * @returns La tontine complète.
  */
 function tontine(over: Partial<Tontine> = {}): Tontine {
-  return {
-    id: "t1",
-    name: "Tontine de test",
-    contribution: 5_000n,
-    frequency: { unit: "semaine", interval: 1 },
-    round: 1,
-    totalRounds: 10,
-    state: "ACTIVE",
-    members: [member(SELF_MEMBER_ID, "ADMIN"), member("m2", "MEMBRE"), member("m3", "MEMBRE")],
-    beneficiaryId: "m2",
-    description: "Une tontine de test.",
-    headerColors: ["#2CCA86", "#62F79D"],
-    invitationCode: null,
-    ...over,
-  };
+  return makeTontine({ totalRounds: 10, ...over });
 }
 
 /**

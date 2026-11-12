@@ -108,7 +108,7 @@ function recapRows(form: TontineFormState, recap: TontineRecap): readonly SheetR
       : { label: "Participants", value: `${recap.participants} membres` },
     recap.pot === null
       ? null
-      : { label: "Cagnotte par tour", value: `${formatAmount(recap.pot)} FCFA` },
+      : { label: "Restourne par tour", value: `${formatAmount(recap.pot)} FCFA` },
     recap.cycleTotal === null
       ? null
       : { label: "Total du cycle", value: `${formatAmount(recap.cycleTotal)} FCFA` },
@@ -149,7 +149,7 @@ function TontineParticipantsStep(props: TontineCreateFieldsProps) {
       min={MIN_PARTICIPANTS}
       max={MAX_PARTICIPANTS}
       onChange={(participants) => onChange({ participants })}
-      hint="Vous inclus. Chacun reçoit la cagnotte une fois."
+      hint="Vous inclus. Chacun reçoit la restourne une fois."
       invalid={invalid.participants}
     />
   );

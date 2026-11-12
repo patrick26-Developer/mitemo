@@ -12,7 +12,7 @@ describe("TontineRecapCard", () => {
     expect(screen.getByText("En cours")).toBeOnTheScreen();
     expect(screen.getByText("Tour 1 sur 3")).toBeOnTheScreen();
     expect(screen.getByTestId("progress-fill")).toBeOnTheScreen();
-    expect(screen.getByText("Cagnotte du tour")).toBeOnTheScreen();
+    expect(screen.getByText("Restourne du tour")).toBeOnTheScreen();
     expect(screen.getByTestId("tontine-fact-icon-beneficiary")).toBeOnTheScreen();
   });
 

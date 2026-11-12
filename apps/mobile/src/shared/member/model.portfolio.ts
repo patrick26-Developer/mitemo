@@ -2,6 +2,7 @@ import { randomUUID } from "expo-crypto";
 import type { CycleFrequencyUnit, TontineMemberRole } from "@mitemo/contracts";
 
 import type { PaymentMethod } from "../model/model.payment-method";
+import { takenTurns } from "./model.tontine-turns";
 
 /** Identifiant du membre connecté dans les données locales. */
 export const SELF_MEMBER_ID = "self";
@@ -18,8 +19,23 @@ export interface TontineMember {
   readonly id: string;
   readonly name: string;
   readonly role: TontineMemberRole;
-  /** `true` quand la cotisation du tour en cours est réglée. */
+  /** Numéro au format international E.164, connu quand le membre vient du répertoire. */
+  readonly phone?: string;
+  /** `true` quand la cotisation du tour en cours est réglée, pour tous ses tours. */
   readonly paidCurrentRound: boolean;
+  /**
+   * Nombre de tours pris, au moins 1 : chaque tour est une part, cotisée à
+   * chaque tour et touchée une fois.
+   */
+  readonly turns: number;
+}
+
+/** Invitation envoyée par l'administrateur, en attente de la réponse du contact. */
+export interface PendingInvitation {
+  readonly id: string;
+  readonly name: string;
+  /** Numéro au format international E.164. */
+  readonly phone: string;
 }
 
 /** États d'une tontine : en préparation, en cours, terminée. */
@@ -40,7 +56,10 @@ export interface Tontine {
   readonly totalRounds: number;
   /** `PENDING` avant le départ, `ACTIVE` pendant le cycle, `COMPLETED` après. */
   readonly state: TontineState;
+  /** Membres qui ont accepté leur invitation, dans l'ordre de passage. */
   readonly members: readonly TontineMember[];
+  /** Invitations envoyées qui attendent l'acceptation ou le refus du contact. */
+  readonly invitations: readonly PendingInvitation[];
   /** Membre qui reçoit la cagnotte du tour en cours. */
   readonly beneficiaryId: string;
   readonly description: string;
@@ -116,14 +135,15 @@ const FREQUENCY_PLURALS: Readonly<Record<CycleFrequencyUnit, string>> = {
 };
 
 /**
- * Calcule la cagnotte brute d'un tour : cotisation × (participants − 1). Une
- * tontine en préparation compte les participants prévus, pas seulement ceux
- * déjà inscrits, pour annoncer la cagnotte que le récapitulatif a promise.
+ * Calcule la cagnotte brute d'un tour : cotisation × (parts − 1), chaque tour
+ * pris étant une part. Une tontine en préparation compte les tours prévus, pas
+ * seulement ceux déjà pris, pour annoncer la cagnotte que le récapitulatif a
+ * promise.
  * @param tontine Tontine concernée.
  * @returns Le montant brut du pot, en plus petite unité de la devise.
  */
 export function tontinePot(tontine: Tontine): bigint {
-  const participants = tontine.state === "PENDING" ? tontine.totalRounds : tontine.members.length;
+  const participants = tontine.state === "PENDING" ? tontine.totalRounds : takenTurns(tontine);
 
   return tontine.contribution * BigInt(Math.max(participants - 1, 0));
 }
@@ -168,10 +188,10 @@ export function paidMemberCount(tontine: Tontine): number {
 /**
  * Indique si la tontine a réuni tous les participants prévus.
  * @param tontine Tontine concernée.
- * @returns `true` quand le nombre de membres atteint le quota de tours.
+ * @returns `true` quand les tours pris atteignent le nombre de tours prévu.
  */
 export function hasReachedQuota(tontine: Tontine): boolean {
-  return tontine.members.length >= tontine.totalRounds;
+  return takenTurns(tontine) >= tontine.totalRounds;
 }
 
 /**

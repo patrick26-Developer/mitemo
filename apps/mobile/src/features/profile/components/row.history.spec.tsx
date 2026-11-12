@@ -25,7 +25,7 @@ describe("HistoryRow", () => {
       <HistoryRow
         entry={{
           id: "2",
-          label: "Cagnotte reçue",
+          label: "Restourne reçue",
           date: "2026-11-01",
           amount: 75_000n,
           direction: "credit",

@@ -1,5 +1,6 @@
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
+import { takenTurns } from "../../../shared/member/model.tontine-turns";
 import {
   beneficiaryName,
   formatFrequency,
@@ -42,7 +43,7 @@ function fcfa(amount: bigint): string {
 }
 
 /**
- * Décrit l'étape de la tontine : membres réunis avant le départ, tour en cours
+ * Décrit l'étape de la tontine : tours pris avant le départ, tour en cours
  * pendant le cycle, puis fin du cycle.
  * @param tontine Tontine concernée.
  * @returns L'étape et son détail.
@@ -52,7 +53,7 @@ export function tontineStatus(tontine: Tontine): TontineStatus {
   if (tontine.state === "PENDING") {
     return {
       label: "En préparation",
-      detail: `${tontine.members.length} sur ${totalRounds} membres`,
+      detail: `${takenTurns(tontine)} sur ${totalRounds} tours pris`,
     };
   }
   if (tontine.state === "COMPLETED") {
@@ -62,14 +63,14 @@ export function tontineStatus(tontine: Tontine): TontineStatus {
 }
 
 /**
- * Avancement de la tontine, entre 0 et 1 : membres réunis avant le départ,
+ * Avancement de la tontine, entre 0 et 1 : tours pris avant le départ,
  * tours passés pendant le cycle, plein une fois terminée.
  * @param tontine Tontine concernée.
  * @returns La part accomplie.
  */
 export function tontineProgress(tontine: Tontine): number {
   if (tontine.state === "COMPLETED") return 1;
-  const done = tontine.state === "PENDING" ? tontine.members.length : tontine.round;
+  const done = tontine.state === "PENDING" ? takenTurns(tontine) : tontine.round;
   return tontine.totalRounds === 0 ? 0 : Math.min(done / tontine.totalRounds, 1);
 }
 
@@ -108,7 +109,7 @@ function roundsLeft(tontine: Tontine): number {
 export function tontineFactRows(tontine: Tontine): readonly TontineFactRow[] {
   const pot: TontineFactRow = {
     kind: "pot",
-    label: "Cagnotte du tour",
+    label: "Restourne du tour",
     value: fcfa(tontinePot(tontine)),
   };
   const remaining: TontineFactRow = {

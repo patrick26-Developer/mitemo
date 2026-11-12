@@ -1,3 +1,4 @@
+import { INITIAL_INVITATIONS } from "../demo/demo.invitations";
 import { INITIAL_CARDS } from "../demo/demo.savings";
 import { INITIAL_TONTINES } from "../demo/demo.tontines";
 
@@ -9,6 +10,7 @@ export const INITIAL_PORTFOLIO = {
   available: INITIAL_AVAILABLE,
   tontines: INITIAL_TONTINES,
   cards: INITIAL_CARDS,
+  invitations: INITIAL_INVITATIONS,
 } as const;
 
 /** Clé de persistance du portefeuille sur l'appareil. */

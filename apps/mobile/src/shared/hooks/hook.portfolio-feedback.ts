@@ -15,16 +15,17 @@ function describeError(error: unknown): string {
 /**
  * Exécute une opération du portefeuille et annonce son résultat dans un toast.
  * Une opération refusée par le modèle ne modifie pas l'état et affiche sa
- * raison, par exemple un solde insuffisant.
+ * raison, par exemple un solde insuffisant. Un succès sans message (`null`)
+ * reste silencieux : la feuille de partage native, par exemple, suffit.
  * @returns La fonction d'exécution, qui indique si l'opération a réussi.
  */
 export function usePortfolioFeedback() {
   const show = useToastStore((state) => state.show);
 
-  const run = (action: () => void, success: string): boolean => {
+  const run = (action: () => void, success: string | null): boolean => {
     try {
       action();
-      show("success", success);
+      if (success !== null) show("success", success);
       return true;
     } catch (error) {
       show("error", describeError(error));

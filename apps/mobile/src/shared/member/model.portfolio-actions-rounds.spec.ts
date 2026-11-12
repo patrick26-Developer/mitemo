@@ -7,41 +7,6 @@ import {
   TEST_PORTFOLIO,
 } from "../testing/fixtures.portfolio";
 
-describe("addMember", () => {
-  it("inscrit un invité tant que le quota n'est pas atteint", () => {
-    const pending = makeTontine({
-      state: "PENDING",
-      totalRounds: 3,
-      members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
-    });
-    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [pending] });
-
-    actions.addMember("t1");
-
-    expect(state().tontines[0]?.members).toHaveLength(2);
-    expect(state().tontines[0]?.members[1]?.role).toBe("MEMBRE");
-  });
-
-  it("refuse un membre de plus quand le quota est atteint", () => {
-    const { actions } = makePortfolio({
-      ...TEST_PORTFOLIO,
-      tontines: [makeTontine({ state: "PENDING" })],
-    });
-
-    expect(() => actions.addMember("t1")).toThrow(ForbiddenOperationError);
-  });
-
-  it("refuse l'ajout à un simple membre", () => {
-    const pending = makeTontine({
-      state: "PENDING",
-      members: [makeMember(SELF_MEMBER_ID, "MEMBRE")],
-    });
-    const { actions } = makePortfolio({ ...TEST_PORTFOLIO, tontines: [pending] });
-
-    expect(() => actions.addMember("t1")).toThrow(ForbiddenOperationError);
-  });
-});
-
 describe("startTontine", () => {
   it("lance la tontine complète et ouvre le premier tour", () => {
     const { actions, state } = makePortfolio({

@@ -134,13 +134,31 @@ describe("advanceRound", () => {
         makeMember("m2", "MEMBRE"),
         makeMember("m3", "MEMBRE"),
       ],
+      round: 2,
       beneficiaryId: "m2",
     });
     const [updated] = advanceRound([current], "t1");
 
-    expect(updated?.round).toBe(2);
+    expect(updated?.round).toBe(3);
     expect(updated?.beneficiaryId).toBe("m3");
     expect(updated?.members[0]?.paidCurrentRound).toBe(false);
+  });
+
+  it("garde le même bénéficiaire tant qu'il lui reste un tour à la suite", () => {
+    const current = makeTontine({
+      totalRounds: 4,
+      members: [
+        makeMember(SELF_MEMBER_ID, "ADMIN", true),
+        { ...makeMember("m2", "MEMBRE"), turns: 2 },
+        makeMember("m3", "MEMBRE"),
+      ],
+      round: 2,
+      beneficiaryId: "m2",
+    });
+    const [updated] = advanceRound([current], "t1");
+
+    expect(updated?.round).toBe(3);
+    expect(updated?.beneficiaryId).toBe("m2");
   });
 
   it("clôt la tontine au dernier tour", () => {

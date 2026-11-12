@@ -1,6 +1,11 @@
 import { SELF_MEMBER_ID } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
+import {
+  buildCard,
+  buildInvitation,
+  buildJoiningSelf,
+  buildTontine,
+} from "./model.portfolio-create";
 
 /** Entrée de création de tontine utilisée par les tests. */
 const TONTINE_INPUT: CreateTontineInput = {
@@ -47,9 +52,21 @@ describe("buildTontine", () => {
     expect(buildTontine({ ...TONTINE_INPUT, participantCount: 12 }, 0).totalRounds).toBe(12);
   });
 
-  it("nomme les invités au-delà du vivier", () => {
-    expect(buildInvitedMember(9).name).toBe("Membre 11");
-    expect(buildInvitedMember(0).role).toBe("MEMBRE");
+  it("prépare l'invitation d'un contact sous son nom et son numéro", () => {
+    expect(buildInvitation({ name: "Aimée Mbemba", phone: "+242065706622" }, () => "abc")).toEqual({
+      id: "invitation-abc",
+      name: "Aimée Mbemba",
+      phone: "+242065706622",
+    });
+  });
+
+  it("inscrit le membre connecté avec les tours choisis, cotisation non réglée", () => {
+    expect(buildJoiningSelf(2)).toMatchObject({
+      id: SELF_MEMBER_ID,
+      role: "MEMBRE",
+      turns: 2,
+      paidCurrentRound: false,
+    });
   });
 
   it("fait tourner les dégradés selon le rang", () => {

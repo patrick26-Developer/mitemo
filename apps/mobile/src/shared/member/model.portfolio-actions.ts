@@ -1,3 +1,4 @@
+import type { ReceivedInvitation } from "./model.invitation";
 import type { CardPayment, SavingsCard, Tontine } from "./model.portfolio";
 import {
   allMembersPaid,
@@ -7,8 +8,8 @@ import {
   SELF_MEMBER_ID,
   tontinePot,
 } from "./model.portfolio";
-import type { CreateCardInput, CreateTontineInput } from "./model.portfolio-create";
-import { buildCard, buildInvitedMember, buildTontine } from "./model.portfolio-create";
+import type { CreateCardInput, CreateTontineInput, MemberContact } from "./model.portfolio-create";
+import { buildCard, buildTontine } from "./model.portfolio-create";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -16,9 +17,14 @@ import {
 } from "./model.portfolio-error";
 import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
+  acceptInvitation,
+  cancelInvitation,
+  declineInvitation,
+  inviteContact,
+} from "./model.portfolio-invitations";
+import {
   addSaved,
   advanceRound,
-  appendTontineMember,
   clearSaved,
   deductSaved,
   markSelfPaid,
@@ -33,6 +39,7 @@ import {
   setInvitationCode,
   startTontine as startTontineIn,
 } from "./model.portfolio-update";
+import { selfDue } from "./model.tontine-turns";
 
 /** Mise à jour partielle de l'état du portefeuille. */
 export type PortfolioUpdate =
@@ -52,12 +59,19 @@ export interface PortfolioState {
   readonly available: bigint;
   readonly tontines: readonly Tontine[];
   readonly cards: readonly SavingsCard[];
+  /** Invitations reçues par le membre connecté, en attente de sa réponse. */
+  readonly invitations: readonly ReceivedInvitation[];
   createTontine: (input: CreateTontineInput) => Tontine;
   createCard: (input: CreateCardInput) => void;
   startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
   confirmRound: (tontineId: string) => void;
-  addMember: (tontineId: string) => void;
+  /** Invite un contact du répertoire qui a un compte Mitemo ; il devient membre en acceptant. */
+  inviteContact: (tontineId: string, contact: MemberContact) => void;
+  cancelInvitation: (tontineId: string, invitationId: string) => void;
+  /** Rejoint la tontine d'une invitation reçue, avec le nombre de tours choisi. */
+  acceptInvitation: (invitationId: string, turns: number) => void;
+  declineInvitation: (invitationId: string) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
   /** Pointe un marqueur, payé par l'opérateur choisi. */
@@ -156,25 +170,6 @@ function confirmRound(context: PortfolioContext, tontineId: string): void {
 }
 
 /**
- * Ajoute un membre à une tontine préparée, tant que le quota n'est pas atteint.
- * @param context Accès au store.
- * @param tontineId Tontine concernée.
- * @throws {ForbiddenOperationError} si la tontine est lancée ou déjà complète.
- */
-function addMember(context: PortfolioContext, tontineId: string): void {
-  const tontine = requireTontine(context.get().tontines, tontineId);
-  requireAdmin(tontine);
-  if (tontine.state !== "PENDING") {
-    throw new ForbiddenOperationError("Cette tontine est déjà lancée.");
-  }
-  if (hasReachedQuota(tontine)) {
-    throw new ForbiddenOperationError("La tontine a déjà tous ses membres.");
-  }
-  const member = buildInvitedMember(tontine.members.length - 1);
-  context.set((state) => ({ tontines: appendTontineMember(state.tontines, tontineId, member) }));
-}
-
-/**
  * Ouvre ou renvoie le code d'invitation d'une tontine administrée.
  * @param context Accès au store.
  * @param tontineId Tontine concernée.
@@ -258,11 +253,12 @@ function transferCardToTontine(context: PortfolioContext, cardId: string): void 
   }
   const tontine = requireTontine(context.get().tontines, card.tontineId);
   requireSelfCanPay(tontine);
-  if (card.saved < tontine.contribution) {
+  const due = selfDue(tontine);
+  if (card.saved < due) {
     throw new InsufficientFundsError("L'épargne de la carte ne couvre pas la cotisation.");
   }
   context.set((state) => ({
-    cards: deductSaved(state.cards, cardId, tontine.contribution),
+    cards: deductSaved(state.cards, cardId, due),
     tontines: markSelfPaid(state.tontines, tontine.id),
   }));
 }
@@ -280,7 +276,10 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     startTontine: (id) => startTontine(context, id),
     contributeTontine: (id) => contributeTontine(context, id),
     confirmRound: (id) => confirmRound(context, id),
-    addMember: (id) => addMember(context, id),
+    inviteContact: (id, contact) => inviteContact(context, id, contact),
+    cancelInvitation: (id, invitationId) => cancelInvitation(context, id, invitationId),
+    acceptInvitation: (id, turns) => acceptInvitation(context, id, turns),
+    declineInvitation: (id) => declineInvitation(context, id),
     inviteMember: (id) => inviteMember(context, id),
     removeMember: (tontineId, memberId) => removeMember(context, tontineId, memberId),
     contributeCard: (id, payment) => contributeCard(context, id, payment),

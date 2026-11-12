@@ -38,8 +38,8 @@ function contributionNotification(tontine: Tontine): HomeNotification {
 function potNotification(tontine: Tontine): HomeNotification {
   return {
     id: `pot-${tontine.id}`,
-    title: "Cagnotte à retirer",
-    message: `Vous recevez la cagnotte de ${tontine.name} à la fin de ce tour.`,
+    title: "Restourne à recevoir",
+    message: `Vous recevez la restourne de ${tontine.name} à la fin de ce tour.`,
     time: `Tour ${tontine.round}`,
   };
 }

@@ -83,3 +83,23 @@ export function fieldChrome(state: FieldChromeState): ViewStyle {
 
   return plainChrome(FIELD_CHROME.border);
 }
+
+/** Opacité de l'anneau d'un élément mis en avant, en suffixe hexadécimal (50 %). */
+const ACCENT_RING_ALPHA = "80";
+
+/**
+ * Cercle un élément mis en avant de la couleur de l'écran, comme le focus
+ * des champs de shadcn/ui : bordure pleine et anneau à mi-opacité, dessiné
+ * hors de la bordure sans déplacer la mise en page.
+ * @param accent Couleur d'action de l'écran, `#RRGGBB`.
+ * @returns Le style de la bordure et de l'anneau.
+ */
+export function accentRing(accent: string): ViewStyle {
+  return {
+    borderColor: accent,
+    outlineColor: `${accent}${ACCENT_RING_ALPHA}`,
+    outlineOffset: RING_OFFSET,
+    outlineStyle: "solid",
+    outlineWidth: RING_WIDTH,
+  };
+}

@@ -3,6 +3,7 @@ import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { PaymentMethod } from "../../../shared/model/model.payment-method";
 import { MobilePaySheet } from "../../payments";
 import type { MobilePayRequest } from "../../payments";
+import { selfDue } from "../../../shared/member/model.tontine-turns";
 
 /** Props de la feuille de paiement d'une cotisation. */
 export interface TontinePaySheetProps {
@@ -25,9 +26,9 @@ function contributionRequest(item: Tontine): MobilePayRequest {
     rows: [
       { label: "Tontine", value: item.name },
       { label: "Tour", value: `${item.round} sur ${item.totalRounds}` },
-      { label: "Montant", value: `${formatAmount(item.contribution)} FCFA` },
+      { label: "Montant", value: `${formatAmount(selfDue(item))} FCFA` },
     ],
-    amount: item.contribution,
+    amount: selfDue(item),
     accent: item.headerColors[0],
   };
 }

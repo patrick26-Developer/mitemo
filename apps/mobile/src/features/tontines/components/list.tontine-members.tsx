@@ -1,70 +1,159 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
 
-import type { Tontine } from "../../../shared/member/model.portfolio";
-import {
-  isTontineAdmin,
-  paidMemberCount,
-  SELF_MEMBER_ID,
-} from "../../../shared/member/model.portfolio";
+import { ConfirmSheet } from "../../../shared/components/macros/sheet.confirm";
+import type { Tontine, TontineMember } from "../../../shared/member/model.portfolio";
+import { paidMemberCount } from "../../../shared/member/model.portfolio";
+import { takenTurns } from "../../../shared/member/model.tontine-turns";
+import { previewTurns } from "../model/model.member-turns";
+import { canCancelInvitation, removalContent } from "../model/model.member-management";
+import { InvitedMemberRow } from "./row.member-invited";
+import { MemberTimelineItem } from "./item.member-timeline";
+import { SeeAllMembersButton } from "./button.see-all-members";
 import { TontineMemberSheet } from "./sheet.tontine-member";
-import { TontineMemberRow } from "./row.tontine-member";
+
+/** Nombre de lignes montrées dans le détail, avant « Voir tous les membres ». */
+const PREVIEW_SIZE = 5;
 
 /** Props de la liste des membres d'une tontine. */
 export interface TontineMemberListProps {
   readonly item: Tontine;
   readonly onRemove: (memberId: string) => void;
+  /** Annule une invitation envoyée ; l'administrateur seul la reçoit. */
+  readonly onCancelInvitation?: (invitationId: string) => void;
 }
 
 /**
- * Affiche les membres de la tontine, met en avant celui dont c'est le tour et
- * ouvre son historique de cotisation au clic. Un administrateur peut retirer
- * les autres membres ; un simple membre voit la même liste sans gestion.
- * @param props Tontine affichée et action de retrait.
- * @returns La liste des membres et la feuille d'historique.
+ * Affiche un aperçu des membres dans l'ordre de passage, centré sur le tour en
+ * cours, puis les invitations envoyées, grisées. Une tontine de 1 000 membres
+ * n'est jamais déroulée ici : « Voir tous les membres » ouvre la liste
+ * complète, avec recherche et filtres. Ouvre l'historique de cotisation d'un
+ * membre au clic, et laisse l'administrateur retirer un membre avant le
+ * départ, après confirmation.
+ * @param props Tontine affichée, retrait d'un membre et annulation d'une invitation.
+ * @returns L'aperçu, la feuille d'historique et la confirmation de retrait.
  */
 export function TontineMemberList(props: TontineMemberListProps) {
-  const { item, onRemove } = props;
-  const admin = isTontineAdmin(item);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = item.members.find((member) => member.id === selectedId) ?? null;
+  const { item, onRemove, onCancelInvitation } = props;
+  const [selected, setSelected] = useState<TontineMember | null>(null);
+  const [removing, setRemoving] = useState<TontineMember | null>(null);
 
   return (
     <View className="gap-2">
-      <View className="flex-row items-center justify-between pb-1">
-        <Text accessibilityRole="header" className="text-[16px] font-medium text-ink">
-          Membres
-        </Text>
-        <Text className="text-[13px] text-muted">{membersCount(item)}</Text>
-      </View>
-      {item.members.map((member) => (
-        <TontineMemberRow
-          key={member.id}
-          member={member}
-          canRemove={admin && member.id !== SELF_MEMBER_ID && item.state === "PENDING"}
-          onRemove={() => onRemove(member.id)}
-          focused={item.state === "ACTIVE" && member.id === item.beneficiaryId}
-          onPress={() => setSelectedId(member.id)}
-        />
-      ))}
+      <MembersHeader item={item} />
+      <MembersPreview
+        item={item}
+        onSelect={setSelected}
+        onAskRemove={setRemoving}
+        {...(onCancelInvitation === undefined ? {} : { onCancelInvitation })}
+      />
       <TontineMemberSheet
         visible={selected !== null}
         item={item}
         member={selected}
-        onClose={() => setSelectedId(null)}
+        onClose={() => setSelected(null)}
+      />
+      <ConfirmSheet
+        content={removalContent(item, removing)}
+        visible={removing !== null}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => {
+          if (removing !== null) onRemove(removing.id);
+          setRemoving(null);
+        }}
       />
     </View>
   );
 }
 
+/** Props de l'aperçu des membres. */
+interface MembersPreviewProps {
+  readonly item: Tontine;
+  readonly onSelect: (member: TontineMember) => void;
+  readonly onAskRemove: (member: TontineMember) => void;
+  readonly onCancelInvitation?: (invitationId: string) => void;
+}
+
 /**
- * Compte affiché à droite du titre : inscrits avant le départ, cotisations
- * reçues pendant le cycle.
+ * Pose la frise des rangs, les invitations qui tiennent encore dans l'aperçu
+ * et le lien vers la liste complète quand tout n'y tient pas.
+ * @param props Tontine, ouverture de l'historique, retrait et annulation.
+ * @returns L'aperçu des membres.
+ */
+function MembersPreview(props: MembersPreviewProps) {
+  const { item, onSelect, onAskRemove, onCancelInvitation } = props;
+  const entries = previewTurns(item, PREVIEW_SIZE);
+  const invitations = item.invitations.slice(0, Math.max(PREVIEW_SIZE - entries.length, 0));
+  const total = item.members.length + item.invitations.length;
+  const hidden = takenTurns(item) + item.invitations.length > entries.length + invitations.length;
+  const cancellable = onCancelInvitation !== undefined && canCancelInvitation(item);
+
+  return (
+    <View className="gap-2">
+      <View>
+        {entries.map((entry) => (
+          <MemberTimelineItem
+            key={entry.turn}
+            item={item}
+            entry={entry}
+            onSelect={onSelect}
+            onAskRemove={onAskRemove}
+          />
+        ))}
+      </View>
+      {invitations.map((invitation) => (
+        <InvitedMemberRow
+          key={invitation.id}
+          invitation={invitation}
+          {...(cancellable ? { onCancel: () => onCancelInvitation(invitation.id) } : {})}
+        />
+      ))}
+      {hidden ? <SeeAllMembersButton tontineId={item.id} count={total} /> : null}
+    </View>
+  );
+}
+
+/** Props de l'en-tête de la liste. */
+interface MembersHeaderProps {
+  readonly item: Tontine;
+}
+
+/**
+ * Titre de la liste et compte des inscrits ou des cotisations reçues.
+ * @param props Tontine affichée.
+ * @returns L'en-tête de la liste.
+ */
+function MembersHeader(props: MembersHeaderProps) {
+  return (
+    <View className="flex-row items-center justify-between pb-1">
+      <Text accessibilityRole="header" className="text-[16px] font-medium text-ink">
+        Membres
+      </Text>
+      <Text className="text-[13px] text-muted">{membersCount(props.item)}</Text>
+    </View>
+  );
+}
+
+/**
+ * Compte affiché à droite du titre : inscrits et invités avant le départ (les
+ * tours pris sont dans le récapitulatif), cotisations reçues pendant le cycle.
  * @param item Tontine affichée.
- * @returns Le compte, par exemple « 2 sur 5 ont cotisé ».
+ * @returns Le compte, par exemple « 3 inscrits · 2 invités » ou « 2 sur 5 ont cotisé ».
  */
 function membersCount(item: Tontine): string {
-  const total = item.members.length;
-  if (item.state === "PENDING") return `${total} sur ${item.totalRounds} inscrits`;
-  return `${paidMemberCount(item)} sur ${total} ont cotisé`;
+  if (item.state !== "PENDING")
+    return `${paidMemberCount(item)} sur ${item.members.length} ont cotisé`;
+  const joined = plural(item.members.length, "inscrit");
+  const invited = item.invitations.length;
+  return invited === 0 ? joined : `${joined} · ${plural(invited, "invité")}`;
+}
+
+/**
+ * Accorde un nom avec son nombre.
+ * @param count Nombre.
+ * @param noun Nom au singulier.
+ * @returns Par exemple « 1 invité » ou « 3 inscrits ».
+ */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count > 1 ? "s" : ""}`;
 }

@@ -6,6 +6,7 @@ import {
   InvalidAmountError,
   UnknownEntityError,
 } from "./model.portfolio-error";
+import { turnOrder } from "./model.tontine-turns";
 
 /**
  * Retrouve le membre connecté dans une tontine.
@@ -127,30 +128,13 @@ export function markSelfPaid(tontines: readonly Tontine[], id: string): readonly
 }
 
 /**
- * Désigne le bénéficiaire suivant dans l'ordre des membres.
+ * Désigne le bénéficiaire du tour suivant dans l'ordre de passage, où un
+ * membre qui a pris plusieurs tours revient autant de fois, à la suite.
  * @param tontine Tontine concernée.
  * @returns L'identifiant du bénéficiaire suivant.
  */
 function nextBeneficiaryId(tontine: Tontine): string {
-  const index = tontine.members.findIndex((member) => member.id === tontine.beneficiaryId);
-  return tontine.members[(index + 1) % tontine.members.length]?.id ?? SELF_MEMBER_ID;
-}
-
-/**
- * Ajoute un membre à une tontine préparée.
- * @param tontines Tontines du membre.
- * @param id Tontine concernée.
- * @param member Membre à inscrire.
- * @returns La liste avec le membre ajouté.
- */
-export function appendTontineMember(
-  tontines: readonly Tontine[],
-  id: string,
-  member: TontineMember,
-): readonly Tontine[] {
-  return tontines.map((tontine) =>
-    tontine.id === id ? { ...tontine, members: [...tontine.members, member] } : tontine,
-  );
+  return turnOrder(tontine)[tontine.round] ?? SELF_MEMBER_ID;
 }
 
 /**

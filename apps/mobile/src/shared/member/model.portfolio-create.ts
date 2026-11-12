@@ -1,19 +1,12 @@
-import type { SavingsCard, Tontine, TontineFrequency, TontineMember } from "./model.portfolio";
+import type {
+  PendingInvitation,
+  SavingsCard,
+  Tontine,
+  TontineFrequency,
+  TontineMember,
+} from "./model.portfolio";
 import { cardCreationFee } from "./model.card-fee";
 import { createId, SELF_MEMBER_ID } from "./model.portfolio";
-
-/** Noms proposés aux membres invités lors d'une création locale. */
-const MEMBER_NAME_POOL = [
-  "Mama Nadège",
-  "Jean-Baptiste Okemba",
-  "Clarisse Nzaba",
-  "Serge Makosso",
-  "Pauline Elenga",
-  "Alphonse Mabiala",
-  "Léonie Bantsimba",
-  "David Nkodia",
-  "Sylvie Tchicaya",
-] as const;
 
 /** Dégradés des nouvelles tontines, du centre vers le bord. */
 const TONTINE_TINTS: readonly (readonly [string, string])[] = [
@@ -55,18 +48,38 @@ export interface CreateCardInput {
   readonly description: string;
 }
 
+/** Contact du répertoire, titulaire d'un compte Mitemo, à inscrire dans une tontine. */
+export interface MemberContact {
+  readonly name: string;
+  /** Numéro au format international E.164. */
+  readonly phone: string;
+}
+
 /**
- * Construit le membre invité qui prend le rang donné.
- * @param index Rang de l'invité, à partir de 0.
- * @returns Le membre, cotisation du tour en cours non réglée.
+ * Prépare l'invitation d'un contact du répertoire : il ne devient membre
+ * qu'une fois qu'il l'a acceptée.
+ * @param contact Nom et numéro du contact.
+ * @param generate Source d'identifiant, injectée pour les tests.
+ * @returns L'invitation en attente de réponse.
  */
-export function buildInvitedMember(index: number): TontineMember {
+export function buildInvitation(
+  contact: MemberContact,
+  generate?: () => string,
+): PendingInvitation {
   return {
-    id: `member-${index + 1}`,
-    name: MEMBER_NAME_POOL[index] ?? `Membre ${index + 2}`,
-    role: "MEMBRE",
-    paidCurrentRound: false,
+    id: generate === undefined ? createId("invitation") : createId("invitation", generate),
+    name: contact.name,
+    phone: contact.phone,
   };
+}
+
+/**
+ * Construit l'adhésion du membre connecté qui accepte une invitation.
+ * @param turns Nombre de tours choisis, déjà validé.
+ * @returns Son adhésion de simple membre, cotisation du tour non réglée.
+ */
+export function buildJoiningSelf(turns: number): TontineMember {
+  return { id: SELF_MEMBER_ID, name: SELF_NAME, role: "MEMBRE", paidCurrentRound: false, turns };
 }
 
 /**
@@ -79,6 +92,7 @@ function buildSelfMember(): TontineMember {
     name: SELF_NAME,
     role: "ADMIN",
     paidCurrentRound: false,
+    turns: 1,
   };
 }
 
@@ -104,6 +118,7 @@ export function buildTontine(input: CreateTontineInput, index: number): Tontine 
     description: input.description,
     headerColors: TONTINE_TINTS[index % TONTINE_TINTS.length] ?? ["#2CCA86", "#62F79D"],
     invitationCode: null,
+    invitations: [],
   };
 }
 
