@@ -34,11 +34,7 @@ export function TontineDetailContent(props: TontineDetailContentProps) {
 
   return (
     <View className="flex-1">
-      <TontineDetailHeader
-        item={item}
-        onShare={actions.share}
-        onAddMember={() => setAddOpen(true)}
-      />
+      <TontineDetailHeader item={item} onAddMember={() => setAddOpen(true)} />
       <TontineDetailBody
         item={item}
         actions={actions}

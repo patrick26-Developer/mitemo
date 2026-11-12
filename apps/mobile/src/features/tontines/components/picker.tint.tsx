@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { TONTINE_TINT_LABELS, TONTINE_TINTS } from "../../../shared/member/model.tontine-settings";
 
@@ -11,7 +11,8 @@ export interface TintPickerProps {
 
 /**
  * Choix de la couleur d'une tontine : une pastille par dégradé, cerclée quand
- * elle est choisie.
+ * elle est choisie, sur une ligne qui défile à l'horizontale comme le choix
+ * d'un fond d'écran sur WhatsApp.
  * @param props Couleur choisie et changement.
  * @returns Les pastilles de couleur.
  */
@@ -21,7 +22,13 @@ export function TintPicker(props: TintPickerProps) {
   return (
     <View className="gap-1.5">
       <Text className="text-[12px] font-semibold uppercase text-muted">Couleur</Text>
-      <View accessibilityRole="radiogroup" className="flex-row gap-3">
+      <ScrollView
+        testID="tint-picker-scroll"
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        accessibilityRole="radiogroup"
+        contentContainerClassName="gap-3"
+      >
         {TONTINE_TINTS.map(([main], index) => (
           <Pressable
             key={main}
@@ -35,7 +42,7 @@ export function TintPicker(props: TintPickerProps) {
             <View className="h-8 w-8 rounded-full" style={{ backgroundColor: main }} />
           </Pressable>
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }

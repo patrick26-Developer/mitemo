@@ -118,12 +118,13 @@ describe("contributeCard", () => {
     expect(() => actions.contributeCard("c1", PAYMENT)).toThrow(ForbiddenOperationError);
   });
 
-  it("débite le solde quand le marqueur est payé depuis Mitemo", () => {
+  it("débite le solde du pointage et de sa part des frais quand il est payé depuis Mitemo", () => {
     const { actions, state } = makePortfolio(TEST_PORTFOLIO);
 
     actions.contributeCard("c1", { ...PAYMENT, method: "MITEMO" });
 
-    expect(state().available).toBe(15_000n);
+    expect(state().available).toBe(14_500n);
+    expect(state().cards[0]?.saved).toBe(25_000n);
     expect(state().cards[0]?.entries.at(-1)?.method).toBe("MITEMO");
   });
 
@@ -141,30 +142,40 @@ describe("withdrawCard", () => {
     const full = makeCard({ saved: 30_000n, state: "COMPLETED" });
     const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, cards: [full] });
 
-    actions.withdrawCard("c1");
+    actions.withdrawCard("c1", "MITEMO");
 
     expect(state().available).toBe(50_000n);
+    expect(state().cards[0]?.state).toBe("ARCHIVED");
+  });
+
+  it("envoie l'épargne vers l'opérateur choisi, sans passer par le solde", () => {
+    const full = makeCard({ saved: 30_000n, state: "COMPLETED" });
+    const { actions, state } = makePortfolio({ ...TEST_PORTFOLIO, cards: [full] });
+
+    actions.withdrawCard("c1", "AIRTEL_MONEY");
+
+    expect(state().available).toBe(TEST_PORTFOLIO.available);
     expect(state().cards[0]?.state).toBe("ARCHIVED");
   });
 
   it("refuse de retirer une carte dont l'objectif n'est pas atteint", () => {
     const { actions } = makePortfolio(TEST_PORTFOLIO);
 
-    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
+    expect(() => actions.withdrawCard("c1", "MITEMO")).toThrow(ForbiddenOperationError);
   });
 
   it("refuse de retirer deux fois une carte archivée", () => {
     const archived = makeCard({ saved: 30_000n, state: "ARCHIVED" });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [archived] });
 
-    expect(() => actions.withdrawCard("c1")).toThrow(ForbiddenOperationError);
+    expect(() => actions.withdrawCard("c1", "MITEMO")).toThrow(ForbiddenOperationError);
   });
 
   it("refuse le retrait d'une carte vide", () => {
     const empty = makeCard({ saved: 0n });
     const { actions } = makePortfolio({ ...TEST_PORTFOLIO, cards: [empty] });
 
-    expect(() => actions.withdrawCard("c1")).toThrow();
+    expect(() => actions.withdrawCard("c1", "MITEMO")).toThrow();
   });
 });
 

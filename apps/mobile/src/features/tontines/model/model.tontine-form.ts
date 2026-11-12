@@ -26,12 +26,7 @@ export const TONTINE_CADENCE_GROUPS = FREQUENCY_SELECT_GROUPS;
 export type TontineCadenceId = string;
 
 /** Titres des étapes de la création, dans l'ordre. */
-export const TONTINE_FORM_STEPS = [
-  "L'essentiel",
-  "La fréquence",
-  "Les participants",
-  "Le récapitulatif",
-] as const;
+export const TONTINE_FORM_STEPS = ["L'essentiel", "Le rythme", "Le récapitulatif"] as const;
 
 /** Champs saisis pour créer une tontine. */
 export interface TontineFormState {
@@ -105,7 +100,7 @@ const participantsSchema = z.object({
 });
 
 /** Schémas des étapes intermédiaires ; la dernière valide tout le formulaire. */
-const STEP_SCHEMAS = [essentialsSchema, cadenceSchema, participantsSchema] as const;
+const STEP_SCHEMAS = [essentialsSchema, cadenceSchema.extend(participantsSchema.shape)] as const;
 
 const tontineFormSchema = essentialsSchema
   .extend(cadenceSchema.shape)

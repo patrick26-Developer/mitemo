@@ -58,6 +58,21 @@ function phoneHint(digits: string): string {
 }
 
 /**
+ * Champs à entourer de rouge : tous les champs fautifs après « Continuer »,
+ * seulement le numéro pendant sa saisie, pour ne pas colorer des champs que
+ * le membre n'a pas encore remplis.
+ * @param state Saisie et erreur de l'envoi.
+ * @param message Message affiché, de l'envoi ou de la saisie du numéro.
+ * @returns Les champs signalés.
+ */
+function invalidFields(state: SignUpFormState, message: string): SignUpInvalidFields {
+  if (message === "") return NO_INVALID;
+  if (state.error === "") return { ...NO_INVALID, digits: true };
+
+  return signUpInvalidFields(state);
+}
+
+/**
  * Extrait l'identité nettoyée du formulaire.
  * @param state État courant du formulaire.
  * @returns Prénom, nom et profession sans espaces superflus.
@@ -124,7 +139,7 @@ export function useSignUpForm() {
     patch(error === "" ? { termsOpen: true } : { error });
   };
   const message = state.error !== "" ? state.error : phoneHint(state.digits);
-  const invalid = message === "" ? NO_INVALID : signUpInvalidFields(state);
+  const invalid = invalidFields(state, message);
   const terms = termsHandlers({ state, patch, startSignUp });
   const validPhone = isValidPhoneDigits(state.digits);
 

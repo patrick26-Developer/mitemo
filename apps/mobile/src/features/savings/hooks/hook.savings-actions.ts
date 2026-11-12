@@ -3,7 +3,8 @@ import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { nowIsoUtc } from "../../../shared/model/model.clock";
 import type { PaymentMethod } from "../../../shared/model/model.payment-method";
-import { paymentMethodLabel } from "../../../shared/model/model.payment-method";
+import { paymentMethodLabel, paymentMethodName } from "../../../shared/model/model.payment-method";
+import { formatAmount } from "../../../shared/format/format.amount";
 import { usePortfolioFeedback } from "../../../shared/hooks/hook.portfolio-feedback";
 import { todayUtc } from "../../../shared/model/model.clock";
 
@@ -11,8 +12,21 @@ import { todayUtc } from "../../../shared/model/model.clock";
 export interface SavingsActionsState {
   /** Pointe un marqueur, réglé par l'opérateur choisi. */
   readonly contribute: (method: PaymentMethod) => void;
-  readonly withdraw: () => void;
+  /** Retire l'épargne vers le moyen choisi : le solde Mitemo ou un opérateur. */
+  readonly withdraw: (method: PaymentMethod) => void;
   readonly transfer: () => void;
+}
+
+/**
+ * Message d'un retrait réussi, selon sa destination.
+ * @param card Carte retirée.
+ * @param method Destination de l'épargne.
+ * @returns Le message du toast.
+ */
+function withdrawMessage(card: SavingsCard, method: PaymentMethod): string {
+  if (method === "MITEMO") return "L'épargne a rejoint votre solde disponible.";
+
+  return `Retrait de ${formatAmount(card.saved)} FCFA vers ${paymentMethodName(method)} lancé.`;
 }
 
 /**
@@ -31,8 +45,8 @@ export function useSavingsActions(card: SavingsCard): SavingsActionsState {
         (store) => store.contributeCard(card.id, { at: nowIsoUtc(), method }),
         `Pointage réglé par ${paymentMethodLabel(method)}.`,
       ),
-    withdraw: () =>
-      act((store) => store.withdrawCard(card.id), "L'épargne a rejoint votre solde disponible."),
+    withdraw: (method) =>
+      act((store) => store.withdrawCard(card.id, method), withdrawMessage(card, method)),
     transfer: () =>
       act(
         (store) => store.transferCardToTontine(card.id, todayUtc()),

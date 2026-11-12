@@ -1,6 +1,7 @@
 import { CircleCheck, Coins, Hourglass, UserRound } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { ProgressBar } from "../../../shared/components/atoms/bar.progress";
 import { FactPillIcon } from "../../../shared/components/atoms/icon.fact-pill";
@@ -30,6 +31,12 @@ export interface TontineRecapCardProps {
 }
 
 /**
+ * Transition de la teinte : quand l'administrateur change la couleur de la
+ * tontine, la carte passe en douceur à la nouvelle, sans toast.
+ */
+const TINT_TRANSITION = { transitionProperty: "backgroundColor", transitionDuration: 300 } as const;
+
+/**
  * Réunit sur une seule carte, comme celle d'une carte de pointage, tout ce
  * qu'il faut savoir d'une tontine : cotisation, plan, avancement, cagnotte,
  * bénéficiaire, cotisations reçues et tours restants.
@@ -40,10 +47,10 @@ export function TontineRecapCard(props: TontineRecapCardProps) {
   const { item } = props;
 
   return (
-    <View
+    <Animated.View
       testID="tontine-recap-card"
       className="gap-4 overflow-hidden rounded-[20px] p-5"
-      style={{ backgroundColor: item.headerColors[1] }}
+      style={{ backgroundColor: item.headerColors[1], ...TINT_TRANSITION }}
     >
       <NoisePattern />
       <View className="gap-1">
@@ -63,7 +70,7 @@ export function TontineRecapCard(props: TontineRecapCardProps) {
           ),
         }))}
       />
-    </View>
+    </Animated.View>
   );
 }
 

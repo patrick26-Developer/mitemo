@@ -1,4 +1,5 @@
-import { formatAmount } from "../../../shared/format/format.amount";
+import { contributionFee } from "../../../shared/member/model.contribution-fee";
+import { feeRows } from "../../../shared/model/model.fee-rows";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { PaymentMethod } from "../../../shared/model/model.payment-method";
 import { MobilePaySheet } from "../../payments";
@@ -16,21 +17,24 @@ export interface TontinePaySheetProps {
 }
 
 /**
- * Décrit la cotisation du tour à payer : le tour en cours, ou le tour
- * suivant quand le membre cotise d'avance.
+ * Décrit la cotisation du tour à payer, le tour en cours ou le suivant quand
+ * le membre cotise d'avance, avec sa part des frais Mitemo.
  * @param item Tontine concernée.
  * @returns La demande de paiement de la cotisation.
  */
 function contributionRequest(item: Tontine): MobilePayRequest {
+  const due = selfDue(item);
+  const { rows, total } = feeRows("Cotisation", due, contributionFee(due));
+
   return {
     title: "Cotiser",
     recapTitle: "Cotisation",
     rows: [
       { label: "Tontine", value: item.name },
       { label: "Tour", value: `${payingRound(item)} sur ${item.totalRounds}` },
-      { label: "Montant", value: `${formatAmount(selfDue(item))} FCFA` },
+      ...rows,
     ],
-    amount: selfDue(item),
+    amount: total,
     accent: item.headerColors[0],
   };
 }

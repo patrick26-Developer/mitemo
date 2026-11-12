@@ -1,4 +1,3 @@
-import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -24,7 +23,12 @@ import {
   savingsInvalidFields,
   savingsRecap,
 } from "../model/model.savings-form";
-import { TontinePicker } from "./section.tontine-picker";
+import {
+  NO_TONTINE,
+  linkedTontineName,
+  tontineIdOf,
+  tontineLinkGroups,
+} from "../model/model.tontine-link";
 
 /** Props de la feuille de création d'une carte de pointage. */
 export interface SavingsCreateSheetProps {
@@ -45,9 +49,7 @@ interface SavingsCreateFieldsProps {
  * @param props Saisie courante et mise à jour des champs.
  * @returns Les champs du projet.
  */
-function SavingsProjectStep(
-  props: Pick<SavingsCreateFieldsProps, "form" | "invalid" | "onChange">,
-) {
+function SavingsProjectStep(props: SavingsCreateFieldsProps) {
   const { form, invalid, onChange } = props;
 
   return (
@@ -83,10 +85,12 @@ function SavingsProjectStep(
 /**
  * Construit les lignes du récapitulatif d'une carte en cours de saisie.
  * @param recap Valeurs calculées à partir du formulaire.
+ * @param tontine Nom de la tontine rattachée, `null` sans tontine.
  * @returns Les lignes affichables, dans l'ordre choisi.
  */
-function recapRows(recap: SavingsRecap): readonly SheetRecapRow[] {
+function recapRows(recap: SavingsRecap, tontine: string | null): readonly SheetRecapRow[] {
   const rows = [
+    tontine === null ? null : { label: "Tontine rattachée", value: tontine },
     recap.goal === null ? null : { label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
     recap.fee === null
       ? null
@@ -101,8 +105,8 @@ function recapRows(recap: SavingsRecap): readonly SheetRecapRow[] {
 }
 
 /**
- * Deuxième étape : le rythme des pointages, l'échéance au calendrier, la
- * tontine rattachée et le récapitulatif.
+ * Deuxième étape : le rythme des pointages, l'échéance au calendrier et la
+ * tontine rattachée, choisie dans une liste.
  * @param props Saisie courante, tontines disponibles et mise à jour des champs.
  * @returns Les champs du rythme.
  */
@@ -126,14 +130,48 @@ function SavingsRhythmStep(props: SavingsCreateFieldsProps) {
         hint="Dernier jour pour atteindre l'objectif."
         invalid={invalid.deadline}
       />
-      <TontinePicker
-        tontines={tontines}
-        selected={form.tontineId}
-        onSelect={(tontineId) => onChange({ tontineId })}
+      <SheetSelect
+        label="Tontine rattachée"
+        groups={tontineLinkGroups(tontines)}
+        value={form.tontineId ?? NO_TONTINE}
+        onChange={(value) => onChange({ tontineId: tontineIdOf(value) })}
+        hint="La carte peut régler les cotisations de cette tontine."
       />
-      <SheetRecap title="Récapitulatif" rows={recapRows(savingsRecap(form, new Date()))} />
     </>
   );
+}
+
+/**
+ * Dernière étape, pour valider seulement : tout ce qu'il faut savoir de la
+ * carte avant de la créer.
+ * @param props Saisie courante et tontines du membre.
+ * @returns Le récapitulatif de la carte.
+ */
+function SavingsRecapStep(props: SavingsCreateFieldsProps) {
+  const { form, tontines } = props;
+  const tontine = linkedTontineName(tontines, form.tontineId);
+
+  return <SheetRecap rows={recapRows(savingsRecap(form, new Date()), tontine)} />;
+}
+
+/** Contenu de chaque étape, dans l'ordre de SAVINGS_FORM_STEPS. */
+const STEP_CONTENTS = [SavingsProjectStep, SavingsRhythmStep, SavingsRecapStep];
+
+/** Props de l'étape affichée. */
+interface SavingsStepProps {
+  readonly index: number;
+  readonly fields: SavingsCreateFieldsProps;
+}
+
+/**
+ * Affiche le contenu de l'étape courante.
+ * @param props Rang de l'étape et champs de la carte.
+ * @returns Les champs ou le récapitulatif de l'étape.
+ */
+function SavingsStep(props: SavingsStepProps) {
+  const Content = STEP_CONTENTS[props.index] ?? SavingsProjectStep;
+
+  return <Content {...props.fields} />;
 }
 
 /**
@@ -158,6 +196,11 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
       visible={props.visible}
       title="Nouvelle carte"
       onClose={close}
+      steps={{
+        index: steps.index,
+        total: steps.total,
+        title: SAVINGS_FORM_STEPS[steps.index] ?? "",
+      }}
       footer={
         <SheetStepsFooter
           isFirst={steps.isFirst}
@@ -168,16 +211,7 @@ export function SavingsCreateSheet(props: SavingsCreateSheetProps) {
         />
       }
     >
-      <StepIndicator
-        index={steps.index}
-        total={steps.total}
-        title={SAVINGS_FORM_STEPS[steps.index] ?? ""}
-      />
-      {steps.isFirst ? (
-        <SavingsProjectStep form={form} invalid={invalid} onChange={update} />
-      ) : (
-        <SavingsRhythmStep form={form} invalid={invalid} tontines={tontines} onChange={update} />
-      )}
+      <SavingsStep index={steps.index} fields={{ form, invalid, tontines, onChange: update }} />
     </BottomSheet>
   );
 }

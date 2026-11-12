@@ -11,6 +11,30 @@ describe("PhoneField", () => {
     expect(screen.getByDisplayValue("06 570 66 22")).toBeOnTheScreen();
   });
 
+  it("n'affiche pas d'icône de téléphone, l'indicatif suffit", async () => {
+    await render(<PhoneField digits="" onChange={jest.fn()} />);
+
+    expect(screen.queryByTestId("auth-icon-phone")).toBeNull();
+  });
+
+  it("retire l'indicatif +242 que le membre tape lui-même", async () => {
+    const onChange = jest.fn();
+    await render(<PhoneField digits="" onChange={onChange} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "+242 06 570 66 22");
+
+    expect(onChange).toHaveBeenCalledWith("065706622");
+  });
+
+  it("laisse effacer un espace, en effaçant le chiffre qui le précède", async () => {
+    const onChange = jest.fn();
+    await render(<PhoneField digits="065706622" onChange={onChange} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "06 570 6622");
+
+    expect(onChange).toHaveBeenCalledWith("06570622");
+  });
+
   it("ne transmet que les neuf premiers chiffres", async () => {
     const onChange = jest.fn();
     await render(<PhoneField digits="" onChange={onChange} />);

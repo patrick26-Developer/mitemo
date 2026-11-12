@@ -4,11 +4,13 @@ import {
   allMembersPaid,
   cardCapabilities,
   hasReachedQuota,
+  markersDone,
   SELF_MEMBER_ID,
   tontinePot,
 } from "./model.portfolio";
 import type { CreateCardInput, CreateTontineInput, MemberContact } from "./model.portfolio-create";
 import { buildCard, buildTontine } from "./model.portfolio-create";
+import { markerFee } from "./model.contribution-fee";
 import {
   ForbiddenOperationError,
   InsufficientFundsError,
@@ -41,6 +43,7 @@ import { adminActions } from "./model.portfolio-admin";
 import { walletActions } from "./model.portfolio-wallet";
 import { canPayAhead, markSelfPaidAhead } from "./model.tontine-prepay";
 import { transferAndRenew } from "./model.card-renewal";
+import type { PaymentMethod } from "../model/model.payment-method";
 
 /** Mise à jour partielle de l'état du portefeuille. */
 export type PortfolioUpdate =
@@ -63,7 +66,8 @@ export interface PortfolioState {
   /** Invitations reçues par le membre connecté, en attente de sa réponse. */
   readonly invitations: readonly ReceivedInvitation[];
   createTontine: (input: CreateTontineInput) => Tontine;
-  createCard: (input: CreateCardInput) => void;
+  /** Crée une carte de pointage et la renvoie, pour ouvrir sa page. */
+  createCard: (input: CreateCardInput) => SavingsCard;
   startTontine: (tontineId: string) => void;
   contributeTontine: (tontineId: string) => void;
   confirmRound: (tontineId: string) => void;
@@ -79,7 +83,8 @@ export interface PortfolioState {
   updateTontineSettings: (tontineId: string, settings: TontineSettings) => void;
   /** Pointe un marqueur, payé par l'opérateur choisi. */
   contributeCard: (cardId: string, payment: CardPayment) => void;
-  withdrawCard: (cardId: string) => void;
+  /** Retire l'épargne d'une carte remplie vers le moyen choisi. */
+  withdrawCard: (cardId: string, method: PaymentMethod) => void;
   /** Retire une partie du solde disponible vers l'opérateur mobile du membre. */
   withdrawAvailable: (amount: bigint) => void;
   /** Verse la carte à sa tontine et la fait repartir sur une copie neuve, datée de `today` (UTC). */
@@ -104,10 +109,12 @@ function createTontine(context: PortfolioContext, input: CreateTontineInput): To
  * Crée une carte de pointage et l'ajoute en tête de liste.
  * @param context Accès au store.
  * @param input Paramètres saisis.
+ * @returns La carte créée.
  */
-function createCard(context: PortfolioContext, input: CreateCardInput): void {
+function createCard(context: PortfolioContext, input: CreateCardInput): SavingsCard {
   const card = buildCard(input);
   context.set((state) => ({ cards: prependCard(state.cards, card) }));
+  return card;
 }
 
 /**
@@ -171,18 +178,21 @@ function confirmRound(context: PortfolioContext, tontineId: string): void {
 
 /**
  * Ajoute un marqueur d'épargne à une carte et l'inscrit dans son historique.
+ * Payé depuis Mitemo, le solde est débité du marqueur et de sa part des frais
+ * de la carte ; seul le marqueur rejoint l'épargne.
  * @param context Accès au store.
  * @param cardId Carte concernée.
  * @param payment Instant du pointage et opérateur qui l'a réglé.
  * @throws {ForbiddenOperationError} si la carte est clôturée.
- * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur.
+ * @throws {InsufficientFundsError} si, payé depuis Mitemo, le solde ne couvre pas le marqueur et ses frais.
  */
 function contributeCard(context: PortfolioContext, cardId: string, payment: CardPayment): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.state !== "ACTIVE") {
     throw new ForbiddenOperationError("Cette carte est clôturée.");
   }
-  const debit = payment.method === "MITEMO" ? card.markerAmount : 0n;
+  const charged = card.markerAmount + markerFee(card, markersDone(card));
+  const debit = payment.method === "MITEMO" ? charged : 0n;
   requireFunds(context.get().available, debit);
   context.set((state) => ({
     available: state.available - debit,
@@ -191,21 +201,24 @@ function contributeCard(context: PortfolioContext, cardId: string, payment: Card
 }
 
 /**
- * Verse l'épargne d'une carte remplie sur le solde disponible et archive la
- * carte : une carte archivée est terminée et retirée.
+ * Retire l'épargne d'une carte remplie et archive la carte : vers le solde
+ * disponible avec Mitemo, hors de l'application avec un opérateur mobile.
+ * Une carte archivée est terminée et retirée.
  * @param context Accès au store.
  * @param cardId Carte concernée.
+ * @param method Destination de l'épargne.
  * @throws {InvalidAmountError} si la carte n'a aucune épargne.
  * @throws {ForbiddenOperationError} si l'objectif n'est pas atteint ou la carte déjà archivée.
  */
-function withdrawCard(context: PortfolioContext, cardId: string): void {
+function withdrawCard(context: PortfolioContext, cardId: string, method: PaymentMethod): void {
   const card = requireCard(context.get().cards, cardId);
   if (card.saved <= 0n) throw new InvalidAmountError("Cette carte n'a rien à retirer.");
   if (!cardCapabilities(card).canWithdraw) {
     throw new ForbiddenOperationError("Le retrait n'est possible qu'une fois l'objectif atteint.");
   }
+  const toBalance = method === "MITEMO" ? card.saved : 0n;
   context.set((state) => ({
-    available: state.available + card.saved,
+    available: state.available + toBalance,
     cards: clearSaved(state.cards, cardId),
   }));
 }
@@ -256,7 +269,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...adminActions(context),
     ...walletActions(context),
     contributeCard: (id, payment) => contributeCard(context, id, payment),
-    withdrawCard: (id) => withdrawCard(context, id),
+    withdrawCard: (id, method) => withdrawCard(context, id, method),
     transferCardToTontine: (id, today) => transferCardToTontine(context, id, today),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),
   };

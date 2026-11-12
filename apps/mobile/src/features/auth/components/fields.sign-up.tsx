@@ -43,7 +43,6 @@ export function SignUpFields(props: SignUpFieldsProps) {
       <PhoneField
         digits={form.digits}
         onChange={(value) => form.update("digits", value)}
-        iconDelay={AUTH_ICON_DELAY + AUTH_ICON_STEP * 3}
         invalid={form.invalid.digits}
       />
     </>

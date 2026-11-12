@@ -29,8 +29,7 @@ export function useTontineSettings(item: Tontine, onClose: () => void): TontineS
     const parsed = parseTontineSettings(form);
     if (!parsed.ok) return show("error", parsed.message);
     const store = usePortfolioStore.getState();
-    if (run(() => store.updateTontineSettings(item.id, parsed.value), "Tontine modifiée."))
-      onClose();
+    if (run(() => store.updateTontineSettings(item.id, parsed.value), null)) onClose();
   };
 
   return { form, change: (patch) => setForm((current) => ({ ...current, ...patch })), save };

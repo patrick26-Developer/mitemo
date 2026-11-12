@@ -38,6 +38,27 @@ describe("WithdrawSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("n'a aucun bouton Retour au code PIN", async () => {
+    await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
+
+    await fireEvent.changeText(screen.getByLabelText("Montant (FCFA)"), "5000");
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer vers MTN MoMo" }));
+
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
+    expect(usePortfolioStore.getState().available).toBe(20_000n);
+  });
+
+  it("remplit « Retirer vers MTN MoMo » et laisse Airtel Money en contour", async () => {
+    await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
+
+    const filled = screen.getAllByTestId("sheet-primary-fill");
+    expect(filled).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Retirer vers MTN MoMo" })).toContainElement(
+      filled[0] ?? null,
+    );
+    expect(screen.getByRole("button", { name: "Retirer vers Airtel Money" })).toBeOnTheScreen();
+  });
+
   it("refuse un montant supérieur au solde sans demander le code", async () => {
     await renderWithSafeArea(<WithdrawSheet visible onClose={jest.fn()} />);
 

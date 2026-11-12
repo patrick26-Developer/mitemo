@@ -22,4 +22,13 @@ describe("TontineRecapCard", () => {
     expect(screen.getByTestId("tontine-recap-card")).toHaveStyle({ backgroundColor: "#62F79D" });
     expect(screen.getByTestId("noise-pattern")).toBeOnTheScreen();
   });
+
+  it("passe en douceur à la nouvelle teinte quand la couleur de la tontine change", async () => {
+    await render(<TontineRecapCard item={makeTontine()} />);
+
+    expect(screen.getByTestId("tontine-recap-card")).toHaveStyle({
+      transitionProperty: "backgroundColor",
+      transitionDuration: 300,
+    });
+  });
 });

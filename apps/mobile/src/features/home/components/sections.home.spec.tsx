@@ -55,7 +55,7 @@ describe("HomeSections", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Créer" }));
     await fireEvent.press(screen.getByRole("button", { name: /^Une tontine/ }));
 
-    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 4/ })).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 3/ })).toBeOnTheScreen();
   });
 
   it("ouvre la création d'une carte de pointage depuis le même choix", async () => {
@@ -65,6 +65,6 @@ describe("HomeSections", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Créer" }));
     await fireEvent.press(screen.getByRole("button", { name: /^Une carte de pointage/ }));
 
-    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 2/ })).toBeOnTheScreen();
+    expect(screen.getByRole("progressbar", { name: /Étape 1 sur 3/ })).toBeOnTheScreen();
   });
 });

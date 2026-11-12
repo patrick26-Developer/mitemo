@@ -86,16 +86,16 @@ describe("MobilePaySheet", () => {
     expect(onPay).toHaveBeenCalledWith("MITEMO");
   });
 
-  it("revient au choix du moyen sans payer", async () => {
+  it("n'a aucun bouton Retour au code PIN : la croix seule ferme la feuille", async () => {
     const onPay = jest.fn();
     await renderWithSafeArea(
       <MobilePaySheet visible request={REQUEST} onClose={jest.fn()} onPay={onPay} />,
     );
 
     await fireEvent.press(screen.getByRole("button", { name: "Payer avec Mitemo" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Retour" }));
 
-    expect(screen.getByRole("button", { name: "Payer avec Mitemo" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Fermer" })).toBeOnTheScreen();
     expect(onPay).not.toHaveBeenCalled();
   });
 

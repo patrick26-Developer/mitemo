@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+
 import type { StepForm } from "../../../shared/hooks/hook.step-form";
 import { useStepForm } from "../../../shared/hooks/hook.step-form";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -23,7 +25,7 @@ export function useSavingsCreate(onDone: () => void): StepForm<SavingsFormState>
     total: SAVINGS_FORM_STEPS.length,
     validateStep: (form, step) => savingsStepError(form, step, new Date()),
     parse: (form) => parseSavingsForm(form, new Date()),
-    onCreate: createCard,
+    onCreate: (input) => router.push(`/savings-detail/${createCard(input).id}`),
     onDone,
   });
 }

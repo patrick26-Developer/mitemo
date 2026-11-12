@@ -51,10 +51,12 @@ describe("SignInScreen", () => {
     });
   });
 
-  it("dessine l'icône filaire du téléphone", async () => {
+  it("montre l'indicatif et le format attendu, sans icône de téléphone", async () => {
     await renderWithSafeArea(<SignInScreen />);
 
-    expect(screen.getByTestId("auth-icon-phone")).toBeOnTheScreen();
+    expect(screen.queryByTestId("auth-icon-phone")).toBeNull();
+    expect(screen.getByText("+242")).toBeOnTheScreen();
+    expect(screen.getByPlaceholderText("0X XXX XX XX")).toBeOnTheScreen();
   });
 
   it("formate le numéro pendant la saisie", async () => {

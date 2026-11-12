@@ -22,6 +22,16 @@ describe("TontinePaySheet", () => {
     expect(screen.getByRole("button", { name: "Payer avec Mitemo" })).toBeOnTheScreen();
   });
 
+  it("ajoute à la cotisation sa part des frais Mitemo, 10 % du tour partagés entre les membres", async () => {
+    await renderWithSafeArea(
+      <TontinePaySheet visible item={TONTINE} onClose={jest.fn()} onPay={jest.fn()} />,
+    );
+
+    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
+    expect(screen.getByText("500 FCFA")).toBeOnTheScreen();
+    expect(screen.getByText("5 500 FCFA")).toBeOnTheScreen();
+  });
+
   it("règle la cotisation par MTN MoMo une fois validée sur le téléphone", async () => {
     const onPay = jest.fn();
     await renderWithSafeArea(
