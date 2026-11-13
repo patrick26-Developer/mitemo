@@ -1,3 +1,4 @@
+import type { SheetIcon } from "../atoms/badge.sheet-icon";
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import type { SheetButtonTone } from "../atoms/button.sheet-primary";
 import { SheetText } from "../atoms/text.sheet";
@@ -10,6 +11,8 @@ export interface ConfirmSheetContent {
   readonly confirmLabel: string;
   /** Teinte de l'action, bleu de marque par défaut. */
   readonly tone?: SheetButtonTone;
+  /** Icône posée au-dessus du titre. */
+  readonly icon?: SheetIcon;
 }
 
 /** Props d'une feuille de confirmation. */
@@ -30,7 +33,12 @@ export function ConfirmSheet(props: ConfirmSheetProps) {
   const { content, visible, onClose, onConfirm } = props;
 
   return (
-    <BottomSheet visible={visible} title={content.title} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      title={content.title}
+      onClose={onClose}
+      {...(content.icon === undefined ? {} : { icon: content.icon })}
+    >
       <SheetText>{content.message}</SheetText>
       <SheetPrimaryButton
         label={content.confirmLabel}

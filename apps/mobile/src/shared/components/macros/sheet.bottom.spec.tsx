@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
+import { HeartCrack } from "lucide-react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Dimensions, Platform, Text } from "react-native";
 
@@ -62,6 +63,24 @@ describe("BottomSheet", () => {
     expect(
       screen.getByTestId("grid-background", { includeHiddenElements: true }),
     ).toBeOnTheScreen();
+  });
+
+  it("pose l'icône au-dessus du titre, centré dessous", async () => {
+    await renderWithSafeArea(
+      <BottomSheet
+        visible
+        title="Vous partez déjà ?"
+        icon={{ icon: HeartCrack, tone: "danger" }}
+        onClose={jest.fn()}
+      >
+        <Text>Contenu</Text>
+      </BottomSheet>,
+    );
+
+    const header = screen.getByTestId("bottom-sheet-header");
+    expect(header).toContainElement(screen.getByTestId("sheet-icon"));
+    expect(header).toContainElement(screen.getByRole("header", { name: "Vous partez déjà ?" }));
+    expect(screen.getByRole("button", { name: "Fermer" })).toBeOnTheScreen();
   });
 
   it("signale aussi la coupure du réseau par-dessus la feuille", async () => {

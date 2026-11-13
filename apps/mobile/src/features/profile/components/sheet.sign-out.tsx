@@ -34,6 +34,7 @@ export function SignOutSheet(props: SignOutSheetProps) {
     <BottomSheet
       visible={visible}
       title="Vous partez déjà ?"
+      icon={{ icon: HeartCrack, tone: "danger" }}
       onClose={onClose}
       footer={
         <SheetActionRow
@@ -48,17 +49,14 @@ export function SignOutSheet(props: SignOutSheetProps) {
 }
 
 /**
- * Cœur brisé, bien aéré, puis les excuses adressées au membre par son prénom.
+ * Excuses adressées au membre par son prénom, sous le cœur brisé et le titre.
  * @returns Le message de la feuille.
  */
 function SignOutMessageView() {
   const { firstName, reasons } = signOutMessage(useMemberStore((state) => state.name));
 
   return (
-    <View className="items-center gap-5 py-4">
-      <View className="h-16 w-16 items-center justify-center rounded-full bg-[#FDECEA]">
-        <HeartCrack size={30} color={PALETTE.danger} strokeWidth={2} />
-      </View>
+    <View className="pb-2">
       <Text className="text-center text-[14px] leading-5 text-muted">
         Nous sommes désolés de vous voir partir
         {firstName === "" ? null : (

@@ -1,17 +1,7 @@
-import { X } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import type { GestureResponderHandlers, ScrollViewInstance } from "react-native";
+import { Animated, Modal, Platform, ScrollView, useWindowDimensions, View } from "react-native";
+import type { ScrollViewInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useFocusedFieldReveal } from "../../hooks/hook.focused-field-reveal";
@@ -21,14 +11,15 @@ import { useSheetDrag } from "../../hooks/hook.sheet-drag";
 import type { SheetLayout } from "../../model/model.sheet-layout";
 import { computeSheetLayout, sheetContentPaddingBottom } from "../../model/model.sheet-layout";
 import { FOCUS_RING_SCROLL } from "../../theme/theme.field";
-import { PALETTE } from "../../theme/theme.palette";
 import { SHADOWS } from "../../theme/theme.shadow";
-import { SHEET_HANDLE_SHAPE, computeSheetCardStyle } from "../../theme/theme.sheet-card";
+import { computeSheetCardStyle } from "../../theme/theme.sheet-card";
 import { SHEET_OPEN_OFFSET, closeSheet, openSheet } from "../../model/model.sheet-animation";
 import { SheetBackdrop } from "../atoms/backdrop.sheet";
+import type { SheetIcon } from "../atoms/badge.sheet-icon";
 import type { StepIndicatorProps } from "../atoms/indicator.step";
-import { StepIndicator } from "../atoms/indicator.step";
 import { ConnectionHost } from "./host.connection";
+import type { SheetHeaderContent } from "./header.sheet";
+import { SheetHeader } from "./header.sheet";
 import { ToastHost } from "./host.toast";
 
 /** Props d'une feuille modale ancrée en bas de l'écran. */
@@ -47,6 +38,8 @@ export interface BottomSheetProps {
    * feuille se ferme alors en la glissant vers le bas ou en touchant le fond.
    */
   readonly steps?: StepIndicatorProps;
+  /** Icône posée au-dessus du titre, qui se centre alors dessous. */
+  readonly icon?: SheetIcon;
 }
 
 /**
@@ -115,7 +108,7 @@ function useSheetPresence(requested: boolean) {
  * @returns La feuille modale.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { title, onClose, children, footer, steps } = props;
+  const { title, onClose, children, footer, steps, icon } = props;
   const { keyboardHeight, layout } = useSheetLayout();
   const { translateY, visible, onDismiss } = useSheetPresence(props.visible);
   const close = useStableClose(translateY, onClose);
@@ -134,7 +127,7 @@ export function BottomSheet(props: BottomSheetProps) {
         <SheetBackdrop onPress={close} />
         <SheetSurface
           translateY={translateY}
-          header={{ title, onClose: close, steps }}
+          header={{ title, onClose: close, steps, icon }}
           layout={layout}
           keyboardHeight={keyboardHeight}
           footer={footer}
@@ -156,58 +149,6 @@ interface SheetSurfaceProps {
   readonly keyboardHeight: number;
   readonly children: ReactNode;
   readonly footer?: ReactNode;
-}
-
-/** Titre, étapes éventuelles et fermeture de l'en-tête. */
-interface SheetHeaderContent {
-  readonly title: string;
-  readonly onClose: () => void;
-  readonly steps: StepIndicatorProps | undefined;
-}
-
-/** Props de l'en-tête glissable d'une feuille. */
-interface SheetHeaderProps {
-  readonly header: SheetHeaderContent;
-  readonly dragHandlers: GestureResponderHandlers;
-}
-
-/**
- * Rend la poignée, le titre et le bouton de fermeture de la feuille.
- * @param props Titre, étapes, fermeture et gestionnaires du glissement.
- * @returns L'en-tête glissable.
- */
-function SheetHeader(props: SheetHeaderProps) {
-  const { title, onClose, steps } = props.header;
-
-  return (
-    <View testID="bottom-sheet-header" {...props.dragHandlers}>
-      <View className="mb-3 items-center">
-        <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
-      </View>
-      <View className="mb-2 flex-row items-center justify-between gap-3">
-        <Text
-          accessibilityRole="header"
-          numberOfLines={1}
-          className="flex-1 text-[20px] font-bold text-ink"
-        >
-          {title}
-        </Text>
-        {steps === undefined ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Fermer"
-            hitSlop={8}
-            onPress={onClose}
-            className="h-9 w-9 items-center justify-center rounded-full bg-field"
-          >
-            <X size={18} color={PALETTE.muted} />
-          </Pressable>
-        ) : (
-          <StepIndicator {...steps} />
-        )}
-      </View>
-    </View>
-  );
 }
 
 /**
