@@ -4,15 +4,21 @@ import { Text, View } from "react-native";
 import { SheetInfoCard } from "../../../../shared/components/macros/card.sheet-info";
 import { SheetSection } from "../../../../shared/components/macros/section.sheet";
 import { PALETTE } from "../../../../shared/theme/theme.palette";
+import { useSupportContact } from "../../hooks/hook.support-contact";
 import { PROFILE_FAQ } from "../../model/model.profile-documents";
+import { SupportContactSection } from "./section.support-contact";
 
 /**
- * Affiche les questions fréquentes et le contact du support.
+ * Propose de joindre le service client (WhatsApp, appel, e-mail) et
+ * affiche les questions fréquentes.
  * @returns Le contenu de la feuille « Centre d'aide ».
  */
 export function HelpSheet() {
+  const { contact, open } = useSupportContact();
+
   return (
     <>
+      <SupportContactSection contact={contact} onOpen={(url) => void open(url)} />
       <SheetSection title="Questions fréquentes">
         {PROFILE_FAQ.map((item) => (
           <SheetInfoCard key={item.id}>
@@ -21,7 +27,7 @@ export function HelpSheet() {
           </SheetInfoCard>
         ))}
       </SheetSection>
-      <SheetSection title="Nous contacter">
+      <SheetSection title="Par e-mail">
         <View className="flex-row items-center gap-3 rounded-[14px] border border-card-border px-4 py-3">
           <Mail size={20} color={PALETTE.muted} />
           <View className="flex-1 gap-0.5">
