@@ -3,11 +3,9 @@ import { render, screen } from "@testing-library/react-native";
 import { PROFILE_FAQ } from "../../model/model.profile-documents";
 import { HelpSheet } from "./sheet.help";
 
-jest.mock("../../model/config.support-contact", () => ({
-  SUPPORT_CONTACT: {
-    display: "+242 06 570 6622",
-    whatsappUrl: "https://wa.me/242065706622",
-    callUrl: "tel:+242065706622",
+jest.mock("../../api/config.support", () => ({
+  supportApi: {
+    contact: async () => ({ phoneNumber: "+242065706622", maxAgeSeconds: 86_400 }),
   },
 }));
 
