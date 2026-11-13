@@ -9,6 +9,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import type { ConfettiPiece as Piece } from "../../model/model.confetti";
+import { confettiShape } from "../../model/model.confetti";
+import { ConfettiBillMark } from "./mark.confetti-bill";
+import { ConfettiCoinMark } from "./mark.confetti-coin";
 
 /** Props d'un confetti. */
 export interface ConfettiPieceProps {
@@ -38,15 +41,17 @@ export function ConfettiPiece(props: ConfettiPieceProps) {
       { rotate: `${progress.value * piece.spin}deg` },
     ],
   }));
-  const shape = {
-    left: piece.x * area.width,
-    width: piece.width,
-    height: piece.square ? piece.width : piece.width / 2,
-    backgroundColor: piece.color,
-  };
+  const shape = { left: piece.x * area.width, ...confettiShape(piece) };
 
-  return <Animated.View testID="confetti-piece" style={[styles.piece, shape, style]} />;
+  return (
+    <Animated.View testID="confetti-piece" style={[styles.piece, shape, style]}>
+      {piece.kind === "bill" ? <ConfettiBillMark /> : null}
+      {piece.kind === "coin" ? <ConfettiCoinMark /> : null}
+    </Animated.View>
+  );
 }
 
-/** Confetti posé en haut de la zone, aux coins à peine arrondis. */
-const styles = StyleSheet.create({ piece: { position: "absolute", top: 0, borderRadius: 1.5 } });
+/** Confetti posé en haut de la zone, sa marque centrée. */
+const styles = StyleSheet.create({
+  piece: { position: "absolute", top: 0, alignItems: "center", justifyContent: "center" },
+});

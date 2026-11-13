@@ -11,7 +11,7 @@ import { ConfettiPiece } from "../atoms/piece.confetti";
 export const CELEBRATION_MS = 3200;
 
 /** Nombre de confettis d'une salve. */
-const CONFETTI_COUNT = 48;
+const CONFETTI_COUNT = 96;
 
 /**
  * Joue le carillon et le retour haptique de réussite au début de la salve,
