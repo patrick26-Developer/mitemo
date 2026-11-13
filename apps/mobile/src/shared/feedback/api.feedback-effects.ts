@@ -4,6 +4,7 @@ import { NotificationFeedbackType, notificationAsync } from "expo-haptics";
 
 import addSound from "../../../assets/sounds/add.wav";
 import coinSound from "../../../assets/sounds/coin.wav";
+import errorSound from "../../../assets/sounds/error.wav";
 import farewellSound from "../../../assets/sounds/farewell.wav";
 import paySound from "../../../assets/sounds/pay.wav";
 import successSound from "../../../assets/sounds/success.wav";
@@ -15,6 +16,7 @@ const SOUNDS = {
   add: addSound,
   pay: paySound,
   farewell: farewellSound,
+  error: errorSound,
 } as const;
 
 /**
@@ -71,6 +73,19 @@ export async function playFeedbackSound(sound: FeedbackSound): Promise<boolean> 
 export async function playSuccessHaptic(): Promise<boolean> {
   try {
     await notificationAsync(NotificationFeedbackType.Success);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Fait vibrer le téléphone comme pour une erreur.
+ * @returns `true` si la vibration a été lancée.
+ */
+export async function playErrorHaptic(): Promise<boolean> {
+  try {
+    await notificationAsync(NotificationFeedbackType.Error);
     return true;
   } catch {
     return false;

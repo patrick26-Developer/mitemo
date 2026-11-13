@@ -4,7 +4,10 @@ import { useToastStore } from "../../feedback/store.toast";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { useMemberStore } from "../../member/store.member";
 import { SUCCESS_TOAST_MS, toastDuration } from "../../model/model.toast-content";
+import { signalError } from "../../feedback/api.error-feedback";
 import { ToastHost } from "./host.toast";
+
+jest.mock("../../feedback/api.error-feedback", () => ({ signalError: jest.fn() }));
 
 describe("ToastHost", () => {
   beforeEach(() => {
@@ -30,6 +33,16 @@ describe("ToastHost", () => {
 
     await act(() => jest.advanceTimersByTime(toastDuration("error")));
     expect(useToastStore.getState().toast).toBeNull();
+  });
+
+  it("fait sonner et vibrer une erreur, pas une réussite", async () => {
+    jest.mocked(signalError).mockClear();
+    await renderWithSafeArea(<ToastHost />);
+
+    await act(() => useToastStore.getState().show("success", "Pointage réglé."));
+    expect(signalError).not.toHaveBeenCalled();
+    await act(() => useToastStore.getState().show("error", "Code incorrect."));
+    expect(signalError).toHaveBeenCalledTimes(1);
   });
 
   it("se ferme au toucher", async () => {

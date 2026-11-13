@@ -8,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { signalError } from "../../feedback/api.error-feedback";
 import { useToastStore } from "../../feedback/store.toast";
 import type { Toast } from "../../feedback/store.toast";
 import { useMemberStore } from "../../member/store.member";
@@ -35,7 +36,8 @@ const KIND_CARDS = {
 /**
  * Affiche le toast courant en haut de l'écran, comme une notification : il
  * apparaît en fondu, sans rebond, et se retire tout seul (une seconde pour
- * une réussite, le temps de lire pour une erreur) ou au toucher.
+ * une réussite, le temps de lire pour une erreur) ou au toucher. Une erreur
+ * sonne et fait vibrer le téléphone.
  * @returns Le toast courant, ou rien.
  */
 export function ToastHost() {
@@ -44,6 +46,7 @@ export function ToastHost() {
 
   useEffect(() => {
     if (toast === null) return undefined;
+    if (toast.kind === "error") signalError();
     const timer = setTimeout(dismiss, toastDuration(toast.kind));
     return () => clearTimeout(timer);
   }, [toast, dismiss]);

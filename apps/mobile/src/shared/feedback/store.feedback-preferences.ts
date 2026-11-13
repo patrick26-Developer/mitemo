@@ -17,9 +17,13 @@ export interface FeedbackOption {
 
 /** Retours proposés, dans l'ordre de la page profil. */
 export const FEEDBACK_OPTIONS: readonly FeedbackOption[] = [
-  { key: "sound", label: "Sons", description: "Un son à chaque réussite" },
+  { key: "sound", label: "Sons", description: "Un son à chaque réussite ou erreur" },
   { key: "confetti", label: "Confettis", description: "Une pluie de confettis à chaque réussite" },
-  { key: "vibration", label: "Vibrations", description: "Une vibration brève à chaque réussite" },
+  {
+    key: "vibration",
+    label: "Vibrations",
+    description: "Une vibration brève à chaque réussite ou erreur",
+  },
   {
     key: "animations",
     label: "Animations",
