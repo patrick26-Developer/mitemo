@@ -1,5 +1,6 @@
 import { Plus, Search } from "lucide-react-native";
 
+import { withTapSound } from "../../feedback/api.tap-sound";
 import { ActionPill } from "../atoms/pill.action";
 
 /** Props des actions rapides d'une liste. */
@@ -20,7 +21,7 @@ export function ListActions(props: ListActionsProps) {
     <ActionPill
       actions={[
         { icon: Search, label: "Rechercher", onPress: onSearch },
-        { icon: Plus, label: "Ajouter", onPress: onAdd },
+        { icon: Plus, label: "Ajouter", onPress: onAdd && withTapSound("add", onAdd) },
       ]}
     />
   );

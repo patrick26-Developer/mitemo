@@ -6,6 +6,7 @@ import { PALETTE } from "../../../shared/theme/theme.palette";
 import { TAB_ICONS } from "../../../shared/theme/theme.tab-icons";
 import type { HomeCreateState } from "../hooks/hook.home-create";
 import { HomeCreateOption } from "./option.home-create";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Props de l'accueil vide. */
 export interface HomeEmptyStateProps {
@@ -59,7 +60,7 @@ export function HomeEmptyState(props: HomeEmptyStateProps) {
         </Text>
       </View>
       <View className="w-full">
-        <SheetPrimaryButton label="Créer" onPress={toggleChoices} />
+        <SheetPrimaryButton label="Créer" onPress={withTapSound("add", toggleChoices)} />
       </View>
       {choosing ? <HomeCreateChoices create={props.create} /> : null}
     </View>

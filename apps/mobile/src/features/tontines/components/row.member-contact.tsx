@@ -5,6 +5,7 @@ import { MemberPhoto } from "../../../shared/components/atoms/photo.member";
 import { formatPhone } from "../../../shared/format/format.phone";
 import type { MemberContact } from "../../../shared/member/model.portfolio-create";
 import { PALETTE } from "../../../shared/theme/theme.palette";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Ce que fait le toucher d'un contact : l'ajouter, ou l'inviter sur Mitemo. */
 export type MemberContactAction = "add" | "invite";
@@ -30,7 +31,7 @@ export function MemberContactRow(props: MemberContactRowProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      onPress={onPress}
+      onPress={action === "add" ? withTapSound("add", onPress) : onPress}
       className="flex-row items-center gap-3 rounded-[14px] border border-card-border bg-white px-4 py-3"
     >
       <MemberPhoto

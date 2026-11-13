@@ -17,6 +17,7 @@ import { TontinePaySheet } from "./sheet.tontine-pay";
 import { contributionCharge } from "../../../shared/member/model.contribution-fee";
 import { freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
 import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
 const CONFIRM_ROUND: ConfirmSheetContent = {
@@ -91,8 +92,9 @@ function pendingAction(item: Tontine, actions: TontineActionsState): DockAction 
  */
 function payAction(item: Tontine, askPay: () => void): DockAction | null {
   const amount = `${formatAmount(contributionCharge(selfDue(item)))} FCFA`;
-  if (canPayContribution(item)) return { label: `Cotiser ${amount}`, onPress: askPay };
-  if (canPayAhead(item)) return { label: `Cotiser d'avance ${amount}`, onPress: askPay };
+  const onPress = withTapSound("pay", askPay);
+  if (canPayContribution(item)) return { label: `Cotiser ${amount}`, onPress };
+  if (canPayAhead(item)) return { label: `Cotiser d'avance ${amount}`, onPress };
 
   return null;
 }

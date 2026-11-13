@@ -7,6 +7,7 @@ import type { Tontine } from "../../../shared/member/model.portfolio";
 import { isTontineAdmin } from "../../../shared/member/model.portfolio";
 import { canInviteMembers } from "../../../shared/member/model.tontine-turns";
 import { TontineSettingsSheet } from "./sheet.tontine-settings";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Props de l'en-tête du détail d'une tontine. */
 export interface TontineDetailHeaderProps {
@@ -31,7 +32,10 @@ function headerActions(
   const more: HeaderAction = { label: "Plus d'options", icon: Ellipsis, onPress: onMore };
   if (!canInviteMembers(item)) return [more];
 
-  return [{ label: "Ajouter un membre", icon: UserPlus, onPress: onAddMember }, more];
+  return [
+    { label: "Ajouter un membre", icon: UserPlus, onPress: withTapSound("add", onAddMember) },
+    more,
+  ];
 }
 
 /**

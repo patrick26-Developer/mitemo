@@ -11,6 +11,7 @@ import type { ListFilter } from "../../model/model.list-filter";
 import { EmptyState } from "./state.empty";
 import { ListHeader } from "./header.list";
 import { TabBackground } from "./background.tab";
+import { withTapSound } from "../../feedback/api.tap-sound";
 
 /** Réglages d'une liste filtrable et recherchable. */
 export interface FilterableListConfig<Item> {
@@ -104,7 +105,10 @@ function FilterableHeader<Item>(props: FilterableHeaderProps<Item>) {
 export function FilterableList<Item>(props: FilterableListProps<Item>) {
   const { config, onAdd } = props;
   const list = useListQuery(config);
-  const action = config.items.length === 0 ? { action: { label: "Créer", onPress: onAdd } } : {};
+  const action =
+    config.items.length === 0
+      ? { action: { label: "Créer", onPress: withTapSound("add", onAdd) } }
+      : {};
 
   return (
     <View className="flex-1 bg-white">

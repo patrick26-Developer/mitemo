@@ -14,6 +14,7 @@ import { MobilePaySheet, PayoutSheet } from "../../payments";
 import type { SavingsActionsState } from "../hooks/hook.savings-actions";
 import { cardPayRequest } from "../model/model.card-pay";
 import { cardPayoutRequest } from "../model/model.card-payout";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Props du dock d'une carte de pointage. */
 export interface SavingsDetailDockProps {
@@ -35,7 +36,11 @@ export interface SavingsDetailDockProps {
 function pointAction(item: SavingsCard, onPress: () => void): DockAction | null {
   if (!cardCapabilities(item).canContribute) return null;
 
-  return { label: `Pointer ${formatAmount(markerCharge(item))} FCFA`, onPress, accent: item.tint };
+  return {
+    label: `Pointer ${formatAmount(markerCharge(item))} FCFA`,
+    onPress: withTapSound("pay", onPress),
+    accent: item.tint,
+  };
 }
 
 /** Confirmation de la suppression d'une carte. */
