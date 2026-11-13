@@ -1,4 +1,4 @@
-/** Couleurs de Mito, la mascotte : une pièce dorée, souriante, et ses amis. */
+/** Couleurs de Temo, la mascotte : une pièce dorée, souriante, et ses amis. */
 export const MASCOT_COLORS = {
   gold: "#F7B733",
   goldLight: "#FFCB57",

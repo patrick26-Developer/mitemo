@@ -3,7 +3,7 @@ import { Circle, Ellipse, G, Path } from "react-native-svg";
 import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
 
 /**
- * Visage de Mito : de grands yeux brillants, des joues roses et un sourire.
+ * Visage de Temo : de grands yeux brillants, des joues roses et un sourire.
  * @returns Le visage, centré sur le corps.
  */
 export function MascotFace() {

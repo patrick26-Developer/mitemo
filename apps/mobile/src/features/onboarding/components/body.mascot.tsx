@@ -4,7 +4,7 @@ import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
 import { MascotFace } from "./face.mascot";
 
 /**
- * Corps de Mito : une pièce dorée sur ses deux pieds, qui salue de la main
+ * Corps de Temo : une pièce dorée sur ses deux pieds, qui salue de la main
  * gauche et tend la droite, où se posent les accessoires de chaque page.
  * @returns Le corps, à placer dans un dessin de 220 × 200.
  */

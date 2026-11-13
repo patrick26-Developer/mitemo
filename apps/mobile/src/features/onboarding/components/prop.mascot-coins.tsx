@@ -6,7 +6,7 @@ import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
 const COIN_LEVELS = [176, 164, 152, 140] as const;
 
 /**
- * Pile de pièces qui grandit à côté de Mito, surmontée d'une étincelle.
+ * Pile de pièces qui grandit à côté de Temo, surmontée d'une étincelle.
  * @returns La pile de pièces.
  */
 export function MascotCoins() {

@@ -2,7 +2,7 @@ import { Circle, G, Path } from "react-native-svg";
 
 import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
 
-/** Props d'un ami de Mito. */
+/** Props d'un ami de Temo. */
 interface FriendProps {
   readonly cx: number;
   readonly color: string;
@@ -33,7 +33,7 @@ function Friend(props: FriendProps) {
 }
 
 /**
- * Les amis de Mito, de part et d'autre : une tontine se fait en groupe.
+ * Les amis de Temo, de part et d'autre : une tontine se fait en groupe.
  * @returns Les deux amis.
  */
 export function MascotFriends() {
