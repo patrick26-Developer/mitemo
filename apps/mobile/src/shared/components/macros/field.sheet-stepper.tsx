@@ -1,6 +1,7 @@
 import { Minus, Plus } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { withTapSound } from "../../feedback/api.tap-sound";
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
 
@@ -60,7 +61,7 @@ function StepButton(props: StepButtonProps) {
 export function SheetStepper(props: SheetStepperProps) {
   const { label, value, min, max, onChange, hint, invalid = false } = props;
   const decrease = () => onChange(Math.max(value - 1, min));
-  const increase = () => onChange(Math.min(value + 1, max));
+  const increase = withTapSound("add", () => onChange(Math.min(value + 1, max)));
 
   return (
     <View className="gap-1.5">

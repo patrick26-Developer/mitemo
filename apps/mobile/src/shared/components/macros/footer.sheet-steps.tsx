@@ -1,3 +1,4 @@
+import { withTapSound } from "../../feedback/api.tap-sound";
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import { SheetActionRow } from "./row.sheet-actions";
 
@@ -22,13 +23,14 @@ export interface SheetStepsFooterProps {
 export function SheetStepsFooter(props: SheetStepsFooterProps) {
   const { isFirst, isLast, finalLabel, onBack, onNext } = props;
   const nextLabel = isLast ? finalLabel : "Continuer";
+  const next = withTapSound("add", onNext);
 
-  if (isFirst) return <SheetPrimaryButton label={nextLabel} onPress={onNext} />;
+  if (isFirst) return <SheetPrimaryButton label={nextLabel} onPress={next} />;
 
   return (
     <SheetActionRow
       secondary={{ label: "Retour", onPress: onBack }}
-      primary={{ label: nextLabel, onPress: onNext }}
+      primary={{ label: nextLabel, onPress: next }}
     />
   );
 }
