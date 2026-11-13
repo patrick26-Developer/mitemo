@@ -32,7 +32,7 @@ describe("SavingsRecapCard", () => {
     expect(screen.getByText("Créée le")).toBeOnTheScreen();
     expect(screen.getByText("1 novembre 2026")).toBeOnTheScreen();
     expect(screen.getByText("Échéance")).toBeOnTheScreen();
-    expect(screen.getByText("31 décembre 2026")).toBeOnTheScreen();
+    expect(screen.getByText("31 décembre 2030")).toBeOnTheScreen();
   });
 
   it("nomme la tontine liée quand la carte en a une", async () => {

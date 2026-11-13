@@ -2,6 +2,7 @@ import { randomUUID } from "expo-crypto";
 import type { CycleFrequencyUnit, TontineMemberRole } from "@mitemo/contracts";
 
 import type { PaymentMethod } from "../model/model.payment-method";
+import { todayUtc } from "../model/model.clock";
 import type { TontineActivity } from "./model.tontine-activity";
 import { takenTurns } from "./model.tontine-turns";
 
@@ -316,13 +317,17 @@ export function remainingToSave(card: SavingsCard): bigint {
 
 /**
  * Indique les opérations possibles sur une carte de pointage.
+ * Le retrait s'ouvre une fois l'objectif atteint ou la date de fin arrivée.
  * @param card Carte concernée.
+ * @param today Jour de référence, en ISO 8601 UTC ; aujourd'hui par défaut.
  * @returns Les capacités de versement, de retrait et de rattachement.
  */
-export function cardCapabilities(card: SavingsCard): CardCapabilities {
+export function cardCapabilities(card: SavingsCard, today: string = todayUtc()): CardCapabilities {
+  const due = card.saved >= cardGoal(card) || today >= card.deadline;
+
   return {
     canContribute: card.state === "ACTIVE" && card.saved < cardGoal(card),
-    canWithdraw: card.state !== "ARCHIVED" && card.saved > 0n && card.saved >= cardGoal(card),
+    canWithdraw: card.state !== "ARCHIVED" && card.saved > 0n && due,
     canTransfer: card.tontineId !== null && card.state === "ACTIVE",
   };
 }

@@ -45,7 +45,7 @@ function card(over: Partial<SavingsCard> = {}): SavingsCard {
     frequency: { unit: "semaine", interval: 1 },
     startDate: "2026-11-01",
     saved: 20_000n,
-    deadline: "2026-12-31",
+    deadline: "2030-12-31",
     tint: "#CFD8FF",
     state: "ACTIVE",
     description: "Une carte de test.",
@@ -181,6 +181,14 @@ describe("cardCapabilities", () => {
     expect(cardCapabilities(card({ saved: 29_999n })).canWithdraw).toBe(false);
     expect(cardCapabilities(card({ saved: 30_000n, state: "COMPLETED" })).canWithdraw).toBe(true);
     expect(cardCapabilities(card({ saved: 30_000n, state: "ARCHIVED" })).canWithdraw).toBe(false);
+  });
+
+  it("autorise le retrait à la date de fin, même sans l'objectif atteint", () => {
+    const due = card({ saved: 10_000n, deadline: "2026-11-13" });
+
+    expect(cardCapabilities(due, "2026-11-12").canWithdraw).toBe(false);
+    expect(cardCapabilities(due, "2026-11-13").canWithdraw).toBe(true);
+    expect(cardCapabilities({ ...due, saved: 0n }, "2026-11-13").canWithdraw).toBe(false);
   });
 
   it("interdit le transfert sans tontine rattachée", () => {

@@ -123,6 +123,18 @@ describe("SavingsDetailDock", () => {
     expect(screen.queryByRole("button", { name: "Retirer" })).not.toBeOnTheScreen();
   });
 
+  it("propose de retirer à la date de fin, même sans l'objectif atteint", async () => {
+    await renderWithSafeArea(
+      <SavingsDetailDock
+        item={makeCard({ saved: 10_000n, deadline: "2020-01-31" })}
+        actions={makeActions()}
+        onLayout={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Retirer" })).toBeOnTheScreen();
+  });
+
   it("ne propose pas de retirer une carte vide", async () => {
     await renderWithSafeArea(
       <SavingsDetailDock

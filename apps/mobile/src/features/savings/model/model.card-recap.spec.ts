@@ -6,7 +6,7 @@ describe("recapFactRows", () => {
     expect(recapFactRows(makeCard(), null)).toEqual([
       { kind: "remaining", label: "Reste à épargner", value: "10 000 FCFA" },
       { kind: "created", label: "Créée le", value: "1 novembre 2026" },
-      { kind: "deadline", label: "Échéance", value: "31 décembre 2026" },
+      { kind: "deadline", label: "Échéance", value: "31 décembre 2030" },
     ]);
   });
 

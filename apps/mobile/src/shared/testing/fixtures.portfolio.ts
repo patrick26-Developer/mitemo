@@ -60,7 +60,7 @@ export function makeCard(over: Partial<SavingsCard> = {}): SavingsCard {
     frequency: { unit: "semaine", interval: 1 },
     startDate: "2026-11-01",
     saved: 20_000n,
-    deadline: "2026-12-31",
+    deadline: "2030-12-31",
     tint: "#CFD8FF",
     state: "ACTIVE",
     description: "Une carte de test.",
