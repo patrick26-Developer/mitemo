@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useCallback, useEffect } from "react";
 
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
 import { useMemberStore } from "../../../shared/member/store.member";
 import { todayUtc } from "../../../shared/model/model.clock";
 import { useSessionStore } from "../../../shared/session/store.session";
@@ -11,20 +12,23 @@ import { PIN_MISMATCH_MESSAGE, usePinChoice } from "./hook.pin-choice";
 
 /**
  * Fin du parcours : enregistre l'identité d'une inscription, efface le
- * brouillon et ouvre la session. Le garde de navigation ouvre les onglets.
+ * brouillon et ouvre la session. Le garde de navigation ouvre les onglets,
+ * sous les confettis après une inscription.
  * @returns Le brouillon, le mode et l'action de réussite.
  */
 function useSessionCompletion() {
   const draft = useAuthDraft();
   const registerMember = useMemberStore((state) => state.registerMember);
   const signIn = useSessionStore((state) => state.signIn);
+  const celebrate = useCelebrationStore((state) => state.celebrate);
   const isSignUp = draft.mode === "sign-up";
   const { firstName, lastName, occupation, phone, reset } = draft;
   const complete = useCallback(() => {
     if (isSignUp) registerMember({ firstName, lastName, occupation, phone }, todayUtc());
     reset();
     signIn();
-  }, [isSignUp, firstName, lastName, occupation, phone, reset, signIn, registerMember]);
+    if (isSignUp) celebrate();
+  }, [isSignUp, firstName, lastName, occupation, phone, reset, signIn, registerMember, celebrate]);
 
   return { phone, isSignUp, complete };
 }

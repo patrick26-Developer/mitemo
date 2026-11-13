@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { tomorrowUtc } from "../../../shared/model/model.clock";
 import { makeTontine } from "../../../shared/testing/fixtures.portfolio";
@@ -105,6 +106,7 @@ describe("SavingsCreateSheet", () => {
 
     await fireEvent.press(screen.getByRole("button", { name: "Créer la carte" }));
 
+    expect(useCelebrationStore.getState().burst).not.toBeNull();
     expect(onClose).toHaveBeenCalledTimes(1);
     const created = usePortfolioStore
       .getState()

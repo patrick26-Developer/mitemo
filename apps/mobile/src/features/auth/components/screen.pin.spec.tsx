@@ -1,6 +1,7 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/store.member";
 import { INITIAL_SESSION, useSessionStore } from "../../../shared/session/store.session";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
@@ -39,6 +40,7 @@ async function enterPin(digits: string): Promise<void> {
 
 describe("PinScreen", () => {
   beforeEach(() => {
+    useCelebrationStore.setState({ burst: null });
     jest.clearAllMocks();
     mockPinAuth.reset();
     useAuthDraft.setState(INITIAL_AUTH_DRAFT);
@@ -68,6 +70,7 @@ describe("PinScreen", () => {
     await enterPin("4821");
 
     await waitFor(() => expect(useSessionStore.getState().signedIn).toBe(true));
+    expect(useCelebrationStore.getState().burst).toBeNull();
     expect(useAuthDraft.getState().phone).toBe("");
     expect(useSessionStore.getState().signedIn).toBe(true);
   });
@@ -153,6 +156,7 @@ describe("PinScreen", () => {
     expect(useMemberStore.getState().occupation).toBe("Commerçante");
     expect(useMemberStore.getState().phone).toBe(PHONE);
     expect(useMemberStore.getState().createdAt).toBe("2026-11-11");
+    expect(useCelebrationStore.getState().burst).not.toBeNull();
 
     await act(async () => {});
 

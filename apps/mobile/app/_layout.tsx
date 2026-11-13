@@ -7,6 +7,7 @@ import { launchRoutes, SplashGate, useOnboardingStore } from "../src/features/on
 import { ProfilePhotoSync } from "../src/features/profile";
 import { CardReminders } from "../src/features/savings";
 import { AppBadgeSync } from "../src/shared/components/atoms/sync.app-badge";
+import { CelebrationHost } from "../src/shared/components/macros/host.celebration";
 import { ConnectionHost } from "../src/shared/components/macros/host.connection";
 import { ToastHost } from "../src/shared/components/macros/host.toast";
 import { useSessionStore } from "../src/shared/session/store.session";
@@ -56,6 +57,7 @@ export default function RootLayout() {
       </Stack>
       <ConnectionHost />
       <ToastHost />
+      <CelebrationHost />
       <SplashGate />
     </KeyboardProvider>
   );

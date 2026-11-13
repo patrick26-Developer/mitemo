@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { TontineCreateSheet } from "./sheet.tontine-create";
@@ -126,6 +127,7 @@ describe("TontineCreateSheet", () => {
       .tontines.find((item) => item.name === "Tontine du Marché");
     expect(created?.frequency).toEqual({ unit: "semaine", interval: 2 });
     expect(created?.totalRounds).toBe(6);
+    expect(useCelebrationStore.getState().burst).not.toBeNull();
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(router.push).toHaveBeenCalledWith(`/tontine/${created?.id ?? "absent"}`);
     expect(screen.queryByText("Votre tontine est prête")).toBeNull();

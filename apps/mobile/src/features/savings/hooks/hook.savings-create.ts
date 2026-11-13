@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
 import type { StepForm } from "../../../shared/hooks/hook.step-form";
 import { useStepForm } from "../../../shared/hooks/hook.step-form";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -19,13 +20,17 @@ import {
  */
 export function useSavingsCreate(onDone: () => void): StepForm<SavingsFormState> {
   const createCard = usePortfolioStore((state) => state.createCard);
+  const celebrate = useCelebrationStore((state) => state.celebrate);
 
   return useStepForm({
     initial: INITIAL_SAVINGS_FORM,
     total: SAVINGS_FORM_STEPS.length,
     validateStep: (form, step) => savingsStepError(form, step, new Date()),
     parse: (form) => parseSavingsForm(form, new Date()),
-    onCreate: (input) => router.push(`/savings-detail/${createCard(input).id}`),
+    onCreate: (input) => {
+      router.push(`/savings-detail/${createCard(input).id}`);
+      celebrate();
+    },
     onDone,
   });
 }
