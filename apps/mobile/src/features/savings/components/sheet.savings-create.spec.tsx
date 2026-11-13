@@ -117,14 +117,15 @@ describe("SavingsCreateSheet", () => {
     expect(router.push).toHaveBeenCalledWith(`/savings-detail/${created?.id ?? "absent"}`);
   });
 
-  it("rattache la carte à la tontine choisie dans la liste", async () => {
+  it("rattache la carte à la tontine choisie, dont la fin fixe l'échéance", async () => {
     usePortfolioStore.setState({ tontines: [makeTontine({ id: "t1", name: "Les Amis" })] });
     await renderWithSafeArea(<SavingsCreateSheet visible onClose={jest.fn()} />);
     await fillProject();
-    await chooseDeadline();
 
     await fireEvent.press(screen.getByLabelText("Tontine rattachée : Aucune tontine"));
     await fireEvent.press(screen.getByRole("button", { name: /^Les Amis,/ }));
+    expect(screen.queryByTestId("sheet-date-trigger")).toBeNull();
+    expect(screen.getByText(/L'échéance suit la tontine/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
     expect(screen.getByText("Les Amis")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Créer la carte" }));
@@ -133,6 +134,7 @@ describe("SavingsCreateSheet", () => {
       .getState()
       .cards.find((item) => item.name === "Loyer de Février");
     expect(created?.tontineId).toBe("t1");
+    expect((created?.deadline ?? "") > tomorrowUtc()).toBe(true);
   });
 
   it("refuse de passer au récapitulatif sans échéance", async () => {

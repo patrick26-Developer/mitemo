@@ -1,4 +1,5 @@
 import { CalendarCheck, Coins, Link, Target } from "lucide-react-native";
+import { Text } from "react-native";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -9,6 +10,7 @@ import type { FactItem } from "../../../shared/components/atoms/row.fact";
 import { FactList } from "../../../shared/components/macros/list.facts";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
+import { formatLongDate } from "../../../shared/format/format.date";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { tomorrowUtc } from "../../../shared/model/model.clock";
@@ -27,7 +29,7 @@ import {
 import {
   NO_TONTINE,
   linkedTontineName,
-  tontineIdOf,
+  linkTontine,
   tontineLinkGroups,
 } from "../model/model.tontine-link";
 
@@ -125,10 +127,17 @@ function recapRows(recap: SavingsRecap, tontine: string | null): readonly FactIt
  * @returns Les champs du rythme.
  */
 function SavingsRhythmStep(props: SavingsCreateFieldsProps) {
-  const { form, invalid, tontines, onChange } = props;
+  const { form, tontines, onChange } = props;
 
   return (
     <>
+      <SheetSelect
+        label="Tontine rattachée"
+        groups={tontineLinkGroups(tontines)}
+        value={form.tontineId ?? NO_TONTINE}
+        onChange={(value) => onChange(linkTontine(tontines, value, new Date()))}
+        hint="La carte peut régler les cotisations de cette tontine."
+      />
       <SheetSelect
         label="Fréquence des pointages"
         groups={FREQUENCY_SELECT_GROUPS}
@@ -136,22 +145,36 @@ function SavingsRhythmStep(props: SavingsCreateFieldsProps) {
         onChange={(cadence) => onChange({ cadence })}
         hint="Le rythme auquel vous mettez de côté."
       />
-      <SheetDateField
-        label="Échéance"
-        value={form.deadline}
-        minimum={tomorrowUtc()}
-        onChange={(deadline) => onChange({ deadline })}
-        hint="Dernier jour pour atteindre l'objectif."
-        invalid={invalid.deadline}
-      />
-      <SheetSelect
-        label="Tontine rattachée"
-        groups={tontineLinkGroups(tontines)}
-        value={form.tontineId ?? NO_TONTINE}
-        onChange={(value) => onChange({ tontineId: tontineIdOf(value) })}
-        hint="La carte peut régler les cotisations de cette tontine."
-      />
+      <SavingsDeadlineField {...props} />
     </>
+  );
+}
+
+/**
+ * Échéance de la carte : choisie au calendrier pour une carte indépendante,
+ * imposée par la fin de la tontine pour une carte rattachée.
+ * @param props Saisie, champs invalides et changement.
+ * @returns Le champ de date, ou la date de fin de la tontine.
+ */
+function SavingsDeadlineField(props: SavingsCreateFieldsProps) {
+  const { form, invalid, onChange } = props;
+  if (form.tontineId !== null) {
+    return (
+      <Text className="text-[13px] leading-5 text-muted">
+        {`L'échéance suit la tontine : le ${formatLongDate(form.deadline)}, à la fin de son dernier tour.`}
+      </Text>
+    );
+  }
+
+  return (
+    <SheetDateField
+      label="Échéance"
+      value={form.deadline}
+      minimum={tomorrowUtc()}
+      onChange={(deadline) => onChange({ deadline })}
+      hint="Dernier jour pour atteindre l'objectif."
+      invalid={invalid.deadline}
+    />
   );
 }
 
