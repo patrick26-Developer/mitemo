@@ -1,19 +1,6 @@
-import { BriefcaseBusiness, CalendarDays, Phone, UserRound } from "lucide-react-native";
-
-import { FactList } from "../../../shared/components/macros/list.facts";
+import { MemberFactList } from "../../../shared/components/macros/list.member-facts";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
-import { useMemberStore } from "../../../shared/member/store.member";
-import type { MemberFactKind } from "../model/model.member-summary";
-import { memberSummaryRows } from "../model/model.member-summary";
 import { ProfileLinkCard } from "./card.profile-link";
-
-/** Icône de chaque information du membre. */
-const FACT_ICONS = {
-  name: UserRound,
-  phone: Phone,
-  occupation: BriefcaseBusiness,
-  createdAt: CalendarDays,
-} as const satisfies Record<MemberFactKind, unknown>;
 
 /** Props de la feuille du résumé du membre. */
 export interface MemberSummarySheetProps {
@@ -32,15 +19,10 @@ export interface MemberSummarySheetProps {
  */
 export function MemberSummarySheet(props: MemberSummarySheetProps) {
   const { visible, onClose, onOpenProfile } = props;
-  const name = useMemberStore((state) => state.name);
-  const phone = useMemberStore((state) => state.phone);
-  const occupation = useMemberStore((state) => state.occupation);
-  const createdAt = useMemberStore((state) => state.createdAt);
-  const rows = memberSummaryRows({ name, phone, occupation, createdAt });
 
   return (
     <BottomSheet visible={visible} title="Mes informations" onClose={onClose}>
-      <FactList items={rows.map((row) => ({ id: row.kind, icon: FACT_ICONS[row.kind], ...row }))} />
+      <MemberFactList />
       <ProfileLinkCard onPress={onOpenProfile} />
     </BottomSheet>
   );

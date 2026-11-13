@@ -12,9 +12,10 @@ describe("IdentitySheet", () => {
   it("affiche l'identité du membre", async () => {
     await renderWithSafeArea(<IdentitySheet />);
 
-    expect(screen.getByText("Précieuse")).toBeOnTheScreen();
-    expect(screen.getByText("Mavoungou")).toBeOnTheScreen();
+    expect(screen.getByText("Précieuse Mavoungou")).toBeOnTheScreen();
     expect(screen.getByText("Commerçante")).toBeOnTheScreen();
+    expect(screen.getAllByTestId("fact-divider")).toHaveLength(3);
+    expect(screen.getByRole("button", { name: "Modifier mes informations" })).toBeOnTheScreen();
   });
 
   it("modifie l'identité depuis le profil", async () => {
@@ -28,7 +29,7 @@ describe("IdentitySheet", () => {
 
     expect(useMemberStore.getState().name).toBe("Aimée Mbemba");
     expect(useMemberStore.getState().occupation).toBe("Couturière");
-    expect(screen.getByText("Aimée")).toBeOnTheScreen();
+    expect(screen.getByText("Aimée Mbemba")).toBeOnTheScreen();
   });
 
   it("refuse un prénom trop court", async () => {

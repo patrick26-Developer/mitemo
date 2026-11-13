@@ -1,5 +1,5 @@
-import { formatDate } from "../../../shared/format/format.date";
-import type { MemberProfile } from "../../../shared/member/store.member";
+import { formatDate } from "../format/format.date";
+import type { MemberProfile } from "./store.member";
 
 /** Informations du résumé, chacune avec son icône. */
 export const MEMBER_FACT_KINDS = ["name", "phone", "occupation", "createdAt"] as const;
