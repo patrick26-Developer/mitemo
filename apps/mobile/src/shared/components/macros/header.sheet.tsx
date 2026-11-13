@@ -13,6 +13,8 @@ import { StepIndicator } from "../atoms/indicator.step";
 export interface SheetHeaderContent {
   readonly title: string;
   readonly onClose: () => void;
+  /** Faux pour une feuille qui ne se ferme pas d'elle-même : ni croix, ni glissement. */
+  readonly closable: boolean;
   readonly steps: StepIndicatorProps | undefined;
   readonly icon: SheetIcon | undefined;
 }
@@ -29,11 +31,11 @@ export interface SheetHeaderProps {
  * @returns L'en-tête glissable.
  */
 export function SheetHeader(props: SheetHeaderProps) {
-  const { title, onClose, steps, icon } = props.header;
+  const { title, steps, icon } = props.header;
   if (icon !== undefined) return <IconSheetHeader {...props} icon={icon} />;
 
   return (
-    <View testID="bottom-sheet-header" {...props.dragHandlers}>
+    <View testID="bottom-sheet-header" {...dragHandlersOf(props)}>
       <View className="mb-3 items-center">
         <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
       </View>
@@ -46,7 +48,7 @@ export function SheetHeader(props: SheetHeaderProps) {
           {title}
         </Text>
         {steps === undefined ? (
-          <SheetCloseButton onClose={onClose} />
+          <SheetCloseButton header={props.header} />
         ) : (
           <StepIndicator {...steps} />
         )}
@@ -62,15 +64,15 @@ export function SheetHeader(props: SheetHeaderProps) {
  * @returns L'en-tête glissable.
  */
 function IconSheetHeader(props: SheetHeaderProps & { readonly icon: SheetIcon }) {
-  const { title, onClose } = props.header;
+  const { title } = props.header;
 
   return (
-    <View testID="bottom-sheet-header" {...props.dragHandlers}>
+    <View testID="bottom-sheet-header" {...dragHandlersOf(props)}>
       <View className="mb-1 items-center">
         <View className="bg-ink/20" style={SHEET_HANDLE_SHAPE} />
       </View>
-      <View className="items-end">
-        <SheetCloseButton onClose={onClose} />
+      <View className="h-9 items-end">
+        <SheetCloseButton header={props.header} />
       </View>
       <SheetIconBadge sheetIcon={props.icon} />
       <Text accessibilityRole="header" className="mb-2 text-center text-[20px] font-bold text-ink">
@@ -80,23 +82,34 @@ function IconSheetHeader(props: SheetHeaderProps & { readonly icon: SheetIcon })
   );
 }
 
+/**
+ * Gestionnaires du glissement, retirés d'une feuille qui ne se ferme pas.
+ * @param props En-tête et gestionnaires.
+ * @returns Les gestionnaires à poser sur l'en-tête.
+ */
+function dragHandlersOf(props: SheetHeaderProps): GestureResponderHandlers | undefined {
+  return props.header.closable ? props.dragHandlers : undefined;
+}
+
 /** Props de la croix de fermeture. */
 interface SheetCloseButtonProps {
-  readonly onClose: () => void;
+  readonly header: SheetHeaderContent;
 }
 
 /**
- * Croix ronde qui ferme la feuille.
- * @param props Fermeture.
- * @returns Le bouton « Fermer ».
+ * Croix ronde qui ferme la feuille, absente d'une feuille qui ne se ferme pas.
+ * @param props En-tête de la feuille.
+ * @returns Le bouton « Fermer », ou rien.
  */
 function SheetCloseButton(props: SheetCloseButtonProps) {
+  if (!props.header.closable) return null;
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Fermer"
       hitSlop={8}
-      onPress={props.onClose}
+      onPress={props.header.onClose}
       className="h-9 w-9 items-center justify-center rounded-full bg-field"
     >
       <X size={18} color={PALETTE.muted} />

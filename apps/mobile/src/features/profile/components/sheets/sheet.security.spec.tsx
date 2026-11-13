@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../../shared/member/store.member";
 import { renderWithSafeArea } from "../../../../shared/testing/util.render-with-safe-area";
+import { useAutoLockStore } from "../../../../shared/session/store.auto-lock";
 import { SecuritySheet } from "./sheet.security";
 
 describe("SecuritySheet", () => {
@@ -14,6 +15,16 @@ describe("SecuritySheet", () => {
     expect(screen.getByText("Demandé à chaque ouverture")).toBeOnTheScreen();
     expect(screen.getAllByTestId("fact-divider")).toHaveLength(1);
     expect(screen.getByText(/seule son empreinte est conservée/)).toBeOnTheScreen();
+  });
+
+  it("règle le verrouillage automatique, 5 minutes par défaut", async () => {
+    useAutoLockStore.setState({ minutes: 5 });
+    await renderWithSafeArea(<SecuritySheet />);
+
+    await fireEvent.press(screen.getByLabelText("Verrouillage automatique : Après 5 minutes"));
+    await fireEvent.press(screen.getByRole("button", { name: /^Après 15 minutes/ }));
+
+    expect(useAutoLockStore.getState().minutes).toBe(15);
   });
 
   it("ouvre le changement de code en trois étapes, à commencer par le code actuel", async () => {

@@ -13,6 +13,8 @@ import { PinRow } from "./row.pin";
 export interface PinConfirmProps {
   /** Appelé une fois le code du membre reconnu. */
   readonly onConfirmed: () => void;
+  /** Faux quand la feuille porte déjà l'icône et le titre de la suspension. */
+  readonly suspendedHeading?: boolean;
 }
 
 /**
@@ -31,7 +33,9 @@ export function PinConfirm(props: PinConfirmProps) {
     onComplete: onConfirmed,
   });
 
-  if (suspended) return <SuspendedNotice onSwitchAccount={signOut} />;
+  if (suspended) {
+    return <SuspendedNotice onSwitchAccount={signOut} heading={props.suspendedHeading !== false} />;
+  }
 
   return (
     <>

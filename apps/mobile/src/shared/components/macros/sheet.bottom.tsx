@@ -8,6 +8,7 @@ import { useFocusedFieldReveal } from "../../hooks/hook.focused-field-reveal";
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
 import { useModalPresence } from "../../hooks/hook.modal-presence";
 import { useSheetDrag } from "../../hooks/hook.sheet-drag";
+import { useActivityStore } from "../../session/store.activity";
 import type { SheetLayout } from "../../model/model.sheet-layout";
 import { computeSheetLayout, sheetContentPaddingBottom } from "../../model/model.sheet-layout";
 import { FOCUS_RING_SCROLL } from "../../theme/theme.field";
@@ -40,6 +41,11 @@ export interface BottomSheetProps {
   readonly steps?: StepIndicatorProps;
   /** Icône posée au-dessus du titre, qui se centre alors dessous. */
   readonly icon?: SheetIcon;
+  /**
+   * Faux pour une feuille qui ne se ferme pas d'elle-même (le verrou du code
+   * PIN) : ni croix, ni fond, ni glissement, ni retour.
+   */
+  readonly dismissible?: boolean;
 }
 
 /**
@@ -97,6 +103,11 @@ function useSheetPresence(requested: boolean) {
   return { translateY, visible, onDismiss };
 }
 
+/** Fermeture ignorée d'une feuille qui ne se ferme pas d'elle-même. */
+function keepOpen(): void {
+  // Seule l'action de la feuille (le code PIN juste) la referme.
+}
+
 /**
  * Affiche un contenu dans une feuille qui monte depuis le bas, plutôt que dans
  * une nouvelle page : le contexte de l'écran reste visible derrière.
@@ -111,7 +122,9 @@ export function BottomSheet(props: BottomSheetProps) {
   const { title, onClose, children, footer, steps, icon } = props;
   const { keyboardHeight, layout } = useSheetLayout();
   const { translateY, visible, onDismiss } = useSheetPresence(props.visible);
-  const close = useStableClose(translateY, onClose);
+  const closable = props.dismissible !== false;
+  const stableClose = useStableClose(translateY, onClose);
+  const close = closable ? stableClose : keepOpen;
 
   return (
     <Modal
@@ -123,11 +136,16 @@ export function BottomSheet(props: BottomSheetProps) {
       onRequestClose={close}
       onDismiss={onDismiss}
     >
-      <View accessibilityViewIsModal importantForAccessibility="yes" className="flex-1 justify-end">
+      <View
+        accessibilityViewIsModal
+        importantForAccessibility="yes"
+        className="flex-1 justify-end"
+        onTouchStart={() => useActivityStore.getState().touch()}
+      >
         <SheetBackdrop onPress={close} />
         <SheetSurface
           translateY={translateY}
-          header={{ title, onClose: close, steps, icon }}
+          header={{ title, onClose: close, closable, steps, icon }}
           layout={layout}
           keyboardHeight={keyboardHeight}
           footer={footer}

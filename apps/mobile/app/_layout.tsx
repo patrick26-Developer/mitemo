@@ -4,6 +4,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import "../global.css";
 
 import { launchRoutes, SplashGate, useOnboardingStore } from "../src/features/onboarding";
+import { PinLockSheet } from "../src/features/auth";
 import { ProfilePhotoSync } from "../src/features/profile";
 import { CardReminders } from "../src/features/savings";
 import { MotionConfig } from "../src/shared/components/atoms/config.motion";
@@ -11,6 +12,7 @@ import { AppBadgeSync } from "../src/shared/components/atoms/sync.app-badge";
 import { CelebrationHost } from "../src/shared/components/macros/host.celebration";
 import { MoneyFlightHost } from "../src/shared/components/macros/host.money-flight";
 import { ConnectionHost } from "../src/shared/components/macros/host.connection";
+import { ActivityZone } from "../src/shared/components/macros/zone.activity";
 import { ToastHost } from "../src/shared/components/macros/host.toast";
 import { useSessionStore } from "../src/shared/session/store.session";
 
@@ -41,23 +43,26 @@ export default function RootLayout() {
       <ProfilePhotoSync />
       <AppBadgeSync signedIn={signedIn} />
       {signedIn ? <CardReminders /> : null}
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected {...routes.member}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="savings-detail/[id]" />
-          <Stack.Screen name="tontine/[id]" />
-          <Stack.Screen name="tontine-members/[id]" />
-          <Stack.Screen name="invitation/[id]" />
-          <Stack.Screen name="search" options={{ animation: "fade" }} />
-          <Stack.Screen name="history" options={{ animation: "slide_from_right" }} />
-        </Stack.Protected>
-        <Stack.Protected {...routes.auth}>
-          <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
-        </Stack.Protected>
-        <Stack.Protected {...routes.onboarding}>
-          <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
-        </Stack.Protected>
-      </Stack>
+      <ActivityZone>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected {...routes.member}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="savings-detail/[id]" />
+            <Stack.Screen name="tontine/[id]" />
+            <Stack.Screen name="tontine-members/[id]" />
+            <Stack.Screen name="invitation/[id]" />
+            <Stack.Screen name="search" options={{ animation: "fade" }} />
+            <Stack.Screen name="history" options={{ animation: "slide_from_right" }} />
+          </Stack.Protected>
+          <Stack.Protected {...routes.auth}>
+            <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
+          </Stack.Protected>
+          <Stack.Protected {...routes.onboarding}>
+            <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
+          </Stack.Protected>
+        </Stack>
+        <PinLockSheet />
+      </ActivityZone>
       <ConnectionHost />
       <ToastHost />
       <MoneyFlightHost />
