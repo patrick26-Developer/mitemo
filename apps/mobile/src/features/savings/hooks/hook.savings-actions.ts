@@ -34,7 +34,11 @@ function withdrawMessage(card: SavingsCard, method: PaymentMethod): string {
 }
 
 /** Lance une opération sur le store et annonce sa réussite. */
-type CardAct = (action: (store: PortfolioState) => void, success: string) => boolean;
+type CardAct = (
+  action: (store: PortfolioState) => void,
+  success: string,
+  festive?: boolean,
+) => boolean;
 
 /**
  * Revient à la liste avant de supprimer la carte, pour ne jamais afficher la
@@ -44,7 +48,7 @@ type CardAct = (action: (store: PortfolioState) => void, success: string) => boo
  */
 function discardCard(card: SavingsCard, act: CardAct): void {
   router.back();
-  act((store) => store.deleteCard(card.id), "Carte supprimée.");
+  act((store) => store.deleteCard(card.id), "Carte supprimée.", false);
 }
 
 /**
@@ -54,8 +58,8 @@ function discardCard(card: SavingsCard, act: CardAct): void {
  */
 export function useSavingsActions(card: SavingsCard): SavingsActionsState {
   const { run } = usePortfolioFeedback();
-  const act: CardAct = (action, success) =>
-    run(() => action(usePortfolioStore.getState()), success);
+  const act: CardAct = (action, success, festive = true) =>
+    run(() => action(usePortfolioStore.getState()), success, festive);
 
   return {
     contribute: (method) =>

@@ -38,7 +38,7 @@ export function useTontineSettings(item: Tontine, onClose: () => void): TontineS
   const remove = () => {
     onClose();
     router.back();
-    run(() => usePortfolioStore.getState().deleteTontine(item.id), "Tontine supprimée.");
+    run(() => usePortfolioStore.getState().deleteTontine(item.id), "Tontine supprimée.", false);
   };
   const change = (patch: Partial<TontineSettingsForm>) =>
     setForm((current) => ({ ...current, ...patch }));

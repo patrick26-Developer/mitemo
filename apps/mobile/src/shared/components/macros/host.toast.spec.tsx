@@ -2,7 +2,9 @@ import { act, fireEvent, screen } from "@testing-library/react-native";
 
 import { useToastStore } from "../../feedback/store.toast";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
-import { TOAST_DURATION_MS, ToastHost } from "./host.toast";
+import { useMemberStore } from "../../member/store.member";
+import { SUCCESS_TOAST_MS, toastDuration } from "../../model/model.toast-content";
+import { ToastHost } from "./host.toast";
 
 describe("ToastHost", () => {
   beforeEach(() => {
@@ -24,9 +26,9 @@ describe("ToastHost", () => {
     await renderWithSafeArea(<ToastHost />);
 
     await act(() => useToastStore.getState().show("error", "Votre solde est insuffisant."));
-    expect(screen.getByRole("alert", { name: "Votre solde est insuffisant." })).toBeOnTheScreen();
+    expect(screen.getByRole("alert", { name: /Votre solde est insuffisant\./ })).toBeOnTheScreen();
 
-    await act(() => jest.advanceTimersByTime(TOAST_DURATION_MS));
+    await act(() => jest.advanceTimersByTime(toastDuration("error")));
     expect(useToastStore.getState().toast).toBeNull();
   });
 
@@ -36,6 +38,19 @@ describe("ToastHost", () => {
 
     await fireEvent.press(screen.getByRole("alert"));
 
+    expect(useToastStore.getState().toast).toBeNull();
+  });
+
+  it("montre d'abord la photo du membre, un titre, puis la description, pendant une seconde", async () => {
+    useMemberStore.setState({ name: "Espoir LOEMBA", avatarInitial: "E", photoUri: null });
+    await renderWithSafeArea(<ToastHost />);
+    await act(() => useToastStore.getState().show("success", "Pointage réglé."));
+
+    expect(screen.getByTestId("toast-avatar")).toBeOnTheScreen();
+    expect(screen.getByText("Bravo Espoir !")).toBeOnTheScreen();
+    expect(screen.getByText("Pointage réglé.")).toBeOnTheScreen();
+
+    await act(() => jest.advanceTimersByTime(SUCCESS_TOAST_MS));
     expect(useToastStore.getState().toast).toBeNull();
   });
 
@@ -51,5 +66,6 @@ describe("ToastHost", () => {
     await act(() => useToastStore.getState().show("error", "Votre solde est insuffisant."));
 
     expect(screen.getByRole("alert")).toHaveStyle({ backgroundColor: "#B42318" });
+    expect(screen.getByText("Un petit souci")).toBeOnTheScreen();
   });
 });

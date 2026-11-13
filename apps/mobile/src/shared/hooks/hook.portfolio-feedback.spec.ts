@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react-native";
 
+import { useCelebrationStore } from "../feedback/store.celebration";
 import { useToastStore } from "../feedback/store.toast";
 import { usePortfolioFeedback } from "./hook.portfolio-feedback";
 
@@ -15,6 +16,7 @@ function shownToast() {
 describe("usePortfolioFeedback", () => {
   beforeEach(() => {
     useToastStore.getState().dismiss();
+    useCelebrationStore.setState({ burst: null });
   });
 
   it("n'affiche rien avant la première opération", async () => {
@@ -35,6 +37,18 @@ describe("usePortfolioFeedback", () => {
     expect(action).toHaveBeenCalledTimes(1);
     expect(succeeded).toBe(true);
     expect(shownToast()).toEqual({ kind: "success", message: "C'est fait." });
+    expect(useCelebrationStore.getState().burst).not.toBeNull();
+  });
+
+  it("annonce sans fête une réussite qui n'en mérite pas, comme une suppression", async () => {
+    const { result } = await renderHook(() => usePortfolioFeedback());
+
+    await act(() => {
+      result.current.run(jest.fn(), "Carte supprimée.", false);
+    });
+
+    expect(shownToast()).toEqual({ kind: "success", message: "Carte supprimée." });
+    expect(useCelebrationStore.getState().burst).toBeNull();
   });
 
   it("affiche le message métier d'une opération refusée", async () => {
@@ -88,5 +102,16 @@ describe("usePortfolioFeedback", () => {
     });
 
     expect(shownToast()).toBeNull();
+  });
+  it("ne fête pas une opération refusée", async () => {
+    const { result } = await renderHook(() => usePortfolioFeedback());
+
+    await act(() => {
+      result.current.run(() => {
+        throw new Error("Votre solde est insuffisant.");
+      }, "C'est fait.");
+    });
+
+    expect(useCelebrationStore.getState().burst).toBeNull();
   });
 });

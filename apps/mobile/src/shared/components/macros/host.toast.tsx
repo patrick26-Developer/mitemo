@@ -1,6 +1,5 @@
-import { CircleAlert, CircleCheck } from "lucide-react-native";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,11 +10,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useToastStore } from "../../feedback/store.toast";
 import type { Toast } from "../../feedback/store.toast";
+import { useMemberStore } from "../../member/store.member";
+import { toastDuration, toastTitle } from "../../model/model.toast-content";
 import { PALETTE } from "../../theme/theme.palette";
 import { SHADOWS } from "../../theme/theme.shadow";
-
-/** Durée d'affichage d'un toast, en millisecondes. */
-export const TOAST_DURATION_MS = 3500;
+import { ToastLead } from "../atoms/lead.toast";
+import { ToastText } from "../atoms/text.toast";
 
 /** Départ du toast, juste au-dessus de sa place, en points. */
 const TOAST_HIDDEN_OFFSET = -24;
@@ -24,30 +24,19 @@ const TOAST_HIDDEN_OFFSET = -24;
 const TOAST_TIMING = { duration: 220, easing: Easing.out(Easing.cubic) };
 
 /**
- * Couleurs de chaque nature de toast : un succès reprend le blanc des
- * feuilles, une erreur est entièrement rouge pour ne pas passer inaperçue.
+ * Fond de chaque nature de toast : un succès reprend le blanc des feuilles,
+ * une erreur est entièrement rouge pour ne pas passer inaperçue.
  */
-const KIND_STYLES = {
-  success: {
-    card: { backgroundColor: PALETTE.white, borderColor: "#E4E7EE" },
-    icon: "#1F8A4C",
-    text: PALETTE.ink,
-    Icon: CircleCheck,
-  },
-  error: {
-    card: { backgroundColor: PALETTE.danger, borderColor: PALETTE.danger },
-    icon: PALETTE.white,
-    text: PALETTE.white,
-    Icon: CircleAlert,
-  },
+const KIND_CARDS = {
+  success: { backgroundColor: PALETTE.white, borderColor: "#E4E7EE" },
+  error: { backgroundColor: PALETTE.danger, borderColor: PALETTE.danger },
 } as const;
 
 /**
  * Affiche le toast courant en haut de l'écran, comme une notification : il
- * apparaît en fondu, sans rebond, et se retire au bout de quelques secondes ou
- * au toucher.
- * À poser à la racine et dans chaque feuille, pour passer au-dessus d'elle.
- * @returns Le toast, ou rien.
+ * apparaît en fondu, sans rebond, et se retire tout seul (une seconde pour
+ * une réussite, le temps de lire pour une erreur) ou au toucher.
+ * @returns Le toast courant, ou rien.
  */
 export function ToastHost() {
   const toast = useToastStore((state) => state.toast);
@@ -55,7 +44,7 @@ export function ToastHost() {
 
   useEffect(() => {
     if (toast === null) return undefined;
-    const timer = setTimeout(dismiss, TOAST_DURATION_MS);
+    const timer = setTimeout(dismiss, toastDuration(toast.kind));
     return () => clearTimeout(timer);
   }, [toast, dismiss]);
 
@@ -70,20 +59,23 @@ interface ToastCardProps {
 }
 
 /**
- * Carte du toast : icône, message et couleur de sa nature.
+ * Carte du toast : d'abord la photo du membre (ou l'icône d'erreur), puis
+ * un titre et la description.
  * @param props Toast à afficher et fermeture.
  * @returns La carte animée.
  */
 function ToastCard(props: ToastCardProps) {
   const { toast, onPress } = props;
   const insets = useSafeAreaInsets();
-  const kind = KIND_STYLES[toast.kind];
+  const title = toastTitle(
+    toast.kind,
+    useMemberStore((state) => state.name),
+  );
   const offset = useSharedValue(TOAST_HIDDEN_OFFSET);
   const slide = useAnimatedStyle(() => ({
     opacity: 1 - offset.get() / TOAST_HIDDEN_OFFSET,
     transform: [{ translateY: offset.get() }],
   }));
-
   useEffect(() => {
     offset.set(withTiming(0, TOAST_TIMING));
   }, [offset]);
@@ -92,16 +84,14 @@ function ToastCard(props: ToastCardProps) {
     <Animated.View pointerEvents="box-none" style={[styles.host, { top: insets.top + 8 }, slide]}>
       <Pressable
         accessibilityRole="alert"
-        accessibilityLabel={toast.message}
+        accessibilityLabel={`${title}. ${toast.message}`}
         accessibilityLiveRegion="polite"
         onPress={onPress}
-        className="flex-row items-center gap-3 rounded-[20px] border px-4 py-3.5"
-        style={[styles.card, kind.card]}
+        className="flex-row items-center gap-3 rounded-[20px] border px-3.5 py-3"
+        style={[styles.card, KIND_CARDS[toast.kind]]}
       >
-        <kind.Icon size={20} color={kind.icon} strokeWidth={2.2} />
-        <Text className="flex-1 text-[14px] font-medium leading-5" style={{ color: kind.text }}>
-          {toast.message}
-        </Text>
+        <ToastLead kind={toast.kind} />
+        <ToastText kind={toast.kind} title={title} message={toast.message} />
       </Pressable>
     </Animated.View>
   );
