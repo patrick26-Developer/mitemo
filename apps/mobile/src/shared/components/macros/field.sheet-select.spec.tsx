@@ -94,4 +94,41 @@ describe("SheetSelect", () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.queryByTestId("sheet-select-menu")).not.toBeOnTheScreen();
   });
+  it("sépare les options d'un trait fin, comme un récapitulatif", async () => {
+    await renderWithSafeArea(
+      <SheetSelect label="Fréquence" groups={GROUPS} value="jour-1" onChange={jest.fn()} />,
+    );
+
+    await fireEvent.press(screen.getByTestId("sheet-select-trigger"));
+
+    expect(screen.getAllByTestId("sheet-select-divider")).toHaveLength(1);
+  });
+
+  it("présente en cartes les options détaillées, avec leur couleur", async () => {
+    const tontines = [
+      {
+        title: "Vos tontines",
+        options: [
+          {
+            value: "t1",
+            label: "Les Amis",
+            description: "6 membres · 5 000 FCFA par tour",
+            accent: "#2CCA86",
+          },
+        ],
+      },
+    ];
+    await renderWithSafeArea(
+      <SheetSelect label="Tontine" groups={tontines} value="t1" onChange={jest.fn()} />,
+    );
+
+    await fireEvent.press(screen.getByTestId("sheet-select-trigger"));
+
+    expect(screen.getByText("6 membres · 5 000 FCFA par tour")).toBeOnTheScreen();
+    expect(screen.getByTestId("sheet-select-swatch-t1")).toHaveStyle({
+      backgroundColor: "#2CCA86",
+    });
+    expect(screen.getByLabelText("Les Amis, 6 membres · 5 000 FCFA par tour")).toBeSelected();
+    expect(screen.queryByTestId("sheet-select-divider")).toBeNull();
+  });
 });

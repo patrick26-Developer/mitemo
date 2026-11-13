@@ -53,6 +53,7 @@ describe("SheetDateField", () => {
     await fireEvent.press(screen.getByTestId("sheet-date-trigger"));
 
     expect(screen.getByRole("header", { name: "Échéance" })).toBeOnTheScreen();
+    expect(screen.getByText("Date retenue")).toBeOnTheScreen();
 
     await fireEvent(screen.getByTestId("native-date-picker"), "change", { type: "set" }, PICKED);
 

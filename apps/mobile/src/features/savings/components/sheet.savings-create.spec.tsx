@@ -123,7 +123,7 @@ describe("SavingsCreateSheet", () => {
     await chooseDeadline();
 
     await fireEvent.press(screen.getByLabelText("Tontine rattachée : Aucune tontine"));
-    await fireEvent.press(screen.getByRole("button", { name: "Les Amis" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Les Amis,/ }));
     await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
     expect(screen.getByText("Les Amis")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Créer la carte" }));

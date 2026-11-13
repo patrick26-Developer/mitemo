@@ -2,7 +2,7 @@ import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/d
 import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { CalendarDays } from "lucide-react-native";
 import { useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatDate } from "../../format/format.date";
 import { fieldChrome } from "../../theme/theme.field";
@@ -138,8 +138,9 @@ interface DateCalendarProps {
 }
 
 /**
- * Calendrier natif d'iOS, dans la seconde feuille : toucher un jour le
- * retient et ferme la feuille, sans bouton de validation à part.
+ * Calendrier natif d'iOS, dans la seconde feuille, sans cadre : la date
+ * retenue en grand, un trait fin, puis le calendrier sur toute la largeur.
+ * Toucher un jour le retient et ferme la feuille, sans bouton à part.
  * @param props Date affichée, minimum et choix.
  * @returns Le calendrier.
  */
@@ -147,11 +148,14 @@ function DateCalendar(props: DateCalendarProps) {
   const { shown, minimum, onPick } = props;
 
   return (
-    <View
-      testID="sheet-date-menu"
-      className="overflow-hidden rounded-[14px] border border-card-border bg-white px-2"
-    >
+    <View testID="sheet-date-menu" className="gap-2">
+      <View className="gap-0.5">
+        <Text className="text-[13px] text-muted">Date retenue</Text>
+        <Text className="text-[22px] font-bold text-ink">{formatDate(isoDay(shown))}</Text>
+      </View>
+      <View className="h-px bg-card-border" />
       <DateTimePicker
+        style={styles.calendar}
         value={shown}
         mode="date"
         display="inline"
@@ -164,3 +168,6 @@ function DateCalendar(props: DateCalendarProps) {
     </View>
   );
 }
+
+/** Le calendrier occupe toute la largeur de la feuille. */
+const styles = StyleSheet.create({ calendar: { alignSelf: "stretch" } });

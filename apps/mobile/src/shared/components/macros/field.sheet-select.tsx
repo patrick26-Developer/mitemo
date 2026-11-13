@@ -1,15 +1,21 @@
-import { Check, ChevronDown } from "lucide-react-native";
+import { ChevronDown } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { fieldChrome } from "../../theme/theme.field";
 import { PALETTE } from "../../theme/theme.palette";
+import { SelectCardOption } from "../atoms/option.select-card";
+import { SelectRowOption } from "../atoms/option.select-row";
 import { BottomSheet } from "./sheet.bottom";
 
 /** Option d'un sélecteur de feuille. */
 export interface SheetSelectOption<Value extends string> {
   readonly value: Value;
   readonly label: string;
+  /** Détail sous le libellé : une liste d'options détaillées s'affiche en cartes. */
+  readonly description?: string;
+  /** Couleur de la pastille d'une carte, par exemple celle d'une tontine. */
+  readonly accent?: string;
 }
 
 /** Groupe d'options, précédé de son titre dans la liste ouverte. */
@@ -107,7 +113,7 @@ function SelectMenu<Value extends string>(props: SelectMenuProps<Value>) {
   const { groups, value, onSelect } = props;
 
   return (
-    <View testID="sheet-select-menu" className="gap-3">
+    <View testID="sheet-select-menu" className="gap-5">
       {groups.map((group) => (
         <SelectGroup key={group.title} group={group} value={value} onSelect={onSelect} />
       ))}
@@ -123,23 +129,25 @@ interface SelectGroupProps<Value extends string> {
 }
 
 /**
- * Affiche un groupe d'options sous son titre.
+ * Affiche un groupe d'options sous son titre : en cartes quand elles sont
+ * détaillées, sinon en lignes séparées d'un trait fin.
  * @template Value Type de la valeur portée par chaque option.
  * @param props Groupe, valeur courante et choix.
- * @returns Le groupe d'options.
+ * @returns Le groupe et ses options.
  */
 function SelectGroup<Value extends string>(props: SelectGroupProps<Value>) {
   const { group, value, onSelect } = props;
+  const detailed = group.options.some((option) => option.description !== undefined);
 
   return (
-    <View className="gap-1">
-      <Text className="px-2 pt-1 text-[12px] font-semibold uppercase text-muted">
-        {group.title}
-      </Text>
-      {group.options.map((option) => (
+    <View className={detailed ? "gap-2" : ""}>
+      <Text className="pb-1 text-[12px] font-semibold uppercase text-muted">{group.title}</Text>
+      {group.options.map((option, index) => (
         <SelectOption
           key={option.value}
           option={option}
+          detailed={detailed}
+          divided={!detailed && index > 0}
           selected={option.value === value}
           onSelect={() => onSelect(option.value)}
         />
@@ -151,31 +159,43 @@ function SelectGroup<Value extends string>(props: SelectGroupProps<Value>) {
 /** Props d'une option de la liste ouverte. */
 interface SelectOptionProps<Value extends string> {
   readonly option: SheetSelectOption<Value>;
+  readonly detailed: boolean;
+  /** Trace le trait fin qui la sépare de l'option précédente. */
+  readonly divided: boolean;
   readonly selected: boolean;
   readonly onSelect: () => void;
 }
 
 /**
- * Affiche une option de la liste, cochée quand elle est choisie.
- * @param props Option, sélection et choix.
- * @returns La ligne de l'option.
+ * Affiche une option en carte détaillée ou en ligne, précédée de son trait.
+ * @template Value Type de la valeur portée par l'option.
+ * @param props Option, présentation, état et choix.
+ * @returns L'option.
  */
 function SelectOption<Value extends string>(props: SelectOptionProps<Value>) {
   const { option, selected, onSelect } = props;
+  if (props.detailed) {
+    const item = { id: option.value, label: option.label, accent: option.accent };
+    return (
+      <SelectCardOption
+        item={{ ...item, description: option.description ?? "" }}
+        selected={selected}
+        onSelect={onSelect}
+      />
+    );
+  }
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={option.label}
-      accessibilityState={{ selected }}
-      testID={`sheet-select-option-${option.value}`}
-      onPress={onSelect}
-      className={`min-h-11 flex-row items-center justify-between rounded-[10px] px-3 py-2.5 ${
-        selected ? "bg-brand-veil" : "bg-white"
-      }`}
-    >
-      <Text className="text-[15px] text-ink">{option.label}</Text>
-      {selected ? <Check size={16} color={PALETTE.brand} strokeWidth={2.6} /> : null}
-    </Pressable>
+    <View>
+      {props.divided ? (
+        <View testID="sheet-select-divider" className="h-px bg-card-border" />
+      ) : null}
+      <SelectRowOption
+        id={option.value}
+        label={option.label}
+        selected={selected}
+        onSelect={onSelect}
+      />
+    </View>
   );
 }
