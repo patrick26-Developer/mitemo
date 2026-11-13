@@ -21,7 +21,7 @@ export interface TontineSettingsSheetProps {
 }
 
 /**
- * Réglages de l'administrateur : nom, couleur et, avant le lancement,
+ * Réglages de l'administrateur : nom, couleur et, avant le premier versement,
  * cotisation et fréquence.
  * @param props Visibilité, tontine et fermeture.
  * @returns La feuille « Modifier la tontine ».

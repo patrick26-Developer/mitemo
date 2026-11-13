@@ -17,6 +17,8 @@ import {
   InvalidAmountError,
 } from "./model.portfolio-error";
 import { removalActions } from "./model.portfolio-removal";
+import type { CardEdit } from "./model.card-edit";
+import { cardEditActions } from "./model.card-edit";
 import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   acceptInvitation,
@@ -80,7 +82,7 @@ export interface PortfolioState {
   declineInvitation: (invitationId: string) => void;
   inviteMember: (tontineId: string) => string;
   removeMember: (tontineId: string, memberId: string) => void;
-  /** Change le nom, la couleur et, avant le lancement, les règles d'une tontine. */
+  /** Change le nom, la couleur et, avant le premier versement, les règles d'une tontine. */
   updateTontineSettings: (tontineId: string, settings: TontineSettings) => void;
   /** Pointe un marqueur, payé par l'opérateur choisi. */
   contributeCard: (cardId: string, payment: CardPayment) => void;
@@ -96,6 +98,8 @@ export interface PortfolioState {
   dismissTontine: (tontineId: string) => void;
   /** Supprime une carte qui n'a reçu aucun pointage. */
   deleteCard: (cardId: string) => void;
+  /** Renomme une carte et, avant le premier pointage, change son objectif et son pointage. */
+  updateCard: (cardId: string, edit: CardEdit) => void;
   reset: () => void;
 }
 
@@ -292,6 +296,7 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     ...walletActions(context),
     ...removalActions(context),
     ...cardActions(context),
+    ...cardEditActions(context),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),
   };
 }

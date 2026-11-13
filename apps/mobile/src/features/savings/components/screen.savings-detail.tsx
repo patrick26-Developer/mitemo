@@ -6,6 +6,7 @@ import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import type { DetailFocus } from "../../../shared/model/model.detail-focus";
 import { NO_FOCUS } from "../../../shared/model/model.detail-focus";
 import { SavingsDetailContent } from "./content.savings-detail";
+import { SavingsDetailHeader } from "./header.savings-detail";
 
 /** Props de l'écran de détail d'une carte de pointage. */
 export interface SavingsDetailScreenProps {
@@ -27,10 +28,7 @@ export function SavingsDetailScreen(props: SavingsDetailScreenProps) {
 
   return (
     <ScreenFrame>
-      <DetailHeader
-        title={card?.name ?? "Carte"}
-        {...(card === undefined ? {} : { accent: card.tint })}
-      />
+      {card === undefined ? <DetailHeader title="Carte" /> : <SavingsDetailHeader item={card} />}
       {card === undefined ? (
         <EmptyState
           icon={TAB_ICONS.savings}

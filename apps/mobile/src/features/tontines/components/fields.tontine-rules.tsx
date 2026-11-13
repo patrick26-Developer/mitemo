@@ -7,14 +7,14 @@ import type { TontineSettingsForm } from "../model/model.tontine-settings-form";
 /** Props des règles d'une tontine en cours de réglage. */
 export interface TontineRulesFieldsProps {
   readonly form: TontineSettingsForm;
-  /** Vrai une fois la tontine lancée : les règles ne se modifient plus. */
+  /** Vrai dès le lancement ou le premier versement : les règles ne se modifient plus. */
   readonly locked: boolean;
   readonly onChange: (patch: Partial<TontineSettingsForm>) => void;
 }
 
 /**
  * Règles de la tontine : cotisation et fréquence, modifiables seulement avant
- * le lancement.
+ * le lancement et le premier versement.
  * @param props Saisie, verrou et changement.
  * @returns Les champs des règles, ou l'explication du verrou.
  */
@@ -23,7 +23,7 @@ export function TontineRulesFields(props: TontineRulesFieldsProps) {
   if (locked) {
     return (
       <SheetText>
-        La cotisation et la fréquence ne changent plus une fois la tontine lancée.
+        La cotisation et la fréquence ne changent plus depuis le premier versement.
       </SheetText>
     );
   }

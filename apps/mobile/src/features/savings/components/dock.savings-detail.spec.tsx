@@ -133,16 +133,16 @@ describe("SavingsDetailDock", () => {
 
     expect(screen.queryByRole("button", { name: "Retirer" })).not.toBeOnTheScreen();
   });
-  it("supprime une carte sans pointage, après confirmation", async () => {
-    const actions = makeActions();
+  it("laisse la suppression aux options : le dock ne propose plus de supprimer", async () => {
     await renderWithSafeArea(
-      <SavingsDetailDock item={makeCard({ saved: 0n })} actions={actions} onLayout={jest.fn()} />,
+      <SavingsDetailDock
+        item={makeCard({ saved: 0n })}
+        actions={makeActions()}
+        onLayout={jest.fn()}
+      />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Supprimer la carte" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Supprimer" }));
-
-    expect(actions.discard).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Supprimer la carte" })).toBeNull();
   });
 
   it("ne propose pas de supprimer une carte déjà pointée", async () => {

@@ -1,6 +1,7 @@
 import { formatAmount } from "../../../shared/format/format.amount";
 import { TONTINE_TINTS } from "../../../shared/member/model.tontine-settings";
-import { makeTontine } from "../../../shared/testing/fixtures.portfolio";
+import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
+import { makeMember, makeTontine } from "../../../shared/testing/fixtures.portfolio";
 import { parseTontineSettings, rulesLocked, settingsFormOf } from "./model.tontine-settings-form";
 
 describe("settingsFormOf", () => {
@@ -50,5 +51,17 @@ describe("parseTontineSettings", () => {
 
   it("verrouille les règles d'une tontine lancée", () => {
     expect(rulesLocked(makeTontine())).toBe(true);
+  });
+
+  it("verrouille les règles dès le premier versement, même avant le lancement", () => {
+    const prepaid = makeTontine({
+      state: "PENDING",
+      members: [
+        makeMember(SELF_MEMBER_ID, "ADMIN"),
+        { ...makeMember("m2", "MEMBRE"), prepaidRounds: 1 },
+      ],
+    });
+
+    expect(rulesLocked(prepaid)).toBe(true);
   });
 });

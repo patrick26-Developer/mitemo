@@ -28,3 +28,34 @@ export function cardTintFor(markerAmount: bigint): string {
   const band = CARD_TINT_BANDS.filter((entry) => markerAmount >= entry.from).at(-1);
   return band?.tint ?? "#CDF5DD";
 }
+
+/** Niveau d'une carte : sa tranche de pointage, de 1 à 5. */
+export interface CardLevel {
+  readonly level: number;
+  readonly total: number;
+  /** Pointage minimal de la tranche, en FCFA entiers, inclus. */
+  readonly from: bigint;
+  /** Pointage maximal de la tranche, en FCFA entiers, inclus ; `null` pour la dernière. */
+  readonly to: bigint | null;
+}
+
+/**
+ * Niveau d'une carte selon le montant de son pointage : c'est lui qui donne
+ * sa couleur à la carte.
+ * @param markerAmount Montant d'un pointage, en FCFA entiers.
+ * @returns Le niveau et les bornes de sa tranche.
+ */
+export function cardLevel(markerAmount: bigint): CardLevel {
+  const index = Math.max(
+    0,
+    CARD_TINT_BANDS.findLastIndex((entry) => markerAmount >= entry.from),
+  );
+  const next = CARD_TINT_BANDS[index + 1];
+
+  return {
+    level: index + 1,
+    total: CARD_TINT_BANDS.length,
+    from: CARD_TINT_BANDS[index]?.from ?? 0n,
+    to: next === undefined ? null : next.from - 1n,
+  };
+}

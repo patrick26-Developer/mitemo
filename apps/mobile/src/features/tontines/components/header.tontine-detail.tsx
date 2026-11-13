@@ -1,4 +1,4 @@
-import { Ellipsis, UserPlus } from "lucide-react-native";
+import { EllipsisVertical, UserPlus } from "lucide-react-native";
 import { useState } from "react";
 
 import type { HeaderAction } from "../../../shared/components/macros/header.detail";
@@ -29,7 +29,7 @@ function headerActions(
 ): readonly HeaderAction[] {
   const { item, onAddMember } = props;
   if (!isTontineAdmin(item)) return [];
-  const more: HeaderAction = { label: "Plus d'options", icon: Ellipsis, onPress: onMore };
+  const more: HeaderAction = { label: "Plus d'options", icon: EllipsisVertical, onPress: onMore };
   if (!canInviteMembers(item)) return [more];
 
   return [

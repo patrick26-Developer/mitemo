@@ -1,6 +1,7 @@
 import type { Tontine, TontineFrequency } from "./model.portfolio";
 import { ForbiddenOperationError } from "./model.portfolio-error";
 import { requireAdmin } from "./model.portfolio-update";
+import { tontineRulesLocked } from "./model.tontine-contributions";
 
 /** Dégradés proposés pour l'en-tête d'une tontine : couleur principale, puis sa teinte claire. */
 export const TONTINE_TINTS: readonly (readonly [string, string])[] = [
@@ -72,18 +73,18 @@ function changesRules(tontine: Tontine, settings: TontineSettings): boolean {
 
 /**
  * Applique les réglages de l'administrateur. Le nom et la couleur changent à
- * tout moment ; la cotisation et la fréquence seulement avant le lancement,
+ * tout moment ; la cotisation et la fréquence seulement avant le premier versement,
  * car les membres se sont engagés sur ces règles.
  * @param tontine Tontine à régler.
  * @param settings Réglages demandés, déjà validés.
  * @returns La tontine réglée.
  * @throws {ForbiddenOperationError} si le membre connecté n'administre pas la tontine.
- * @throws {ForbiddenOperationError} si une règle change sur une tontine lancée.
+ * @throws {ForbiddenOperationError} si une règle change après le lancement ou le premier versement.
  */
 export function applyTontineSettings(tontine: Tontine, settings: TontineSettings): Tontine {
   requireAdmin(tontine);
-  if (tontine.state !== "PENDING" && changesRules(tontine, settings)) {
-    throw new ForbiddenOperationError("Les règles d'une tontine lancée ne changent plus.");
+  if (tontineRulesLocked(tontine) && changesRules(tontine, settings)) {
+    throw new ForbiddenOperationError("Les règles ne changent plus après le premier versement.");
   }
   return { ...tontine, ...settings };
 }

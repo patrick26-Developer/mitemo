@@ -3,17 +3,7 @@ import { isTontineAdmin } from "./model.portfolio";
 import type { PortfolioContext, PortfolioState } from "./model.portfolio-actions";
 import { ForbiddenOperationError } from "./model.portfolio-error";
 import { requireCard, requireTontine } from "./model.portfolio-update";
-
-/**
- * Indique si la tontine a déjà reçu une cotisation, du tour en cours ou d'avance.
- * @param tontine Tontine concernée.
- * @returns `true` dès qu'un membre a cotisé.
- */
-function hasContributions(tontine: Tontine): boolean {
-  return tontine.members.some(
-    (member) => member.paidCurrentRound || (member.prepaidRounds ?? 0) > 0,
-  );
-}
+import { tontineHasContributions } from "./model.tontine-contributions";
 
 /**
  * Indique si le membre connecté peut supprimer la tontine : il l'administre,
@@ -23,7 +13,9 @@ function hasContributions(tontine: Tontine): boolean {
  * @returns `true` quand la suppression est permise.
  */
 export function canDeleteTontine(tontine: Tontine): boolean {
-  return isTontineAdmin(tontine) && tontine.state === "PENDING" && !hasContributions(tontine);
+  return (
+    isTontineAdmin(tontine) && tontine.state === "PENDING" && !tontineHasContributions(tontine)
+  );
 }
 
 /**

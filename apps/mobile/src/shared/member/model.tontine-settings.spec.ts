@@ -35,7 +35,18 @@ describe("applyTontineSettings", () => {
 
   it("refuse de changer les règles d'une tontine lancée", () => {
     expect(() => applyTontineSettings(makeTontine(), CHANGED)).toThrow(
-      new ForbiddenOperationError("Les règles d'une tontine lancée ne changent plus."),
+      new ForbiddenOperationError("Les règles ne changent plus après le premier versement."),
+    );
+  });
+
+  it("fige les règles dès le premier versement, même avant le lancement", () => {
+    const paid = makeTontine({
+      state: "PENDING",
+      members: [makeMember(SELF_MEMBER_ID, "ADMIN"), makeMember("m2", "MEMBRE", true)],
+    });
+
+    expect(() => applyTontineSettings(paid, CHANGED)).toThrow(
+      new ForbiddenOperationError("Les règles ne changent plus après le premier versement."),
     );
   });
 

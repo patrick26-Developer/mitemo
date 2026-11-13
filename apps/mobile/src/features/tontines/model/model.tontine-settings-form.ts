@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { tontineRulesLocked } from "../../../shared/member/model.tontine-contributions";
 
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
@@ -29,12 +30,12 @@ const SETTINGS_SCHEMA = z.object({
 
 /**
  * Indique si les règles (cotisation, fréquence) sont figées : elles le sont
- * dès le lancement, les membres s'étant engagés sur elles.
+ * dès le lancement ou le premier versement, les membres s'étant engagés sur elles.
  * @param tontine Tontine réglée.
  * @returns `true` quand seuls le nom et la couleur se modifient.
  */
 export function rulesLocked(tontine: Tontine): boolean {
-  return tontine.state !== "PENDING";
+  return tontineRulesLocked(tontine);
 }
 
 /**

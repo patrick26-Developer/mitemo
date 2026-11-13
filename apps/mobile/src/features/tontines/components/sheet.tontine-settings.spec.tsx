@@ -52,7 +52,7 @@ describe("TontineSettingsSheet", () => {
     expect(screen.queryByLabelText("Cotisation par tour (FCFA)")).toBeNull();
     expect(
       screen.getByText(
-        "La cotisation et la fréquence ne changent plus une fois la tontine lancée.",
+        "La cotisation et la fréquence ne changent plus depuis le premier versement.",
       ),
     ).toBeOnTheScreen();
     expect(screen.getByRole("radio", { name: "Vert", checked: true })).toBeOnTheScreen();
