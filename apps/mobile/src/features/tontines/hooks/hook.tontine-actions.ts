@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { PortfolioState } from "../../../shared/member/model.portfolio-actions";
 import type { MemberContact } from "../../../shared/member/model.portfolio-create";
@@ -25,6 +27,8 @@ export interface TontineActionsState {
   /** Partage l'invitation (code et lien), en créant le code au premier partage. */
   readonly share: () => void;
   readonly remove: (memberId: string) => void;
+  /** Retire de l'historique une tontine supprimée par son administrateur, puis revient en arrière. */
+  readonly dismiss: () => void;
 }
 
 /** Actions d'une tontine. */
@@ -84,6 +88,10 @@ function tontineHandlers(tontine: Tontine, act: RunAction): TontineHandlers {
       act((store) => shareInvitation(tontine, store.inviteMember(tontine.id)), null);
     },
     remove: (memberId) => act((store) => store.removeMember(tontine.id, memberId), null),
+    dismiss: () => {
+      router.back();
+      act((store) => store.dismissTontine(tontine.id), null);
+    },
   };
 }
 

@@ -16,6 +16,7 @@ import {
   InsufficientFundsError,
   InvalidAmountError,
 } from "./model.portfolio-error";
+import { removalActions } from "./model.portfolio-removal";
 import { INITIAL_PORTFOLIO } from "./model.portfolio-initial";
 import {
   acceptInvitation,
@@ -89,6 +90,12 @@ export interface PortfolioState {
   withdrawAvailable: (amount: bigint) => void;
   /** Verse la carte à sa tontine et la fait repartir sur une copie neuve, datée de `today` (UTC). */
   transferCardToTontine: (cardId: string, today: string) => void;
+  /** Supprime une tontine pas encore lancée et sans cotisation ; réservé à l'administrateur. */
+  deleteTontine: (tontineId: string) => void;
+  /** Retire de l'historique une tontine supprimée par son administrateur. */
+  dismissTontine: (tontineId: string) => void;
+  /** Supprime une carte qui n'a reçu aucun pointage. */
+  deleteCard: (cardId: string) => void;
   reset: () => void;
 }
 
@@ -250,6 +257,21 @@ function transferCardToTontine(context: PortfolioContext, cardId: string, today:
 }
 
 /**
+ * Actions sur les cartes de pointage : pointer, retirer, verser à la tontine.
+ * @param context Accès au store.
+ * @returns Les actions branchées sur le store.
+ */
+function cardActions(
+  context: PortfolioContext,
+): Pick<PortfolioState, "contributeCard" | "withdrawCard" | "transferCardToTontine"> {
+  return {
+    contributeCard: (id, payment) => contributeCard(context, id, payment),
+    withdrawCard: (id, method) => withdrawCard(context, id, method),
+    transferCardToTontine: (id, today) => transferCardToTontine(context, id, today),
+  };
+}
+
+/**
  * Assemble les opérations du portefeuille autour du store.
  * @param context Accès en lecture et en écriture au store.
  * @returns L'état initial et les opérations prêtes à être exposées.
@@ -268,9 +290,8 @@ export function createPortfolioActions(context: PortfolioContext): PortfolioStat
     declineInvitation: (id) => declineInvitation(context, id),
     ...adminActions(context),
     ...walletActions(context),
-    contributeCard: (id, payment) => contributeCard(context, id, payment),
-    withdrawCard: (id, method) => withdrawCard(context, id, method),
-    transferCardToTontine: (id, today) => transferCardToTontine(context, id, today),
+    ...removalActions(context),
+    ...cardActions(context),
     reset: () => context.set({ ...INITIAL_PORTFOLIO }),
   };
 }

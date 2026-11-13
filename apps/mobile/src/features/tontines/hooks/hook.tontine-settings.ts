@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 
 import { useToastStore } from "../../../shared/feedback/store.toast";
@@ -13,6 +14,8 @@ export interface TontineSettingsState {
   readonly change: (patch: Partial<TontineSettingsForm>) => void;
   /** Valide, enregistre puis ferme la feuille ; une erreur la garde ouverte. */
   readonly save: () => void;
+  /** Supprime la tontine, ferme la feuille et revient à la liste des tontines. */
+  readonly remove: () => void;
 }
 
 /**
@@ -32,5 +35,13 @@ export function useTontineSettings(item: Tontine, onClose: () => void): TontineS
     if (run(() => store.updateTontineSettings(item.id, parsed.value), null)) onClose();
   };
 
-  return { form, change: (patch) => setForm((current) => ({ ...current, ...patch })), save };
+  const remove = () => {
+    onClose();
+    router.back();
+    run(() => usePortfolioStore.getState().deleteTontine(item.id), "Tontine supprimée.");
+  };
+  const change = (patch: Partial<TontineSettingsForm>) =>
+    setForm((current) => ({ ...current, ...patch }));
+
+  return { form, change, save, remove };
 }

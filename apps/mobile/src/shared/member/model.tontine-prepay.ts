@@ -30,7 +30,8 @@ export function prepaidRounds(tontine: Tontine): number {
  */
 export function canPayAhead(tontine: Tontine): boolean {
   const self = selfOf(tontine);
-  if (tontine.state !== "ACTIVE" || self === undefined || !self.paidCurrentRound) return false;
+  if (tontine.state !== "ACTIVE" || tontine.deletedBy !== undefined) return false;
+  if (self === undefined || !self.paidCurrentRound) return false;
 
   return prepaidRounds(tontine) < tontine.totalRounds - tontine.round;
 }

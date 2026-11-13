@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
+import { FeedbackBanner } from "../../../shared/components/atoms/banner.feedback";
 import { useScrollToTarget } from "../../../shared/hooks/hook.scroll-to-target";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
@@ -34,6 +35,12 @@ export function TontineDetailBody(props: TontineDetailBodyProps) {
       contentContainerClassName="gap-5 px-4 pt-5"
       contentContainerStyle={{ paddingBottom }}
     >
+      {item.deletedBy === undefined ? null : (
+        <FeedbackBanner
+          kind="error"
+          message={`${item.deletedBy} a supprimé la tontine. Vous ne pouvez plus cotiser.`}
+        />
+      )}
       <TontineRecapCard item={item} />
       <View onLayout={onTargetLayout}>
         <TontineMemberList

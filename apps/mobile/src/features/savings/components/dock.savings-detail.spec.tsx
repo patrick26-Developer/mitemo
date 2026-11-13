@@ -28,6 +28,7 @@ function makeActions(over: Partial<SavingsActionsState> = {}): SavingsActionsSta
     contribute: jest.fn(),
     withdraw: jest.fn(),
     transfer: jest.fn(),
+    discard: jest.fn(),
     ...over,
   };
 }
@@ -131,6 +132,25 @@ describe("SavingsDetailDock", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Retirer" })).not.toBeOnTheScreen();
+  });
+  it("supprime une carte sans pointage, après confirmation", async () => {
+    const actions = makeActions();
+    await renderWithSafeArea(
+      <SavingsDetailDock item={makeCard({ saved: 0n })} actions={actions} onLayout={jest.fn()} />,
+    );
+
+    await fireEvent.press(screen.getByRole("button", { name: "Supprimer la carte" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Supprimer" }));
+
+    expect(actions.discard).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne propose pas de supprimer une carte déjà pointée", async () => {
+    await renderWithSafeArea(
+      <SavingsDetailDock item={makeCard()} actions={makeActions()} onLayout={jest.fn()} />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Supprimer la carte" })).toBeNull();
   });
 });
 

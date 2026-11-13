@@ -1,5 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 
+import { router } from "expo-router";
+
 import { useToastStore } from "../../../shared/feedback/store.toast";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { firstOf, makeTontine } from "../../../shared/testing/fixtures.portfolio";
@@ -18,6 +20,8 @@ async function open(state: "PENDING" | "ACTIVE"): Promise<jest.Mock> {
   await renderWithSafeArea(<TontineSettingsSheet visible item={tontine} onClose={onClose} />);
   return onClose;
 }
+
+jest.mock("expo-router", () => ({ router: { back: jest.fn() } }));
 
 describe("TontineSettingsSheet", () => {
   beforeEach(() => {
@@ -64,5 +68,21 @@ describe("TontineSettingsSheet", () => {
       "Le nom doit contenir au moins 3 caractères.",
     );
     expect(onClose).not.toHaveBeenCalled();
+  });
+  it("supprime une tontine pas encore lancée, après confirmation, puis revient en arrière", async () => {
+    const onClose = await open("PENDING");
+
+    await fireEvent.press(screen.getByRole("button", { name: "Supprimer la tontine" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Supprimer" }));
+
+    expect(usePortfolioStore.getState().tontines).toEqual([]);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(router.back).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne propose pas de supprimer une tontine lancée", async () => {
+    await open("ACTIVE");
+
+    expect(screen.queryByRole("button", { name: "Supprimer la tontine" })).toBeNull();
   });
 });

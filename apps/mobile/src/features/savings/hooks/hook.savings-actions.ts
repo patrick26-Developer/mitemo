@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+
 import type { PortfolioState } from "../../../shared/member/model.portfolio-actions";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -15,6 +17,8 @@ export interface SavingsActionsState {
   /** Retire l'épargne vers le moyen choisi : le solde Mitemo ou un opérateur. */
   readonly withdraw: (method: PaymentMethod) => void;
   readonly transfer: () => void;
+  /** Supprime une carte sans pointage, puis revient à la liste des cartes. */
+  readonly discard: () => void;
 }
 
 /**
@@ -29,6 +33,20 @@ function withdrawMessage(card: SavingsCard, method: PaymentMethod): string {
   return `Retrait de ${formatAmount(card.saved)} FCFA vers ${paymentMethodName(method)} lancé.`;
 }
 
+/** Lance une opération sur le store et annonce sa réussite. */
+type CardAct = (action: (store: PortfolioState) => void, success: string) => boolean;
+
+/**
+ * Revient à la liste avant de supprimer la carte, pour ne jamais afficher la
+ * page d'une carte disparue.
+ * @param card Carte à supprimer.
+ * @param act Lancement de l'opération.
+ */
+function discardCard(card: SavingsCard, act: CardAct): void {
+  router.back();
+  act((store) => store.deleteCard(card.id), "Carte supprimée.");
+}
+
 /**
  * Branche les opérations d'une carte sur le portefeuille local.
  * @param card Carte affichée.
@@ -36,7 +54,7 @@ function withdrawMessage(card: SavingsCard, method: PaymentMethod): string {
  */
 export function useSavingsActions(card: SavingsCard): SavingsActionsState {
   const { run } = usePortfolioFeedback();
-  const act = (action: (store: PortfolioState) => void, success: string) =>
+  const act: CardAct = (action, success) =>
     run(() => action(usePortfolioStore.getState()), success);
 
   return {
@@ -52,5 +70,6 @@ export function useSavingsActions(card: SavingsCard): SavingsActionsState {
         (store) => store.transferCardToTontine(card.id, todayUtc()),
         "Cotisation réglée : la carte repart sur une copie neuve.",
       ),
+    discard: () => discardCard(card, act),
   };
 }

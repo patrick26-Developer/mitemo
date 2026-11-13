@@ -15,6 +15,7 @@ const ACTIONS = {
   confirm: jest.fn(),
   share: jest.fn(),
   remove: jest.fn(),
+  dismiss: jest.fn(),
 } satisfies TontineActionsState;
 
 describe("TontineDetailBody", () => {

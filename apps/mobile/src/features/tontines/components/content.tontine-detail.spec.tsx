@@ -51,4 +51,16 @@ describe("TontineDetailContent", () => {
     expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Ajouter un membre" })).toBeNull();
   });
+  it("prévient qu'une tontine supprimée par son administrateur ne reçoit plus de cotisation", async () => {
+    const tontine = makeTontine({
+      deletedBy: "Grâce Mabiala",
+      members: [makeMember(SELF_MEMBER_ID, "MEMBRE"), makeMember("m2", "ADMIN")],
+    });
+    usePortfolioStore.setState({ available: 20_000n, tontines: [tontine], cards: [] });
+    await renderWithSafeArea(<TontineDetailContent item={tontine} focus={NO_FOCUS} />);
+
+    expect(
+      screen.getByText("Grâce Mabiala a supprimé la tontine. Vous ne pouvez plus cotiser."),
+    ).toBeOnTheScreen();
+  });
 });

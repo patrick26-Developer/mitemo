@@ -45,13 +45,17 @@ interface DockHandlers {
 /**
  * Choisit l'action flottante d'une tontine : lancer la tontine une fois les
  * membres réunis (l'ajout se fait depuis l'en-tête), confirmer la restourne
- * quand tout le monde a versé, ou cotiser.
+ * quand tout le monde a versé, cotiser, ou retirer de l'historique une
+ * tontine supprimée par son administrateur.
  * @param item Tontine affichée.
  * @param handlers Actions disponibles et ouverture des feuilles.
  * @returns L'action à proposer, ou `null` quand aucune n'est possible.
  */
 function primaryAction(item: Tontine, handlers: DockHandlers): DockAction | null {
   const { actions, askConfirm, askPay } = handlers;
+  if (item.deletedBy !== undefined) {
+    return { label: "Retirer de l'historique", onPress: actions.dismiss };
+  }
   if (item.state === "PENDING") return pendingAction(item, actions);
   if (item.state !== "ACTIVE") return null;
   if (canConfirmRound(item)) return { label: "Confirmer la restourne", onPress: askConfirm };

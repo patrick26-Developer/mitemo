@@ -75,6 +75,8 @@ export interface Tontine {
   readonly invitationCode: string | null;
   /** Fil de la tontine, du plus ancien au plus récent ; vide par défaut. */
   readonly activity?: readonly TontineActivity[];
+  /** Nom de l'administrateur qui a supprimé la tontine ; absent tant qu'elle existe. */
+  readonly deletedBy?: string;
 }
 
 /** Carte de pointage suivie par le membre. */
@@ -177,11 +179,13 @@ export function isTontineBeneficiary(tontine: Tontine): boolean {
 /**
  * Indique si le membre connecté peut régler sa cotisation du tour en cours.
  * @param tontine Tontine concernée.
- * @returns `true` quand il participe, n'a pas encore payé et que la tontine est active.
+ * @returns `true` quand il participe, n'a pas encore payé et que la tontine est active,
+ * sans avoir été supprimée.
  */
 export function canPayContribution(tontine: Tontine): boolean {
   const self = tontine.members.find((member) => member.id === SELF_MEMBER_ID);
-  return tontine.state === "ACTIVE" && self !== undefined && !self.paidCurrentRound;
+  const open = tontine.state === "ACTIVE" && tontine.deletedBy === undefined;
+  return open && self !== undefined && !self.paidCurrentRound;
 }
 
 /**

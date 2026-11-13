@@ -39,6 +39,15 @@ describe("canPayAhead", () => {
     expect(canPayAhead(active(2, { paidCurrentRound: true, prepaidRounds: 3 }))).toBe(false);
     expect(canPayAhead(active(5, { paidCurrentRound: true }))).toBe(false);
   });
+
+  it("refuse une avance sur une tontine supprimée", () => {
+    const paid = makeTontine({
+      deletedBy: "Grâce Mabiala",
+      members: [makeMember(SELF_MEMBER_ID, "MEMBRE", true)],
+    });
+
+    expect(canPayAhead(paid)).toBe(false);
+  });
 });
 
 describe("selfTotalDue et selfPaidTotal", () => {

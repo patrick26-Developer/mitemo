@@ -33,6 +33,7 @@ function makeActions(over: Partial<TontineActionsState> = {}): TontineActionsSta
     confirm: jest.fn(),
     share: jest.fn(),
     remove: jest.fn(),
+    dismiss: jest.fn(),
     ...over,
   };
 }
@@ -163,6 +164,21 @@ describe("TontineDetailDock", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Activer la restourne" }));
 
     expect(actions.start).toHaveBeenCalledTimes(1);
+  });
+  it("ne propose plus que de retirer de l'historique une tontine supprimée", async () => {
+    const actions = makeActions();
+    const deleted = makeTontine({
+      deletedBy: "Grâce Mabiala",
+      members: [makeMember(SELF_MEMBER_ID, "MEMBRE", false), makeMember("m2", "ADMIN", false)],
+    });
+    await renderWithSafeArea(
+      <TontineDetailDock item={deleted} actions={actions} onLayout={jest.fn()} />,
+    );
+
+    expect(screen.queryByRole("button", { name: /^Cotiser/ })).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer de l'historique" }));
+
+    expect(actions.dismiss).toHaveBeenCalledTimes(1);
   });
 });
 
