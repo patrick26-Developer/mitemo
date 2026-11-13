@@ -2,12 +2,14 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 
 import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
+import { useToastStore } from "../../../shared/feedback/store.toast";
 import { INITIAL_MEMBER_PROFILE, useMemberStore } from "../../../shared/member/store.member";
 import { INITIAL_SESSION, useSessionStore } from "../../../shared/session/store.session";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { PIN_UNAVAILABLE_MESSAGE } from "../hooks/hook.pin-validation";
 import { INITIAL_AUTH_DRAFT, useAuthDraft } from "../model/model.auth-draft";
 import { checkPin, registerPin } from "../model/model.pin-auth";
+import { usePinAttemptsStore } from "../model/store.pin-attempts";
 import { createMemoryPinAuth } from "../testing/mock.pin-auth";
 import { PinScreen } from "./screen.pin";
 
@@ -21,6 +23,12 @@ const mockPinAuth = createMemoryPinAuth();
 jest.mock("../api/deps.pin-auth", () => ({
   get PIN_AUTH_DEPS() {
     return mockPinAuth.deps;
+  },
+}));
+
+jest.mock("../../../shared/support/config.support", () => ({
+  supportApi: {
+    contact: jest.fn(async () => ({ phoneNumber: "+242065706622", maxAgeSeconds: 86_400 })),
   },
 }));
 
@@ -46,6 +54,8 @@ describe("PinScreen", () => {
     useAuthDraft.setState(INITIAL_AUTH_DRAFT);
     useMemberStore.setState(INITIAL_MEMBER_PROFILE);
     useSessionStore.setState(INITIAL_SESSION);
+    usePinAttemptsStore.setState({ failures: {} });
+    useToastStore.getState().dismiss();
   });
 
   it("affiche quatre cases et le clavier", async () => {
@@ -106,6 +116,34 @@ describe("PinScreen", () => {
     expect(useSessionStore.getState().signedIn).toBe(false);
     expect(screen.getByTestId("pin-box-0")).not.toHaveTextContent("•");
     expect(useSessionStore.getState().signedIn).toBe(false);
+  });
+
+  it("annonce en toast les essais restants après un code incorrect", async () => {
+    await registerPin({ phone: PHONE, pin: "4821" }, mockPinAuth.deps);
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await enterPin("0000");
+
+    await waitFor(() =>
+      expect(useToastStore.getState().toast?.message).toBe(
+        "Code incorrect. Il vous reste 4 essais.",
+      ),
+    );
+  });
+
+  it("suspend le compte au cinquième échec et propose le service client", async () => {
+    await registerPin({ phone: PHONE, pin: "4821" }, mockPinAuth.deps);
+    usePinAttemptsStore.setState({ failures: { [PHONE]: 4 } });
+    useAuthDraft.getState().startSignIn(PHONE);
+    await renderWithSafeArea(<PinScreen />);
+
+    await enterPin("0000");
+
+    expect(await screen.findByRole("header", { name: "Compte suspendu" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "1" })).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Changer de compte" }));
+    expect(router.replace).toHaveBeenCalledWith("/(auth)/sign-in");
   });
 
   it("signale une vérification impossible", async () => {

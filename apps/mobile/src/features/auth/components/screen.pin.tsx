@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
@@ -13,6 +14,7 @@ import { AuthLayout } from "./layout.auth";
 import { PinKeypad } from "./keypad.pin";
 import { PinRow } from "./row.pin";
 import { ForgotPinSheet } from "./sheet.forgot-pin";
+import { SuspendedNotice } from "./notice.suspended";
 
 /** Consigne de l'écran pour chaque étape du code. */
 const PIN_SUBTITLES = {
@@ -84,6 +86,13 @@ export function PinScreen() {
   const session = usePinSession();
   const [forgotOpen, setForgotOpen] = useState(false);
   if (session.missingDraft) return null;
+  if (session.suspended) {
+    return (
+      <AuthLayout>
+        <SuspendedNotice onSwitchAccount={() => router.replace("/(auth)/sign-in")} />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>

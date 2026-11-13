@@ -7,7 +7,8 @@ import { todayUtc } from "../../../shared/model/model.clock";
 import { useSessionStore } from "../../../shared/session/store.session";
 import { PIN_AUTH_DEPS } from "../api/deps.pin-auth";
 import { useAuthDraft } from "../model/model.auth-draft";
-import { checkPin, registerPin } from "../model/model.pin-auth";
+import { registerPin } from "../model/model.pin-auth";
+import { useGuardedPinCheck } from "./hook.guarded-pin";
 import { PIN_MISMATCH_MESSAGE, usePinChoice } from "./hook.pin-choice";
 
 /**
@@ -44,8 +45,8 @@ function usePinChecks(phone: string) {
     (pin: string) => registerPin({ phone, pin }, PIN_AUTH_DEPS),
     [phone],
   );
-  const check = useCallback((pin: string) => checkPin({ phone, pin }, PIN_AUTH_DEPS), [phone]);
-  return { register, check };
+  const { verify: check, suspended } = useGuardedPinCheck(phone);
+  return { register, check, suspended };
 }
 
 /**
@@ -73,5 +74,6 @@ export function usePinSession() {
     back: confirming ? choice.restart : router.back,
     rejectedMessage: confirming ? PIN_MISMATCH_MESSAGE : undefined,
     missingDraft: phone === "",
+    suspended: !isSignUp && checks.suspended,
   };
 }

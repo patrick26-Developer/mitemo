@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useToastStore } from "../../../shared/feedback/store.toast";
 import { useMemberStore } from "../../../shared/member/store.member";
 import { PIN_AUTH_DEPS } from "../api/deps.pin-auth";
-import { checkPin } from "../model/model.pin-auth";
+import { useGuardedPinCheck } from "./hook.guarded-pin";
 import {
   changePin,
   isNewPin,
@@ -28,14 +28,15 @@ interface PinChangeCodes {
  * Vérifications des trois étapes : l'actuel est reconnu, le nouveau en
  * diffère, la confirmation le reprend et remplace le code.
  * @param codes Code actuel et nouveau code déjà saisis.
+ * @param verifyCurrent Vérification du code actuel, qui compte les échecs.
  * @returns La vérification de chaque étape.
  */
-function pinChangeChecks(codes: PinChangeCodes) {
+function pinChangeChecks(codes: PinChangeCodes, verifyCurrent: (pin: string) => Promise<boolean>) {
   const phone = useMemberStore.getState().phone;
 
   return [
     {
-      verify: (pin) => checkPin({ phone, pin }, PIN_AUTH_DEPS),
+      verify: verifyCurrent,
       rejectedMessage: PIN_REJECTED_MESSAGE,
     },
     {
@@ -52,12 +53,15 @@ function pinChangeChecks(codes: PinChangeCodes) {
 /**
  * Déroule le changement de code PIN en trois étapes, puis l'annonce.
  * @param onDone Fin du changement, une fois le code remplacé.
- * @returns L'étape courante, sa vérification et le passage à la suivante.
+ * @returns L'étape courante, sa vérification, le passage à la suivante et la
+ * suspension du compte.
  */
 export function usePinChange(onDone: () => void) {
   const [step, setStep] = useState(0);
   const [codes, setCodes] = useState<PinChangeCodes>({ current: "", next: "" });
   const show = useToastStore((state) => state.show);
+  const guarded = useGuardedPinCheck(useMemberStore((state) => state.phone));
+  const checks = pinChangeChecks(codes, guarded.verify);
   const accept = (pin: string) => {
     if (step === 0) setCodes((value) => ({ ...value, current: pin }));
     if (step === 1) setCodes((value) => ({ ...value, next: pin }));
@@ -66,5 +70,5 @@ export function usePinChange(onDone: () => void) {
     onDone();
   };
 
-  return { step, check: pinChangeChecks(codes)[step] ?? pinChangeChecks(codes)[0], accept };
+  return { step, check: checks[step] ?? checks[0], accept, suspended: guarded.suspended };
 }

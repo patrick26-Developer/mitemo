@@ -3,8 +3,10 @@ import { View } from "react-native";
 import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetText } from "../../../shared/components/atoms/text.sheet";
 import { StepTransition } from "../../../shared/components/atoms/transition.step";
+import { useSessionStore } from "../../../shared/session/store.session";
 import { usePinChange } from "../hooks/hook.pin-change";
 import { PIN_CHANGE_STEPS } from "../model/model.pin-change";
+import { SuspendedNotice } from "./notice.suspended";
 import { PinChangeStepEntry } from "./step.pin-change";
 
 /** Props du changement de code PIN. */
@@ -20,8 +22,10 @@ export interface PinChangeProps {
  * @returns Le parcours de changement de code.
  */
 export function PinChange(props: PinChangeProps) {
-  const { step, check, accept } = usePinChange(props.onDone);
+  const { step, check, accept, suspended } = usePinChange(props.onDone);
+  const signOut = useSessionStore((state) => state.signOut);
   const content = PIN_CHANGE_STEPS[step] ?? PIN_CHANGE_STEPS[0];
+  if (suspended) return <SuspendedNotice onSwitchAccount={signOut} />;
 
   return (
     <View className="gap-4">

@@ -1,11 +1,11 @@
-import { useCallback } from "react";
 import Animated from "react-native-reanimated";
 
 import { useMemberStore } from "../../../shared/member/store.member";
-import { PIN_AUTH_DEPS } from "../api/deps.pin-auth";
 import { usePinEntry } from "../hooks/hook.pin-entry";
-import { checkPin } from "../model/model.pin-auth";
+import { useSessionStore } from "../../../shared/session/store.session";
+import { useGuardedPinCheck } from "../hooks/hook.guarded-pin";
 import { AuthErrorText } from "./text.auth-error";
+import { SuspendedNotice } from "./notice.suspended";
 import { PinKeypad } from "./keypad.pin";
 import { PinRow } from "./row.pin";
 
@@ -24,11 +24,14 @@ export interface PinConfirmProps {
 export function PinConfirm(props: PinConfirmProps) {
   const { onConfirmed } = props;
   const phone = useMemberStore((state) => state.phone);
-  const verify = useCallback((pin: string) => checkPin({ phone, pin }, PIN_AUTH_DEPS), [phone]);
+  const { verify, suspended } = useGuardedPinCheck(phone);
+  const signOut = useSessionStore((state) => state.signOut);
   const { pin, error, shakeStyle, pressDigit, erase } = usePinEntry({
     verify,
     onComplete: onConfirmed,
   });
+
+  if (suspended) return <SuspendedNotice onSwitchAccount={signOut} />;
 
   return (
     <>
