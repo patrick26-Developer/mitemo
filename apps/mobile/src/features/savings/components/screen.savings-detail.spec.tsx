@@ -7,6 +7,8 @@ import {
   makeMember,
   makeTontine,
 } from "../../../shared/testing/fixtures.portfolio";
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
 import { useToastStore } from "../../../shared/feedback/store.toast";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
@@ -76,6 +78,8 @@ describe("SavingsDetailScreen", () => {
   });
 
   it("pointe par l'opérateur choisi, puis l'inscrit dans l'historique", async () => {
+    useMoneyFlightStore.setState({ flight: null });
+    useCelebrationStore.setState({ burst: null });
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 500 FCFA" }));
@@ -89,6 +93,8 @@ describe("SavingsDetailScreen", () => {
     const card = firstOf(usePortfolioStore.getState().cards);
     expect(card.saved).toBe(25_000n);
     expect(card.entries.at(-1)?.method).toBe("AIRTEL_MONEY");
+    expect(useMoneyFlightStore.getState().flight?.amount).toBe(5_500n);
+    expect(useCelebrationStore.getState().burst).toBeNull();
   });
 
   it("annonce en toast un solde Mitemo insuffisant", async () => {

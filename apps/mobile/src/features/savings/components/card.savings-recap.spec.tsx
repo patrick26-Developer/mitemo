@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react-native";
 
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
 import { makeCard } from "../../../shared/testing/fixtures.portfolio";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { SavingsRecapCard } from "./card.savings-recap";
@@ -13,6 +14,13 @@ describe("SavingsRecapCard", () => {
     expect(screen.getByText("Objectif : 30 000 FCFA")).toBeOnTheScreen();
     expect(screen.getByText("En cours")).toBeOnTheScreen();
     expect(screen.getByText("4 sur 6 pointages")).toBeOnTheScreen();
+  });
+
+  it("reçoit l'argent de chaque pointage sur le montant actuel", async () => {
+    useMoneyFlightStore.setState({ measureTarget: null });
+    await renderWithSafeArea(<SavingsRecapCard item={makeCard()} tontineName={null} />);
+
+    expect(useMoneyFlightStore.getState().measureTarget).not.toBeNull();
   });
 
   it("détaille le reste, la création et l'échéance, sans frais", async () => {

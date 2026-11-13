@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { ProgressBar } from "../../../shared/components/atoms/bar.progress";
 import { NoisePattern } from "../../../shared/components/atoms/pattern.noise";
 import { AmountText } from "../../../shared/components/atoms/text.amount";
+import { MoneyFlightTarget } from "../../../shared/components/macros/target.money-flight";
 import { RecapFactList } from "../../../shared/components/macros/list.recap-facts";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { cardProgress } from "../../../shared/member/model.portfolio";
@@ -37,7 +38,9 @@ export function SavingsRecapCard(props: SavingsRecapCardProps) {
       <NoisePattern />
       <View className="gap-1">
         <Text className="text-[14px] text-ink">Montant actuel</Text>
-        <AmountText amount={item.saved} />
+        <MoneyFlightTarget>
+          <AmountText amount={item.saved} />
+        </MoneyFlightTarget>
         <RecapGoal item={item} />
       </View>
       <RecapProgress item={item} />

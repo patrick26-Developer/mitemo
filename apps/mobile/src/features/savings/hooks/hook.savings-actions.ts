@@ -1,5 +1,7 @@
 import { router } from "expo-router";
 
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
+
 import type { PortfolioState } from "../../../shared/member/model.portfolio-actions";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -9,6 +11,7 @@ import { paymentMethodLabel, paymentMethodName } from "../../../shared/model/mod
 import { formatAmount } from "../../../shared/format/format.amount";
 import { usePortfolioFeedback } from "../../../shared/hooks/hook.portfolio-feedback";
 import { todayUtc } from "../../../shared/model/model.clock";
+import { markerCharge } from "../model/model.card-pay";
 
 /** Actions offertes sur une carte de pointage ; leur résultat sort en toast. */
 export interface SavingsActionsState {
@@ -52,6 +55,23 @@ function discardCard(card: SavingsCard, act: CardAct): void {
 }
 
 /**
+ * Règle le prochain pointage, puis fait voler le montant prélevé jusqu'à la
+ * somme de la carte, où la fête se lance à l'arrivée.
+ * @param card Carte à pointer.
+ * @param act Exécution d'une opération, avec son message de succès.
+ * @param method Moyen de paiement choisi.
+ */
+function payMarker(card: SavingsCard, act: CardAct, method: PaymentMethod): void {
+  const charge = markerCharge(card);
+  const paid = act(
+    (store) => store.contributeCard(card.id, { at: nowIsoUtc(), method }),
+    `Pointage réglé par ${paymentMethodLabel(method)}.`,
+    false,
+  );
+  if (paid) useMoneyFlightStore.getState().launch(charge);
+}
+
+/**
  * Branche les opérations d'une carte sur le portefeuille local.
  * @param card Carte affichée.
  * @returns Les actions de la carte.
@@ -62,11 +82,7 @@ export function useSavingsActions(card: SavingsCard): SavingsActionsState {
     run(() => action(usePortfolioStore.getState()), success, festive);
 
   return {
-    contribute: (method) =>
-      act(
-        (store) => store.contributeCard(card.id, { at: nowIsoUtc(), method }),
-        `Pointage réglé par ${paymentMethodLabel(method)}.`,
-      ),
+    contribute: (method) => payMarker(card, act, method),
     withdraw: (method) =>
       act((store) => store.withdrawCard(card.id, method), withdrawMessage(card, method)),
     transfer: () =>

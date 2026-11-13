@@ -9,6 +9,7 @@ import { CardReminders } from "../src/features/savings";
 import { MotionConfig } from "../src/shared/components/atoms/config.motion";
 import { AppBadgeSync } from "../src/shared/components/atoms/sync.app-badge";
 import { CelebrationHost } from "../src/shared/components/macros/host.celebration";
+import { MoneyFlightHost } from "../src/shared/components/macros/host.money-flight";
 import { ConnectionHost } from "../src/shared/components/macros/host.connection";
 import { ToastHost } from "../src/shared/components/macros/host.toast";
 import { useSessionStore } from "../src/shared/session/store.session";
@@ -59,6 +60,7 @@ export default function RootLayout() {
       </Stack>
       <ConnectionHost />
       <ToastHost />
+      <MoneyFlightHost />
       <CelebrationHost />
       <SplashGate />
     </KeyboardProvider>

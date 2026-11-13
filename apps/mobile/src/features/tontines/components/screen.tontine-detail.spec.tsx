@@ -3,6 +3,8 @@ import { act, fireEvent, screen } from "@testing-library/react-native";
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { firstOf, makeMember, makeTontine } from "../../../shared/testing/fixtures.portfolio";
+import { useCelebrationStore } from "../../../shared/feedback/store.celebration";
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
 import { useToastStore } from "../../../shared/feedback/store.toast";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { TontineDetailScreen } from "./screen.tontine-detail";
@@ -61,6 +63,8 @@ describe("TontineDetailScreen", () => {
   });
 
   it("cotise depuis le dock par Airtel Money, validé sur le téléphone", async () => {
+    useMoneyFlightStore.setState({ flight: null });
+    useCelebrationStore.setState({ burst: null });
     await renderWithSafeArea(<TontineDetailScreen id="2" />);
 
     await fireEvent.press(screen.getByRole("button", { name: /^Cotiser/ }));
@@ -76,6 +80,8 @@ describe("TontineDetailScreen", () => {
         (member) => member.id === SELF_MEMBER_ID,
       )?.paidCurrentRound,
     ).toBe(true);
+    expect(useMoneyFlightStore.getState().flight).not.toBeNull();
+    expect(useCelebrationStore.getState().burst).toBeNull();
   });
 
   it("demande confirmation avant de verser la restourne du tour", async () => {

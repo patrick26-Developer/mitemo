@@ -1,5 +1,9 @@
 import { router } from "expo-router";
 
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
+import { contributionCharge } from "../../../shared/member/model.contribution-fee";
+import { selfDue } from "../../../shared/member/model.tontine-turns";
+
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { PortfolioState } from "../../../shared/member/model.portfolio-actions";
 import type { MemberContact } from "../../../shared/member/model.portfolio-create";
@@ -10,7 +14,11 @@ import { paymentMethodLabel } from "../../../shared/model/model.payment-method";
 import { shareInvitation } from "../api/api.share-invitation";
 
 /** Exécution d'une opération du portefeuille, avec son message de succès. */
-type RunAction = (action: (store: PortfolioState) => void, success: string | null) => boolean;
+type RunAction = (
+  action: (store: PortfolioState) => void,
+  success: string | null,
+  festive?: boolean,
+) => boolean;
 
 /** Actions offertes sur une tontine ; leur résultat sort en toast. */
 export interface TontineActionsState {
@@ -42,10 +50,13 @@ type TontineHandlers = TontineActionsState;
  */
 function contributeHandler(tontine: Tontine, act: RunAction): (method: PaymentMethod) => void {
   return (method) => {
-    act(
+    const charge = contributionCharge(selfDue(tontine));
+    const paid = act(
       (store) => store.contributeTontine(tontine.id),
       `Cotisation réglée par ${paymentMethodLabel(method)}.`,
+      false,
     );
+    if (paid) useMoneyFlightStore.getState().launch(charge);
   };
 }
 
@@ -102,8 +113,8 @@ function tontineHandlers(tontine: Tontine, act: RunAction): TontineHandlers {
  */
 export function useTontineActions(tontine: Tontine): TontineActionsState {
   const { run } = usePortfolioFeedback();
-  const act: RunAction = (action, success) =>
-    run(() => action(usePortfolioStore.getState()), success);
+  const act: RunAction = (action, success, festive = true) =>
+    run(() => action(usePortfolioStore.getState()), success, festive);
 
   return tontineHandlers(tontine, act);
 }

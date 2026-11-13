@@ -1,9 +1,17 @@
 import { render, screen } from "@testing-library/react-native";
 
+import { useMoneyFlightStore } from "../../../shared/feedback/store.money-flight";
 import { makeTontine } from "../../../shared/testing/fixtures.portfolio";
 import { TontineRecapCard } from "./card.tontine-recap";
 
 describe("TontineRecapCard", () => {
+  it("reçoit l'argent de chaque cotisation", async () => {
+    useMoneyFlightStore.setState({ measureTarget: null });
+    await render(<TontineRecapCard item={makeTontine({ contribution: 10_000n })} />);
+
+    expect(useMoneyFlightStore.getState().measureTarget).not.toBeNull();
+  });
+
   it("réunit la cotisation, le plan, l'avancement et les informations du tour", async () => {
     await render(<TontineRecapCard item={makeTontine({ contribution: 10_000n })} />);
 

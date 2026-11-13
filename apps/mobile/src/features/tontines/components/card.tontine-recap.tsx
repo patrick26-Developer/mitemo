@@ -7,6 +7,7 @@ import { ProgressBar } from "../../../shared/components/atoms/bar.progress";
 import { FactPillIcon } from "../../../shared/components/atoms/icon.fact-pill";
 import { NoisePattern } from "../../../shared/components/atoms/pattern.noise";
 import { AmountText } from "../../../shared/components/atoms/text.amount";
+import { MoneyFlightTarget } from "../../../shared/components/macros/target.money-flight";
 import { RecapFactList } from "../../../shared/components/macros/list.recap-facts";
 import type { Tontine } from "../../../shared/member/model.portfolio";
 import type { TontineFactKind } from "../model/model.tontine-recap";
@@ -55,7 +56,9 @@ export function TontineRecapCard(props: TontineRecapCardProps) {
       <NoisePattern />
       <View className="gap-1">
         <Text className="text-[14px] text-ink">Cotisation du tour</Text>
-        <AmountText amount={item.contribution} />
+        <MoneyFlightTarget>
+          <AmountText amount={item.contribution} />
+        </MoneyFlightTarget>
         <TontineGoal item={item} />
       </View>
       <TontineProgress item={item} />
