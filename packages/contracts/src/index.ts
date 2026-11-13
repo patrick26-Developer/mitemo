@@ -20,6 +20,7 @@ export type {
   UserId,
 } from "./identifiers.ts";
 export type { HealthResponse } from "./health.ts";
+export type { SupportContactResponse } from "./support.ts";
 export { API_ERROR_CODES } from "./api-error.ts";
 export type { ApiErrorCode, ApiErrorResponse, ApiFieldError } from "./api-error.ts";
 export {
