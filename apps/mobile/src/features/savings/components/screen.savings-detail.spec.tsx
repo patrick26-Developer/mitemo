@@ -71,14 +71,14 @@ describe("SavingsDetailScreen", () => {
   it("propose de pointer, sans retrait tant que la carte n'est pas remplie", async () => {
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 
-    expect(screen.getByRole("button", { name: "Pointer 5 000 FCFA" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Pointer 5 500 FCFA" })).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Retirer" })).not.toBeOnTheScreen();
   });
 
   it("pointe par l'opérateur choisi, puis l'inscrit dans l'historique", async () => {
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 500 FCFA" }));
     jest.useFakeTimers();
     await fireEvent.press(screen.getByRole("button", { name: "Payer avec Airtel Money" }));
     await act(async () => {
@@ -95,7 +95,7 @@ describe("SavingsDetailScreen", () => {
     usePortfolioStore.setState({ available: 0n });
     await renderWithSafeArea(<SavingsDetailScreen id="1" />);
 
-    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 500 FCFA" }));
     await fireEvent.press(screen.getByRole("button", { name: "Payer avec Mitemo" }));
     await fireEvent.press(screen.getByRole("button", { name: "Code juste" }));
 

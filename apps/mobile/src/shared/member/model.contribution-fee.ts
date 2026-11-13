@@ -12,6 +12,17 @@ export function contributionFee(due: bigint): bigint {
 }
 
 /** Frais d'une carte et nombre de pointages sur lesquels les répartir. */
+/**
+ * Montant réellement prélevé pour une cotisation : la cotisation et sa part
+ * des frais, affiché tel quel au membre.
+ * @param due Cotisation due, en plus petite unité de la devise.
+ * @returns Le montant prélevé, en plus petite unité de la devise.
+ */
+export function contributionCharge(due: bigint): bigint {
+  return due + contributionFee(due);
+}
+
+/** Plan des frais d'une carte, réparti sur ses pointages. */
 export interface CardFeePlan {
   /** Frais de la carte, 10 % de l'objectif, en plus petite unité de la devise. */
   readonly fee: bigint;

@@ -2,10 +2,9 @@ import { makeCard } from "../../../shared/testing/fixtures.portfolio";
 import { recapFactRows, recapGoalLines } from "./model.card-recap";
 
 describe("recapFactRows", () => {
-  it("liste le reste, les frais, la création et l'échéance d'une carte indépendante", () => {
+  it("liste le reste, la création et l'échéance d'une carte indépendante, sans frais", () => {
     expect(recapFactRows(makeCard(), null)).toEqual([
       { kind: "remaining", label: "Reste à épargner", value: "10 000 FCFA" },
-      { kind: "fee", label: "Frais Mitemo (10 %)", value: "3 000 FCFA" },
       { kind: "created", label: "Créée le", value: "1 novembre 2026" },
       { kind: "deadline", label: "Échéance", value: "31 décembre 2026" },
     ]);

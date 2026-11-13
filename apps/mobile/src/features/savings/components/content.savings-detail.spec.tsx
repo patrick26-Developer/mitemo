@@ -33,7 +33,7 @@ describe("SavingsDetailContent", () => {
     usePortfolioStore.setState({ available: 20_000n, tontines: [], cards: [card] });
     await renderWithSafeArea(<SavingsDetailContent item={card} />);
 
-    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
+    expect(screen.getByText("Reste à épargner")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Carte complète" })).toBeOnTheScreen();
     expect(screen.getByText("02/11/2026 à 10:15")).toBeOnTheScreen();
   });

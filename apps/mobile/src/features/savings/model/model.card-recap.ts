@@ -1,11 +1,10 @@
 import { formatAmount } from "../../../shared/format/format.amount";
 import { formatLongDate } from "../../../shared/format/format.date";
-import { CARD_FEE_PERCENT } from "../../../shared/member/model.card-fee";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { cardGoal, formatFrequency, remainingToSave } from "../../../shared/member/model.portfolio";
 
 /** Nature de chaque ligne du récapitulatif, qui décide de son icône. */
-export const RECAP_FACT_KINDS = ["remaining", "fee", "created", "deadline", "tontine"] as const;
+export const RECAP_FACT_KINDS = ["remaining", "created", "deadline", "tontine"] as const;
 
 /** Nature d'une ligne du récapitulatif. Voir {@link RECAP_FACT_KINDS}. */
 export type RecapFactKind = (typeof RECAP_FACT_KINDS)[number];
@@ -18,8 +17,9 @@ export interface RecapFactRow {
 }
 
 /**
- * Construit les lignes d'information d'une carte : reste à épargner, frais
- * Mitemo, création, échéance, puis tontine liée quand elle existe.
+ * Construit les lignes d'information d'une carte : reste à épargner,
+ * création, échéance, puis tontine liée quand elle existe. Les frais ne
+ * s'affichent pas : ils sont prélevés discrètement à chaque pointage.
  * @param card Carte concernée.
  * @param tontineName Nom de la tontine liée, `null` quand la carte est indépendante.
  * @returns Les lignes, dans l'ordre d'affichage.
@@ -31,7 +31,6 @@ export function recapFactRows(
   const fcfa = (amount: bigint) => `${formatAmount(amount)} FCFA`;
   const rows: RecapFactRow[] = [
     { kind: "remaining", label: "Reste à épargner", value: fcfa(remainingToSave(card)) },
-    { kind: "fee", label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`, value: fcfa(card.fee) },
     { kind: "created", label: "Créée le", value: formatLongDate(card.startDate) },
     { kind: "deadline", label: "Échéance", value: formatLongDate(card.deadline) },
   ];

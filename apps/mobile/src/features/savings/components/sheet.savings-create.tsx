@@ -1,4 +1,4 @@
-import { CalendarCheck, Coins, Link, Receipt, Target } from "lucide-react-native";
+import { CalendarCheck, Coins, Link, Target } from "lucide-react-native";
 import { SheetDateField } from "../../../shared/components/macros/field.sheet-date";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -10,7 +10,6 @@ import { FactList } from "../../../shared/components/macros/list.facts";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { Tontine } from "../../../shared/member/model.portfolio";
-import { CARD_FEE_PERCENT } from "../../../shared/member/model.card-fee";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
 import { tomorrowUtc } from "../../../shared/model/model.clock";
 import { FREQUENCY_SELECT_GROUPS } from "../../../shared/model/model.frequency";
@@ -98,14 +97,6 @@ function recapRows(recap: SavingsRecap, tontine: string | null): readonly FactIt
     recap.goal === null
       ? null
       : { id: "goal", icon: Target, label: "Objectif", value: `${formatAmount(recap.goal)} FCFA` },
-    recap.fee === null
-      ? null
-      : {
-          id: "fee",
-          icon: Receipt,
-          label: `Frais Mitemo (${CARD_FEE_PERCENT} %)`,
-          value: `${formatAmount(recap.fee)} FCFA`,
-        },
     recap.markerAmount === null
       ? null
       : {

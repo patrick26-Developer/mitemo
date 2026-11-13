@@ -15,13 +15,12 @@ describe("SavingsRecapCard", () => {
     expect(screen.getByText("4 sur 6 pointages")).toBeOnTheScreen();
   });
 
-  it("détaille le reste, les frais, la création et l'échéance", async () => {
+  it("détaille le reste, la création et l'échéance, sans frais", async () => {
     await renderWithSafeArea(<SavingsRecapCard item={makeCard()} tontineName={null} />);
 
     expect(screen.getByText("Reste à épargner")).toBeOnTheScreen();
     expect(screen.getByText("10 000 FCFA")).toBeOnTheScreen();
-    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
-    expect(screen.getByText("3 000 FCFA")).toBeOnTheScreen();
+    expect(screen.queryByText(/Frais/)).toBeNull();
     expect(screen.getByText("Créée le")).toBeOnTheScreen();
     expect(screen.getByText("1 novembre 2026")).toBeOnTheScreen();
     expect(screen.getByText("Échéance")).toBeOnTheScreen();
@@ -46,7 +45,7 @@ describe("SavingsRecapCard", () => {
   it("sépare chaque ligne d'information par un trait", async () => {
     await renderWithSafeArea(<SavingsRecapCard item={makeCard()} tontineName={null} />);
 
-    expect(screen.getAllByTestId("recap-fact-divider")).toHaveLength(3);
+    expect(screen.getAllByTestId("recap-fact-divider")).toHaveLength(2);
   });
 
   it("pose une petite icône devant chaque ligne d'information", async () => {
@@ -54,7 +53,7 @@ describe("SavingsRecapCard", () => {
       <SavingsRecapCard item={makeCard({ tontineId: "t1" })} tontineName="Tontine du Marché" />,
     );
 
-    for (const kind of ["remaining", "fee", "created", "deadline", "tontine"]) {
+    for (const kind of ["remaining", "created", "deadline", "tontine"]) {
       expect(screen.getByTestId(`recap-fact-icon-${kind}`)).toBeOnTheScreen();
     }
   });
@@ -64,7 +63,7 @@ describe("SavingsRecapCard", () => {
       <SavingsRecapCard item={makeCard({ tontineId: "t1" })} tontineName="Tontine du Marché" />,
     );
 
-    expect(screen.getAllByTestId("recap-fact-divider")).toHaveLength(4);
+    expect(screen.getAllByTestId("recap-fact-divider")).toHaveLength(3);
   });
 
   it("détaille l'objectif, le montant et la fréquence sous le montant actuel", async () => {

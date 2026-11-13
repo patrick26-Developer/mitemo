@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { markerCharge } from "../model/model.card-pay";
 import type { LayoutChangeEvent } from "react-native";
 
 import { ActionsDock } from "../../../shared/components/macros/dock.actions";
@@ -26,7 +27,7 @@ export interface SavingsDetailDockProps {
 
 /**
  * Construit l'action « Pointer », à la teinte de la carte, quand un marqueur
- * peut encore être ajouté.
+ * peut encore être ajouté, avec le montant réellement prélevé, frais compris.
  * @param item Carte affichée.
  * @param onPress Ouverture de la feuille de paiement.
  * @returns L'action principale du dock, ou `null`.
@@ -34,7 +35,7 @@ export interface SavingsDetailDockProps {
 function pointAction(item: SavingsCard, onPress: () => void): DockAction | null {
   if (!cardCapabilities(item).canContribute) return null;
 
-  return { label: `Pointer ${formatAmount(item.markerAmount)} FCFA`, onPress, accent: item.tint };
+  return { label: `Pointer ${formatAmount(markerCharge(item))} FCFA`, onPress, accent: item.tint };
 }
 
 /** Confirmation de la suppression d'une carte. */

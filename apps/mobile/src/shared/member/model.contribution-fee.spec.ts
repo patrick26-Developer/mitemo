@@ -1,4 +1,4 @@
-import { contributionFee, markerFee } from "./model.contribution-fee";
+import { contributionCharge, contributionFee, markerFee } from "./model.contribution-fee";
 
 describe("contributionFee", () => {
   it("ajoute 10 % à la cotisation du membre : 500 FCFA en coûtent 550", () => {
@@ -57,5 +57,11 @@ describe("markerFee", () => {
 
   it("ne demande aucun frais au-delà du dernier pointage", () => {
     expect(markerFee({ fee: 3_000n, markersTotal: 6 }, 6)).toBe(0n);
+  });
+});
+
+describe("contributionCharge", () => {
+  it("rend le montant réellement prélevé : la cotisation et sa part des frais", () => {
+    expect(contributionCharge(5_000n)).toBe(5_500n);
   });
 });

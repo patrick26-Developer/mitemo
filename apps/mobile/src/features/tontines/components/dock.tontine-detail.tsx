@@ -14,6 +14,7 @@ import {
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
+import { contributionCharge } from "../../../shared/member/model.contribution-fee";
 import { freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
 import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
 
@@ -83,12 +84,13 @@ function pendingAction(item: Tontine, actions: TontineActionsState): DockAction 
 /**
  * Propose de cotiser le tour en cours, ou le tour suivant d'avance une fois
  * le tour réglé, tant que le total (cotisation × tours) n'est pas atteint.
+ * Le bouton annonce le montant réellement prélevé, frais compris.
  * @param item Tontine affichée.
  * @param askPay Ouvre la feuille de paiement.
  * @returns L'action de cotisation, ou `null` quand tout est déjà versé.
  */
 function payAction(item: Tontine, askPay: () => void): DockAction | null {
-  const amount = `${formatAmount(selfDue(item))} FCFA`;
+  const amount = `${formatAmount(contributionCharge(selfDue(item)))} FCFA`;
   if (canPayContribution(item)) return { label: `Cotiser ${amount}`, onPress: askPay };
   if (canPayAhead(item)) return { label: `Cotiser d'avance ${amount}`, onPress: askPay };
 

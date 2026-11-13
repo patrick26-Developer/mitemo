@@ -40,7 +40,7 @@ describe("SavingsDetailDock", () => {
       <SavingsDetailDock item={makeCard()} actions={actions} onLayout={jest.fn()} />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Pointer 5 500 FCFA" }));
     jest.useFakeTimers();
     await fireEvent.press(screen.getByRole("button", { name: "Payer avec MTN MoMo" }));
     await act(async () => {

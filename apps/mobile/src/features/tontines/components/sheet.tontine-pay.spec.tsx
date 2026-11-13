@@ -22,13 +22,12 @@ describe("TontinePaySheet", () => {
     expect(screen.getByRole("button", { name: "Payer avec Mitemo" })).toBeOnTheScreen();
   });
 
-  it("ajoute à la cotisation sa part des frais Mitemo, 10 % du tour partagés entre les membres", async () => {
+  it("affiche un seul montant, la part des frais comprise, sans ligne de frais", async () => {
     await renderWithSafeArea(
       <TontinePaySheet visible item={TONTINE} onClose={jest.fn()} onPay={jest.fn()} />,
     );
 
-    expect(screen.getByText("Frais Mitemo (10 %)")).toBeOnTheScreen();
-    expect(screen.getByText("500 FCFA")).toBeOnTheScreen();
+    expect(screen.queryByText(/Frais/)).toBeNull();
     expect(screen.getByText("5 500 FCFA")).toBeOnTheScreen();
   });
 

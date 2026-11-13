@@ -52,7 +52,7 @@ describe("TontineDetailDock", () => {
       <TontineDetailDock item={makeTontine()} actions={actions} onLayout={jest.fn()} />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Cotiser 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Cotiser 5 500 FCFA" }));
     expect(actions.contribute).not.toHaveBeenCalled();
 
     jest.useFakeTimers();
@@ -84,7 +84,7 @@ describe("TontineDetailDock", () => {
       />,
     );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Cotiser d'avance 5 000 FCFA" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Cotiser d'avance 5 500 FCFA" }));
 
     expect(await screen.findByText("2 sur 3")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
