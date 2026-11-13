@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 
+import { useOnline } from "../../../shared/hooks/hook.online";
 import { SheetSecondaryButton } from "../../../shared/components/atoms/button.sheet-secondary";
 import type { SavingsCard, Tontine } from "../../../shared/member/model.portfolio";
 import { canPayContribution, cardCapabilities } from "../../../shared/member/model.portfolio";
@@ -20,7 +21,8 @@ export interface SavingsTontinePanelProps {
 export function SavingsTontinePanel(props: SavingsTontinePanelProps) {
   const { item, tontine, onTransfer } = props;
 
-  if (!cardCapabilities(item).canTransfer || !canPayContribution(tontine)) return null;
+  const online = useOnline();
+  if (!online || !cardCapabilities(item).canTransfer || !canPayContribution(tontine)) return null;
 
   return (
     <View className="gap-2 rounded-[18px] border border-card-border p-4">

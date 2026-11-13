@@ -2,6 +2,8 @@ import { StyleSheet, View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useOnline } from "../../hooks/hook.online";
+import { offlineDock } from "../../model/model.offline-dock";
 import { SheetPrimaryButton } from "../atoms/button.sheet-primary";
 import type { SheetButtonTone } from "../atoms/button.sheet-primary";
 import { SheetSecondaryButton } from "../atoms/button.sheet-secondary";
@@ -122,13 +124,18 @@ function DockActions(props: DockActionsProps) {
  * Pose les actions principales d'un écran de détail en bas, au-dessus de la
  * zone sûre, sans fond ni barre : seuls les boutons flottent sur le contenu,
  * qui reste touchable entre eux. Le dock reste visible quand le contenu défile ;
- * les retours d'opération sortent en toast.
+ * les retours d'opération sortent en toast. Hors connexion, les transactions
+ * laissent place à un bouton grisé « Hors connexion ».
  * @param props Action principale, action secondaire et mesure.
  * @returns Le dock d'actions ; sans action, un repère vide de hauteur nulle,
  * pour que le contenu cesse de réserver la place des boutons.
  */
 export function ActionsDock(props: ActionsDockProps) {
-  const { primary, secondary = null, onLayout } = props;
+  const { primary, secondary } = offlineDock(
+    { primary: props.primary, secondary: props.secondary ?? null },
+    useOnline(),
+  );
+  const { onLayout } = props;
   const insets = useSafeAreaInsets();
 
   if (primary === null && secondary === null) {

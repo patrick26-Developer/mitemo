@@ -1,7 +1,13 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
+import { useNetworkState } from "expo-network";
+
 import { ActionsDock } from "./dock.actions";
+
+jest.mock("expo-network", () => ({
+  useNetworkState: jest.fn(() => ({ isConnected: true, isInternetReachable: true })),
+}));
 
 describe("ActionsDock", () => {
   it("affiche l'action principale et l'action secondaire", async () => {
@@ -20,6 +26,22 @@ describe("ActionsDock", () => {
 
     expect(onPrimary).toHaveBeenCalledTimes(1);
     expect(onSecondary).toHaveBeenCalledTimes(1);
+  });
+
+  it("bloque les transactions hors connexion par un bouton grisé", async () => {
+    jest
+      .mocked(useNetworkState)
+      .mockReturnValueOnce({ isConnected: false, isInternetReachable: false });
+    await renderWithSafeArea(
+      <ActionsDock
+        primary={{ label: "Pointer 5 000 FCFA", onPress: jest.fn() }}
+        secondary={{ label: "Retirer", onPress: jest.fn() }}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Pointer 5 000 FCFA" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Retirer" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Hors connexion" })).toBeDisabled();
   });
 
   it("prend toute la largeur quand seule l'action secondaire existe", async () => {
