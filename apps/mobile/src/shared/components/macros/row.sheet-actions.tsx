@@ -10,6 +10,12 @@ export interface SheetRowAction {
   readonly onPress: () => void;
 }
 
+/** Action secondaire, bordée de rouge quand elle est grave. */
+export interface SheetRowSecondaryAction extends SheetRowAction {
+  /** `danger` pour une action grave, bordée de rouge. */
+  readonly tone?: "danger";
+}
+
 /** Action principale d'une feuille, éventuellement destructive. */
 export interface SheetRowPrimaryAction extends SheetRowAction {
   readonly tone?: SheetButtonTone;
@@ -19,7 +25,7 @@ export interface SheetRowPrimaryAction extends SheetRowAction {
 
 /** Props de la ligne d'actions. */
 export interface SheetActionRowProps {
-  readonly secondary: SheetRowAction;
+  readonly secondary: SheetRowSecondaryAction;
   readonly primary: SheetRowPrimaryAction;
 }
 
@@ -35,7 +41,11 @@ export function SheetActionRow(props: SheetActionRowProps) {
   return (
     <View testID="sheet-action-row" style={ROW_STYLE} className="gap-3">
       <View className="flex-1">
-        <SheetSecondaryButton label={secondary.label} onPress={secondary.onPress} />
+        <SheetSecondaryButton
+          label={secondary.label}
+          onPress={secondary.onPress}
+          {...(secondary.tone === undefined ? {} : { tone: secondary.tone })}
+        />
       </View>
       <View className="flex-1">
         <SheetPrimaryButton

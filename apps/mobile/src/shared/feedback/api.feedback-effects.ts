@@ -4,15 +4,23 @@ import { NotificationFeedbackType, notificationAsync } from "expo-haptics";
 
 import addSound from "../../../assets/sounds/add.wav";
 import coinSound from "../../../assets/sounds/coin.wav";
+import farewellSound from "../../../assets/sounds/farewell.wav";
 import paySound from "../../../assets/sounds/pay.wav";
 import successSound from "../../../assets/sounds/success.wav";
 
 /** Sons de l'application, synthétisés pour Mitemo. */
-const SOUNDS = { success: successSound, coin: coinSound, add: addSound, pay: paySound } as const;
+const SOUNDS = {
+  success: successSound,
+  coin: coinSound,
+  add: addSound,
+  pay: paySound,
+  farewell: farewellSound,
+} as const;
 
 /**
  * Un son de l'application : le carillon de réussite, la pièce qui arrive,
- * le « pop » d'un ajout ou le tintement d'un paiement lancé.
+ * le « pop » d'un ajout, le tintement d'un paiement lancé ou l'au revoir
+ * d'une déconnexion.
  */
 export type FeedbackSound = keyof typeof SOUNDS;
 

@@ -1,17 +1,15 @@
 import { signOutMessage } from "./model.sign-out";
 
 describe("signOutMessage", () => {
-  it("s'adresse au membre par son prénom", () => {
-    expect(signOutMessage("Grâce MBEMBA")).toMatch(
-      /^Nous sommes désolés de vous voir partir, Grâce\./,
-    );
+  it("garde le prénom à part, pour le mettre en gras", () => {
+    expect(signOutMessage("Grâce MBEMBA").firstName).toBe("Grâce");
   });
 
   it("reste poli sans prénom", () => {
-    expect(signOutMessage("")).toMatch(/^Nous sommes désolés de vous voir partir\./);
+    expect(signOutMessage("").firstName).toBe("");
   });
 
   it("rappelle ce que le membre manquerait en partant", () => {
-    expect(signOutMessage("Grâce")).toMatch(/rappels de cotisation/);
+    expect(signOutMessage("Grâce").reasons).toMatch(/rappels de cotisation/);
   });
 });

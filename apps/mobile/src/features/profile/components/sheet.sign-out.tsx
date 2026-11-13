@@ -1,9 +1,9 @@
 import { HeartCrack } from "lucide-react-native";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 
-import { SheetText } from "../../../shared/components/atoms/text.sheet";
 import { SheetActionRow } from "../../../shared/components/macros/row.sheet-actions";
 import { BottomSheet } from "../../../shared/components/macros/sheet.bottom";
+import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 import { useMemberStore } from "../../../shared/member/store.member";
 import { useSessionStore } from "../../../shared/session/store.session";
 import { PALETTE } from "../../../shared/theme/theme.palette";
@@ -16,19 +16,19 @@ export interface SignOutSheetProps {
 }
 
 /**
- * Feuille de déconnexion : elle dit au membre qu'on est désolé de le voir
- * partir et l'invite à rester, sans lui retirer la possibilité de partir.
+ * Feuille de déconnexion : elle dit au membre, prénom en gras, qu'on est
+ * désolé de le voir partir et l'invite à rester. « Je me déconnecte » reste
+ * possible, bordé de rouge comme une action grave, avec un son d'au revoir.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille de déconnexion.
  */
 export function SignOutSheet(props: SignOutSheetProps) {
   const { visible, onClose } = props;
   const signOut = useSessionStore((state) => state.signOut);
-  const message = signOutMessage(useMemberStore((state) => state.name));
-  const leave = () => {
+  const leave = withTapSound("farewell", () => {
     onClose();
     signOut();
-  };
+  });
 
   return (
     <BottomSheet
@@ -37,17 +37,41 @@ export function SignOutSheet(props: SignOutSheetProps) {
       onClose={onClose}
       footer={
         <SheetActionRow
-          secondary={{ label: "Me déconnecter", onPress: leave }}
-          primary={{ label: "Rester connecté", onPress: onClose }}
+          secondary={{ label: "Je me déconnecte", onPress: leave, tone: "danger" }}
+          primary={{ label: "Je reste", onPress: onClose }}
         />
       }
     >
-      <View className="items-center gap-4">
-        <View className="h-16 w-16 items-center justify-center rounded-full bg-[#FDECEA]">
-          <HeartCrack size={30} color={PALETTE.danger} strokeWidth={2} />
-        </View>
-        <SheetText>{message}</SheetText>
-      </View>
+      <SignOutMessageView />
     </BottomSheet>
   );
 }
+
+/**
+ * Cœur brisé, bien aéré, puis les excuses adressées au membre par son prénom.
+ * @returns Le message de la feuille.
+ */
+function SignOutMessageView() {
+  const { firstName, reasons } = signOutMessage(useMemberStore((state) => state.name));
+
+  return (
+    <View className="items-center gap-5 py-4">
+      <View className="h-16 w-16 items-center justify-center rounded-full bg-[#FDECEA]">
+        <HeartCrack size={30} color={PALETTE.danger} strokeWidth={2} />
+      </View>
+      <Text className="text-center text-[14px] leading-5 text-muted">
+        Nous sommes désolés de vous voir partir
+        {firstName === "" ? null : (
+          <>
+            {", "}
+            <Text style={BOLD}>{firstName}</Text>
+          </>
+        )}
+        {`. ${reasons}`}
+      </Text>
+    </View>
+  );
+}
+
+/** Prénom en gras, porté par `style` pour rester vérifiable en test. */
+const BOLD = { fontWeight: "700", color: PALETTE.ink } as const;
