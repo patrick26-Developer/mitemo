@@ -1,4 +1,5 @@
 import type { FeedbackKind } from "../components/atoms/banner.feedback";
+import { firstNameOf } from "./model.first-name";
 
 /** Durée d'un toast de réussite, en millisecondes : une seconde, juste le temps de le voir. */
 export const SUCCESS_TOAST_MS = 1000;
@@ -14,7 +15,7 @@ const ERROR_TOAST_MS = 2500;
  */
 export function toastTitle(kind: FeedbackKind, name: string): string {
   if (kind === "error") return "Un petit souci";
-  const firstName = name.trim().split(/\s+/)[0] ?? "";
+  const firstName = firstNameOf(name);
 
   return firstName === "" ? "Bravo !" : `Bravo ${firstName} !`;
 }

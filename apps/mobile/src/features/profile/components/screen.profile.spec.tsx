@@ -247,9 +247,7 @@ describe("ProfileScreen", () => {
 
     fireEvent.press(screen.getByRole("button", { name: "Se déconnecter" }));
 
-    expect(
-      await screen.findByRole("button", { name: "Confirmer la déconnexion" }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByRole("button", { name: "Me déconnecter" })).toBeOnTheScreen();
   });
 
   it("n'affiche plus l'ancienneté dans l'en-tête", async () => {
