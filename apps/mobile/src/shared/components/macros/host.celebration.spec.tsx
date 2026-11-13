@@ -1,6 +1,10 @@
 import { act, screen } from "@testing-library/react-native";
 import { Vibration } from "react-native";
 
+import {
+  INITIAL_FEEDBACK_PREFERENCES,
+  useFeedbackPreferences,
+} from "../../feedback/store.feedback-preferences";
 import { useCelebrationStore } from "../../feedback/store.celebration";
 import { renderWithSafeArea } from "../../testing/util.render-with-safe-area";
 import { CELEBRATION_MS, CelebrationHost } from "./host.celebration";
@@ -8,8 +12,12 @@ import { CELEBRATION_MS, CelebrationHost } from "./host.celebration";
 describe("CelebrationHost", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.spyOn(Vibration, "vibrate").mockImplementation(() => undefined);
+    jest
+      .spyOn(Vibration, "vibrate")
+      .mockImplementation(() => undefined)
+      .mockClear();
     useCelebrationStore.setState({ burst: null });
+    useFeedbackPreferences.setState(INITIAL_FEEDBACK_PREFERENCES);
   });
 
   afterEach(() => {
@@ -41,5 +49,14 @@ describe("CelebrationHost", () => {
 
     expect(screen.queryByTestId("celebration-host")).toBeNull();
     expect(useCelebrationStore.getState().burst).toBeNull();
+  });
+  it("ne fait ni confettis ni vibration quand le membre les a coupés", async () => {
+    useFeedbackPreferences.setState({ confetti: false, vibration: false });
+    await renderWithSafeArea(<CelebrationHost />);
+
+    await act(() => useCelebrationStore.getState().celebrate());
+
+    expect(screen.queryAllByTestId("confetti-piece")).toHaveLength(0);
+    expect(Vibration.vibrate).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { StyleSheet, useWindowDimensions, Vibration, View } from "react-native";
 
+import { useFeedbackPreferences } from "../../feedback/store.feedback-preferences";
 import { useCelebrationStore } from "../../feedback/store.celebration";
 import { confettiPieces } from "../../model/model.confetti";
 import { ConfettiPiece } from "../atoms/piece.confetti";
@@ -15,30 +16,34 @@ const CONFETTI_COUNT = 48;
 const CELEBRATION_VIBRATION = [0, 40, 70, 40];
 
 /**
- * Efface la salve une fois la pluie finie.
+ * Vibre au début de la salve, si le membre le veut, puis l'efface une fois la
+ * pluie finie.
  * @param burstId Salve en cours, `null` sans célébration.
  */
 function useBurstEnd(burstId: number | null): void {
   const finish = useCelebrationStore((state) => state.finish);
+  const vibration = useFeedbackPreferences((state) => state.vibration);
   useEffect(() => {
     if (burstId === null) return undefined;
-    Vibration.vibrate(CELEBRATION_VIBRATION);
+    if (vibration) Vibration.vibrate(CELEBRATION_VIBRATION);
     const timer = setTimeout(finish, CELEBRATION_MS);
     return () => clearTimeout(timer);
-  }, [burstId, finish]);
+  }, [burstId, finish, vibration]);
 }
 
 /**
  * Pluie de confettis par-dessus toute l'application, avec une vibration, à
  * la création d'un compte, d'une tontine ou d'une carte : la page d'arrivée
  * s'ouvre sous les confettis, qui laissent passer les touchers.
+ * Le membre peut couper confettis et vibration depuis son profil.
  * @returns La pluie de confettis, ou rien sans célébration.
  */
 export function CelebrationHost() {
   const burst = useCelebrationStore((state) => state.burst);
+  const confetti = useFeedbackPreferences((state) => state.confetti);
   const { width, height } = useWindowDimensions();
   useBurstEnd(burst?.id ?? null);
-  if (burst === null) return null;
+  if (burst === null || !confetti) return null;
   const pieces = confettiPieces({ count: CONFETTI_COUNT, seed: burst.id });
 
   return (

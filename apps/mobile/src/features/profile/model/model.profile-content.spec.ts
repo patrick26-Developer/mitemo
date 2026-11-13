@@ -18,9 +18,9 @@ describe("profileGroupsFor", () => {
     expect(spaces?.actions.map((action) => action.value)).toEqual(["3", "1"]);
   });
 
-  it("ne propose dans les préférences que les notifications", () => {
+  it("propose dans les préférences les notifications, puis les sons et animations", () => {
     const preferences = profileGroupsFor(COUNTS).find((group) => group.title === "Préférences");
 
-    expect(preferences?.actions.map((action) => action.id)).toEqual(["notifications"]);
+    expect(preferences?.actions.map((action) => action.id)).toEqual(["notifications", "effects"]);
   });
 });

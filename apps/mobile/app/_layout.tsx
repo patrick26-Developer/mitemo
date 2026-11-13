@@ -6,6 +6,7 @@ import "../global.css";
 import { launchRoutes, SplashGate, useOnboardingStore } from "../src/features/onboarding";
 import { ProfilePhotoSync } from "../src/features/profile";
 import { CardReminders } from "../src/features/savings";
+import { MotionConfig } from "../src/shared/components/atoms/config.motion";
 import { AppBadgeSync } from "../src/shared/components/atoms/sync.app-badge";
 import { CelebrationHost } from "../src/shared/components/macros/host.celebration";
 import { ConnectionHost } from "../src/shared/components/macros/host.connection";
@@ -35,6 +36,7 @@ export default function RootLayout() {
   return (
     <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
       <StatusBar style="dark" />
+      <MotionConfig />
       <ProfilePhotoSync />
       <AppBadgeSync signedIn={signedIn} />
       {signedIn ? <CardReminders /> : null}

@@ -160,6 +160,17 @@ export class Keyframe {
   }
 }
 
+/** Modes de réduction des animations, comme Reanimated. */
+export const ReduceMotion = { System: "system", Always: "always", Never: "never" };
+
+/**
+ * Réglage global des animations, sans effet dans les tests.
+ * @returns {null} Aucun rendu.
+ */
+export function ReducedMotionConfig() {
+  return null;
+}
+
 export const FadeIn = entering;
 export const FadeInDown = entering;
 export const FadeInRight = entering;

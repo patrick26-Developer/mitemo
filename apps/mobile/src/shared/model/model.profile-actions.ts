@@ -7,6 +7,7 @@ import {
   Lock,
   PiggyBank,
   ShieldCheck,
+  Sparkles,
   UserRound,
   UsersRound,
 } from "lucide-react-native";
@@ -25,6 +26,7 @@ export const PROFILE_ACTION_IDS = [
   "payment",
   "history",
   "notifications",
+  "effects",
   "security",
   "help",
   "privacy",
@@ -75,7 +77,10 @@ export const PROFILE_GROUPS: readonly ProfileGroupContent[] = [
   },
   {
     title: "Préférences",
-    actions: [{ id: "notifications", label: "Notifications", icon: Bell }],
+    actions: [
+      { id: "notifications", label: "Notifications", icon: Bell },
+      { id: "effects", label: "Sons et animations", icon: Sparkles },
+    ],
   },
   {
     title: "Aide",

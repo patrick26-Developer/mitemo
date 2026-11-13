@@ -5,6 +5,7 @@ import type {
   ProfileActionContent,
   ProfileActionId,
 } from "../../../shared/model/model.profile-actions";
+import { EffectsSheet } from "./sheets/sheet.effects";
 import { HelpSheet } from "./sheets/sheet.help";
 import { IdentitySheet } from "./sheets/sheet.identity";
 import { NotificationsSheet } from "./sheets/sheet.notifications";
@@ -21,6 +22,7 @@ const ACTION_SHEETS: Readonly<Record<ProfileActionId, ComponentType | null>> = {
   payment: PaymentSheet,
   history: null,
   notifications: NotificationsSheet,
+  effects: EffectsSheet,
   security: SecuritySheet,
   help: HelpSheet,
   privacy: PrivacySheet,
