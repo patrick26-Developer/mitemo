@@ -90,7 +90,7 @@ describe("TontineDetailDock", () => {
     expect(screen.queryByRole("button", { name: "Confirmer la restourne" })).not.toBeOnTheScreen();
   });
 
-  it("ne propose plus rien quand le total à verser est atteint", async () => {
+  it("grise le bouton une fois la limite de cotisation atteinte", async () => {
     const self = { ...makeMember(SELF_MEMBER_ID, "ADMIN", true), prepaidRounds: 2 };
     await renderWithSafeArea(
       <TontineDetailDock
@@ -101,6 +101,7 @@ describe("TontineDetailDock", () => {
     );
 
     expect(screen.queryByRole("button", { name: /Cotiser/ })).not.toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Vous avez atteint votre limite" })).toBeDisabled();
   });
 
   it("demande confirmation avant de distribuer la cagnotte", async () => {

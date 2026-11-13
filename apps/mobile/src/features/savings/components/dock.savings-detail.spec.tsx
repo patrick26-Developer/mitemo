@@ -62,7 +62,7 @@ describe("SavingsDetailDock", () => {
     expect(screen.getByTestId("sheet-primary-accent")).toHaveStyle({ backgroundColor: "#2AD56E" });
   });
 
-  it("ne propose plus de pointer quand l'objectif est atteint", async () => {
+  it("grise le bouton une fois l'objectif atteint", async () => {
     await renderWithSafeArea(
       <SavingsDetailDock
         item={makeCard({ saved: 30_000n })}
@@ -72,6 +72,7 @@ describe("SavingsDetailDock", () => {
     );
 
     expect(screen.queryByRole("button", { name: /Pointer/ })).not.toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Vous avez atteint votre limite" })).toBeDisabled();
   });
 
   it("propose trois moyens de retrait, Mitemo plein, puis demande le code PIN", async () => {

@@ -6,7 +6,7 @@ import { ActionsDock } from "../../../shared/components/macros/dock.actions";
 import type { DockAction } from "../../../shared/components/macros/dock.actions";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
-import { cardCapabilities } from "../../../shared/member/model.portfolio";
+import { cardCapabilities, cardGoal } from "../../../shared/member/model.portfolio";
 import { MobilePaySheet, PayoutSheet } from "../../payments";
 import type { SavingsActionsState } from "../hooks/hook.savings-actions";
 import { cardPayRequest } from "../model/model.card-pay";
@@ -23,15 +23,32 @@ export interface SavingsDetailDockProps {
   readonly initialPay?: boolean;
 }
 
+/** Bouton grisé affiché une fois l'objectif atteint. */
+const LIMIT_REACHED: DockAction = {
+  label: "Vous avez atteint votre limite",
+  onPress: () => undefined,
+  tone: "disabled",
+};
+
+/**
+ * Indique si la carte a atteint son objectif.
+ * @param item Carte affichée.
+ * @returns `true` quand tout l'objectif est épargné.
+ */
+function goalReached(item: SavingsCard): boolean {
+  return item.saved >= cardGoal(item);
+}
+
 /**
  * Construit l'action « Pointer », à la teinte de la carte, quand un marqueur
- * peut encore être ajouté, avec le montant réellement prélevé, frais compris.
+ * peut encore être ajouté, avec le montant réellement prélevé, frais compris ;
+ * une fois l'objectif atteint, un bouton grisé annonce la limite.
  * @param item Carte affichée.
  * @param onPress Ouverture de la feuille de paiement.
  * @returns L'action principale du dock, ou `null`.
  */
 function pointAction(item: SavingsCard, onPress: () => void): DockAction | null {
-  if (!cardCapabilities(item).canContribute) return null;
+  if (!cardCapabilities(item).canContribute) return goalReached(item) ? LIMIT_REACHED : null;
 
   return {
     label: `Pointer ${formatAmount(markerCharge(item))} FCFA`,

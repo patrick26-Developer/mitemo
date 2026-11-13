@@ -5,6 +5,7 @@ import {
   nextRoundPayment,
   payingRound,
   prepaidRounds,
+  reachedContributionLimit,
   selfPaidTotal,
   selfTotalDue,
 } from "./model.tontine-prepay";
@@ -103,5 +104,19 @@ describe("payingRound", () => {
 
   it("vise le premier tour à venir qui n'est pas encore payé", () => {
     expect(payingRound(active(2, { paidCurrentRound: true, prepaidRounds: 1 }))).toBe(4);
+  });
+});
+
+describe("reachedContributionLimit", () => {
+  it("annonce la limite quand tout le cycle est versé", () => {
+    const self = { ...makeMember(SELF_MEMBER_ID, "ADMIN", true), prepaidRounds: 2 };
+
+    expect(reachedContributionLimit(makeTontine({ members: [self] }))).toBe(true);
+  });
+
+  it("n'annonce rien tant qu'un tour reste à verser", () => {
+    const self = makeMember(SELF_MEMBER_ID, "ADMIN", true);
+
+    expect(reachedContributionLimit(makeTontine({ members: [self] }))).toBe(false);
   });
 });

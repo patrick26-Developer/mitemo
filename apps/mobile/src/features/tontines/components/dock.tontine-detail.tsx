@@ -16,7 +16,7 @@ import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
 import { contributionCharge } from "../../../shared/member/model.contribution-fee";
 import { freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
-import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
+import { canPayAhead, reachedContributionLimit } from "../../../shared/member/model.tontine-prepay";
 import { withTapSound } from "../../../shared/feedback/api.tap-sound";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
@@ -82,9 +82,17 @@ function pendingAction(item: Tontine, actions: TontineActionsState): DockAction 
   return isTontineAdmin(item) ? { label: "Activer la restourne", onPress: actions.start } : null;
 }
 
+/** Bouton grisé affiché une fois tout le cycle versé. */
+const LIMIT_REACHED: DockAction = {
+  label: "Vous avez atteint votre limite",
+  onPress: () => undefined,
+  tone: "disabled",
+};
+
 /**
  * Propose de cotiser le tour en cours, ou le tour suivant d'avance une fois
- * le tour réglé, tant que le total (cotisation × tours) n'est pas atteint.
+ * le tour réglé, tant que le total (cotisation × tours) n'est pas atteint ;
+ * ensuite, un bouton grisé annonce la limite atteinte.
  * Le bouton annonce le montant réellement prélevé, frais compris.
  * @param item Tontine affichée.
  * @param askPay Ouvre la feuille de paiement.
@@ -95,6 +103,7 @@ function payAction(item: Tontine, askPay: () => void): DockAction | null {
   const onPress = withTapSound("pay", askPay);
   if (canPayContribution(item)) return { label: `Cotiser ${amount}`, onPress };
   if (canPayAhead(item)) return { label: `Cotiser d'avance ${amount}`, onPress };
+  if (reachedContributionLimit(item)) return LIMIT_REACHED;
 
   return null;
 }

@@ -37,6 +37,20 @@ export function canPayAhead(tontine: Tontine): boolean {
 }
 
 /**
+ * Indique si le membre connecté a atteint sa limite de cotisation : le tour
+ * en cours est réglé et tous les tours à venir le sont d'avance.
+ * @param tontine Tontine concernée.
+ * @returns `true` quand il n'y a plus rien à verser sur le cycle.
+ */
+export function reachedContributionLimit(tontine: Tontine): boolean {
+  const self = selfOf(tontine);
+  if (tontine.state !== "ACTIVE" || tontine.deletedBy !== undefined) return false;
+  if (self === undefined || !self.paidCurrentRound) return false;
+
+  return prepaidRounds(tontine) >= tontine.totalRounds - tontine.round;
+}
+
+/**
  * Calcule le total que le membre connecté verse sur tout le cycle :
  * cotisation × tours pris × nombre de tours.
  * @param tontine Tontine concernée.
