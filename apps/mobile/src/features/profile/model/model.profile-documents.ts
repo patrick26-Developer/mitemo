@@ -98,10 +98,6 @@ export const TERMS_SECTIONS: readonly ProfileLegalSection[] = [
     body: "Les cotisations, pointages et retraits passent par MTN MoMo, Airtel Money ou votre solde Mitemo, à votre nom. Une opération n'est enregistrée qu'une fois confirmée par l'opérateur. Mitemo ne peut pas annuler un paiement confirmé par erreur ; contactez le service client, qui vous aidera auprès de l'opérateur.",
   },
   {
-    title: "Frais",
-    body: "Mitemo prélève des frais de service de 10 % : sur une carte, 10 % de l'objectif, répartis en petites parts sur chaque pointage ; sur une tontine, 10 % de chaque cotisation. Le montant affiché sur le bouton et dans la feuille de paiement est toujours le montant réellement prélevé, frais compris. Les frais de l'opérateur de paiement éventuels restent à votre charge.",
-  },
-  {
     title: "Responsabilités",
     body: "Mitemo met tout en œuvre pour que l'application soit disponible et que vos opérations soient enregistrées correctement. Mitemo n'est pas responsable d'un membre qui ne verse pas sa cotisation, ni des interruptions propres aux opérateurs de paiement ou au réseau mobile. Les litiges entre membres d'une tontine se règlent d'abord au sein du groupe.",
   },

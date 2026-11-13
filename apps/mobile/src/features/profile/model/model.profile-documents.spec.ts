@@ -31,7 +31,7 @@ describe("PRIVACY_SECTIONS", () => {
 });
 
 describe("TERMS_SECTIONS", () => {
-  it("couvre le service, le compte, les tontines, les cartes, les paiements, les frais et la résiliation", () => {
+  it("couvre le service, le compte, les tontines, les cartes, les paiements et la résiliation", () => {
     expect(titles(TERMS_SECTIONS)).toEqual(
       expect.arrayContaining([
         "Objet du service",
@@ -39,7 +39,6 @@ describe("TERMS_SECTIONS", () => {
         "Tontines",
         "Cartes de pointage",
         "Paiements et retraits",
-        "Frais",
         "Responsabilités",
         "Résiliation",
         "Droit applicable",
@@ -47,10 +46,10 @@ describe("TERMS_SECTIONS", () => {
     );
   });
 
-  it("annonce les frais, prélevés à chaque paiement", () => {
-    const fees = TERMS_SECTIONS.find((section) => section.title === "Frais");
+  it("ne rappelle jamais les frais au membre", () => {
+    const text = [...TERMS_SECTIONS, ...PRIVACY_SECTIONS].map((section) => section.body).join(" ");
 
-    expect(fees?.body).toMatch(/10 %/);
+    expect(text).not.toMatch(/frais/i);
   });
 
   it("donne à chaque section un texte développé", () => {

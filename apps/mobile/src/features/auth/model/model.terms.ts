@@ -7,7 +7,6 @@ export const TERMS_POINTS: readonly string[] = [
   "Votre compte est personnel : ne communiquez jamais votre code PIN, même à un proche ou à un agent Mitemo.",
   "En rejoignant une tontine, vous vous engagez à verser chaque cotisation à temps, jusqu'au dernier tour.",
   "Les paiements et les retraits passent par MTN MoMo ou Airtel Money, à votre nom.",
-  "Le montant affiché à chaque paiement est celui réellement prélevé : les frais Mitemo (10 %) y sont déjà inclus.",
   "Mitemo n'est pas une banque : l'application ne prête pas d'argent et ne verse pas d'intérêts.",
   "Votre numéro et votre profil servent uniquement à faire fonctionner vos tontines et vos cartes de pointage.",
 ];
