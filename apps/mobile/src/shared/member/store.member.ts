@@ -47,6 +47,12 @@ export interface MemberState extends MemberProfile {
    * @param identity Prénom, nom, profession et numéro au format international.
    * @param createdAt Date de création, au format `AAAA-MM-JJ` en UTC.
    */
+  /**
+   * Retient le numéro du compte ouvert à la connexion, pour que le profil et
+   * les vérifications du code PIN parlent du même compte.
+   * @param phone Numéro au format international.
+   */
+  rememberPhone: (phone: string) => void;
   registerMember: (identity: MemberIdentity, createdAt: string) => void;
   /**
    * Enregistre la photo choisie et la marque à envoyer au serveur.
@@ -100,6 +106,7 @@ export const useMemberStore = create<MemberState>()(
     (set) => ({
       ...INITIAL_MEMBER_PROFILE,
       updateIdentity: (identity) => set(identityState(identity)),
+      rememberPhone: (phone) => set({ phone }),
       registerMember: (identity, createdAt) =>
         set({
           ...identityState(identity),

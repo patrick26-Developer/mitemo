@@ -30,23 +30,17 @@ describe("changePin", () => {
   });
 
   it("remplace le code une fois l'actuel reconnu", async () => {
-    await expect(
-      changePin({ phone: PHONE, current: "4821", next: "7305" }, auth.deps),
-    ).resolves.toBe(true);
+    await expect(changePin({ current: "4821", next: "7305" }, auth.deps)).resolves.toBe(true);
     await expect(checkPin({ phone: PHONE, pin: "7305" }, auth.deps)).resolves.toBe(true);
     await expect(checkPin({ phone: PHONE, pin: "4821" }, auth.deps)).resolves.toBe(false);
   });
 
   it("garde l'ancien code si l'actuel est faux", async () => {
-    await expect(
-      changePin({ phone: PHONE, current: "0000", next: "7305" }, auth.deps),
-    ).resolves.toBe(false);
+    await expect(changePin({ current: "0000", next: "7305" }, auth.deps)).resolves.toBe(false);
     await expect(checkPin({ phone: PHONE, pin: "4821" }, auth.deps)).resolves.toBe(true);
   });
 
   it("refuse un nouveau code identique à l'actuel", async () => {
-    await expect(
-      changePin({ phone: PHONE, current: "4821", next: "4821" }, auth.deps),
-    ).resolves.toBe(false);
+    await expect(changePin({ current: "4821", next: "4821" }, auth.deps)).resolves.toBe(false);
   });
 });

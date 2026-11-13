@@ -1,9 +1,8 @@
 import { useState } from "react";
 
 import { useToastStore } from "../../../shared/feedback/store.toast";
-import { useMemberStore } from "../../../shared/member/store.member";
 import { PIN_AUTH_DEPS } from "../api/deps.pin-auth";
-import { useGuardedPinCheck } from "./hook.guarded-pin";
+import { useSessionPinCheck } from "./hook.session-pin";
 import {
   changePin,
   isNewPin,
@@ -32,8 +31,6 @@ interface PinChangeCodes {
  * @returns La vérification de chaque étape.
  */
 function pinChangeChecks(codes: PinChangeCodes, verifyCurrent: (pin: string) => Promise<boolean>) {
-  const phone = useMemberStore.getState().phone;
-
   return [
     {
       verify: verifyCurrent,
@@ -44,7 +41,7 @@ function pinChangeChecks(codes: PinChangeCodes, verifyCurrent: (pin: string) => 
       rejectedMessage: SAME_PIN_MESSAGE,
     },
     {
-      verify: async (pin) => pin === codes.next && changePin({ phone, ...codes }, PIN_AUTH_DEPS),
+      verify: async (pin) => pin === codes.next && changePin(codes, PIN_AUTH_DEPS),
       rejectedMessage: PIN_MISMATCH_MESSAGE,
     },
   ] as const satisfies readonly PinChangeCheck[];
@@ -60,7 +57,7 @@ export function usePinChange(onDone: () => void) {
   const [step, setStep] = useState(0);
   const [codes, setCodes] = useState<PinChangeCodes>({ current: "", next: "" });
   const show = useToastStore((state) => state.show);
-  const guarded = useGuardedPinCheck(useMemberStore((state) => state.phone));
+  const guarded = useSessionPinCheck();
   const checks = pinChangeChecks(codes, guarded.verify);
   const accept = (pin: string) => {
     if (step === 0) setCodes((value) => ({ ...value, current: pin }));

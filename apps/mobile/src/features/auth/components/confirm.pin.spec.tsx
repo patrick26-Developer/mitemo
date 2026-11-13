@@ -44,6 +44,16 @@ describe("PinConfirm", () => {
     await waitFor(() => expect(onConfirmed).toHaveBeenCalledTimes(1));
   });
 
+  it("accepte le code du compte même si le profil porte un autre numéro", async () => {
+    useMemberStore.setState({ phone: "+242 06 512 34 56" });
+    const onConfirmed = jest.fn();
+    await renderWithSafeArea(<PinConfirm onConfirmed={onConfirmed} />);
+
+    await enterPin("4821");
+
+    await waitFor(() => expect(onConfirmed).toHaveBeenCalledTimes(1));
+  });
+
   it("refuse un mauvais code sans valider l'opération", async () => {
     const onConfirmed = jest.fn();
     await renderWithSafeArea(<PinConfirm onConfirmed={onConfirmed} />);

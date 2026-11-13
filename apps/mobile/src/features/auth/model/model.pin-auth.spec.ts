@@ -1,5 +1,5 @@
 import type { CredentialVault } from "./model.credential-vault";
-import { checkPin, hasAccount, registerPin } from "./model.pin-auth";
+import { checkDevicePin, checkPin, hasAccount, registerPin } from "./model.pin-auth";
 import type { PinAuthDeps } from "./model.pin-auth";
 import type { PinCredential } from "./model.pin-credential";
 
@@ -53,6 +53,20 @@ describe("checkPin", () => {
 
     await expect(checkPin({ phone: PHONE, pin: "4821" }, deps)).resolves.toBe(true);
     await expect(checkPin({ phone: PHONE, pin: "1234" }, deps)).resolves.toBe(false);
+  });
+});
+
+describe("checkDevicePin", () => {
+  it("vérifie le code du compte de l'appareil, quel que soit le numéro du profil", async () => {
+    const deps = depsWith(memoryVault());
+    await registerPin({ phone: PHONE, pin: "4821" }, deps);
+
+    await expect(checkDevicePin("4821", deps)).resolves.toBe(true);
+    await expect(checkDevicePin("1234", deps)).resolves.toBe(false);
+  });
+
+  it("refuse tout code tant qu'aucun compte n'existe", async () => {
+    await expect(checkDevicePin("4821", depsWith(memoryVault()))).resolves.toBe(false);
   });
 });
 

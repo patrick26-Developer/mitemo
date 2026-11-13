@@ -83,6 +83,7 @@ describe("PinScreen", () => {
     expect(useCelebrationStore.getState().burst).toBeNull();
     expect(useAuthDraft.getState().phone).toBe("");
     expect(useSessionStore.getState().signedIn).toBe(true);
+    expect(useMemberStore.getState().phone).toBe(PHONE);
   });
 
   it("n'affiche aucun code de démonstration", async () => {

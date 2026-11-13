@@ -1,9 +1,8 @@
 import Animated from "react-native-reanimated";
 
-import { useMemberStore } from "../../../shared/member/store.member";
 import { usePinEntry } from "../hooks/hook.pin-entry";
 import { useSessionStore } from "../../../shared/session/store.session";
-import { useGuardedPinCheck } from "../hooks/hook.guarded-pin";
+import { useSessionPinCheck } from "../hooks/hook.session-pin";
 import { AuthErrorText } from "./text.auth-error";
 import { SuspendedNotice } from "./notice.suspended";
 import { PinKeypad } from "./keypad.pin";
@@ -25,8 +24,7 @@ export interface PinConfirmProps {
  */
 export function PinConfirm(props: PinConfirmProps) {
   const { onConfirmed } = props;
-  const phone = useMemberStore((state) => state.phone);
-  const { verify, suspended } = useGuardedPinCheck(phone);
+  const { verify, suspended } = useSessionPinCheck();
   const signOut = useSessionStore((state) => state.signOut);
   const { pin, error, shakeStyle, pressDigit, erase } = usePinEntry({
     verify,

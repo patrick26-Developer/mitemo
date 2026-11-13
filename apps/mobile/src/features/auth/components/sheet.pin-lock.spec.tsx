@@ -62,6 +62,15 @@ describe("PinLockSheet", () => {
     expect(useSessionStore.getState().signedIn).toBe(true);
   });
 
+  it("rouvre la session même quand le profil porte encore le numéro de démonstration", async () => {
+    useMemberStore.setState({ phone: "+242 06 512 34 56" });
+    await renderWithSafeArea(<PinLockSheet />);
+
+    await enterPin("4821");
+
+    await waitFor(() => expect(useSessionStore.getState().locked).toBe(false));
+  });
+
   it("revient au numéro de téléphone en changeant de compte", async () => {
     await renderWithSafeArea(<PinLockSheet />);
 

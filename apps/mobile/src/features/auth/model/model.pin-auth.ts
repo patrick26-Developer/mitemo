@@ -40,6 +40,21 @@ export async function checkPin(attempt: PinAttempt, deps: PinAuthDeps): Promise<
 }
 
 /**
+ * Vérifie le code du compte enregistré sur l'appareil, pendant une session
+ * déjà ouverte : le numéro vient du trousseau, pas du profil, qui peut
+ * porter un autre numéro.
+ * @param pin Code saisi.
+ * @param deps Trousseau et empreinte.
+ * @returns `true` quand le code est celui du compte de l'appareil.
+ */
+export async function checkDevicePin(pin: string, deps: PinAuthDeps): Promise<boolean> {
+  const credential = await deps.vault.load();
+  if (credential === null) return false;
+
+  return verifyPinCredential(credential, { phone: credential.phone, pin }, deps.digest);
+}
+
+/**
  * Indique si un compte de ce numéro a été créé sur l'appareil.
  * @param phone Numéro au format international.
  * @param vault Trousseau de l'appareil.

@@ -12,26 +12,38 @@ import { useGuardedPinCheck } from "./hook.guarded-pin";
 import { PIN_MISMATCH_MESSAGE, usePinChoice } from "./hook.pin-choice";
 
 /**
- * Fin du parcours : enregistre l'identité d'une inscription, efface le
- * brouillon et ouvre la session. Le garde de navigation ouvre les onglets,
- * sous les confettis après une inscription.
+ * Retient le membre de l'appareil : l'identité complète d'une inscription,
+ * ou le numéro d'une connexion, pour que le profil et le code PIN parlent du
+ * même compte.
+ * @param draft Brouillon du parcours.
+ */
+function recordMember(draft: ReturnType<typeof useAuthDraft.getState>): void {
+  const member = useMemberStore.getState();
+  const { firstName, lastName, occupation, phone } = draft;
+  if (draft.mode === "sign-up") {
+    member.registerMember({ firstName, lastName, occupation, phone }, todayUtc());
+  } else member.rememberPhone(phone);
+}
+
+/**
+ * Fin du parcours : retient le membre, efface le brouillon et ouvre la
+ * session. Le garde de navigation ouvre les onglets, sous les confettis après
+ * une inscription.
  * @returns Le brouillon, le mode et l'action de réussite.
  */
 function useSessionCompletion() {
   const draft = useAuthDraft();
-  const registerMember = useMemberStore((state) => state.registerMember);
   const signIn = useSessionStore((state) => state.signIn);
   const celebrate = useCelebrationStore((state) => state.celebrate);
   const isSignUp = draft.mode === "sign-up";
-  const { firstName, lastName, occupation, phone, reset } = draft;
   const complete = useCallback(() => {
-    if (isSignUp) registerMember({ firstName, lastName, occupation, phone }, todayUtc());
-    reset();
+    recordMember(useAuthDraft.getState());
+    useAuthDraft.getState().reset();
     signIn();
     if (isSignUp) celebrate();
-  }, [isSignUp, firstName, lastName, occupation, phone, reset, signIn, registerMember, celebrate]);
+  }, [isSignUp, signIn, celebrate]);
 
-  return { phone, isSignUp, complete };
+  return { phone: draft.phone, isSignUp, complete };
 }
 
 /**
