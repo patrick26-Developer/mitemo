@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react-native";
 import { PROFILE_FAQ } from "../../model/model.profile-documents";
 import { HelpSheet } from "./sheet.help";
 
-jest.mock("../../api/config.support", () => ({
+jest.mock("../../../../shared/support/config.support", () => ({
   supportApi: {
     contact: async () => ({ phoneNumber: "+242065706622", maxAgeSeconds: 86_400 }),
   },

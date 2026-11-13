@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { Linking } from "react-native";
 
-import { useToastStore } from "../../../shared/feedback/store.toast";
-import { supportApi } from "../api/config.support";
-import { isSupportCacheFresh } from "../model/model.support-cache";
-import { parseSupportContact } from "../model/model.support-contact";
-import { useSupportContactStore } from "../model/store.support-contact";
+import { useToastStore } from "../feedback/store.toast";
+import { supportApi } from "./config.support";
+import { isSupportCacheFresh } from "./model.support-cache";
+import { parseSupportContact } from "./model.support-contact";
+import { useSupportContactStore } from "./store.support-contact";
 
 /** Message affiché quand ni WhatsApp ni le téléphone ne s'ouvrent. */
 const OPEN_FAILED = "Impossible d'ouvrir cette application. Écrivez-nous à support@mitemo.app.";

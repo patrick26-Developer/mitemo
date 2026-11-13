@@ -4,9 +4,9 @@ import { Text, View } from "react-native";
 import { SheetInfoCard } from "../../../../shared/components/macros/card.sheet-info";
 import { SheetSection } from "../../../../shared/components/macros/section.sheet";
 import { PALETTE } from "../../../../shared/theme/theme.palette";
-import { useSupportContact } from "../../hooks/hook.support-contact";
+import { useSupportContact } from "../../../../shared/support/hook.support-contact";
 import { PROFILE_FAQ } from "../../model/model.profile-documents";
-import { SupportContactSection } from "./section.support-contact";
+import { SupportContactSection } from "../../../../shared/components/macros/section.support-contact";
 
 /**
  * Propose de joindre le service client (WhatsApp, appel, e-mail) et

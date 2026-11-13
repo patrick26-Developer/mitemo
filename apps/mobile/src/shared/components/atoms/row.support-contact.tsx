@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react-native";
 import { ChevronRight } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
-import { PALETTE } from "../../../../shared/theme/theme.palette";
+import { PALETTE } from "../../theme/theme.palette";
 
 /** Props d'une ligne de contact du service client. */
 export interface SupportContactRowProps {

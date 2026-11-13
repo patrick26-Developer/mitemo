@@ -1,12 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { Linking } from "react-native";
 
-import { useToastStore } from "../../../shared/feedback/store.toast";
-import { supportApi } from "../api/config.support";
-import { useSupportContactStore } from "../model/store.support-contact";
+import { useToastStore } from "../feedback/store.toast";
+import { supportApi } from "./config.support";
+import { useSupportContactStore } from "./store.support-contact";
 import { useSupportContact } from "./hook.support-contact";
 
-jest.mock("../api/config.support", () => ({ supportApi: { contact: jest.fn() } }));
+jest.mock("./config.support", () => ({ supportApi: { contact: jest.fn() } }));
 
 /** Réponse du service client de test. */
 const RESPONSE = { phoneNumber: "+242065706622", maxAgeSeconds: 86_400 };

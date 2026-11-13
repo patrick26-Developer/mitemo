@@ -1,8 +1,8 @@
 import { MessageCircle, Phone } from "lucide-react-native";
 
-import { SheetSection } from "../../../../shared/components/macros/section.sheet";
-import type { SupportContact } from "../../model/model.support-contact";
-import { SupportContactRow } from "./row.support-contact";
+import { SheetSection } from "./section.sheet";
+import type { SupportContact } from "../../support/model.support-contact";
+import { SupportContactRow } from "../atoms/row.support-contact";
 
 /** Props de la section de contact du service client. */
 export interface SupportContactSectionProps {

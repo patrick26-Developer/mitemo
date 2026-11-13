@@ -1,7 +1,7 @@
 import type { SupportContactResponse } from "@mitemo/contracts";
 import { z } from "zod";
 
-import type { ApiClient } from "../../../shared/api/client.http";
+import type { ApiClient } from "../api/client.http";
 
 /** Contact du service client reçu du backend, validé à la frontière. */
 const SUPPORT_CONTACT_SCHEMA: z.ZodType<SupportContactResponse> = z.object({

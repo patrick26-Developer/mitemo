@@ -1,4 +1,4 @@
-import type { ApiClient } from "../../../shared/api/client.http";
+import type { ApiClient } from "../api/client.http";
 import { createSupportApi } from "./api.support-contact";
 
 describe("createSupportApi", () => {
