@@ -25,6 +25,14 @@
         {
           "contactsPermission": "Mitemo lit vos contacts pour retrouver ceux qui ont déjà un compte et les ajouter à vos tontines."
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
       ]
     ],
     "android": {

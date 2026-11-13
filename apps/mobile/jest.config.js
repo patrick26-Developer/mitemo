@@ -20,6 +20,8 @@ module.exports = {
     "^expo-linking$": "<rootDir>/jest/mocks/expo-linking.js",
     "^expo-contacts$": "<rootDir>/jest/mocks/expo-contacts.js",
     "^expo-network$": "<rootDir>/jest/mocks/expo-network.js",
+    "^expo-audio$": "<rootDir>/jest/mocks/expo-audio.js",
+    "^expo-haptics$": "<rootDir>/jest/mocks/expo-haptics.js",
     "^react-native-keyboard-controller$":
       "<rootDir>/node_modules/react-native-keyboard-controller/jest/index.js",
     "^@react-native-community/datetimepicker$": "<rootDir>/jest/mocks/datetime-picker.js",
