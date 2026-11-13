@@ -1,6 +1,6 @@
 import { Circle, Ellipse, G, Path } from "react-native-svg";
 
-import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
+import { MASCOT_COLORS as C } from "../../theme/theme.mascot";
 
 /**
  * Visage de Temo : de grands yeux brillants, des joues roses et un sourire.

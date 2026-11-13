@@ -10,7 +10,7 @@ import Animated, {
 import Svg from "react-native-svg";
 
 import type { OnboardingSlideId } from "../model/model.onboarding-slides";
-import { MascotBody } from "./body.mascot";
+import { MascotBody } from "../../../shared/components/atoms/body.mascot";
 import { MascotCoins } from "./prop.mascot-coins";
 import { MascotFriends } from "./prop.mascot-friends";
 import { MascotPhone } from "./prop.mascot-phone";

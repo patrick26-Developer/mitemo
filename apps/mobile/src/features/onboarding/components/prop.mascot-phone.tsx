@@ -1,6 +1,6 @@
 import { Circle, G, Path, Rect } from "react-native-svg";
 
-import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
+import { MASCOT_COLORS as C } from "../../../shared/theme/theme.mascot";
 
 /**
  * Téléphone tenu par Temo, un paiement validé à l'écran.

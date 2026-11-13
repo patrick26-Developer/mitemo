@@ -1,6 +1,6 @@
 import { Ellipse, G, Path } from "react-native-svg";
 
-import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
+import { MASCOT_COLORS as C } from "../../../shared/theme/theme.mascot";
 
 /** Hauteur de chaque pièce de la pile, du bas vers le haut. */
 const COIN_LEVELS = [176, 164, 152, 140] as const;

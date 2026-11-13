@@ -1,6 +1,6 @@
 import { Circle, G, Path } from "react-native-svg";
 
-import { MASCOT_COLORS as C } from "../model/model.mascot-colors";
+import { MASCOT_COLORS as C } from "../../../shared/theme/theme.mascot";
 
 /** Props d'un ami de Temo. */
 interface FriendProps {
