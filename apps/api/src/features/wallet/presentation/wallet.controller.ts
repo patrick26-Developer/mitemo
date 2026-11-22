@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { DemoAccessGuard, previewEnabled, SessionService } from "../../identity/index.js";
 import { WalletService } from "../infrastructure/wallet.service.js";
+import { localFundingEnabled } from "./local-funding.js";
 
 /** Exposes the authenticated demonstration wallet. */
 @Controller("wallet")
@@ -69,7 +70,7 @@ export class WalletController {
     @Headers("idempotency-key") key: string | undefined,
     @Body() body: unknown,
   ) {
-    if (!previewEnabled()) throw new NotFoundException();
+    if (!previewEnabled() && !localFundingEnabled(process.env)) throw new NotFoundException();
     return this.wallet.fund(await this.sessions.walletOwner(auth), key, body);
   }
 }
