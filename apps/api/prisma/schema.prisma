@@ -79,21 +79,26 @@ model LedgerPostingLine {
 
 /// Compte de démonstration, avec justificatif haché et rôle attribué côté serveur.
 model AppUser {
-  id              String          @id @db.Uuid
-  phoneNumber     String          @unique @map("phone_number")
-  displayName     String          @map("display_name")
-  pinHash         String          @map("pin_hash")
-  isDemo          Boolean         @default(false) @map("is_demo")
-  role            String          @default("USER")
-  phoneVerifiedAt DateTime?       @map("phone_verified_at") @db.Timestamptz(3)
-  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
-  challenges      AuthChallenge[]
-  sessions        AuthSession[]
-  pushTokens      NotificationPushToken[]
-  savingsGoals    SavingsGoal[]
+  id                          String                  @id @db.Uuid
+  phoneNumber                 String                  @unique @map("phone_number")
+  displayName                 String                  @map("display_name")
+  pinHash                     String                  @map("pin_hash")
+  isDemo                      Boolean                 @default(false) @map("is_demo")
+  role                        String                  @default("USER")
+  phoneVerifiedAt             DateTime?               @map("phone_verified_at") @db.Timestamptz(3)
+  createdAt                   DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  challenges                  AuthChallenge[]
+  sessions                    AuthSession[]
+  pushTokens                  NotificationPushToken[]
+  savingsGoals                SavingsGoal[]
+  registryGroups              TontineGroup[]
+  registryMemberships         TontineMember[]
+  registryInvitationsReceived TontineInvitation[]     @relation("RegistryRecipient")
+  registryInvitationsSent     TontineInvitation[]     @relation("RegistryIssuer")
+  registryAudit               AuditEvent[]
 
-  walletAccountId String @unique @map("wallet_account_id")
-  walletAccount LedgerAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  walletAccountId String        @unique @map("wallet_account_id")
+  walletAccount   LedgerAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@map("app_user")
 }
@@ -166,4 +171,97 @@ model NotificationPushToken {
 
   @@id([userId, token])
   @@map("notification_push_token")
+}
+
+/// Groupe déclaratif gratuit, indépendant de toute caisse financière.
+model TontineGroup {
+  id                 String              @id @db.Uuid
+  name               String
+  creationName       String              @map("creation_name")
+  ownerId            String              @map("owner_id") @db.Uuid
+  contributionAmount BigInt              @map("contribution_amount")
+  participantCount   Int                 @map("participant_count")
+  frequencyUnit      String              @map("frequency_unit")
+  frequencyInterval  Int                 @map("frequency_interval")
+  state              String              @default("RECRUTEMENT")
+  mode               String              @default("REGISTRY")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  owner              AppUser             @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  audit              AuditEvent[]
+  members            TontineMember[]
+  invitations        TontineInvitation[]
+  policies           GroupFeePolicy[]
+
+  @@index([ownerId])
+  @@map("tontine_group")
+}
+
+/// Adhésion et acceptation de la version gratuite des règles.
+model TontineMember {
+  groupId       String       @map("group_id") @db.Uuid
+  userId        String       @map("user_id") @db.Uuid
+  role          String
+  state         String       @default("ACTIF")
+  policyVersion String       @map("policy_version")
+  joinedAt      DateTime     @default(now()) @map("joined_at") @db.Timestamptz(3)
+  user          AppUser      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  group         TontineGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+
+  policy GroupFeePolicy @relation(fields: [groupId, policyVersion], references: [groupId, version], onDelete: Restrict, onUpdate: NoAction, map: "registry_accepted_policy")
+
+  @@id([groupId, userId])
+  @@index([userId])
+  @@map("tontine_member")
+}
+
+/// Invitation nominative, acceptée uniquement par son destinataire authentifié.
+model TontineInvitation {
+  id          String       @id @db.Uuid
+  groupId     String       @map("group_id") @db.Uuid
+  recipientId String       @map("recipient_id") @db.Uuid
+  issuedBy    String       @map("issued_by") @db.Uuid
+  state       String       @default("PENDING")
+  expiresAt   DateTime     @map("expires_at") @db.Timestamptz(3)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  recipient   AppUser      @relation("RegistryRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+  issuer      AppUser      @relation("RegistryIssuer", fields: [issuedBy], references: [id], onDelete: Restrict)
+  group       TontineGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+
+  @@unique([groupId, recipientId])
+  @@index([issuedBy])
+  @@index([recipientId, state])
+  @@map("tontine_invitation")
+}
+
+/// Version gratuite acceptée par chaque membre, immuable.
+model GroupFeePolicy {
+  groupId        String       @map("group_id") @db.Uuid
+  version        String
+  mode           String       @default("FREE")
+  responsibleBps Int          @default(0) @map("responsible_bps")
+  mitemoBps      Int          @default(0) @map("mitemo_bps")
+  operatorFixed  BigInt       @default(0) @map("operator_fixed")
+  effectiveAt    DateTime     @default(now()) @map("effective_at") @db.Timestamptz(3)
+  group          TontineGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+
+  acceptedBy TontineMember[]
+
+  @@id([groupId, version])
+  @@map("group_fee_policy")
+}
+
+/// Journal append-only des actions du registre, sans secrets.
+model AuditEvent {
+  id        String       @id @db.Uuid
+  groupId   String       @map("group_id") @db.Uuid
+  actorId   String       @map("actor_id") @db.Uuid
+  action    String
+  subjectId String       @map("subject_id") @db.Uuid
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  group     TontineGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  actor     AppUser      @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([groupId, createdAt])
+  @@index([actorId])
+  @@map("audit_event")
 }

@@ -1,3 +1,4 @@
+import { RegistryModule } from "./features/registry/registry.module.js";
 import { Module } from "@nestjs/common";
 import { HealthModule } from "./features/health/health.module.js";
 import { IdentityModule } from "./features/identity/index.js";
@@ -17,6 +18,7 @@ import { PrismaModule } from "./shared/database/prisma.module.js";
     PawaPayModule,
     SavingsModule,
     NotificationsModule,
+    RegistryModule,
   ],
 })
 export class AppModule {}
