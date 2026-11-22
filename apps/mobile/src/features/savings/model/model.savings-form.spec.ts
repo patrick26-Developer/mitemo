@@ -131,8 +131,8 @@ describe("savingsInvalidFields", () => {
 });
 
 describe("savingsStepError", () => {
-  it("découpe la saisie en deux étapes", () => {
-    expect(SAVINGS_FORM_STEPS).toEqual(["Le projet", "Le rythme"]);
+  it("découpe la saisie en trois étapes, le récapitulatif en dernier", () => {
+    expect(SAVINGS_FORM_STEPS).toEqual(["Le projet", "Le rythme", "Le récapitulatif"]);
   });
 
   it("valide le projet sans attendre le rythme", () => {
@@ -142,10 +142,17 @@ describe("savingsStepError", () => {
     );
   });
 
-  it("valide le rythme et l'échéance à la dernière étape", () => {
+  it("valide le rythme et l'échéance avant le récapitulatif", () => {
     expect(savingsStepError({ ...VALID_FORM, deadline: "2026-01-01" }, 1, NOW)).toBe(
       "Choisissez une échéance postérieure à aujourd'hui.",
     );
     expect(savingsStepError(VALID_FORM, 1, NOW)).toBeNull();
+  });
+
+  it("valide tout le formulaire au récapitulatif", () => {
+    expect(savingsStepError({ ...VALID_FORM, deadline: "" }, 2, NOW)).toBe(
+      "Choisissez une date d'échéance.",
+    );
+    expect(savingsStepError(VALID_FORM, 2, NOW)).toBeNull();
   });
 });

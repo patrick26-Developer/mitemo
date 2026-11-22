@@ -21,6 +21,15 @@ describe("StepIndicator", () => {
     expect(screen.getAllByTestId("step-connector")).toHaveLength(2);
   });
 
+  it("reste compact : des liens courts entre les pastilles, sans prendre toute la largeur", async () => {
+    await render(<StepIndicator index={0} total={3} title="L'essentiel" />);
+
+    for (const connector of screen.getAllByTestId("step-connector")) {
+      expect(connector).toHaveStyle({ width: 12 });
+    }
+    expect(screen.getByRole("progressbar")).toHaveStyle({ alignSelf: "center" });
+  });
+
   it("remplit les pastilles déjà atteintes", async () => {
     await render(<StepIndicator index={1} total={3} title="Le cycle" />);
 

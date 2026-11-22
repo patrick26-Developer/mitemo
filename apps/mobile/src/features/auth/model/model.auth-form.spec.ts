@@ -4,16 +4,37 @@ import {
   formatPhoneInput,
   isValidPin,
   isValidPhoneDigits,
-  keepPhoneDigits,
+  editPhoneDigits,
   signUpError,
   signUpInvalidFields,
   toInternationalPhone,
 } from "./model.auth-form";
 
-describe("keepPhoneDigits", () => {
-  it("ne garde que les neuf chiffres utiles", () => {
-    expect(keepPhoneDigits("06 570 66 22")).toBe("065706622");
-    expect(keepPhoneDigits("06a570b66 22 99")).toBe("065706622");
+describe("editPhoneDigits", () => {
+  it("retire l'indicatif +242 tapé ou collé par le membre", () => {
+    expect(editPhoneDigits("", "+242 06 570 66 22")).toBe("065706622");
+    expect(editPhoneDigits("", "+242065706622")).toBe("065706622");
+    expect(editPhoneDigits("", "242 06 570 66 22")).toBe("065706622");
+    expect(editPhoneDigits("", "+242")).toBe("");
+  });
+
+  it("garde un numéro local qui commence comme l'indicatif", () => {
+    expect(editPhoneDigits("", "242")).toBe("242");
+    expect(editPhoneDigits("24", "242 1")).toBe("2421");
+  });
+
+  it("efface le chiffre placé avant l'espace que le membre supprime", () => {
+    expect(editPhoneDigits("065706622", "06570 66 22")).toBe("05706622");
+    expect(editPhoneDigits("065706622", "06 570 6622")).toBe("06570622");
+  });
+
+  it("efface n'importe quel chiffre, au milieu comme à la fin", () => {
+    expect(editPhoneDigits("065706622", "06 50 66 22")).toBe("06506622");
+    expect(editPhoneDigits("065706622", "06 570 66 2")).toBe("06570662");
+  });
+
+  it("ne garde que neuf chiffres", () => {
+    expect(editPhoneDigits("", "06 570 66 22 99")).toBe("065706622");
   });
 });
 

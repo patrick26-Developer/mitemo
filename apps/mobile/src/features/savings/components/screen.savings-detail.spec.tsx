@@ -103,21 +103,37 @@ describe("SavingsDetailScreen", () => {
     expect(firstOf(usePortfolioStore.getState().cards).saved).toBe(20_000n);
   });
 
-  it("demande confirmation avant de retirer l'épargne d'une carte remplie", async () => {
+  it("retire l'épargne d'une carte remplie vers le solde Mitemo, une fois le code PIN saisi", async () => {
     usePortfolioStore.setState({
       cards: [makeCard({ id: "c1", saved: 30_000n, state: "COMPLETED" })],
     });
     await renderWithSafeArea(<SavingsDetailScreen id="c1" />);
 
     await fireEvent.press(screen.getByRole("button", { name: "Retirer" }));
-    expect(await screen.findByRole("header", { name: "Retirer l'épargne ?" })).toBeOnTheScreen();
-
-    await fireEvent.press(screen.getByRole("button", { name: "Retirer l'épargne" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer vers Mitemo" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Code juste" }));
 
     expect(useToastStore.getState().toast?.message).toBe(
       "L'épargne a rejoint votre solde disponible.",
     );
     expect(firstOf(usePortfolioStore.getState().cards).state).toBe("ARCHIVED");
+  });
+
+  it("retire l'épargne vers MTN MoMo sans la verser au solde", async () => {
+    usePortfolioStore.setState({
+      available: 0n,
+      cards: [makeCard({ id: "c1", saved: 30_000n, state: "COMPLETED" })],
+    });
+    await renderWithSafeArea(<SavingsDetailScreen id="c1" />);
+
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer vers MTN MoMo" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Code juste" }));
+
+    expect(useToastStore.getState().toast?.message).toMatch(
+      /^Retrait de 30.000 FCFA vers MTN MoMo lancé\.$/,
+    );
+    expect(usePortfolioStore.getState().available).toBe(0n);
   });
 
   it("ne propose pas de régler une cotisation déjà payée", async () => {

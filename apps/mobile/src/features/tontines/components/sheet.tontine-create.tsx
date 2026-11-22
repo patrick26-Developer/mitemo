@@ -1,4 +1,3 @@
-import { StepIndicator } from "../../../shared/components/atoms/indicator.step";
 import { SheetSelect } from "../../../shared/components/macros/field.sheet-select";
 import { SheetStepper } from "../../../shared/components/macros/field.sheet-stepper";
 import { SheetNameField } from "../../../shared/components/macros/field.sheet-name";
@@ -21,7 +20,6 @@ import {
   tontineInvalidFields,
   tontineRecap,
 } from "../model/model.tontine-form";
-import { TontineCreatedPanel } from "./panel.tontine-created";
 
 /** Props de la feuille de création d'une tontine. */
 export interface TontineCreateSheetProps {
@@ -72,21 +70,25 @@ function TontineEssentialsStep(props: TontineCreateFieldsProps) {
 }
 
 /**
- * Deuxième étape : la fréquence des tours, choisie dans une liste groupée.
+ * Deuxième étape, le rythme : la fréquence des tours, choisie dans une liste
+ * groupée, et le nombre de participants.
  * @param props Saisie courante et mise à jour des champs.
- * @returns Le sélecteur de fréquence.
+ * @returns Le sélecteur de fréquence et le compteur de participants.
  */
-function TontineCadenceStep(props: TontineCreateFieldsProps) {
+function TontineRhythmStep(props: TontineCreateFieldsProps) {
   const { form, onChange } = props;
 
   return (
-    <SheetSelect
-      label="Fréquence des tours"
-      groups={TONTINE_CADENCE_GROUPS}
-      value={form.cadence}
-      onChange={(cadence) => onChange({ cadence })}
-      hint="Le rythme auquel chaque membre verse sa cotisation."
-    />
+    <>
+      <SheetSelect
+        label="Fréquence des tours"
+        groups={TONTINE_CADENCE_GROUPS}
+        value={form.cadence}
+        onChange={(cadence) => onChange({ cadence })}
+        hint="Le rythme auquel chaque membre verse sa cotisation."
+      />
+      <TontineParticipantsField {...props} />
+    </>
   );
 }
 
@@ -134,12 +136,12 @@ function invalidFields(form: TontineFormState, error: string | null): TontineInv
 }
 
 /**
- * Troisième étape : le nombre de participants. Chaque participant reçoit la
- * cagnotte une fois, donc le cycle compte autant de tours que de participants.
+ * Nombre de participants. Chaque participant reçoit la cagnotte une fois,
+ * donc le cycle compte autant de tours que de participants.
  * @param props Saisie courante et mise à jour des champs.
  * @returns Le compteur de participants.
  */
-function TontineParticipantsStep(props: TontineCreateFieldsProps) {
+function TontineParticipantsField(props: TontineCreateFieldsProps) {
   const { form, invalid, onChange } = props;
 
   return (
@@ -168,37 +170,28 @@ function TontineRecapStep(props: TontineCreateFieldsProps) {
 }
 
 /** Contenu de chaque étape, dans l'ordre de TONTINE_FORM_STEPS. */
-const STEP_CONTENTS = [
-  TontineEssentialsStep,
-  TontineCadenceStep,
-  TontineParticipantsStep,
-  TontineRecapStep,
-];
+const STEP_CONTENTS = [TontineEssentialsStep, TontineRhythmStep, TontineRecapStep];
 
 /**
- * Saisit les règles d'une nouvelle tontine en quatre étapes, la crée puis
- * propose de partager son code d'invitation.
+ * Saisit les règles d'une nouvelle tontine en trois étapes, la crée puis
+ * ouvre sa page.
  * @param props Visibilité et fermeture de la feuille.
  * @returns La feuille « Nouvelle tontine ».
  */
 export function TontineCreateSheet(props: TontineCreateSheetProps) {
-  const { form, error, steps, update, next, back, close, tontine, finish, share, invitationCode } =
-    useTontineCreate(props.onClose);
+  const { form, error, steps, update, next, back, close } = useTontineCreate(props.onClose);
   const StepContent = STEP_CONTENTS[steps.index] ?? TontineEssentialsStep;
-
-  if (tontine !== null) {
-    return (
-      <BottomSheet visible={props.visible} title="Nouvelle tontine" onClose={finish}>
-        <TontineCreatedPanel tontine={tontine} invitationCode={invitationCode} onShare={share} />
-      </BottomSheet>
-    );
-  }
 
   return (
     <BottomSheet
       visible={props.visible}
       title="Nouvelle tontine"
       onClose={close}
+      steps={{
+        index: steps.index,
+        total: steps.total,
+        title: TONTINE_FORM_STEPS[steps.index] ?? "",
+      }}
       footer={
         <SheetStepsFooter
           isFirst={steps.isFirst}
@@ -209,11 +202,6 @@ export function TontineCreateSheet(props: TontineCreateSheetProps) {
         />
       }
     >
-      <StepIndicator
-        index={steps.index}
-        total={steps.total}
-        title={TONTINE_FORM_STEPS[steps.index] ?? ""}
-      />
       <StepContent form={form} invalid={invalidFields(form, error)} onChange={update} />
     </BottomSheet>
   );

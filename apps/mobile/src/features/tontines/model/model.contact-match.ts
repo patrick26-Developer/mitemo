@@ -37,21 +37,42 @@ export function toE164(raw: string): string | null {
   return parsed?.isValid() === true ? parsed.number : null;
 }
 
+/** Contacts du répertoire, répartis comme dans l'ajout d'un groupe WhatsApp. */
+export interface SplitContacts {
+  /** Contacts qui ont un compte Mitemo : on les ajoute directement. */
+  readonly onMitemo: readonly MemberContact[];
+  /** Autres contacts au numéro valide : on les invite à rejoindre Mitemo. */
+  readonly others: readonly MemberContact[];
+}
+
 /**
- * Retient les contacts du répertoire qui ont un compte Mitemo et ne sont pas
- * encore membres : un numéro n'apparaît qu'une fois, sous le premier nom
- * trouvé, et la liste est triée par nom.
- * @param input Contacts du répertoire, comptes Mitemo et membres inscrits.
- * @returns Les contacts à proposer, numéros au format E.164.
+ * Contacts du répertoire au numéro valide, sans doublon ni membre déjà
+ * inscrit ou invité, triés par nom.
+ * @param input Répertoire et membres connus.
+ * @returns Les contacts proposables, au format E.164.
  */
-export function mitemoContacts(input: ContactMatchInput): readonly MemberContact[] {
+function candidateContacts(input: ContactMatchInput): readonly MemberContact[] {
   const taken = new Set(input.members.map((member) => member.phone));
   const found = new Map<string, MemberContact>();
   for (const contact of input.contacts) {
     const phone = toE164(contact.phone);
-    if (phone === null || taken.has(phone) || found.has(phone) || !input.accounts.has(phone))
-      continue;
-    found.set(phone, { name: contact.name, phone });
+    if (phone !== null && !taken.has(phone) && !found.has(phone)) {
+      found.set(phone, { name: contact.name, phone });
+    }
   }
   return [...found.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+}
+
+/**
+ * Sépare les contacts qui ont un compte Mitemo, à ajouter, des autres, à
+ * inviter sur Mitemo.
+ * @param input Répertoire, comptes Mitemo connus et membres de la tontine.
+ * @returns Les deux groupes de contacts, triés par nom.
+ */
+export function splitContacts(input: ContactMatchInput): SplitContacts {
+  const candidates = candidateContacts(input);
+  return {
+    onMitemo: candidates.filter((contact) => input.accounts.has(contact.phone)),
+    others: candidates.filter((contact) => !input.accounts.has(contact.phone)),
+  };
 }

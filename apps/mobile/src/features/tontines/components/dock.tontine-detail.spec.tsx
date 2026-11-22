@@ -122,21 +122,18 @@ describe("TontineDetailDock", () => {
     expect(actions.confirm).toHaveBeenCalledTimes(1);
   });
 
-  it("grise « Cotiser » en attendant les membres, et laisse l'administrateur partager", async () => {
-    const actions = makeActions();
+  it("grise « Cotiser » en attendant les membres, sans bouton d'invitation en bas", async () => {
     const pending = makeTontine({
       state: "PENDING",
       totalRounds: 3,
       members: [makeMember(SELF_MEMBER_ID, "ADMIN")],
     });
     await renderWithSafeArea(
-      <TontineDetailDock item={pending} actions={actions} onLayout={jest.fn()} />,
+      <TontineDetailDock item={pending} actions={makeActions()} onLayout={jest.fn()} />,
     );
 
     expect(screen.getByRole("button", { name: "En attente de 2 membres" })).toBeDisabled();
-    await fireEvent.press(screen.getByRole("button", { name: "Partager l'invitation" }));
-
-    expect(actions.share).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
   });
 
   it("montre aussi l'attente à un simple membre, sans partage", async () => {

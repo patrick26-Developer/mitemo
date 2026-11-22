@@ -20,6 +20,8 @@ interface PinValidationOptions {
   readonly onComplete: () => void;
   readonly onError: (message: string) => void;
   readonly shake: SharedValue<number>;
+  /** Message d'un code refusé ; « Code incorrect » par défaut. */
+  readonly rejectedMessage?: string;
 }
 
 /**
@@ -59,6 +61,7 @@ interface PinVerification {
   readonly verify: (pin: string) => Promise<boolean>;
   readonly onAccept: () => void;
   readonly onReject: (message: string) => void;
+  readonly rejectedMessage: string;
 }
 
 /**
@@ -66,10 +69,10 @@ interface PinVerification {
  * @param verification Code, vérification et réactions.
  */
 function runVerification(verification: PinVerification): void {
-  const { pin, verify, onAccept, onReject } = verification;
+  const { pin, verify, onAccept, onReject, rejectedMessage } = verification;
 
   verify(pin).then(
-    (accepted) => (accepted ? onAccept() : onReject(PIN_REJECTED_MESSAGE)),
+    (accepted) => (accepted ? onAccept() : onReject(rejectedMessage)),
     () => onReject(PIN_UNAVAILABLE_MESSAGE),
   );
 }
@@ -81,6 +84,7 @@ function runVerification(verification: PinVerification): void {
  */
 export function usePinValidation(options: PinValidationOptions): void {
   const { pin, verify, onComplete, onError, shake } = options;
+  const rejectedMessage = options.rejectedMessage ?? PIN_REJECTED_MESSAGE;
 
   useEffect(() => {
     if (pin.length !== PIN_LENGTH) return;
@@ -89,7 +93,7 @@ export function usePinValidation(options: PinValidationOptions): void {
     const onAccept = () => active && onComplete();
     const onReject = (message: string) => active && rejectPin({ message, onError, shake });
     const timer = setTimeout(
-      () => runVerification({ pin, verify, onAccept, onReject }),
+      () => runVerification({ pin, verify, onAccept, onReject, rejectedMessage }),
       VERIFY_DELAY,
     );
 
@@ -97,5 +101,5 @@ export function usePinValidation(options: PinValidationOptions): void {
       active = false;
       clearTimeout(timer);
     };
-  }, [pin, verify, onComplete, onError, shake]);
+  }, [pin, verify, onComplete, onError, shake, rejectedMessage]);
 }

@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 /** Props de l'indicateur d'étape. */
 export interface StepIndicatorProps {
@@ -31,18 +31,19 @@ function StepMarkers(props: StepMarkersProps) {
         <Fragment key={`step-${step}`}>
           {step > 0 ? (
             <View
-              className={`h-px flex-1 ${step <= index ? "bg-brand" : "bg-hairline"}`}
+              className={`h-px ${step <= index ? "bg-brand" : "bg-hairline"}`}
+              style={styles.connector}
               testID="step-connector"
             />
           ) : null}
           <View
             testID={step <= index ? "step-marker-done" : "step-marker-todo"}
-            className={`h-7 w-7 items-center justify-center rounded-full ${
+            className={`h-6 w-6 items-center justify-center rounded-full ${
               step <= index ? "bg-brand" : "bg-field"
             }`}
           >
             <Text
-              className={`text-[12px] font-semibold ${step <= index ? "text-white" : "text-muted"}`}
+              className={`text-[11px] font-semibold ${step <= index ? "text-white" : "text-muted"}`}
             >
               {step + 1}
             </Text>
@@ -70,9 +71,18 @@ export function StepIndicator(props: StepIndicatorProps) {
       accessibilityRole="progressbar"
       accessibilityLabel={`${position} : ${title}`}
       accessibilityValue={{ min: 1, max: total, now: index + 1 }}
-      className="gap-2"
+      style={styles.indicator}
     >
       <StepMarkers index={index} total={total} />
     </View>
   );
 }
+
+/**
+ * Indicateur compact : liens courts entre les pastilles, centré, pour tenir
+ * entre le titre d'une feuille et sa croix.
+ */
+const styles = StyleSheet.create({
+  indicator: { alignSelf: "center" },
+  connector: { width: 12 },
+});

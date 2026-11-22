@@ -10,21 +10,17 @@ export interface PinEntryOptions {
   readonly verify: (pin: string) => Promise<boolean>;
   /** Appelé quand le code est accepté. */
   readonly onComplete: () => void;
+  /** Message d'un code refusé ; « Code incorrect » par défaut. */
+  readonly rejectedMessage?: string;
 }
 
 /**
- * Gère la saisie d'un code PIN, sa vérification et l'animation d'erreur.
- * @param options Options de la saisie.
- * @param options.verify Vérifie le code une fois les quatre chiffres saisis.
- * @param options.onComplete Appelé quand le code est accepté.
- * @returns Le code, l'erreur, l'animation et les actions du clavier.
+ * Chiffres saisis et message d'erreur : chaque touche efface l'erreur.
+ * @returns Le code, l'erreur et les actions du clavier.
  */
-export function usePinEntry({ verify, onComplete }: PinEntryOptions) {
+function usePinDigits() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
-  const shake = useSharedValue(0);
-  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.get() }] }));
-
   const pressDigit = (digit: string) => {
     setError("");
     setPin((current) => (current.length < PIN_LENGTH ? current + digit : current));
@@ -37,7 +33,30 @@ export function usePinEntry({ verify, onComplete }: PinEntryOptions) {
     setError(message);
     setPin("");
   }, []);
-  usePinValidation({ pin, verify, onComplete, onError: reject, shake });
+
+  return { pin, error, pressDigit, erase, reject };
+}
+
+/**
+ * Gère la saisie d'un code PIN, sa vérification et l'animation d'erreur.
+ * @param options Options de la saisie.
+ * @param options.verify Vérifie le code une fois les quatre chiffres saisis.
+ * @param options.onComplete Appelé quand le code est accepté.
+ * @param options.rejectedMessage Message d'un code refusé.
+ * @returns Le code, l'erreur, l'animation et les actions du clavier.
+ */
+export function usePinEntry({ verify, onComplete, rejectedMessage }: PinEntryOptions) {
+  const { pin, error, pressDigit, erase, reject } = usePinDigits();
+  const shake = useSharedValue(0);
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.get() }] }));
+  usePinValidation({
+    pin,
+    verify,
+    onComplete,
+    onError: reject,
+    shake,
+    ...(rejectedMessage === undefined ? {} : { rejectedMessage }),
+  });
 
   return { pin, error, shakeStyle, pressDigit, erase };
 }

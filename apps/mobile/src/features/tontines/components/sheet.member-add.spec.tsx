@@ -24,21 +24,27 @@ async function renderSheet(
 }
 
 describe("MemberAddSheet", () => {
-  it("liste seulement les contacts du répertoire qui ont un compte Mitemo", async () => {
+  it("sépare les contacts sur Mitemo de ceux à inviter, comme sur WhatsApp", async () => {
     jest.mocked(readDeviceContacts).mockResolvedValue({
       status: "granted",
       contacts: [
         { name: "Aimée Mbemba", phone: "06 570 66 22" },
-        { name: "Sans compte", phone: "04 433 22 11" },
+        { name: "Clarisse Ngoma", phone: "05 533 77 88" },
       ],
     });
-    const { onAdd } = await renderSheet();
+    const { onAdd, onShare } = await renderSheet();
 
-    await fireEvent.press(await screen.findByRole("button", { name: "Inviter Aimée Mbemba" }));
-
-    expect(screen.queryByText("Sans compte")).toBeNull();
+    expect(await screen.findByText("Sur Mitemo")).toBeOnTheScreen();
+    expect(screen.getByText("Inviter sur Mitemo")).toBeOnTheScreen();
     expect(screen.getByText("+242 06 570 6622")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole("button", { name: "Ajouter Aimée Mbemba" }));
     expect(onAdd).toHaveBeenCalledWith({ name: "Aimée Mbemba", phone: "+242065706622" });
+
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Inviter Clarisse Ngoma sur Mitemo" }),
+    );
+    expect(onShare).toHaveBeenCalledTimes(1);
   });
 
   it("explique que le contact rejoint la tontine en acceptant l'invitation", async () => {
@@ -63,12 +69,13 @@ describe("MemberAddSheet", () => {
     expect(await screen.findByText(/Aucun de vos contacts/)).toBeOnTheScreen();
   });
 
-  it("propose de partager le lien quand aucun contact n'a de compte", async () => {
-    jest.mocked(readDeviceContacts).mockResolvedValue({ status: "granted", contacts: [] });
+  it("propose de partager le lien quand l'accès au répertoire est refusé", async () => {
+    jest.mocked(readDeviceContacts).mockResolvedValue({ status: "denied" });
     const { onShare } = await renderSheet();
 
-    expect(await screen.findByText(/Aucun de vos contacts/)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByRole("button", { name: "Partager le lien d'invitation" }));
+    await fireEvent.press(
+      await screen.findByRole("button", { name: "Partager le lien d'invitation" }),
+    );
 
     expect(onShare).toHaveBeenCalledTimes(1);
   });

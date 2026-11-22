@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Dimensions, Platform, Text } from "react-native";
 
 import { useKeyboardHeight } from "../../hooks/hook.keyboard-height";
@@ -11,6 +12,27 @@ jest.mock("../../hooks/hook.keyboard-height", () => ({
 }));
 
 const keyboardHeightMock = jest.mocked(useKeyboardHeight);
+
+/** Marges sûres fixes, pour les rendus successifs d'une même feuille. */
+const METRICS = {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+
+/**
+ * Feuille des conditions, ouverte ou fermée, dans ses zones sûres.
+ * @param visible Visibilité demandée.
+ * @returns L'élément à rendre ou à re-rendre.
+ */
+function termsSheet(visible: boolean) {
+  return (
+    <SafeAreaProvider initialMetrics={METRICS}>
+      <BottomSheet visible={visible} title="Conditions d'utilisation" onClose={jest.fn()}>
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>
+    </SafeAreaProvider>
+  );
+}
 
 describe("BottomSheet", () => {
   const initialPlatform = Platform.OS;
@@ -125,6 +147,35 @@ describe("BottomSheet", () => {
 
     expect(footer).toHaveTextContent("Continuer");
     expect(scroll).toContainElement(footer);
+  });
+
+  it("rouvre la feuille aussitôt sur Android, qui n'attend aucune fin de fermeture", async () => {
+    (Platform as { OS: string }).OS = "android";
+    const { rerender } = await render(termsSheet(true));
+
+    await rerender(termsSheet(false));
+    await rerender(termsSheet(true));
+
+    expect(screen.getByText("Contenu de la feuille")).toBeOnTheScreen();
+  });
+
+  it("pose les étapes dans l'en-tête, à la place de la croix", async () => {
+    await renderWithSafeArea(
+      <BottomSheet
+        visible
+        title="Nouvelle tontine"
+        onClose={jest.fn()}
+        steps={{ index: 1, total: 3, title: "Le rythme" }}
+      >
+        <Text>Contenu de la feuille</Text>
+      </BottomSheet>,
+    );
+
+    const header = screen.getByTestId("bottom-sheet-header");
+    expect(header).toContainElement(
+      screen.getByRole("progressbar", { name: "Étape 2 sur 3 : Le rythme" }),
+    );
+    expect(screen.queryByRole("button", { name: "Fermer" })).toBeNull();
   });
 
   it("ne pose aucun pied quand la feuille n'en a pas", async () => {

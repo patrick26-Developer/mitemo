@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 
-import type { MemberContact } from "../../../shared/member/model.portfolio-create";
 import { readDeviceContacts } from "../api/api.device-contacts";
 import { findMitemoAccounts } from "../api/api.mitemo-directory";
-import type { KnownPhone } from "../model/model.contact-match";
-import { mitemoContacts, toE164 } from "../model/model.contact-match";
+import type { KnownPhone, SplitContacts } from "../model/model.contact-match";
+import { splitContacts, toE164 } from "../model/model.contact-match";
 
 /** État de la recherche des contacts à inscrire. */
 export type MemberPickerState =
   | { readonly status: "loading" }
   | { readonly status: "denied" }
-  | { readonly status: "ready"; readonly contacts: readonly MemberContact[] };
+  | ({ readonly status: "ready" } & SplitContacts);
 
 /**
  * Lit le répertoire, demande à l'annuaire Mitemo lesquels de ses numéros ont
@@ -24,10 +23,7 @@ async function loadMitemoContacts(members: readonly KnownPhone[]): Promise<Membe
 
   const phones = device.contacts.flatMap((contact) => toE164(contact.phone) ?? []);
   const accounts = await findMitemoAccounts([...new Set(phones)]);
-  return {
-    status: "ready",
-    contacts: mitemoContacts({ contacts: device.contacts, accounts, members }),
-  };
+  return { status: "ready", ...splitContacts({ contacts: device.contacts, accounts, members }) };
 }
 
 /**

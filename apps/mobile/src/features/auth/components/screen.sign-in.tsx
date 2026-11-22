@@ -2,11 +2,7 @@ import { router } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { useSignInForm } from "../hooks/hook.sign-in-form";
-import {
-  AUTH_ENTRANCE_DELAY,
-  AUTH_ENTRANCE_DURATION,
-  AUTH_ICON_DELAY,
-} from "../model/model.auth-theme";
+import { AUTH_ENTRANCE_DELAY, AUTH_ENTRANCE_DURATION } from "../model/model.auth-theme";
 import { AuthErrorText } from "./text.auth-error";
 import { AuthFooterLink } from "./link.auth-footer";
 import { AuthHeading } from "./heading.auth";
@@ -30,12 +26,7 @@ export function SignInScreen() {
       <Animated.View
         entering={FadeInDown.delay(AUTH_ENTRANCE_DELAY.body).duration(AUTH_ENTRANCE_DURATION)}
       >
-        <PhoneField
-          digits={digits}
-          onChange={setDigits}
-          iconDelay={AUTH_ICON_DELAY}
-          invalid={invalid}
-        />
+        <PhoneField digits={digits} onChange={setDigits} invalid={invalid} />
         <AuthErrorText message={error} />
       </Animated.View>
       <Animated.View

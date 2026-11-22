@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import { FIELD_CHROME } from "../../../shared/theme/theme.field";
 import { renderWithSafeArea } from "../../../shared/testing/util.render-with-safe-area";
 import { INITIAL_AUTH_DRAFT, useAuthDraft } from "../model/model.auth-draft";
 import { SignUpScreen } from "./screen.sign-up";
@@ -42,13 +43,27 @@ describe("SignUpScreen", () => {
     expect(screen.getByLabelText("Profession ou formation")).toBeOnTheScreen();
   });
 
-  it("dessine une icône filaire sur chaque champ", async () => {
+  it("dessine une icône filaire sur chaque champ d'identité, pas sur le numéro", async () => {
     await renderWithSafeArea(<SignUpScreen />);
 
     expect(screen.getByTestId("auth-icon-firstName")).toBeOnTheScreen();
     expect(screen.getByTestId("auth-icon-lastName")).toBeOnTheScreen();
     expect(screen.getByTestId("auth-icon-occupation")).toBeOnTheScreen();
-    expect(screen.getByTestId("auth-icon-phone")).toBeOnTheScreen();
+    expect(screen.queryByTestId("auth-icon-phone")).toBeNull();
+  });
+
+  it("signale en rouge un numéro faux, sans colorer les champs pas encore remplis", async () => {
+    await renderWithSafeArea(<SignUpScreen />);
+
+    await fireEvent.changeText(screen.getByLabelText("Numéro de téléphone"), "123456789");
+
+    expect(screen.getByTestId("phone-field")).toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+    });
+    expect(screen.getByTestId("auth-field-firstName")).not.toHaveStyle({
+      borderColor: FIELD_CHROME.errorBorder,
+    });
+    expect(screen.getByText(/Entrez un numéro congolais valide/)).toBeOnTheScreen();
   });
 
   it("affiche des libellés visibles et explique la profession", async () => {

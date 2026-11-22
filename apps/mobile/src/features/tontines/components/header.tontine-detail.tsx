@@ -1,4 +1,4 @@
-import { Ellipsis, Share, UserPlus } from "lucide-react-native";
+import { Ellipsis, UserPlus } from "lucide-react-native";
 import { useState } from "react";
 
 import type { HeaderAction } from "../../../shared/components/macros/header.detail";
@@ -11,8 +11,6 @@ import { TontineSettingsSheet } from "./sheet.tontine-settings";
 /** Props de l'en-tête du détail d'une tontine. */
 export interface TontineDetailHeaderProps {
   readonly item: Tontine;
-  /** Partage l'invitation : code et lien. */
-  readonly onShare: () => void;
   /** Ouvre l'ajout d'un membre depuis le répertoire. */
   readonly onAddMember: () => void;
 }
@@ -28,16 +26,12 @@ function headerActions(
   props: TontineDetailHeaderProps,
   onMore: () => void,
 ): readonly HeaderAction[] {
-  const { item, onShare, onAddMember } = props;
+  const { item, onAddMember } = props;
   if (!isTontineAdmin(item)) return [];
   const more: HeaderAction = { label: "Plus d'options", icon: Ellipsis, onPress: onMore };
   if (!canInviteMembers(item)) return [more];
 
-  return [
-    { label: "Partager l'invitation", icon: Share, onPress: onShare },
-    { label: "Ajouter un membre", icon: UserPlus, onPress: onAddMember },
-    more,
-  ];
+  return [{ label: "Ajouter un membre", icon: UserPlus, onPress: onAddMember }, more];
 }
 
 /**

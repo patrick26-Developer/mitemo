@@ -1,7 +1,7 @@
 import { DrawIcon } from "../../../shared/components/atoms/icon.draw";
 
 /** Icônes affichées dans les champs d'authentification. */
-export const AUTH_FIELD_ICON_KINDS = ["person", "work", "phone"] as const;
+export const AUTH_FIELD_ICON_KINDS = ["person", "work"] as const;
 
 /** Type d'icône d'un champ d'authentification. */
 export type AuthFieldIconKind = (typeof AUTH_FIELD_ICON_KINDS)[number];
@@ -16,9 +16,6 @@ const ICON_PATHS: Readonly<Record<AuthFieldIconKind, readonly string[]>> = {
   work: [
     "M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",
     "M4 6h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z",
-  ],
-  phone: [
-    "M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384",
   ],
 };
 

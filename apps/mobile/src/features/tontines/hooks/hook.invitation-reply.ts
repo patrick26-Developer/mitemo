@@ -63,7 +63,7 @@ export function useInvitationReply(): InvitationReplyState {
     invitations,
     accept: () => acceptChoice({ choosing, turns, run, store, done: back }),
     decline: (invitation) => {
-      run(() => store().declineInvitation(invitation.id), "Invitation refusée.");
+      run(() => store().declineInvitation(invitation.id), null);
     },
   };
 }

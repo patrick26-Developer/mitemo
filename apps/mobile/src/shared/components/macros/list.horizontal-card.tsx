@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import type { ReactElement } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 import { CARD_GAP, CARD_WIDTH } from "../../theme/theme.card-layout";
-import { PALETTE } from "../../theme/theme.palette";
 import { PageDots } from "../atoms/indicator.page";
+import type { SectionTitleProps } from "../atoms/title.section";
+import { SectionTitle, sectionTitleColor } from "../atoms/title.section";
 
 /** Pas du défilement : une carte et l'espace qui la suit. */
 const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
@@ -15,8 +16,8 @@ export interface HorizontalCardListProps<Item> {
   readonly items: readonly Item[];
   readonly keyOf: (item: Item) => string;
   readonly renderItem: (item: Item, index: number) => ReactElement;
-  /** Couleur des points : blanche sur le bandeau bleu, bleue sur le blanc. */
-  readonly dotsColor?: string;
+  /** Titre de la section, posé sur la ligne des points de page. */
+  readonly title: SectionTitleProps;
 }
 
 /**
@@ -37,11 +38,19 @@ function pageOf(event: NativeSyntheticEvent<NativeScrollEvent>, count: number): 
  * @returns La liste et son indicateur.
  */
 export function HorizontalCardList<Item>(props: HorizontalCardListProps<Item>) {
-  const { items, keyOf, renderItem, dotsColor = PALETTE.brand } = props;
+  const { items, keyOf, renderItem, title } = props;
   const [active, setActive] = useState(0);
 
   return (
     <View className="gap-3">
+      <View testID="horizontal-card-header" style={styles.header}>
+        <SectionTitle {...title} />
+        <PageDots
+          count={items.length}
+          active={active}
+          color={sectionTitleColor(title.tone ?? "dark")}
+        />
+      </View>
       <FlatList
         testID="horizontal-card-list"
         data={items}
@@ -55,7 +64,17 @@ export function HorizontalCardList<Item>(props: HorizontalCardListProps<Item>) {
         contentContainerClassName="gap-3 px-4"
         renderItem={({ item, index }) => renderItem(item, index)}
       />
-      <PageDots count={items.length} active={active} color={dotsColor} />
     </View>
   );
 }
+
+/** Ligne du titre : le titre à gauche, les points de page à droite. */
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+});

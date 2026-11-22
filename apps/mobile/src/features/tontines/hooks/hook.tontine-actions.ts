@@ -57,13 +57,9 @@ function invitationHandlers(
   act: RunAction,
 ): Pick<TontineHandlers, "invite" | "cancelInvitation"> {
   return {
-    invite: (contact) =>
-      act(
-        (store) => store.inviteContact(tontine.id, contact),
-        `Invitation envoyée à ${contact.name}.`,
-      ),
+    invite: (contact) => act((store) => store.inviteContact(tontine.id, contact), null),
     cancelInvitation: (invitationId) =>
-      act((store) => store.cancelInvitation(tontine.id, invitationId), "Invitation annulée."),
+      act((store) => store.cancelInvitation(tontine.id, invitationId), null),
   };
 }
 
@@ -87,8 +83,7 @@ function tontineHandlers(tontine: Tontine, act: RunAction): TontineHandlers {
     share: () => {
       act((store) => shareInvitation(tontine, store.inviteMember(tontine.id)), null);
     },
-    remove: (memberId) =>
-      act((store) => store.removeMember(tontine.id, memberId), "Membre retiré de la tontine."),
+    remove: (memberId) => act((store) => store.removeMember(tontine.id, memberId), null),
   };
 }
 

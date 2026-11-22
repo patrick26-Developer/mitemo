@@ -1,5 +1,4 @@
 import { act, fireEvent, screen } from "@testing-library/react-native";
-import { Share } from "react-native";
 
 import { SELF_MEMBER_ID } from "../../../shared/member/model.portfolio";
 import { usePortfolioStore } from "../../../shared/member/store.portfolio";
@@ -113,25 +112,14 @@ describe("TontineDetailScreen", () => {
     expect(screen.queryByRole("button", { name: "Ajouter un membre" })).toBeNull();
   });
 
-  it("partage l'invitation depuis l'en-tête tant qu'il manque des membres", async () => {
-    const share = jest
-      .spyOn(Share, "share")
-      .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
+  it("garde un seul bouton d'ajout dans l'en-tête tant qu'il manque des membres", async () => {
     usePortfolioStore.setState({
       tontines: [makeTontine({ state: "PENDING", members: [makeMember(SELF_MEMBER_ID, "ADMIN")] })],
     });
     await renderWithSafeArea(<TontineDetailScreen id="t1" />);
 
-    expect(screen.getByRole("button", { name: "Ajouter un membre" })).toBeOnTheScreen();
-    await fireEvent.press(
-      firstOf(screen.getAllByRole("button", { name: "Partager l'invitation" })),
-    );
-
-    const code = firstOf(usePortfolioStore.getState().tontines).invitationCode;
-    expect(code).not.toBeNull();
-    expect(share).toHaveBeenCalledWith({
-      message: expect.stringContaining(`Code d'invitation : ${code ?? ""}`) as string,
-    });
+    expect(screen.getAllByRole("button", { name: "Ajouter un membre" })).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: "Partager l'invitation" })).toBeNull();
   });
 
   it("ouvre les réglages de l'administrateur depuis « Plus d'options »", async () => {

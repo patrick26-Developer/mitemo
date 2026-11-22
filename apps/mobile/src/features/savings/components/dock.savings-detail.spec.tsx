@@ -73,7 +73,7 @@ describe("SavingsDetailDock", () => {
     expect(screen.queryByRole("button", { name: /Pointer/ })).not.toBeOnTheScreen();
   });
 
-  it("demande confirmation avant de retirer l'épargne d'une carte remplie", async () => {
+  it("propose trois moyens de retrait, Mitemo plein, puis demande le code PIN", async () => {
     const actions = makeActions();
     await renderWithSafeArea(
       <SavingsDetailDock
@@ -84,11 +84,21 @@ describe("SavingsDetailDock", () => {
     );
 
     await fireEvent.press(screen.getByRole("button", { name: "Retirer" }));
-    expect(await screen.findByRole("header", { name: "Retirer l'épargne ?" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Retirer vers MTN MoMo" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Retirer vers Airtel Money" })).toBeOnTheScreen();
+    // Deux boutons pleins : « Retirer » du dock, et « Retirer vers Mitemo » seul dans la feuille.
+    const filled = screen.getAllByTestId("sheet-primary-accent");
+    expect(filled).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Retirer vers Mitemo" })).toContainElement(
+      filled[1] ?? null,
+    );
 
-    await fireEvent.press(screen.getByRole("button", { name: "Retirer l'épargne" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Retirer vers Airtel Money" }));
+    expect(actions.withdraw).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Retour" })).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Code juste" }));
 
-    expect(actions.withdraw).toHaveBeenCalledTimes(1);
+    expect(actions.withdraw).toHaveBeenCalledWith("AIRTEL_MONEY");
   });
 
   it("donne à Retirer la même couleur de fond que les autres actions", async () => {

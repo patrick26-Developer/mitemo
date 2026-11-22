@@ -22,9 +22,10 @@ async function open(state: "PENDING" | "ACTIVE"): Promise<jest.Mock> {
 describe("TontineSettingsSheet", () => {
   beforeEach(() => {
     usePortfolioStore.getState().reset();
+    useToastStore.getState().dismiss();
   });
 
-  it("change le nom, la couleur et les règles d'une tontine à lancer", async () => {
+  it("change le nom, la couleur et les règles d'une tontine à lancer, sans toast", async () => {
     const onClose = await open("PENDING");
 
     await fireEvent.changeText(screen.getByLabelText("Nom"), "Tontine des Amis");
@@ -37,7 +38,7 @@ describe("TontineSettingsSheet", () => {
       contribution: 10_000n,
       headerColors: ["#F2A0B5", "#FBD0DA"],
     });
-    expect(useToastStore.getState().toast?.message).toBe("Tontine modifiée.");
+    expect(useToastStore.getState().toast).toBeNull();
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

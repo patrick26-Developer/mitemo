@@ -7,6 +7,7 @@ import {
   buildTontine,
 } from "./model.portfolio-create";
 import { cardTintFor } from "./model.card-tint";
+import { TONTINE_TINTS } from "./model.tontine-settings";
 
 /** Entrée de création de tontine utilisée par les tests. */
 const TONTINE_INPUT: CreateTontineInput = {
@@ -72,7 +73,10 @@ describe("buildTontine", () => {
 
   it("fait tourner les dégradés selon le rang", () => {
     expect(buildTontine(TONTINE_INPUT, 0).headerColors).toEqual(["#2CCA86", "#62F79D"]);
-    expect(buildTontine(TONTINE_INPUT, 4).headerColors).toEqual(["#2CCA86", "#62F79D"]);
+    expect(buildTontine(TONTINE_INPUT, TONTINE_TINTS.length).headerColors).toEqual([
+      "#2CCA86",
+      "#62F79D",
+    ]);
     expect(buildTontine(TONTINE_INPUT, 1).headerColors).not.toEqual(
       buildTontine(TONTINE_INPUT, 0).headerColors,
     );

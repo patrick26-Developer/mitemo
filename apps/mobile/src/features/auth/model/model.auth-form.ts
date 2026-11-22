@@ -88,12 +88,55 @@ export function formatPhoneForDisplay(input: string): string {
 }
 
 /**
- * Ne garde que les neuf premiers chiffres d'une saisie téléphonique.
- * @param input Saisie brute du champ.
- * @returns Les chiffres utiles du numéro local.
+ * Retire l'indicatif congolais tapé ou collé par le membre : « +242 » en tête,
+ * ou « 242 » devant un numéro trop long pour être local.
+ * @param text Saisie brute du champ.
+ * @returns Les chiffres, sans indicatif.
  */
-export function keepPhoneDigits(input: string): string {
-  return input.replace(/\D/g, "").slice(0, PHONE_DIGITS);
+function withoutCountryCode(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.startsWith(PHONE_COUNTRY_CODE)) {
+    return trimmed.slice(PHONE_COUNTRY_CODE.length).replace(/\D/g, "");
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  const code = PHONE_COUNTRY_CODE.slice(1);
+
+  return digits.length > PHONE_DIGITS && digits.startsWith(code)
+    ? digits.slice(code.length)
+    : digits;
+}
+
+/**
+ * Position, dans les chiffres, du premier caractère qui diffère entre deux
+ * saisies formatées.
+ * @param before Saisie formatée précédente.
+ * @param after Nouvelle saisie.
+ * @returns Le nombre de chiffres placés avant la différence.
+ */
+function digitsBeforeChange(before: string, after: string): number {
+  let index = 0;
+  while (index < after.length && before[index] === after[index]) index += 1;
+
+  return before.slice(0, index).replace(/\D/g, "").length;
+}
+
+/**
+ * Applique une modification du champ de numéro : retire un indicatif tapé
+ * ou collé, et, quand le membre efface un espace, efface le chiffre placé
+ * avant lui, sans quoi l'espace reviendrait aussitôt et l'effacement
+ * resterait sans effet.
+ * @param previous Chiffres avant la modification.
+ * @param text Nouvelle saisie brute du champ.
+ * @returns Les chiffres du numéro local, neuf au plus.
+ */
+export function editPhoneDigits(previous: string, text: string): string {
+  const digits = withoutCountryCode(text);
+  const formatted = formatPhoneInput(previous);
+  if (digits !== previous || text.length >= formatted.length) return digits.slice(0, PHONE_DIGITS);
+  const removed = digitsBeforeChange(formatted, text) - 1;
+  if (removed < 0) return previous;
+
+  return previous.slice(0, removed) + previous.slice(removed + 1);
 }
 
 /**

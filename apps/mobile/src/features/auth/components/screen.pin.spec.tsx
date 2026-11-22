@@ -83,6 +83,12 @@ describe("PinScreen connecté", () => {
       screen.getByRole("progressbar", { name: "Étape 2 sur 2 : Votre code PIN" }),
     ).toBeOnTheScreen();
     await enterPin("4821");
+    expect(await screen.findByText(/Saisissez à nouveau/)).toBeOnTheScreen();
+    expect(identityApi.register).not.toHaveBeenCalled();
+    await enterPin("4822");
+    expect(await screen.findByText(/Les deux codes ne correspondent pas/)).toBeOnTheScreen();
+    expect(identityApi.register).not.toHaveBeenCalled();
+    await enterPin("4821");
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/(auth)/otp"));
     expect(identityApi.register).toHaveBeenCalledWith({
       phoneNumber: PHONE,

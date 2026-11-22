@@ -58,7 +58,7 @@ export interface SavingsInvalidFields {
 }
 
 /** Titres des étapes de la création d'une carte, dans l'ordre de saisie. */
-export const SAVINGS_FORM_STEPS = ["Le projet", "Le rythme"] as const;
+export const SAVINGS_FORM_STEPS = ["Le projet", "Le rythme", "Le récapitulatif"] as const;
 
 /** Formulaire proposé à l'ouverture de la feuille de création. */
 export const INITIAL_SAVINGS_FORM: SavingsFormState = {

@@ -3,21 +3,13 @@ import type { LayoutChangeEvent } from "react-native";
 
 import { ActionsDock } from "../../../shared/components/macros/dock.actions";
 import type { DockAction } from "../../../shared/components/macros/dock.actions";
-import { ConfirmSheet } from "../../../shared/components/macros/sheet.confirm";
-import type { ConfirmSheetContent } from "../../../shared/components/macros/sheet.confirm";
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { SavingsCard } from "../../../shared/member/model.portfolio";
 import { cardCapabilities } from "../../../shared/member/model.portfolio";
-import { MobilePaySheet } from "../../payments";
+import { MobilePaySheet, PayoutSheet } from "../../payments";
 import type { SavingsActionsState } from "../hooks/hook.savings-actions";
 import { cardPayRequest } from "../model/model.card-pay";
-
-/** Confirmation affichée avant de reverser l'épargne sur le solde. */
-const WITHDRAW_CONFIRM: ConfirmSheetContent = {
-  title: "Retirer l'épargne ?",
-  message: "L'épargne de cette carte rejoindra votre solde disponible et la carte sera vidée.",
-  confirmLabel: "Retirer l'épargne",
-};
+import { cardPayoutRequest } from "../model/model.card-payout";
 
 /** Props du dock d'une carte de pointage. */
 export interface SavingsDetailDockProps {
@@ -51,7 +43,7 @@ function pointAction(item: SavingsCard, onPress: () => void): DockAction | null 
  */
 export function SavingsDetailDock(props: SavingsDetailDockProps) {
   const { item, actions, onLayout, initialPay = false } = props;
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [payoutOpen, setPayoutOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(() => initialPay && cardCapabilities(item).canContribute);
   const { canWithdraw } = cardCapabilities(item);
 
@@ -61,7 +53,7 @@ export function SavingsDetailDock(props: SavingsDetailDockProps) {
         primary={pointAction(item, () => setPayOpen(true))}
         secondary={
           canWithdraw
-            ? { label: "Retirer", onPress: () => setConfirmOpen(true), accent: item.tint }
+            ? { label: "Retirer", onPress: () => setPayoutOpen(true), accent: item.tint }
             : null
         }
         onLayout={onLayout}
@@ -72,14 +64,11 @@ export function SavingsDetailDock(props: SavingsDetailDockProps) {
         onClose={() => setPayOpen(false)}
         onPay={actions.contribute}
       />
-      <ConfirmSheet
-        content={WITHDRAW_CONFIRM}
-        visible={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={() => {
-          setConfirmOpen(false);
-          actions.withdraw();
-        }}
+      <PayoutSheet
+        visible={payoutOpen}
+        request={cardPayoutRequest(item)}
+        onClose={() => setPayoutOpen(false)}
+        onPayout={actions.withdraw}
       />
     </>
   );

@@ -1,9 +1,7 @@
 import type { SavingsCard as SavingsCardModel } from "../../../shared/member/model.portfolio";
 import { router } from "expo-router";
-import { PALETTE } from "../../../shared/theme/theme.palette";
 import { View } from "react-native";
 
-import { SectionTitle } from "../../../shared/components/atoms/title.section";
 import { HorizontalCardList } from "../../../shared/components/macros/list.horizontal-card";
 import { SavingsCard } from "../../savings";
 import { formatCountLabel } from "../model/model.home-content";
@@ -28,17 +26,16 @@ export function SavingsSection(props: SavingsSectionProps) {
   const { items: active, lead } = props;
 
   return (
-    <View className={lead ? "-mt-[276px] mb-5 flex-col gap-3" : "mt-4 flex-col gap-3"}>
-      <SectionTitle
-        label={formatCountLabel(props.count, "Carte active", "Cartes actives")}
-        tone={lead ? "light" : "dark"}
-        onPress={() => router.push("/savings")}
-      />
+    <View className={lead ? "-mt-[276px] mb-5 flex-col" : "mt-4 flex-col"}>
       <HorizontalCardList
         items={active}
         keyOf={(item) => item.id}
         renderItem={(item, index) => <SavingsCard item={item} index={index} />}
-        dotsColor={lead ? PALETTE.white : PALETTE.brand}
+        title={{
+          label: formatCountLabel(props.count, "Carte active", "Cartes actives"),
+          tone: lead ? "light" : "dark",
+          onPress: () => router.push("/savings"),
+        }}
       />
     </View>
   );

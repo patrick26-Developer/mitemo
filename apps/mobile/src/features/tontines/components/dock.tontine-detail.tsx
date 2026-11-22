@@ -14,7 +14,7 @@ import {
 import { formatAmount } from "../../../shared/format/format.amount";
 import type { TontineActionsState } from "../hooks/hook.tontine-actions";
 import { TontinePaySheet } from "./sheet.tontine-pay";
-import { canInviteMembers, freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
+import { freeTurns, selfDue } from "../../../shared/member/model.tontine-turns";
 import { canPayAhead } from "../../../shared/member/model.tontine-prepay";
 
 /** Confirmation affichée avant de distribuer la cagnotte d'un tour. */
@@ -77,18 +77,6 @@ function pendingAction(item: Tontine, actions: TontineActionsState): DockAction 
 }
 
 /**
- * Action secondaire : partager l'invitation, pour l'administrateur et tant
- * que la tontine accepte de nouveaux membres.
- * @param item Tontine affichée.
- * @param actions Actions de la tontine.
- * @returns Le partage, ou `null`.
- */
-function secondaryAction(item: Tontine, actions: TontineActionsState): DockAction | null {
-  if (!isTontineAdmin(item) || !canInviteMembers(item)) return null;
-  return { label: "Partager l'invitation", onPress: actions.share, accent: item.headerColors[0] };
-}
-
-/**
  * Propose de cotiser le tour en cours, ou le tour suivant d'avance une fois
  * le tour réglé, tant que le total (cotisation × tours) n'est pas atteint.
  * @param item Tontine affichée.
@@ -134,11 +122,7 @@ export function TontineDetailDock(props: TontineDetailDockProps) {
 
   return (
     <>
-      <ActionsDock
-        primary={tinted(primaryAction(item, handlers), item)}
-        secondary={secondaryAction(item, actions)}
-        onLayout={onLayout}
-      />
+      <ActionsDock primary={tinted(primaryAction(item, handlers), item)} onLayout={onLayout} />
       <TontinePaySheet
         visible={payOpen}
         item={item}
