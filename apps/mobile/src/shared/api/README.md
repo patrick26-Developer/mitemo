@@ -24,7 +24,10 @@ Couche réseau du mobile. Les écrans n'appellent jamais `fetch` : ils passent p
 
 ## Limites connues
 
-- L'environnement de préversion de l'API exige l'en-tête `x-mitemo-preview-key`. Une application
-  mobile ne peut pas garder ce secret : le mobile vise une API sans cette clé.
+- Le parcours Preview utilise maintenant un laissez-passer temporaire pour l'inscription et
+  la connexion, puis une session Bearer vérifiée pour les routes privées. Voir l'ADR 0006 et
+  le README de `features/server-account`. La clé serveur n'entre jamais dans le bundle.
+- L'ancien accès opérateur avec `x-mitemo-preview-key` reste réservé aux outils serveur.
 - Pas encore d'épinglage de certificat : il demande un module natif et une build de développement.
-- La route `POST /notifications/push-tokens` n'existe pas encore côté API.
+- La route `POST /notifications/push-tokens` est disponible après la septième migration ;
+  les notifications distantes Android nécessitent un development build.

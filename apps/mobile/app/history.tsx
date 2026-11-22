@@ -1,9 +1,9 @@
-import { HistoryScreen } from "../src/features/profile";
+import { ServerHistoryScreen } from "../src/features/server-account";
 
 /**
  * Route de l'historique du compte.
  * @returns La page d'historique.
  */
 export default function HistoryRoute() {
-  return <HistoryScreen />;
+  return <ServerHistoryScreen />;
 }

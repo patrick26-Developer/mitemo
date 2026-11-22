@@ -326,6 +326,7 @@ Le détail est dans [`CONTRIBUTING.md`](CONTRIBUTING.md). L'essentiel :
 - Branches : `type/numero-description-courte` (exemple : `feat/42-enregistrer-cotisation`).
 - Commits au format **Conventional Commits**, vérifiés par `commitlint`.
 - **Commits atomiques** : un commit = un changement cohérent et testable.
+- **Coordination backend/mobile obligatoire** : prévenir Espoir (`@Espoir-Loem`) dans la discussion GitHub de la PR concernée pour chaque tâche ou mise à jour backend. Expliquer le besoin, les endpoints et contrats concernés, l'authentification, l'impact mobile, les fichiers communs et les vérifications réalisées. Distinguer explicitement travail préparé, fusionné et réellement déployé ; transmettre le SHA Live seulement après vérification. Prévenir avant tout chevauchement avec ses écrans et conserver les travaux dans des branches isolées. Ne jamais inclure de secret, de jeton ou de laissez-passer dans ces messages. Cette information ne remplace pas l'autorisation explicite de migration ou de déploiement.
 - **Aucune attribution à un outil d'IA** : pas de trailer `Co-authored-by` vers une adresse d'assistant, pas de mention « Generated with ». Le hook `commit-msg` et la CI rejettent ces commits. L'auteur d'un commit est la personne qui en répond.
 
 ## 7. Hooks Git et CI
