@@ -2,6 +2,14 @@
 
 Ce fichier fixe les règles du dépôt. Il s'applique à toute personne (ou tout outil) qui écrit du code ici. En cas de doute, la règle la plus stricte l'emporte.
 
+## Répartition du travail avec Espoir
+
+- Le périmètre principal couvre `apps/api`, la documentation backend et les spécifications métier. Avant toute modification de `packages/contracts`, identifier les impacts sur les clients et se coordonner avec Espoir.
+- Espoir est responsable de `apps/mobile` et de la configuration Expo/EAS. Le code mobile peut être consulté pour diagnostiquer une intégration. Toute modification exige un accord explicite préalable.
+- Si un défaut mobile est constaté, préparer une proposition d’issue pour Espoir avec la reproduction, les résultats attendu et observé et le contrat API concerné. Sa publication exige l’autorisation de Patrick.
+- Avant chaque PR backend, présenter les fichiers modifiés et vérifier qu’aucun fichier mobile ne figure dans le diff.
+- Toute modification ou fusion de la PR #127 exige une coordination avec Espoir et une autorisation explicite. Tout déploiement Render et toute migration sur Neon Production nécessitent une autorisation explicite et préalable de Patrick. Exécuter les tests sur PostgreSQL local.
+
 ## Règle d'or : des faits vérifiés, pas de mémoire
 
 Tout agent (humain ou outil) qui travaille ici s'appuie sur des **données réelles et vérifiées**, jamais sur des souvenirs ou des suppositions.
@@ -291,6 +299,7 @@ Les entités du domaine ne sont **jamais** exposées telles quelles aux clients 
 
 - Ajouter un champ optionnel ou un code d'erreur : PR normale, mais les clients le gèrent dans la même PR.
 - Renommer, supprimer ou changer le type d'un champ : changement cassant. Commit `feat(contracts)!:`, mise à jour de l'API et des deux clients dans la même PR, et note dans la description.
+- Si un contrat touche le mobile, documenter les impacts et les adaptations attendues avec Espoir. Espoir prend en charge les changements dans `apps/mobile`, sauf accord explicite préalable. Si une mise à jour dans la même PR est impossible, convenir avec Espoir du plan de livraison compatible avant de livrer.
 - Le paquet a ses propres tests, y compris des tests de types (`// @ts-expect-error <raison>`) qui garantissent qu'un mauvais usage ne compile pas.
 
 ## 4. TypeScript strict
