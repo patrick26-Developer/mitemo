@@ -114,3 +114,10 @@ export type {
   SavingsGoalResponse,
   SavingsGoalsResponse,
 } from "./savings-goal.ts";
+export type {
+  RegistryCreateGroupRequest,
+  RegistryGroupResponse,
+  RegistryFreePolicy,
+  RegistryInviteRequest,
+  RegistryAcceptInvitationRequest,
+} from "./registry.ts";
